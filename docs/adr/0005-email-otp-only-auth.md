@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -10,7 +10,7 @@ Proposed
 
 ## Context
 
-Aurum needs an authentication strategy that is low-friction for a family finance app used weekly. The current BetterAuth scaffold includes email/password authentication and GitHub OAuth.
+Aurum needs an authentication strategy that is low-friction for a family finance app used weekly. The original T3 scaffold included email/password authentication and GitHub OAuth.
 
 For this product, password-based auth introduces unnecessary complexity: users must remember passwords, the app must handle password resets, and the security surface area is larger. Social OAuth (GitHub) is irrelevant for a household finance tool — the target users are family members, not developers.
 
@@ -28,18 +28,25 @@ The flow:
 4. On success, a session is created
 5. If the email is new, a user account is created during onboarding
 
+Implementation (BetterAuth `emailOTP` plugin):
+
+- **Server:** `src/server/better-auth/config.ts` — `emailOTP({ otpLength: 6, expiresIn: 600 })` with a `sendVerificationOTP` callback (currently logs to console in development; must be wired to a transactional email provider before production)
+- **Client:** `src/server/better-auth/client.ts` and `src/lib/auth-client.ts` — `emailOTPClient()` plugin added to `createAuthClient()`
+- **Schema:** `password` field removed from the `account` table; OTPs are stored in the existing `verification` table
+- **Env:** `BETTER_AUTH_GITHUB_CLIENT_ID` and `BETTER_AUTH_GITHUB_CLIENT_SECRET` removed; `@auth/drizzle-adapter` dependency removed
+
 OTP behavior:
 
 - 6-digit numeric code
-- ~10 minute expiry
-- Resend with cooldown to prevent abuse
-- BetterAuth's built-in email OTP plugin handles the core mechanics
+- 10 minute expiry (`expiresIn: 600`)
+- Resend with cooldown (BetterAuth default: 60s window, max 3 attempts)
+- Client methods: `authClient.emailOtp.sendVerificationOtp()`, `authClient.signIn.emailOtp()`
 
 ## Consequences
 
 - **Positive:** Zero password management — no forgot-password flows, no credential stuffing risk, no bcrypt overhead.
 - **Positive:** Low friction — users only need access to their email to sign in, which matches how infrequently they'll authenticate.
 - **Positive:** Simpler codebase — removes password hashing, password reset flows, and OAuth callback handling.
-- **Trade-off:** Requires a working email delivery service (SMTP or transactional email provider) from day one.
+- **Trade-off:** Requires a working email delivery service (SMTP or transactional email provider) for staging/production.
 - **Trade-off:** Users without email access cannot sign in — acceptable for this product's target audience.
-- **Follow-up:** The current BetterAuth config must be updated to disable `emailAndPassword` and remove GitHub OAuth. An email provider must be configured.
+- **Follow-up:** Integrate a transactional email provider (e.g. Resend, Postmark) into the `sendVerificationOTP` callback before deploying to staging.
