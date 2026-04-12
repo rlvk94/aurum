@@ -31,13 +31,19 @@
   },
   "nav": {
     "dashboard": "Overblik",
-    "accounts": "Konti",
+    "finance": "Økonomi",
     "transactions": "Transaktioner",
+    "accounts": "Konti",
     "budgets": "Budgetter",
+    "annualBudget": "Årsbudget",
+    "challenges": "Udfordringer",
+    "netWorthSection": "Formue",
+    "netWorthOverview": "Overblik",
     "debts": "Gæld",
-    "netWorth": "Formue",
+    "assets": "Aktiver",
+    "tools": "Værktøjer",
     "incomePlanner": "Indkomstplanlægger",
-    "settings": "Indstillinger"
+    "importData": "Importér data"
   },
   "auth": {
     "signInTitle": "Log ind på Aurum",
@@ -168,6 +174,10 @@
     "fixedAmount": "Fast beløb",
     "unallocated": "Ufordelt",
     "emptyState": "Ingen indkomstplaner endnu. Opret en plan for at fordele din indkomst."
+  },
+  "import": {
+    "title": "Importér data",
+    "emptyState": "Upload en CSV-fil fra din bank for at importere transaktioner."
   },
   "settings": {
     "title": "Indstillinger",

@@ -31,13 +31,19 @@
   },
   "nav": {
     "dashboard": "Dashboard",
-    "accounts": "Accounts",
+    "finance": "Finance",
     "transactions": "Transactions",
+    "accounts": "Accounts",
     "budgets": "Budgets",
+    "annualBudget": "Annual Budget",
+    "challenges": "Challenges",
+    "netWorthSection": "Net Worth",
+    "netWorthOverview": "Overview",
     "debts": "Debts",
-    "netWorth": "Net Worth",
+    "assets": "Assets",
+    "tools": "Tools",
     "incomePlanner": "Income Planner",
-    "settings": "Settings"
+    "importData": "Import Data"
   },
   "auth": {
     "signInTitle": "Sign in to Aurum",
@@ -168,6 +174,10 @@
     "fixedAmount": "Fixed amount",
     "unallocated": "Unallocated",
     "emptyState": "No income plans yet. Create a plan to allocate your income."
+  },
+  "import": {
+    "title": "Import Data",
+    "emptyState": "Upload a CSV file from your bank to import transactions."
   },
   "settings": {
     "title": "Settings",

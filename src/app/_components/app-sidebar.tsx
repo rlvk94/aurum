@@ -16,9 +16,14 @@ import {
   ChevronsUpDown,
   LogOut,
   ChevronUp,
+  ChevronRight,
   Users,
   Plus,
   Home,
+  Landmark,
+  Target,
+  Upload,
+  Wrench,
 } from "lucide-react";
 
 import {
@@ -32,8 +37,16 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarRail,
 } from "~/app/_components/sidebar";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "~/app/_components/collapsible";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -41,16 +54,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/app/_components/dropdown-menu";
-
-const navItems = [
-  { href: "/dashboard", icon: LayoutDashboard, labelKey: "dashboard" },
-  { href: "/accounts", icon: Wallet, labelKey: "accounts" },
-  { href: "/transactions", icon: ArrowLeftRight, labelKey: "transactions" },
-  { href: "/budgets", icon: PieChart, labelKey: "budgets" },
-  { href: "/debts", icon: CreditCard, labelKey: "debts" },
-  { href: "/net-worth", icon: TrendingUp, labelKey: "netWorth" },
-  { href: "/income-planner", icon: Calculator, labelKey: "incomePlanner" },
-] as const;
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("nav");
@@ -101,41 +104,164 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
 
-      {/* Navigation */}
       <SidebarContent>
+        {/* Dashboard — top level, no label */}
         <SidebarGroup>
-          <SidebarGroupLabel>{tCommon("appName")}</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.href}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={pathname.startsWith(item.href)}
-                  >
-                    <Link href={item.href}>
-                      <item.icon />
-                      <span>{t(item.labelKey)}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>{tCommon("settings")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname.startsWith("/settings")}
+                  isActive={pathname === "/dashboard"}
                 >
-                  <Link href="/settings">
-                    <Settings />
-                    <span>{t("settings")}</span>
+                  <Link href="/dashboard">
+                    <LayoutDashboard />
+                    <span>{t("dashboard")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Finance */}
+        <SidebarGroup>
+          <SidebarGroupLabel>{t("finance")}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/transactions"}
+                >
+                  <Link href="/transactions">
+                    <ArrowLeftRight />
+                    <span>{t("transactions")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/accounts"}
+                >
+                  <Link href="/accounts">
+                    <Wallet />
+                    <span>{t("accounts")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              {/* Budgets with sub-items */}
+              <Collapsible
+                asChild
+                defaultOpen={pathname.startsWith("/budgets")}
+              >
+                <SidebarMenuItem>
+                  <CollapsibleTrigger asChild>
+                    <SidebarMenuButton isActive={pathname.startsWith("/budgets")}>
+                      <PieChart />
+                      <span>{t("budgets")}</span>
+                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </SidebarMenuButton>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent>
+                    <SidebarMenuSub>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === "/budgets/annual"}
+                        >
+                          <Link href="/budgets/annual">
+                            {t("annualBudget")}
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                      <SidebarMenuSubItem>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={pathname === "/budgets/challenges"}
+                        >
+                          <Link href="/budgets/challenges">
+                            {t("challenges")}
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    </SidebarMenuSub>
+                  </CollapsibleContent>
+                </SidebarMenuItem>
+              </Collapsible>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Net Worth */}
+        <SidebarGroup>
+          <SidebarGroupLabel>{t("netWorthSection")}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/net-worth"}
+                >
+                  <Link href="/net-worth">
+                    <TrendingUp />
+                    <span>{t("netWorthOverview")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/debts"}
+                >
+                  <Link href="/debts">
+                    <CreditCard />
+                    <span>{t("debts")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/assets"}
+                >
+                  <Link href="/assets">
+                    <Landmark />
+                    <span>{t("assets")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* Tools */}
+        <SidebarGroup>
+          <SidebarGroupLabel>{t("tools")}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/income-planner"}
+                >
+                  <Link href="/income-planner">
+                    <Calculator />
+                    <span>{t("incomePlanner")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/import"}
+                >
+                  <Link href="/import">
+                    <Upload />
+                    <span>{t("importData")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
