@@ -130,12 +130,19 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 
 ## Folder Structure
 
-- `src/components/ui/` — shadcn/ui components
+Frontend code lives inside `src/app/` using `_` prefixed directories to avoid route generation:
+
+- `src/app/_components/` — shadcn/ui components and app components
+- `src/app/_lib/` — client-side utilities (auth client, cn helper)
+- `src/app/_hooks/` — React hooks
+- `src/app/_styles/` — global CSS and design system tokens
+- `src/app/` — Next.js App Router pages and layouts
+
+Server code lives outside `src/app/`:
+
 - `src/server/db/` — Drizzle schema and database client
 - `src/server/api/` — tRPC routers and procedures
 - `src/server/better-auth/` — BetterAuth server configuration
-- `src/lib/auth-client.ts` — BetterAuth client helper
-- `src/app/` — Next.js App Router pages and layouts
 - `docs/adr/` — Architecture Decision Records
 
 ## ADR Index

@@ -1,4 +1,4 @@
-import "~/styles/globals.css";
+import "~/app/_styles/globals.css";
 
 import { type Metadata } from "next";
 import { DM_Sans, DM_Serif_Display } from "next/font/google";
