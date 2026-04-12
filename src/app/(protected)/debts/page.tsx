@@ -8,7 +8,7 @@ export default function DebtsPage() {
   const t = useTranslations("debts");
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <PageHeader
         title={t("title")}
         actions={
