@@ -19,7 +19,9 @@ export default function ProtectedLayout({
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
         </header>
-        <div className="flex-1 overflow-auto p-4 lg:p-6">{children}</div>
+        <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 lg:p-6">
+          {children}
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
