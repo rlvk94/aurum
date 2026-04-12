@@ -1,10 +1,15 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  pgEnum,
   pgTable,
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+
+// ── Enums ───────────────────────────────────────────────────────────────────
+
+export const localeEnum = pgEnum("locale", ["da", "en"]);
 
 // ── BetterAuth tables ───────────────────────────────────────────────────────
 
@@ -16,6 +21,7 @@ export const user = pgTable("user", {
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
+  locale: localeEnum("locale").default("da").notNull(),
   createdAt: timestamp("created_at")
     .$defaultFn(() => new Date())
     .notNull(),

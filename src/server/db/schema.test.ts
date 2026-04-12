@@ -22,6 +22,7 @@ describe("database schema", () => {
       expect(columnNames).toContain("name");
       expect(columnNames).toContain("email");
       expect(columnNames).toContain("emailVerified");
+      expect(columnNames).toContain("locale");
       expect(columnNames).toContain("createdAt");
       expect(columnNames).toContain("updatedAt");
     });
