@@ -7,6 +7,9 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
  * the database, demonstrating how to test tRPC routers in isolation.
  */
 
+// Mock server-only to allow importing server modules in tests
+vi.mock("server-only", () => ({}));
+
 // Mock the database module so we don't need a real connection
 vi.mock("~/server/db", () => ({
   db: {
