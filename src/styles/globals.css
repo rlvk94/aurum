@@ -1,6 +1,176 @@
 @import "tailwindcss";
 
-@theme {
-  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif,
-    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+@custom-variant dark (&:is(.dark *));
+
+/* ── Aurum Design System ─────────────────────────────────────────────────── */
+/* Source of truth: Lovable prototype export (aurum-design-system-export.txt) */
+
+:root {
+  --background: hsl(40 20% 97%);
+  --foreground: hsl(220 20% 12%);
+
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(220 20% 12%);
+
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(220 20% 12%);
+
+  --primary: hsl(38 60% 50%);
+  --primary-foreground: hsl(0 0% 100%);
+
+  --secondary: hsl(220 14% 96%);
+  --secondary-foreground: hsl(220 20% 12%);
+
+  --muted: hsl(40 15% 94%);
+  --muted-foreground: hsl(220 10% 46%);
+
+  --accent: hsl(38 40% 92%);
+  --accent-foreground: hsl(38 60% 35%);
+
+  --destructive: hsl(0 60% 55%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  --border: hsl(40 15% 90%);
+  --input: hsl(40 15% 90%);
+  --ring: hsl(38 60% 50%);
+
+  --radius: 0.75rem;
+
+  /* Semantic finance colors */
+  --income: hsl(152 45% 42%);
+  --income-foreground: hsl(0 0% 100%);
+  --income-muted: hsl(152 35% 94%);
+
+  --expense: hsl(0 55% 55%);
+  --expense-foreground: hsl(0 0% 100%);
+  --expense-muted: hsl(0 40% 96%);
+
+  --debt: hsl(25 70% 50%);
+  --debt-foreground: hsl(0 0% 100%);
+  --debt-muted: hsl(25 50% 95%);
+
+  --savings: hsl(210 55% 50%);
+  --savings-foreground: hsl(0 0% 100%);
+  --savings-muted: hsl(210 40% 95%);
+
+  --warning: hsl(40 80% 50%);
+  --warning-foreground: hsl(40 80% 15%);
+  --warning-muted: hsl(40 60% 95%);
+
+  /* Sidebar */
+  --sidebar: hsl(220 20% 12%);
+  --sidebar-foreground: hsl(40 10% 80%);
+  --sidebar-primary: hsl(38 60% 50%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(220 15% 18%);
+  --sidebar-accent-foreground: hsl(40 10% 90%);
+  --sidebar-border: hsl(220 15% 20%);
+  --sidebar-ring: hsl(38 60% 50%);
+
+  /* Shadows */
+  --shadow-card: 0 1px 3px 0 hsl(220 20% 12% / 0.04), 0 1px 2px -1px hsl(220 20% 12% / 0.04);
+  --shadow-elevated: 0 4px 12px -2px hsl(220 20% 12% / 0.08), 0 2px 6px -2px hsl(220 20% 12% / 0.04);
+}
+
+/* ── Tailwind v4 Theme Tokens ────────────────────────────────────────────── */
+
+@theme inline {
+  /* Typography */
+  --font-sans: var(--font-dm-sans), "DM Sans", system-ui, sans-serif;
+  --font-display: var(--font-dm-serif-display), "DM Serif Display", Georgia, serif;
+
+  /* Base colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  /* Finance semantic colors */
+  --color-income: var(--income);
+  --color-income-foreground: var(--income-foreground);
+  --color-income-muted: var(--income-muted);
+  --color-expense: var(--expense);
+  --color-expense-foreground: var(--expense-foreground);
+  --color-expense-muted: var(--expense-muted);
+  --color-debt: var(--debt);
+  --color-debt-foreground: var(--debt-foreground);
+  --color-debt-muted: var(--debt-muted);
+  --color-savings: var(--savings);
+  --color-savings-foreground: var(--savings-foreground);
+  --color-savings-muted: var(--savings-muted);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-muted: var(--warning-muted);
+
+  /* Sidebar */
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Border radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* Shadows */
+  --shadow-card: var(--shadow-card);
+  --shadow-elevated: var(--shadow-elevated);
+
+  /* Animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-fade-in: fade-in 0.4s ease-out;
+}
+
+@keyframes accordion-down {
+  from { height: 0; }
+  to { height: var(--radix-accordion-content-height); }
+}
+
+@keyframes accordion-up {
+  from { height: var(--radix-accordion-content-height); }
+  to { height: 0; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Base Styles ─────────────────────────────────────────────────────────── */
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+
+  h1, h2, h3 {
+    font-family: var(--font-display);
+  }
 }

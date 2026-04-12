@@ -15,7 +15,7 @@ The app replaces a combination of a spend-tracking app (like Spiir) and a custom
 - **API:** tRPC
 - **ORM:** Drizzle ORM
 - **Auth:** BetterAuth (email OTP only — no passwords)
-- **Styling:** Tailwind CSS
+- **Styling:** Tailwind CSS v4 + shadcn/ui
 - **Language:** TypeScript (strict mode)
 - **Error monitoring:** Sentry
 - **Testing:** Vitest
@@ -119,8 +119,18 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - Prefer simple, clear solutions over over-engineering
 - All financial data is manually entered or CSV-imported (no bank integrations in MVP)
 
+## Design System
+
+- Fonts: DM Serif Display (headings) + DM Sans (body) — `font-display` / `font-sans`
+- Primary: warm gold (`hsl(38 60% 50%)`) — dark sidebar with gold accent
+- Finance colors: `income` (green), `expense` (red), `debt` (orange), `savings` (blue), `warning` (amber)
+- Shadows: `shadow-card`, `shadow-elevated`
+- Components: shadcn/ui in `src/components/ui/` — add more via `npx shadcn@latest add <component>`
+- Source of truth: Lovable prototype export + `src/styles/globals.css`
+
 ## Folder Structure
 
+- `src/components/ui/` — shadcn/ui components
 - `src/server/db/` — Drizzle schema and database client
 - `src/server/api/` — tRPC routers and procedures
 - `src/server/better-auth/` — BetterAuth server configuration
@@ -138,6 +148,8 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - `0006` — Family-scoped multi-tenancy
 - `0007` — Manual-first financial data entry
 - `0008` — Annual budget with spending challenges
+- `0009` — Use shadcn/ui as component library
+- `0010` — Aurum design system from Lovable prototype
 
 ## Testing
 

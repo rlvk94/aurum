@@ -164,7 +164,9 @@ Current ADRs:
 | 0005 | [Email OTP-Only Authentication](docs/adr/0005-email-otp-only-auth.md) |
 | 0006 | [Family-Scoped Multi-Tenancy](docs/adr/0006-family-scoped-multi-tenancy.md) |
 | 0007 | [Manual-First Financial Data Entry](docs/adr/0007-manual-first-data-entry.md) |
-| 0008 | [Dual-Period Budgeting Model](docs/adr/0008-dual-period-budgeting.md) |
+| 0008 | [Annual Budget with Spending Challenges](docs/adr/0008-dual-period-budgeting.md) |
+| 0009 | [Use shadcn/ui as Component Library](docs/adr/0009-use-shadcn-ui.md) |
+| 0010 | [Aurum Design System from Lovable Prototype](docs/adr/0010-aurum-design-system.md) |
 
 ## Further Documentation
 
