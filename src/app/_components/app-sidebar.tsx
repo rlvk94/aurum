@@ -21,9 +21,6 @@ import {
   Plus,
   Home,
   Landmark,
-  Target,
-  Upload,
-  Wrench,
 } from "lucide-react";
 
 import {
@@ -240,17 +237,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link href="/income-planner">
                     <Calculator />
                     <span>{t("incomePlanner")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/import"}
-                >
-                  <Link href="/import">
-                    <Upload />
-                    <span>{t("importData")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
