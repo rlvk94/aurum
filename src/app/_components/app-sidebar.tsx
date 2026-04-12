@@ -204,17 +204,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === "/net-worth"}
-                >
-                  <Link href="/net-worth">
-                    <TrendingUp />
-                    <span>{t("netWorthOverview")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
                   isActive={pathname === "/assets"}
                 >
                   <Link href="/assets">
