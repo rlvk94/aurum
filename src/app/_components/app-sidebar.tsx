@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -51,14 +52,14 @@ const navItems = [
   { href: "/income-planner", icon: Calculator, labelKey: "incomePlanner" },
 ] as const;
 
-export function AppSidebar() {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("nav");
   const tFamily = useTranslations("family");
   const tCommon = useTranslations("common");
   const pathname = usePathname();
 
   return (
-    <Sidebar variant="inset" collapsible="icon">
+    <Sidebar {...props}>
       {/* Family switcher */}
       <SidebarHeader>
         <SidebarMenu>
@@ -111,7 +112,6 @@ export function AppSidebar() {
                   <SidebarMenuButton
                     asChild
                     isActive={pathname.startsWith(item.href)}
-                    tooltip={t(item.labelKey)}
                   >
                     <Link href={item.href}>
                       <item.icon />
@@ -132,7 +132,6 @@ export function AppSidebar() {
                 <SidebarMenuButton
                   asChild
                   isActive={pathname.startsWith("/settings")}
-                  tooltip={t("settings")}
                 >
                   <Link href="/settings">
                     <Settings />
