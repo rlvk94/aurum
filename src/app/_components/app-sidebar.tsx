@@ -59,7 +59,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
 
   return (
-    <Sidebar {...props}>
+    <Sidebar variant="inset" {...props}>
       {/* Family switcher */}
       <SidebarHeader>
         <SidebarMenu>
