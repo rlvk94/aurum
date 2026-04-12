@@ -14,24 +14,30 @@ import {
   Settings,
   ChevronsUpDown,
   LogOut,
+  ChevronUp,
+  Users,
+  Plus,
+  Home,
 } from "lucide-react";
 
-import { cn } from "~/app/_lib/utils";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "~/app/_components/sidebar";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/app/_components/dropdown-menu";
 
@@ -52,69 +58,134 @@ export function AppSidebar() {
   const pathname = usePathname();
 
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border px-4 py-5">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <span className="font-display text-xl text-sidebar-primary-foreground">
-            {tCommon("appName")}
-          </span>
-        </Link>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="mt-3 flex w-full items-center justify-between rounded-md px-2 py-1.5 text-sm text-sidebar-foreground hover:bg-sidebar-accent">
-              <span className="truncate">Home</span>
-              <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56">
-            <DropdownMenuItem>{tFamily("switchFamily")}</DropdownMenuItem>
-            <DropdownMenuItem>{tFamily("createFamily")}</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <Sidebar collapsible="icon">
+      {/* Family switcher */}
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <Home className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">Home</span>
+                    <span className="truncate text-xs">
+                      {tFamily("owner")}
+                    </span>
+                  </div>
+                  <ChevronsUpDown className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-popper-anchor-width]"
+                align="start"
+              >
+                <DropdownMenuItem>
+                  <Home className="mr-2 size-4" />
+                  Home
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Plus className="mr-2 size-4" />
+                  {tFamily("createFamily")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
 
+      {/* Navigation */}
       <SidebarContent>
         <SidebarGroup>
+          <SidebarGroupLabel>{tCommon("appName")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navItems.map((item) => {
-                const isActive = pathname.startsWith(item.href);
-                return (
-                  <SidebarMenuItem key={item.href}>
-                    <SidebarMenuButton asChild isActive={isActive}>
-                      <Link href={item.href}>
-                        <item.icon className="h-4 w-4" />
-                        <span>{t(item.labelKey)}</span>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                );
-              })}
+              {navItems.map((item) => (
+                <SidebarMenuItem key={item.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(item.href)}
+                    tooltip={t(item.labelKey)}
+                  >
+                    <Link href={item.href}>
+                      <item.icon />
+                      <span>{t(item.labelKey)}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        <SidebarGroup>
+          <SidebarGroupLabel>{tCommon("settings")}</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/settings")}
+                  tooltip={t("settings")}
+                >
+                  <Link href="/settings">
+                    <Settings />
+                    <span>{t("settings")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-sidebar-border">
+      {/* User menu */}
+      <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname.startsWith("/settings")}>
-              <Link href="/settings">
-                <Settings className="h-4 w-4" />
-                <span>{t("settings")}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <button className="w-full">
-                <LogOut className="h-4 w-4" />
-                <span>{tCommon("signOut")}</span>
-              </button>
-            </SidebarMenuButton>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent">
+                    <Users className="size-4" />
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">User</span>
+                    <span className="truncate text-xs">user@email.dk</span>
+                  </div>
+                  <ChevronUp className="ml-auto" />
+                </SidebarMenuButton>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="w-[--radix-popper-anchor-width]"
+                side="top"
+                align="start"
+              >
+                <DropdownMenuItem>
+                  <Settings className="mr-2 size-4" />
+                  {tCommon("settings")}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <LogOut className="mr-2 size-4" />
+                  {tCommon("signOut")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
+      <SidebarRail />
     </Sidebar>
   );
 }

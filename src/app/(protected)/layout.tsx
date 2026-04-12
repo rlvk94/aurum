@@ -1,7 +1,12 @@
-import { SidebarInset, SidebarProvider } from "~/app/_components/sidebar";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "~/app/_components/sidebar";
+import { Separator } from "~/app/_components/separator";
 import { AppSidebar } from "~/app/_components/app-sidebar";
 
-export default function AppLayout({
+export default function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -10,7 +15,11 @@ export default function AppLayout({
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset>
-        <main className="flex-1 p-6 lg:p-8">{children}</main>
+        <header className="flex h-14 shrink-0 items-center gap-2 border-b px-4 lg:px-6">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+        </header>
+        <main className="flex-1 p-4 lg:p-6">{children}</main>
       </SidebarInset>
     </SidebarProvider>
   );
