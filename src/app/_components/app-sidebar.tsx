@@ -215,22 +215,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === "/debts"}
+                  isActive={pathname === "/assets"}
                 >
-                  <Link href="/debts">
-                    <CreditCard />
-                    <span>{t("debts")}</span>
+                  <Link href="/assets">
+                    <Landmark />
+                    <span>{t("assets")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === "/assets"}
+                  isActive={pathname === "/debts"}
                 >
-                  <Link href="/assets">
-                    <Landmark />
-                    <span>{t("assets")}</span>
+                  <Link href="/debts">
+                    <CreditCard />
+                    <span>{t("debts")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
