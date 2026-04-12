@@ -13,7 +13,8 @@ It replaces a combination of a spend-tracking app and a custom finance spreadshe
 - **Family workspaces** — shared financial data with owner/member roles
 - **Account tracking** — checking, savings, cash, credit cards, e-wallets
 - **Transactions** — manual entry and CSV import with categorization
-- **Budgets** — weekly and monthly budget periods with budget vs actual tracking
+- **Budgets** — annual budgets with monthly breakdown and recurrence patterns (monthly, quarterly, etc.)
+- **Challenges** — time-boxed spending goals with flexible durations
 - **Debts & Assets** — liability and asset tracking for full financial picture
 - **Net Worth** — calculated from account balances + assets − debts
 - **Income Planner** — templates for allocating income by percentage or fixed amount

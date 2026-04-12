@@ -5,7 +5,7 @@ Keep it up to date as the project evolves.
 
 ## Product Overview
 
-Aurum is a **multi-user family finance web application** for shared household and personal financial management. It combines account-based transaction tracking, weekly and monthly budgeting, debt tracking, asset tracking, net worth calculation, and income distribution planning.
+Aurum is a **multi-user family finance web application** for shared household and personal financial management. It combines account-based transaction tracking, annual budgeting with monthly breakdown, spending challenges, debt tracking, asset tracking, net worth calculation, and income distribution planning.
 
 The app replaces a combination of a spend-tracking app (like Spiir) and a custom finance spreadsheet. This is an **MVP** focused on a reliable, user-friendly core experience.
 
@@ -33,8 +33,9 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - **Account** — a financial account inside a family (checking, savings, cash, credit_card, e_wallet, other)
 - **Transaction** — a financial activity tied to an account (types: `expense`, `income`, `transfer`)
 - **Category** — classification for expenses or income (family-scoped, supports parent/child)
-- **Budget** — a family budget for a weekly or monthly period
-- **BudgetLine** — a category-based line within a budget with a planned amount
+- **Budget** — an annual family budget broken down into 12 monthly columns
+- **BudgetLine** — a category-based line with a planned amount and recurrence pattern (monthly, quarterly, semi_annual, annual, custom)
+- **Challenge** — a time-boxed spending goal with flexible duration (e.g. 1 week, 2 weeks, 1 month)
 - **Debt** — a liability tracked for the family
 - **Asset** — a manually tracked asset belonging to the family
 - **IncomePlan** / **IncomePlanLine** — templates for allocating income (by percentage or fixed amount)
@@ -63,10 +64,15 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - Transactions can be manually created or imported via CSV
 
 ### Budgets
-- Support both **weekly** and **monthly** periods
-- Budget lines are category-based
-- Budget vs actual must be shown for both periods
-- Weekly and monthly budgets should use the same underlying model
+- A budget covers a **full year**, with planned amounts distributed across 12 months
+- Budget lines have a **recurrence** (monthly, quarterly, semi_annual, annual, custom) that determines per-month distribution
+- Budget vs actual is shown for the current month (planned vs categorized expense transactions)
+- Transfer transactions are excluded from budget actuals
+
+### Challenges
+- Time-boxed spending goals with flexible duration (1 week, 2 weeks, 1 month, or custom)
+- Independent of the annual budget — a motivational overlay, not a planning tool
+- Track progress: spent vs target, remaining amount, days left
 
 ### Authentication
 - Email OTP only — no password authentication
@@ -131,7 +137,7 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - `0005` — Email OTP-only authentication
 - `0006` — Family-scoped multi-tenancy
 - `0007` — Manual-first financial data entry
-- `0008` — Dual-period budgeting model
+- `0008` — Annual budget with spending challenges
 
 ## Testing
 
@@ -142,7 +148,7 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 
 ## MVP Scope Boundaries
 
-**In scope:** email OTP auth, family collaboration, account-based transactions, weekly/monthly budgets, debt/asset tracking, net worth, income planner, CSV import, manual data entry
+**In scope:** email OTP auth, family collaboration, account-based transactions, annual budgets with monthly breakdown, spending challenges, debt/asset tracking, net worth, income planner, CSV import, manual data entry
 
 **Out of scope for MVP:** automatic bank integrations (PSD2/Open Banking), real money transfers, bill payment, advanced forecasting, AI insights, tax reporting, native mobile app, complex permissions beyond owner/member
 

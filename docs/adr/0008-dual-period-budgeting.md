@@ -1,4 +1,4 @@
-# ADR-0008: Dual-Period Budgeting Model
+# ADR-0008: Annual Budget with Spending Challenges
 
 ## Status
 
@@ -10,36 +10,59 @@ Proposed
 
 ## Context
 
-Aurum's users need budgeting at two different time scales:
+Aurum needs a budgeting model that reflects how household finances actually work: expenses are planned for a full year, but not every expense occurs every month. Some are monthly (rent, subscriptions), others are quarterly (insurance), semi-annual, or annual (car tax, holiday spending). A budgeting model locked to fixed week or month periods cannot represent this naturally.
 
-- **Weekly budgets** for short-term spending control — groceries, dining out, transport, entertainment. These categories are checked frequently (multiple times per week) to stay on track.
-- **Monthly budgets** for broader financial planning — housing, utilities, subscriptions, savings contributions. These are reviewed once a month.
+At the same time, users want short-term tactical control — the ability to set a time-boxed spending goal like "spend less than 2.000 kr. on groceries this week" or "keep dining out under 1.500 kr. for the next two weeks." These are not budgets in the planning sense — they are **challenges**: focused, motivational, and temporary.
 
-Many budgeting apps support only one period type, forcing users to either plan everything monthly (losing short-term visibility) or everything weekly (making long-term categories awkward). The current spreadsheet-based workflow already uses both periods, and the app should preserve this.
+The previous proposal (ADR 0008, dual-period weekly/monthly) treated these as the same concept. In practice they serve different purposes and should be modeled separately.
 
 ## Decision
 
-Support both **weekly** and **monthly** budget periods using a **single unified model**.
+### 1. Annual Budget
 
-### Model structure
+The primary budget is an **annual plan** for a family, broken down into 12 monthly columns.
 
-- A **Budget** record has a `period_type` field (`week` or `month`), along with `period_start` and `period_end` dates.
-- A **BudgetLine** belongs to a Budget and maps a category to a `planned_amount`.
-- Budget vs actual is calculated by summing categorized expense transactions within the budget's date range, scoped to the family.
+- A **Budget** represents a single year for a family (e.g. "2026 Budget").
+- A **BudgetLine** maps a category to a planned amount and a **recurrence** pattern that determines how the amount is distributed across months.
+
+Supported recurrence types:
+
+- `monthly` — same amount every month (e.g. rent: 9.500 kr./month)
+- `quarterly` — amount applied to specific quarter months (e.g. insurance: 3.600 kr. in Jan, Apr, Jul, Oct)
+- `semi_annual` — amount applied twice a year
+- `annual` — amount applied to a single month
+- `custom` — user specifies per-month amounts directly
+
+Each budget line produces a **planned amount per month**, enabling a 12-month overview. Budget vs actual for a given month is calculated by summing categorized expense transactions in that month against the planned amounts.
+
+### 2. Spending Challenges
+
+A **Challenge** is a separate, time-boxed spending goal with a flexible duration.
+
+- A challenge has a **start date**, **end date**, **category** (or set of categories), and a **target amount**.
+- Duration is flexible: 1 week, 2 weeks, 1 month, or any custom range.
+- Challenges are independent of the annual budget — they layer on top as short-term motivational tools.
+- The UI shows progress (spent vs target, remaining amount, days left) and whether the challenge is on track.
+
+Examples:
+
+- "Groceries challenge: stay under 1.500 kr. this week"
+- "No dining out for 2 weeks"
+- "Keep shopping under 3.000 kr. this month"
 
 ### Key behaviors
 
-- Weekly and monthly budgets are independent — they can have different categories and different planned amounts.
-- A category can appear in both a weekly and a monthly budget (e.g. "Groceries" might have a weekly target of 1.500 kr. and a monthly target of 5.500 kr.).
+- The annual budget is the single source of truth for financial planning. The dashboard shows the current month's budget vs actual.
 - Transfer transactions are excluded from budget actuals.
-- The UI shows budget vs actual with remaining amounts and overspending indicators.
-- Copying a previous budget to create a new one should be supported if straightforward.
+- Challenges are optional and do not affect the budget calculation — they are a motivational overlay.
+- Copying last year's budget to seed a new year should be supported.
 
 ## Consequences
 
-- **Positive:** Matches the user's existing mental model — weekly for tactical control, monthly for strategic planning.
-- **Positive:** Unified model keeps the schema and business logic simple — no separate tables or code paths for weekly vs monthly.
-- **Positive:** Flexible date ranges mean the model can support custom periods in the future if needed.
-- **Trade-off:** Budget vs actual queries need to filter transactions by date range, which requires indexed date columns and clear family + date scoping.
-- **Trade-off:** Users may have overlapping budgets for the same category at different periods — the UI must make it clear which budget they're viewing.
-- **Follow-up:** The dashboard should surface both "this week" and "this month" budget summaries prominently.
+- **Positive:** Annual budgets with recurrence patterns accurately model real household expenses — quarterly insurance, annual subscriptions, and monthly rent all fit naturally.
+- **Positive:** The 12-month view gives users a full-year financial picture, making it easy to see months with higher planned spending.
+- **Positive:** Challenges are decoupled from the budget model, keeping each concept simple and focused.
+- **Positive:** Flexible challenge durations support any time-boxed goal without constraining the model to fixed periods.
+- **Trade-off:** Recurrence logic adds complexity to budget line creation — the UI must make it easy to set up monthly vs quarterly vs custom patterns.
+- **Trade-off:** Two related but distinct concepts (budgets and challenges) require clear UX separation so users understand the difference.
+- **Follow-up:** The dashboard should show the current month's budget status prominently, with active challenges displayed alongside or below it.
