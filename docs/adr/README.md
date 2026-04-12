@@ -46,3 +46,7 @@ YYYY-MM-DD
 | 0002 | [Use Sentry for Error Monitoring](0002-use-sentry-for-error-monitoring.md) | Accepted |
 | 0003 | [Use Drizzle ORM](0003-use-drizzle-orm.md) | Accepted |
 | 0004 | [Use BetterAuth](0004-use-betterauth.md) | Accepted |
+| 0005 | [Email OTP-Only Authentication](0005-email-otp-only-auth.md) | Proposed |
+| 0006 | [Family-Scoped Multi-Tenancy](0006-family-scoped-multi-tenancy.md) | Proposed |
+| 0007 | [Manual-First Financial Data Entry](0007-manual-first-data-entry.md) | Proposed |
+| 0008 | [Dual-Period Budgeting Model](0008-dual-period-budgeting.md) | Proposed |

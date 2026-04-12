@@ -1,18 +1,30 @@
 # Aurum
 
-> A production-ready web application built with the T3 Stack.
+> A multi-user family finance web application for shared household and personal financial management.
 
 ## Project Overview
 
-<!-- TODO: Fill in when the application's purpose is defined -->
-Aurum is a full-stack TypeScript web application. This section will be updated with a detailed description of the application's purpose and features.
+Aurum combines account-based transaction tracking, weekly and monthly budgeting, debt tracking, asset tracking, net worth calculation, and income distribution planning — all within a shared family workspace.
+
+It replaces a combination of a spend-tracking app and a custom finance spreadsheet, providing a single, cohesive tool for managing household finances.
+
+### Core Features
+
+- **Family workspaces** — shared financial data with owner/member roles
+- **Account tracking** — checking, savings, cash, credit cards, e-wallets
+- **Transactions** — manual entry and CSV import with categorization
+- **Budgets** — weekly and monthly budget periods with budget vs actual tracking
+- **Debts & Assets** — liability and asset tracking for full financial picture
+- **Net Worth** — calculated from account balances + assets − debts
+- **Income Planner** — templates for allocating income by percentage or fixed amount
+- **Dashboard** — at-a-glance view of spending, budgets, balances, and net worth
 
 ## Tech Stack
 
 - **Framework:** [Next.js](https://nextjs.org/) (App Router)
 - **API:** [tRPC](https://trpc.io/)
 - **ORM:** [Drizzle ORM](https://orm.drizzle.team/)
-- **Auth:** [BetterAuth](https://www.better-auth.com/)
+- **Auth:** [BetterAuth](https://www.better-auth.com/) (email OTP)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Language:** TypeScript (strict mode)
 - **Error Monitoring:** [Sentry](https://sentry.io/)
@@ -31,7 +43,7 @@ Aurum is a full-stack TypeScript web application. This section will be updated w
 1. **Clone the repository:**
 
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/rlvk94/aurum.git
    cd aurum
    ```
 
@@ -148,6 +160,10 @@ Current ADRs:
 | 0002 | [Use Sentry for Error Monitoring](docs/adr/0002-use-sentry-for-error-monitoring.md) |
 | 0003 | [Use Drizzle ORM](docs/adr/0003-use-drizzle-orm.md) |
 | 0004 | [Use BetterAuth](docs/adr/0004-use-betterauth.md) |
+| 0005 | [Email OTP-Only Authentication](docs/adr/0005-email-otp-only-auth.md) |
+| 0006 | [Family-Scoped Multi-Tenancy](docs/adr/0006-family-scoped-multi-tenancy.md) |
+| 0007 | [Manual-First Financial Data Entry](docs/adr/0007-manual-first-data-entry.md) |
+| 0008 | [Dual-Period Budgeting Model](docs/adr/0008-dual-period-budgeting.md) |
 
 ## Further Documentation
 
