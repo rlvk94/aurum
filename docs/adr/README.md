@@ -49,4 +49,4 @@ YYYY-MM-DD
 | 0005 | [Email OTP-Only Authentication](0005-email-otp-only-auth.md) | Accepted |
 | 0006 | [Family-Scoped Multi-Tenancy](0006-family-scoped-multi-tenancy.md) | Accepted |
 | 0007 | [Manual-First Financial Data Entry](0007-manual-first-data-entry.md) | Accepted |
-| 0008 | [Annual Budget with Spending Challenges](0008-dual-period-budgeting.md) | Proposed |
+| 0008 | [Annual Budget with Spending Challenges](0008-dual-period-budgeting.md) | Accepted |
