@@ -1,13 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { getTableName, getTableColumns } from "drizzle-orm";
-import { posts, user, session, account, verification } from "./schema";
+import { user, session, account, verification } from "./schema";
 
 /**
- * Example unit test — co-located with the schema it covers.
+ * Unit test — co-located with the schema it covers.
  *
- * These tests verify that the Drizzle schema tables are defined correctly
- * and export the expected column structure. They serve as a safety net
- * against accidental schema changes.
+ * Verifies that the Drizzle schema tables are defined correctly
+ * and export the expected column structure.
  */
 
 describe("database schema", () => {
@@ -52,21 +51,6 @@ describe("database schema", () => {
   describe("verification table", () => {
     it("is defined with the correct table name", () => {
       expect(getTableName(verification)).toBe("verification");
-    });
-  });
-
-  describe("posts table", () => {
-    it("is defined", () => {
-      expect(posts).toBeDefined();
-    });
-
-    it("has required columns", () => {
-      const columns = getTableColumns(posts);
-      const columnNames = Object.keys(columns);
-      expect(columnNames).toContain("id");
-      expect(columnNames).toContain("name");
-      expect(columnNames).toContain("createdById");
-      expect(columnNames).toContain("createdAt");
     });
   });
 });
