@@ -16,7 +16,4 @@ export default withSentryConfig(config, {
 
   // Suppress noisy Sentry build logs
   silent: !process.env.CI,
-
-  // Automatically tree-shake Sentry logger statements to reduce bundle size
-  disableLogger: true,
 });
