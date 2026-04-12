@@ -9,7 +9,7 @@ export default function AccountsPage() {
   const tCommon = useTranslations("common");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         title={t("title")}
         actions={

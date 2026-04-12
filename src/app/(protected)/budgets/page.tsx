@@ -9,7 +9,7 @@ export default function BudgetsPage() {
   const t = useTranslations("budgets");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         title={t("title")}
         actions={

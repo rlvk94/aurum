@@ -8,7 +8,7 @@ export default function IncomePlannerPage() {
   const t = useTranslations("incomePlanner");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader
         title={t("title")}
         actions={

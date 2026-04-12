@@ -44,7 +44,7 @@ export default function DashboardPage() {
   const t = useTranslations("dashboard");
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       <PageHeader title={t("title")} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
