@@ -4,13 +4,16 @@
  */
 import "./src/env.js";
 import { withSentryConfig } from "@sentry/nextjs";
+import createNextIntlPlugin from "next-intl/plugin";
+
+const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 /** @type {import("next").NextConfig} */
 const config = {
   serverExternalPackages: ["postgres"],
 };
 
-export default withSentryConfig(config, {
+export default withSentryConfig(withNextIntl(config), {
   // Upload source maps to Sentry for readable stack traces in production
   sourcemaps: {
     deleteSourcemapsAfterUpload: true,

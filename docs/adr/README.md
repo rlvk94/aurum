@@ -52,3 +52,5 @@ YYYY-MM-DD
 | 0008 | [Annual Budget with Spending Challenges](0008-dual-period-budgeting.md) | Accepted |
 | 0009 | [Use shadcn/ui as Component Library](0009-use-shadcn-ui.md) | Accepted |
 | 0010 | [Aurum Design System from Lovable Prototype](0010-aurum-design-system.md) | Accepted |
+| 0011 | [Use next-intl for Internationalization](0011-use-next-intl.md) | Proposed |
+| 0012 | [All User-Facing Text Must Use Translation Keys](0012-translatable-labels.md) | Proposed |

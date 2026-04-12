@@ -1,0 +1,21 @@
+{
+  "common": {
+    "appName": "Aurum",
+    "loading": "Indlæser...",
+    "save": "Gem",
+    "cancel": "Annuller",
+    "delete": "Slet",
+    "edit": "Rediger",
+    "create": "Opret",
+    "back": "Tilbage",
+    "next": "Næste",
+    "search": "Søg",
+    "noResults": "Ingen resultater",
+    "error": "Der opstod en fejl",
+    "signIn": "Log ind",
+    "signOut": "Log ud"
+  },
+  "home": {
+    "title": "Aurum"
+  }
+}

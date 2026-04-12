@@ -2,6 +2,8 @@ import "~/app/_styles/globals.css";
 
 import { type Metadata } from "next";
 import { DM_Sans, DM_Serif_Display } from "next/font/google";
+import { NextIntlClientProvider } from "next-intl";
+import { getLocale, getMessages } from "next-intl/server";
 
 import { TRPCReactProvider } from "~/trpc/react";
 
@@ -22,13 +24,18 @@ const dmSerifDisplay = DM_Serif_Display({
   variable: "--font-dm-serif-display",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const locale = await getLocale();
+  const messages = await getMessages();
+
   return (
-    <html lang="en" className={`${dmSans.variable} ${dmSerifDisplay.variable}`}>
+    <html lang={locale} className={`${dmSans.variable} ${dmSerifDisplay.variable}`}>
       <body>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <NextIntlClientProvider messages={messages}>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

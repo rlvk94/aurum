@@ -17,6 +17,7 @@ The app replaces a combination of a spend-tracking app (like Spiir) and a custom
 - **Auth:** BetterAuth (email OTP only — no passwords)
 - **Styling:** Tailwind CSS v4 + shadcn/ui
 - **Language:** TypeScript (strict mode)
+- **i18n:** next-intl (Danish default, English)
 - **Error monitoring:** Sentry
 - **Testing:** Vitest
 
@@ -108,12 +109,26 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - Decimal separator: comma
 - Grouping separator: period
 
+## Internationalization
+
+- **Locales:** `da` (Danish, default), `en` (English) — no locale URL segments
+- **Locale resolution:** user `locale` field (synced to cookie on sign-in) → cookie → Accept-Language → default `da`
+- **User locale field:** stored in the user record, synced to cookie on sign-in, used for emails and server-side contexts
+- **All user-facing text must use translation keys** — never hardcode strings in components
+- **Danish first:** when adding new keys, always add `da` translation first, then `en`
+- **Message files:** `messages/da.json`, `messages/en.json` — organized by namespace
+- **Server Components:** `useTranslations('namespace')`
+- **Client Components:** `useTranslations('namespace')` hook
+- **Config:** `src/i18n/config.ts` (locales), `src/i18n/request.ts` (locale resolution)
+
 ## Key Conventions
 
 - All significant architectural decisions must be documented as an ADR in `docs/adr/` before implementation
 - Tests are co-located with source files using `.test.ts` or `.spec.ts` suffixes
 - Environment variables must be added to `.env.example` and validated in `src/env.js`
 - Never commit `.env`
+- All user-facing strings must use translation keys via `useTranslations()` — never hardcode text
+- When adding new UI, always add both `da` and `en` translations in `messages/`
 - Keep family scoping and permissions explicit in all data access
 - Separate domain logic from UI where practical
 - Prefer simple, clear solutions over over-engineering
@@ -157,6 +172,8 @@ Server code lives outside `src/app/`:
 - `0008` — Annual budget with spending challenges
 - `0009` — Use shadcn/ui as component library
 - `0010` — Aurum design system from Lovable prototype
+- `0011` — Use next-intl for internationalization
+- `0012` — All user-facing text must use translation keys
 
 ## Testing
 

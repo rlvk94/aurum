@@ -167,6 +167,8 @@ Current ADRs:
 | 0008 | [Annual Budget with Spending Challenges](docs/adr/0008-dual-period-budgeting.md) |
 | 0009 | [Use shadcn/ui as Component Library](docs/adr/0009-use-shadcn-ui.md) |
 | 0010 | [Aurum Design System from Lovable Prototype](docs/adr/0010-aurum-design-system.md) |
+| 0011 | [Use next-intl for Internationalization](docs/adr/0011-use-next-intl.md) |
+| 0012 | [All User-Facing Text Must Use Translation Keys](docs/adr/0012-translatable-labels.md) |
 
 ## Further Documentation
 
