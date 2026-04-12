@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -16,13 +16,13 @@ Traditional component libraries (Material UI, Chakra, Ant Design) come with thei
 
 ## Decision
 
-Use [shadcn/ui](https://ui.shadcn.com/) as the component library. Unlike npm-installed libraries, shadcn/ui components are copied directly into the project (`src/components/ui/`) and are fully owned by the codebase.
+Use [shadcn/ui](https://ui.shadcn.com/) as the component library. Unlike npm-installed libraries, shadcn/ui components are copied directly into the project (`src/app/_components/`) and are fully owned by the codebase.
 
 ### Setup
 
-- `components.json` configures shadcn for the T3 project with `~/` path aliases and Tailwind v4
-- `src/lib/utils.ts` provides the `cn()` utility (clsx + tailwind-merge)
-- Components live in `src/components/ui/` and can be modified freely
+- `components.json` configures shadcn for the T3 project with `~/app/_*` path aliases and Tailwind v4
+- `src/app/_lib/utils.ts` provides the `cn()` utility (clsx + tailwind-merge)
+- Components live in `src/app/_components/` (underscore prefix prevents Next.js route generation) and can be modified freely
 - Base dependencies: `class-variance-authority`, `clsx`, `tailwind-merge`, `lucide-react`
 
 ### Installed components

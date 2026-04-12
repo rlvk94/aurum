@@ -50,5 +50,5 @@ YYYY-MM-DD
 | 0006 | [Family-Scoped Multi-Tenancy](0006-family-scoped-multi-tenancy.md) | Accepted |
 | 0007 | [Manual-First Financial Data Entry](0007-manual-first-data-entry.md) | Accepted |
 | 0008 | [Annual Budget with Spending Challenges](0008-dual-period-budgeting.md) | Accepted |
-| 0009 | [Use shadcn/ui as Component Library](0009-use-shadcn-ui.md) | Proposed |
-| 0010 | [Aurum Design System from Lovable Prototype](0010-aurum-design-system.md) | Proposed |
+| 0009 | [Use shadcn/ui as Component Library](0009-use-shadcn-ui.md) | Accepted |
+| 0010 | [Aurum Design System from Lovable Prototype](0010-aurum-design-system.md) | Accepted |

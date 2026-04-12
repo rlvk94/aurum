@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 
@@ -14,7 +14,7 @@ Aurum's UX should feel premium, calm, modern, trustworthy, and analytical. A des
 
 ## Decision
 
-Adopt the **Lovable prototype export** as the Aurum design system, implemented via CSS custom properties and Tailwind v4 theme tokens in `src/styles/globals.css`.
+Adopt the **Lovable prototype export** as the Aurum design system, implemented via CSS custom properties and Tailwind v4 theme tokens in `src/app/_styles/globals.css`.
 
 ### Typography
 
