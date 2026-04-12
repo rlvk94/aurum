@@ -6,7 +6,9 @@ import "./src/env.js";
 import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  serverExternalPackages: ["postgres"],
+};
 
 export default withSentryConfig(config, {
   // Upload source maps to Sentry for readable stack traces in production
