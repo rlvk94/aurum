@@ -3,14 +3,13 @@
 import * as React from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Wallet,
   ArrowLeftRight,
   PieChart,
   CreditCard,
-  TrendingUp,
   Calculator,
   Settings,
   ChevronsUpDown,
@@ -22,6 +21,7 @@ import {
   Home,
   Landmark,
 } from "lucide-react";
+import { authClient } from "~/app/_lib/auth-client";
 
 import {
   Sidebar,
@@ -57,6 +57,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const tFamily = useTranslations("family");
   const tCommon = useTranslations("common");
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -275,7 +276,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   {tCommon("settings")}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={async () => {
+                    await authClient.signOut();
+                    router.push("/sign-in");
+                  }}
+                >
                   <LogOut className="mr-2 size-4" />
                   {tCommon("signOut")}
                 </DropdownMenuItem>

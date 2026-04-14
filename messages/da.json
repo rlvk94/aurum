@@ -57,6 +57,9 @@
     "codePlaceholder": "000000",
     "verify": "Bekræft",
     "resendCode": "Send kode igen",
+    "codeResent": "Ny kode sendt",
+    "sendCodeError": "Kunne ikke sende kode. Prøv igen.",
+    "verifyError": "Ugyldig kode. Prøv igen.",
     "backToSignIn": "Tilbage til login"
   },
   "family": {

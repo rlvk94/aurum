@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { nextCookies } from "better-auth/next-js";
 import { emailOTP } from "better-auth/plugins/email-otp";
 
 import { db } from "~/server/db";
@@ -9,6 +10,7 @@ export const auth = betterAuth({
     provider: "pg",
   }),
   plugins: [
+    nextCookies(),
     emailOTP({
       otpLength: 6,
       expiresIn: 600, // 10 minutes

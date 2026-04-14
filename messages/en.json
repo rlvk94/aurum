@@ -57,6 +57,9 @@
     "codePlaceholder": "000000",
     "verify": "Verify",
     "resendCode": "Resend code",
+    "codeResent": "New code sent",
+    "sendCodeError": "Could not send code. Please try again.",
+    "verifyError": "Invalid code. Please try again.",
     "backToSignIn": "Back to sign in"
   },
   "family": {

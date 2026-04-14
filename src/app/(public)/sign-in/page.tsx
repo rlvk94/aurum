@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { authClient } from "~/app/_lib/auth-client";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
 import {
@@ -19,11 +20,24 @@ export default function SignInPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Call authClient.emailOtp.sendVerificationOtp
+    setError("");
+
+    const { error } = await authClient.emailOtp.sendVerificationOtp({
+      email,
+      type: "sign-in",
+    });
+
+    if (error) {
+      setError(t("sendCodeError"));
+      setIsLoading(false);
+      return;
+    }
+
     router.push(`/verify?email=${encodeURIComponent(email)}`);
   };
 
@@ -51,6 +65,9 @@ export default function SignInPage() {
               autoFocus
             />
           </div>
+          {error && (
+            <p className="text-sm text-destructive">{error}</p>
+          )}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? tCommon("loading") : t("sendCode")}
           </Button>
