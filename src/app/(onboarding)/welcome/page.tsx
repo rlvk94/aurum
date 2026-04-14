@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft, Loader2, Check, LogOut } from "lucide-react";
@@ -43,7 +43,9 @@ export default function WelcomePage() {
     currentLocale === "en" ? "en" : "da",
   );
   const [familyName, setFamilyName] = useState("");
+  const [ready, setReady] = useState(false);
 
+  const { data: onboardingState } = api.user.getOnboardingState.useQuery();
   const { data: families, isLoading: familiesLoading } =
     api.family.list.useQuery();
   const needsFamily = !familiesLoading && families?.length === 0;
@@ -58,26 +60,37 @@ export default function WelcomePage() {
   const currentStep = steps[currentStepIndex] ?? "name";
   const totalSteps = steps.length;
 
-  const updateProfile = api.user.updateProfile.useMutation({
-    onSuccess: () => {
-      if (needsFamily) {
-        // Profile saved, move to family step
-        setDirection(1);
-        setCurrentStepIndex(steps.indexOf("family"));
-      } else {
-        router.push("/dashboard");
-      }
-    },
-  });
+  // Resume from persisted step
+  useEffect(() => {
+    if (onboardingState && !ready) {
+      const resumeIndex = Math.min(
+        onboardingState.onboardingStep,
+        steps.length - 1,
+      );
+      setCurrentStepIndex(resumeIndex);
+      setReady(true);
+    }
+  }, [onboardingState, steps.length, ready]);
 
-  const createFamily = api.family.create.useMutation({
+  const updateProfile = api.user.updateProfile.useMutation();
+  const completeOnboarding = api.user.completeOnboarding.useMutation({
     onSuccess: () => {
       router.push("/dashboard");
     },
   });
+  const createFamily = api.family.create.useMutation({
+    onSuccess: () => {
+      completeOnboarding.mutate();
+    },
+  });
 
-  const isPending = updateProfile.isPending || createFamily.isPending;
-  const error = updateProfile.error ?? createFamily.error;
+  const isPending =
+    updateProfile.isPending ||
+    completeOnboarding.isPending ||
+    createFamily.isPending;
+
+  const error =
+    updateProfile.error ?? completeOnboarding.error ?? createFamily.error;
 
   const canContinue =
     (currentStep === "name" && name.trim().length > 0) ||
@@ -85,20 +98,63 @@ export default function WelcomePage() {
     (currentStep === "family" && familyName.trim().length > 0);
 
   const handleContinue = useCallback(() => {
+    const nextIndex = currentStepIndex + 1;
+    const isLastStep = currentStepIndex === totalSteps - 1;
+
     if (currentStep === "name" && name.trim()) {
-      setDirection(1);
-      setCurrentStepIndex((i) => i + 1);
+      updateProfile.mutate(
+        { name: name.trim(), onboardingStep: nextIndex },
+        {
+          onSuccess: () => {
+            setDirection(1);
+            setCurrentStepIndex(nextIndex);
+          },
+        },
+      );
     } else if (currentStep === "language") {
-      updateProfile.mutate({ name: name.trim(), locale });
+      if (isLastStep) {
+        updateProfile.mutate(
+          { locale },
+          { onSuccess: () => completeOnboarding.mutate() },
+        );
+      } else {
+        updateProfile.mutate(
+          { locale, onboardingStep: nextIndex },
+          {
+            onSuccess: () => {
+              setDirection(1);
+              setCurrentStepIndex(nextIndex);
+            },
+          },
+        );
+      }
     } else if (currentStep === "family" && familyName.trim()) {
       createFamily.mutate({ name: familyName.trim() });
     }
-  }, [currentStep, name, locale, familyName, updateProfile, createFamily]);
+  }, [
+    currentStep,
+    currentStepIndex,
+    totalSteps,
+    name,
+    locale,
+    familyName,
+    updateProfile,
+    completeOnboarding,
+    createFamily,
+  ]);
 
   const handleBack = useCallback(() => {
-    setDirection(-1);
-    setCurrentStepIndex((i) => Math.max(0, i - 1));
-  }, []);
+    const prevIndex = Math.max(0, currentStepIndex - 1);
+    updateProfile.mutate(
+      { onboardingStep: prevIndex },
+      {
+        onSuccess: () => {
+          setDirection(-1);
+          setCurrentStepIndex(prevIndex);
+        },
+      },
+    );
+  }, [currentStepIndex, updateProfile]);
 
   const handleLocaleChange = useCallback(
     (newLocale: "da" | "en") => {
@@ -113,11 +169,13 @@ export default function WelcomePage() {
     (e: React.KeyboardEvent) => {
       if (e.key === "Enter") {
         e.preventDefault();
-        if (canContinue) handleContinue();
+        if (canContinue && !isPending) handleContinue();
       }
     },
-    [canContinue, handleContinue],
+    [canContinue, isPending, handleContinue],
   );
+
+  if (!ready) return null;
 
   return (
     <>

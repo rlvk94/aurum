@@ -1,6 +1,7 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  integer,
   pgEnum,
   pgTable,
   text,
@@ -25,6 +26,8 @@ export const user = pgTable("user", {
   image: text("image"),
   locale: localeEnum("locale").default("da").notNull(),
   activeFamilyId: uuid("active_family_id"),
+  onboardingStep: integer("onboarding_step").default(0).notNull(),
+  onboardedAt: timestamp("onboarded_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),

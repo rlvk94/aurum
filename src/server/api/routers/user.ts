@@ -8,20 +8,42 @@ export const userRouter = createTRPCRouter({
   updateProfile: protectedProcedure
     .input(
       z.object({
-        name: z.string().min(1).max(100),
+        name: z.string().min(1).max(100).optional(),
         locale: z.enum(["da", "en"]).optional(),
+        onboardingStep: z.number().int().min(0).optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       await ctx.db
         .update(user)
         .set({
-          name: input.name,
+          ...(input.name && { name: input.name }),
           ...(input.locale && { locale: input.locale }),
+          ...(input.onboardingStep !== undefined && {
+            onboardingStep: input.onboardingStep,
+          }),
           updatedAt: new Date(),
         })
         .where(eq(user.id, ctx.session.user.id));
     }),
+
+  completeOnboarding: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.db
+      .update(user)
+      .set({ onboardedAt: new Date(), updatedAt: new Date() })
+      .where(eq(user.id, ctx.session.user.id));
+  }),
+
+  getOnboardingState: protectedProcedure.query(async ({ ctx }) => {
+    const [row] = await ctx.db
+      .select({
+        onboardingStep: user.onboardingStep,
+        onboardedAt: user.onboardedAt,
+      })
+      .from(user)
+      .where(eq(user.id, ctx.session.user.id));
+    return row ?? { onboardingStep: 0, onboardedAt: null };
+  }),
 
   setActiveFamily: protectedProcedure
     .input(z.object({ familyId: z.string().uuid() }))
