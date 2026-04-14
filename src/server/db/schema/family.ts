@@ -18,10 +18,10 @@ export const familyRoleEnum = pgEnum("family_role", ["owner", "member"]);
 export const family = pgTable("family", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull(),
-  createdAt: timestamp("created_at")
+  createdAt: timestamp("created_at", { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),
-  updatedAt: timestamp("updated_at")
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),
 });
@@ -36,10 +36,10 @@ export const usersToFamilies = pgTable(
       .notNull()
       .references(() => family.id, { onDelete: "cascade" }),
     role: familyRoleEnum("role").default("member").notNull(),
-    createdAt: timestamp("created_at")
+    createdAt: timestamp("created_at", { withTimezone: true })
       .$defaultFn(() => new Date())
       .notNull(),
-    updatedAt: timestamp("updated_at")
+    updatedAt: timestamp("updated_at", { withTimezone: true })
       .$defaultFn(() => new Date())
       .notNull(),
   },
@@ -53,14 +53,14 @@ export const invitation = pgTable("invitation", {
     .references(() => family.id, { onDelete: "cascade" }),
   email: text("email").notNull(),
   token: text("token").notNull().unique(),
-  expiresAt: timestamp("expires_at").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
   invitedById: text("invited_by_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at")
+  createdAt: timestamp("created_at", { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),
-  updatedAt: timestamp("updated_at")
+  updatedAt: timestamp("updated_at", { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),
 });
