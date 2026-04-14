@@ -3,8 +3,9 @@
 import { useState, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Loader2, Check } from "lucide-react";
+import { ArrowRight, ArrowLeft, Loader2, Check, LogOut } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { authClient } from "~/app/_lib/auth-client";
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
@@ -99,23 +100,37 @@ export default function WelcomePage() {
           <span className="ml-0.5 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
         </span>
 
-        {/* Step dots */}
-        <div className="flex items-center gap-2">
-          {Array.from({ length: TOTAL_STEPS }, (_, i) => (
-            <motion.div
-              key={i}
-              animate={{
-                width: i === currentStep ? 24 : 6,
-                backgroundColor:
-                  i <= currentStep
-                    ? "hsl(38 60% 50%)"
-                    : "hsl(40 15% 90%)",
-              }}
-              transition={{ duration: 0.4, ease: "easeInOut" }}
-              className="h-1.5 rounded-full"
-            />
-          ))}
+        {/* Step dots — centered */}
+        <div className="pointer-events-none absolute inset-x-0 flex justify-center">
+          <div className="flex items-center gap-2">
+            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+              <motion.div
+                key={i}
+                animate={{
+                  width: i === currentStep ? 24 : 6,
+                  backgroundColor:
+                    i <= currentStep
+                      ? "hsl(38 60% 50%)"
+                      : "hsl(40 15% 90%)",
+                }}
+                transition={{ duration: 0.4, ease: "easeInOut" }}
+                className="h-1.5 rounded-full"
+              />
+            ))}
+          </div>
         </div>
+
+        <button
+          type="button"
+          onClick={async () => {
+            await authClient.signOut();
+            router.push("/login");
+          }}
+          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <LogOut className="size-3.5" />
+          {tCommon("logout")}
+        </button>
       </motion.header>
 
       {/* Main content — vertically centered */}
