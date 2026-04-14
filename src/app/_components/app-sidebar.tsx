@@ -22,6 +22,7 @@ import {
   Landmark,
 } from "lucide-react";
 import { authClient } from "~/app/_lib/auth-client";
+import { api } from "~/trpc/react";
 
 import {
   Sidebar,
@@ -59,6 +60,29 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const { data: families } = api.family.list.useQuery();
+  const { data: activeFamilyId } = api.user.getActiveFamily.useQuery();
+  const utils = api.useUtils();
+
+  const setActiveFamily = api.user.setActiveFamily.useMutation({
+    onSuccess: () => {
+      void utils.user.getActiveFamily.invalidate();
+    },
+  });
+
+  const activeFamily =
+    families?.find((f) => f.familyId === activeFamilyId) ?? families?.[0];
+
+  // Auto-set active family if none is set
+  React.useEffect(() => {
+    if (activeFamily && !activeFamilyId) {
+      setActiveFamily.mutate({ familyId: activeFamily.familyId });
+    }
+  }, [activeFamily, activeFamilyId, setActiveFamily]);
+
+  const switchFamily = (familyId: string) => {
+    setActiveFamily.mutate({ familyId });
+  };
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -76,22 +100,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <Home className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">Home</span>
+                    <span className="truncate font-semibold">
+                      {activeFamily?.familyName}
+                    </span>
                     <span className="truncate text-xs">
-                      {tFamily("owner")}
+                      {activeFamily?.role === "owner"
+                        ? tFamily("owner")
+                        : tFamily("member")}
                     </span>
                   </div>
                   <ChevronsUpDown className="ml-auto" />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-[--radix-popper-anchor-width]"
+                className="w-(--radix-popper-anchor-width)"
                 align="start"
               >
-                <DropdownMenuItem>
-                  <Home className="mr-2 size-4" />
-                  Home
-                </DropdownMenuItem>
+                {families?.map((f) => (
+                  <DropdownMenuItem
+                    key={f.familyId}
+                    onClick={() => switchFamily(f.familyId)}
+                  >
+                    <Home className="mr-2 size-4" />
+                    <span className="flex-1 truncate">{f.familyName}</span>
+                    {f.familyId === activeFamily?.familyId && (
+                      <span className="ml-2 h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
+                    )}
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Plus className="mr-2 size-4" />
@@ -272,7 +308,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent
-                className="w-[--radix-popper-anchor-width]"
+                className="w-(--radix-popper-anchor-width)"
                 side="top"
                 align="start"
               >

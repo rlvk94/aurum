@@ -5,6 +5,7 @@ import {
   pgTable,
   text,
   timestamp,
+  uuid,
 } from "drizzle-orm/pg-core";
 import { usersToFamilies } from "./family";
 
@@ -23,6 +24,7 @@ export const user = pgTable("user", {
     .notNull(),
   image: text("image"),
   locale: localeEnum("locale").default("da").notNull(),
+  activeFamilyId: uuid("active_family_id"),
   createdAt: timestamp("created_at", { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),

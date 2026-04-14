@@ -22,4 +22,21 @@ export const userRouter = createTRPCRouter({
         })
         .where(eq(user.id, ctx.session.user.id));
     }),
+
+  setActiveFamily: protectedProcedure
+    .input(z.object({ familyId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(user)
+        .set({ activeFamilyId: input.familyId, updatedAt: new Date() })
+        .where(eq(user.id, ctx.session.user.id));
+    }),
+
+  getActiveFamily: protectedProcedure.query(async ({ ctx }) => {
+    const [row] = await ctx.db
+      .select({ activeFamilyId: user.activeFamilyId })
+      .from(user)
+      .where(eq(user.id, ctx.session.user.id));
+    return row?.activeFamilyId ?? null;
+  }),
 });
