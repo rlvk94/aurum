@@ -83,8 +83,10 @@
     "owner": "Owner",
     "member": "Member",
     "familyName": "Family name",
+    "familyNamePlaceholder": "e.g. The Smiths",
     "familyDescription": "Description",
-    "familyCurrency": "Currency"
+    "familyCurrency": "Currency",
+    "createFamilyDescription": "Create a new shared financial workspace"
   },
   "dashboard": {
     "title": "Dashboard",

@@ -83,8 +83,10 @@
     "owner": "Ejer",
     "member": "Medlem",
     "familyName": "Familienavn",
+    "familyNamePlaceholder": "F.eks. Familien Jensen",
     "familyDescription": "Beskrivelse",
-    "familyCurrency": "Valuta"
+    "familyCurrency": "Valuta",
+    "createFamilyDescription": "Opret et nyt delt økonomisk rum"
   },
   "dashboard": {
     "title": "Overblik",
