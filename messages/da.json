@@ -14,8 +14,8 @@
     "filter": "Filtrer",
     "noResults": "Ingen resultater",
     "error": "Der opstod en fejl",
-    "signIn": "Log ind",
-    "signOut": "Log ud",
+    "login": "Log ind",
+    "logout": "Log ud",
     "settings": "Indstillinger",
     "total": "I alt",
     "amount": "Beløb",
@@ -46,8 +46,8 @@
     "importData": "Importér data"
   },
   "auth": {
-    "signInTitle": "Log ind på Aurum",
-    "signInDescription": "Indtast din e-mail for at modtage en engangskode",
+    "loginTitle": "Log ind på Aurum",
+    "loginDescription": "Indtast din e-mail for at modtage en engangskode",
     "emailLabel": "E-mail",
     "emailPlaceholder": "din@email.dk",
     "sendCode": "Send kode",
@@ -60,7 +60,7 @@
     "codeResent": "Ny kode sendt",
     "sendCodeError": "Kunne ikke sende kode. Prøv igen.",
     "verifyError": "Ugyldig kode. Prøv igen.",
-    "backToSignIn": "Tilbage til login"
+    "backToEmail": "Brug en anden e-mail"
   },
   "family": {
     "switchFamily": "Skift familie",

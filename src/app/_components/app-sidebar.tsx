@@ -279,11 +279,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <DropdownMenuItem
                   onClick={async () => {
                     await authClient.signOut();
-                    router.push("/sign-in");
+                    router.push("/login");
                   }}
                 >
                   <LogOut className="mr-2 size-4" />
-                  {tCommon("signOut")}
+                  {tCommon("logout")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

@@ -14,8 +14,8 @@
     "filter": "Filter",
     "noResults": "No results",
     "error": "An error occurred",
-    "signIn": "Sign in",
-    "signOut": "Sign out",
+    "login": "Log in",
+    "logout": "Log out",
     "settings": "Settings",
     "total": "Total",
     "amount": "Amount",
@@ -46,8 +46,8 @@
     "importData": "Import Data"
   },
   "auth": {
-    "signInTitle": "Sign in to Aurum",
-    "signInDescription": "Enter your email to receive a one-time code",
+    "loginTitle": "Log in to Aurum",
+    "loginDescription": "Enter your email to receive a one-time code",
     "emailLabel": "Email",
     "emailPlaceholder": "you@email.com",
     "sendCode": "Send code",
@@ -60,7 +60,7 @@
     "codeResent": "New code sent",
     "sendCodeError": "Could not send code. Please try again.",
     "verifyError": "Invalid code. Please try again.",
-    "backToSignIn": "Back to sign in"
+    "backToEmail": "Use a different email"
   },
   "family": {
     "switchFamily": "Switch family",
