@@ -60,7 +60,14 @@
     "codeResent": "Ny kode sendt",
     "sendCodeError": "Kunne ikke sende kode. Prøv igen.",
     "verifyError": "Ugyldig kode. Prøv igen.",
-    "backToEmail": "Brug en anden e-mail"
+    "backToEmail": "Brug en anden e-mail",
+    "welcomeTitle": "Velkommen til Aurum",
+    "welcomeDescription": "Fortæl os lidt om dig selv for at komme i gang",
+    "nameLabel": "Dit navn",
+    "namePlaceholder": "Indtast dit navn",
+    "continue": "Fortsæt",
+    "languageTitle": "Vælg dit sprog",
+    "languageDescription": "Du kan altid ændre det senere i indstillinger"
   },
   "family": {
     "switchFamily": "Skift familie",

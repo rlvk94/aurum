@@ -58,6 +58,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const tCommon = useTranslations("common");
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = authClient.useSession();
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -260,8 +261,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <Users className="size-4" />
                   </div>
                   <div className="grid flex-1 text-left text-sm leading-tight">
-                    <span className="truncate font-semibold">User</span>
-                    <span className="truncate text-xs">user@email.dk</span>
+                    <span className="truncate font-semibold">
+                      {session?.user.name}
+                    </span>
+                    <span className="truncate text-xs">
+                      {session?.user.email}
+                    </span>
                   </div>
                   <ChevronUp className="ml-auto" />
                 </SidebarMenuButton>

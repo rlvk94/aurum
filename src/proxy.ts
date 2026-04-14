@@ -1,11 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 const publicPaths = ["/login", "/api/auth", "/api/trpc"];
+const authRequiredPaths = ["/welcome"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPublic = publicPaths.some((path) => pathname.startsWith(path));
+  const isAuthRequired = authRequiredPaths.some((path) => pathname.startsWith(path));
   const hasSession = request.cookies.has("better-auth.session_token");
 
   // Authenticated users visiting login → redirect to dashboard
@@ -13,7 +15,7 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  // Unauthenticated users visiting protected pages → redirect to login
+  // Unauthenticated users visiting auth-required or protected pages → redirect to login
   if (!isPublic && !hasSession) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

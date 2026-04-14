@@ -42,6 +42,7 @@
     "drizzle-orm": "^0.41.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^1.8.0",
+    "motion": "^12.38.0",
     "next": "^16.2.3",
     "next-intl": "^4.9.1",
     "postgres": "^3.4.4",

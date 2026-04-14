@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+import { getSession } from "~/server/better-auth/server";
 import {
   SidebarInset,
   SidebarProvider,
@@ -6,11 +8,21 @@ import {
 import { Separator } from "~/app/_components/separator";
 import { AppSidebar } from "~/app/_components/app-sidebar";
 
-export default function ProtectedLayout({
+export default async function ProtectedLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await getSession();
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  if (!session.user.name) {
+    redirect("/welcome");
+  }
+
   return (
     <SidebarProvider>
       <AppSidebar />

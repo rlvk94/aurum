@@ -60,7 +60,14 @@
     "codeResent": "New code sent",
     "sendCodeError": "Could not send code. Please try again.",
     "verifyError": "Invalid code. Please try again.",
-    "backToEmail": "Use a different email"
+    "backToEmail": "Use a different email",
+    "welcomeTitle": "Welcome to Aurum",
+    "welcomeDescription": "Tell us a bit about yourself to get started",
+    "nameLabel": "Your name",
+    "namePlaceholder": "Enter your name",
+    "continue": "Continue",
+    "languageTitle": "Choose your language",
+    "languageDescription": "You can always change this later in settings"
   },
   "family": {
     "switchFamily": "Switch family",
