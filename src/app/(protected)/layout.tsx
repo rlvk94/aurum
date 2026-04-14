@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
+import { eq } from "drizzle-orm";
 import { getSession } from "~/server/better-auth/server";
+import { db } from "~/server/db";
+import { usersToFamilies } from "~/server/db/schema";
 import {
   SidebarInset,
   SidebarProvider,
@@ -20,6 +23,16 @@ export default async function ProtectedLayout({
   }
 
   if (!session.user.name) {
+    redirect("/welcome");
+  }
+
+  const families = await db
+    .select({ familyId: usersToFamilies.familyId })
+    .from(usersToFamilies)
+    .where(eq(usersToFamilies.userId, session.user.id))
+    .limit(1);
+
+  if (families.length === 0) {
     redirect("/welcome");
   }
 

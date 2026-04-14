@@ -67,7 +67,12 @@
     "namePlaceholder": "Indtast dit navn",
     "continue": "Fortsæt",
     "languageTitle": "Vælg dit sprog",
-    "languageDescription": "Du kan altid ændre det senere i indstillinger"
+    "languageDescription": "Du kan altid ændre det senere i indstillinger",
+    "familyTitle": "Opret din familie",
+    "familyDescription": "En familie er dit delte økonomiske rum. Du kan invitere andre senere.",
+    "familyNameLabel": "Familienavn",
+    "familyNamePlaceholder": "F.eks. Familien Jensen",
+    "getStarted": "Kom i gang"
   },
   "family": {
     "switchFamily": "Skift familie",

@@ -67,7 +67,12 @@
     "namePlaceholder": "Enter your name",
     "continue": "Continue",
     "languageTitle": "Choose your language",
-    "languageDescription": "You can always change this later in settings"
+    "languageDescription": "You can always change this later in settings",
+    "familyTitle": "Create your family",
+    "familyDescription": "A family is your shared financial workspace. You can invite others later.",
+    "familyNameLabel": "Family name",
+    "familyNamePlaceholder": "e.g. The Smiths",
+    "getStarted": "Get started"
   },
   "family": {
     "switchFamily": "Switch family",

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ArrowLeft, Loader2, Check, LogOut } from "lucide-react";
@@ -11,7 +11,7 @@ import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
 import { cn } from "~/app/_lib/utils";
 
-const TOTAL_STEPS = 2;
+type Step = "name" | "language" | "family";
 
 const stepVariants = {
   enter: (direction: number) => ({
@@ -37,34 +37,67 @@ export default function WelcomePage() {
   const tCommon = useTranslations("common");
   const router = useRouter();
   const currentLocale = useLocale();
-  const [currentStep, setCurrentStep] = useState(0);
   const [direction, setDirection] = useState(1);
   const [name, setName] = useState("");
   const [locale, setLocale] = useState<"da" | "en">(
     currentLocale === "en" ? "en" : "da",
   );
+  const [familyName, setFamilyName] = useState("");
+
+  const { data: families, isLoading: familiesLoading } =
+    api.family.list.useQuery();
+  const needsFamily = !familiesLoading && families?.length === 0;
+
+  const steps = useMemo<Step[]>(() => {
+    const s: Step[] = ["name", "language"];
+    if (needsFamily) s.push("family");
+    return s;
+  }, [needsFamily]);
+
+  const [currentStepIndex, setCurrentStepIndex] = useState(0);
+  const currentStep = steps[currentStepIndex] ?? "name";
+  const totalSteps = steps.length;
 
   const updateProfile = api.user.updateProfile.useMutation({
+    onSuccess: () => {
+      if (needsFamily) {
+        // Profile saved, move to family step
+        setDirection(1);
+        setCurrentStepIndex(steps.indexOf("family"));
+      } else {
+        router.push("/dashboard");
+      }
+    },
+  });
+
+  const createFamily = api.family.create.useMutation({
     onSuccess: () => {
       router.push("/dashboard");
     },
   });
 
+  const isPending = updateProfile.isPending || createFamily.isPending;
+  const error = updateProfile.error ?? createFamily.error;
+
   const canContinue =
-    (currentStep === 0 && name.trim().length > 0) || currentStep === 1;
+    (currentStep === "name" && name.trim().length > 0) ||
+    currentStep === "language" ||
+    (currentStep === "family" && familyName.trim().length > 0);
 
   const handleContinue = useCallback(() => {
-    if (currentStep === 0 && name.trim()) {
+    if (currentStep === "name" && name.trim()) {
       setDirection(1);
-      setCurrentStep(1);
-    } else if (currentStep === 1) {
+      setCurrentStepIndex((i) => i + 1);
+    } else if (currentStep === "language") {
       updateProfile.mutate({ name: name.trim(), locale });
+    } else if (currentStep === "family" && familyName.trim()) {
+      createFamily.mutate({ name: familyName.trim() });
     }
-  }, [currentStep, name, locale, updateProfile]);
+  }, [currentStep, name, locale, familyName, updateProfile, createFamily]);
 
   const handleBack = useCallback(() => {
     setDirection(-1);
-    setCurrentStep((s) => Math.max(0, s - 1));
+    setCurrentStepIndex((i) => Math.max(0, i - 1));
   }, []);
 
   const handleLocaleChange = useCallback(
@@ -103,13 +136,13 @@ export default function WelcomePage() {
         {/* Step dots — centered */}
         <div className="pointer-events-none absolute inset-x-0 flex justify-center">
           <div className="flex items-center gap-2">
-            {Array.from({ length: TOTAL_STEPS }, (_, i) => (
+            {Array.from({ length: totalSteps }, (_, i) => (
               <motion.div
                 key={i}
                 animate={{
-                  width: i === currentStep ? 24 : 6,
+                  width: i === currentStepIndex ? 24 : 6,
                   backgroundColor:
-                    i <= currentStep
+                    i <= currentStepIndex
                       ? "hsl(38 60% 50%)"
                       : "hsl(40 15% 90%)",
                 }}
@@ -149,8 +182,8 @@ export default function WelcomePage() {
                 ease: [0.16, 1, 0.3, 1],
               }}
             >
-              {/* Step 0 — Name */}
-              {currentStep === 0 && (
+              {/* Step: Name */}
+              {currentStep === "name" && (
                 <div>
                   <motion.div
                     initial={{ width: 0 }}
@@ -197,21 +230,11 @@ export default function WelcomePage() {
                       className="h-12 text-base"
                     />
                   </motion.div>
-
-                  {updateProfile.error && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-4 text-sm text-destructive"
-                    >
-                      {tCommon("error")}
-                    </motion.p>
-                  )}
                 </div>
               )}
 
-              {/* Step 1 — Language */}
-              {currentStep === 1 && (
+              {/* Step: Language */}
+              {currentStep === "language" && (
                 <div>
                   <div className="mb-8 h-px w-12 bg-primary/40" />
 
@@ -265,17 +288,60 @@ export default function WelcomePage() {
                       </button>
                     ))}
                   </motion.div>
-
-                  {updateProfile.error && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="mt-4 text-sm text-destructive"
-                    >
-                      {tCommon("error")}
-                    </motion.p>
-                  )}
                 </div>
+              )}
+
+              {/* Step: Family */}
+              {currentStep === "family" && (
+                <div>
+                  <div className="mb-8 h-px w-12 bg-primary/40" />
+
+                  <h1 className="font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
+                    {t("familyTitle")}
+                  </h1>
+                  <p className="mt-3 text-lg text-muted-foreground">
+                    {t("familyDescription")}
+                  </p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 0.2,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className="mt-10"
+                  >
+                    <label
+                      htmlFor="familyName"
+                      className="mb-3 block text-sm font-medium text-foreground"
+                    >
+                      {t("familyNameLabel")}
+                    </label>
+                    <Input
+                      id="familyName"
+                      type="text"
+                      placeholder={t("familyNamePlaceholder")}
+                      value={familyName}
+                      onChange={(e) => setFamilyName(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      autoFocus
+                      className="h-12 text-base"
+                    />
+                  </motion.div>
+                </div>
+              )}
+
+              {/* Shared error display */}
+              {error && (
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="mt-4 text-sm text-destructive"
+                >
+                  {tCommon("error")}
+                </motion.p>
               )}
             </motion.div>
           </AnimatePresence>
@@ -284,7 +350,7 @@ export default function WelcomePage() {
 
       {/* Floating back button — bottom left */}
       <AnimatePresence>
-        {currentStep > 0 && (
+        {currentStepIndex > 0 && (
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
@@ -318,18 +384,20 @@ export default function WelcomePage() {
       >
         <Button
           size="lg"
-          disabled={!canContinue || updateProfile.isPending}
+          disabled={!canContinue || isPending}
           onClick={handleContinue}
           className="h-12 gap-2 rounded-full px-6 shadow-elevated transition-all duration-200 hover:shadow-lg disabled:opacity-40"
         >
-          {updateProfile.isPending ? (
+          {isPending ? (
             <>
               <Loader2 className="animate-spin" />
               {tCommon("loading")}
             </>
           ) : (
             <>
-              {t("continue")}
+              {currentStepIndex === totalSteps - 1
+                ? t("getStarted")
+                : t("continue")}
               <ArrowRight className="size-4" />
             </>
           )}
