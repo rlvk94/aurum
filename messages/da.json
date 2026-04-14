@@ -103,6 +103,8 @@
     "title": "Konti",
     "addAccount": "Tilføj konto",
     "accountName": "Kontonavn",
+    "accountIdentifier": "Konto-ID",
+    "accountIdentifierPlaceholder": "F.eks. kontonummer eller navn",
     "accountType": "Kontotype",
     "institution": "Pengeinstitut",
     "balance": "Saldo",

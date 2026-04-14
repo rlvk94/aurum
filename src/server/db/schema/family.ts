@@ -8,6 +8,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
+import { financialAccount } from "./financial-account";
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 
@@ -70,6 +71,7 @@ export const invitation = pgTable("invitation", {
 export const familyRelations = relations(family, ({ many }) => ({
   usersToFamilies: many(usersToFamilies),
   invitations: many(invitation),
+  financialAccounts: many(financialAccount),
 }));
 
 export const usersToFamiliesRelations = relations(

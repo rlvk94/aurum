@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { familyRouter } from "~/server/api/routers/family";
+import { financialAccountRouter } from "~/server/api/routers/financial-account";
 import { userRouter } from "~/server/api/routers/user";
 
 /**
@@ -9,6 +10,7 @@ import { userRouter } from "~/server/api/routers/user";
  */
 export const appRouter = createTRPCRouter({
   family: familyRouter,
+  financialAccount: financialAccountRouter,
   user: userRouter,
 });
 

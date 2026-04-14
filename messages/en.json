@@ -103,6 +103,8 @@
     "title": "Accounts",
     "addAccount": "Add account",
     "accountName": "Account name",
+    "accountIdentifier": "Account ID",
+    "accountIdentifierPlaceholder": "e.g. account number or alias",
     "accountType": "Account type",
     "institution": "Institution",
     "balance": "Balance",
