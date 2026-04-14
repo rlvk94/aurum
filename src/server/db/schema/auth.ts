@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
 } from "drizzle-orm/pg-core";
+import { usersToFamilies } from "./family";
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 
@@ -74,6 +75,7 @@ export const verification = pgTable("verification", {
 export const userRelations = relations(user, ({ many }) => ({
   account: many(account),
   session: many(session),
+  usersToFamilies: many(usersToFamilies),
 }));
 
 export const accountRelations = relations(account, ({ one }) => ({
