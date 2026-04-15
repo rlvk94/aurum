@@ -47,6 +47,7 @@ import { cn } from "~/app/_lib/utils";
 type Transaction = RouterOutputs["transaction"]["list"][number];
 
 const ALL = "__all__";
+const UNCATEGORIZED = "__uncategorized__";
 
 function formatAmount(cents: number): string {
   const value = cents / 100;
@@ -65,8 +66,10 @@ export default function TransactionsPage() {
   const dateLocale = locale === "da" ? da : enUS;
 
   const { data: accounts = [] } = api.financialAccount.list.useQuery();
+  const { data: categories = [] } = api.category.list.useQuery();
   const [accountFilter, setAccountFilter] = useState<string>(ALL);
   const [typeFilter, setTypeFilter] = useState<string>(ALL);
+  const [categoryFilter, setCategoryFilter] = useState<string>(ALL);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -81,12 +84,22 @@ export default function TransactionsPage() {
       typeFilter === ALL
         ? undefined
         : (typeFilter as "expense" | "income" | "transfer"),
+    categoryId:
+      categoryFilter === ALL
+        ? undefined
+        : categoryFilter === UNCATEGORIZED
+          ? null
+          : categoryFilter,
     search: debouncedSearch || undefined,
   });
 
   const accountMap = useMemo(
     () => new Map(accounts.map((a) => [a.id, a])),
     [accounts],
+  );
+  const categoryMap = useMemo(
+    () => new Map(categories.map((c) => [c.id, c])),
+    [categories],
   );
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -164,6 +177,26 @@ export default function TransactionsPage() {
             <SelectItem value="transfer">{t("transfer")}</SelectItem>
           </SelectContent>
         </Select>
+
+        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+          <SelectTrigger className="w-auto min-w-[180px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>{t("allCategories")}</SelectItem>
+            <SelectItem value={UNCATEGORIZED}>
+              {t("uncategorizedFilter")}
+            </SelectItem>
+            {categories
+              .filter((c) => !c.archived)
+              .map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.icon && <span className="mr-1.5">{c.icon}</span>}
+                  {c.name}
+                </SelectItem>
+              ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (
@@ -173,6 +206,7 @@ export default function TransactionsPage() {
               <TableRow>
                 <TableHead>{tCommon("date")}</TableHead>
                 <TableHead>{t("descriptionLabel")}</TableHead>
+                <TableHead>{tCommon("category")}</TableHead>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead className="text-right">{t("amount")}</TableHead>
                 <TableHead className="w-[48px]"></TableHead>
@@ -186,6 +220,9 @@ export default function TransactionsPage() {
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-4 w-48" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-24 rounded-full" />
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-4 w-24" />
@@ -208,6 +245,7 @@ export default function TransactionsPage() {
               <TableRow>
                 <TableHead>{tCommon("date")}</TableHead>
                 <TableHead>{t("descriptionLabel")}</TableHead>
+                <TableHead>{tCommon("category")}</TableHead>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead className="text-right">{t("amount")}</TableHead>
                 <TableHead className="w-[48px]"></TableHead>
@@ -218,6 +256,9 @@ export default function TransactionsPage() {
                 const account = accountMap.get(tx.accountId);
                 const transferAccount = tx.transferAccountId
                   ? accountMap.get(tx.transferAccountId)
+                  : null;
+                const category = tx.categoryId
+                  ? categoryMap.get(tx.categoryId)
                   : null;
                 const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
                 const sign =
@@ -239,6 +280,16 @@ export default function TransactionsPage() {
                         <p className="text-xs text-muted-foreground">
                           {tx.note}
                         </p>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {category ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+                          {category.icon && <span>{category.icon}</span>}
+                          {category.name}
+                        </span>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">—</span>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">

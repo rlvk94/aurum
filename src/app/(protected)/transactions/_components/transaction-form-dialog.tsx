@@ -41,6 +41,7 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "~/app/_components/radio-group";
+import { CategoryPicker } from "~/app/_components/category-picker";
 import { cn } from "~/app/_lib/utils";
 
 type Transaction = RouterOutputs["transaction"]["list"][number];
@@ -87,6 +88,7 @@ const transactionFormSchema = z
     date: z.string().regex(ISO_DATE, "Required"),
     description: z.string().min(1, "Required").max(500),
     note: z.string(),
+    categoryId: z.string(),
   })
   .refine(
     (data) =>
@@ -120,6 +122,7 @@ export function TransactionFormDialog({
   const locale = useLocale();
   const utils = api.useUtils();
   const isEdit = !!transaction;
+  const { data: categories = [] } = api.category.list.useQuery();
 
   const createTx = api.transaction.create.useMutation({
     onSuccess: () => {
@@ -147,6 +150,7 @@ export function TransactionFormDialog({
       date: transaction?.date ?? today(),
       description: transaction?.description ?? "",
       note: transaction?.note ?? "",
+      categoryId: transaction?.categoryId ?? "",
     },
     validators: {
       onSubmit: transactionFormSchema,
@@ -154,6 +158,10 @@ export function TransactionFormDialog({
     onSubmit: async ({ value }) => {
       const amountCents = Math.round(parseFloat(value.amount) * 100);
       const trimmedNote = value.note.trim();
+      const categoryId =
+        value.type !== "transfer" && value.categoryId
+          ? value.categoryId
+          : null;
       if (isEdit) {
         updateTx.mutate({
           id: transaction.id,
@@ -166,6 +174,7 @@ export function TransactionFormDialog({
             value.type === "transfer" && value.transferAccountId
               ? value.transferAccountId
               : null,
+          categoryId,
         });
       } else {
         createTx.mutate({
@@ -179,6 +188,7 @@ export function TransactionFormDialog({
             value.type === "transfer" && value.transferAccountId
               ? value.transferAccountId
               : undefined,
+          categoryId: categoryId ?? undefined,
         });
       }
     },
@@ -438,6 +448,32 @@ export function TransactionFormDialog({
                   </Field>
                 );
               }}
+            />
+
+            <form.Subscribe
+              selector={(state) => state.values.type}
+              children={(type) =>
+                type !== "transfer" && (
+                  <form.Field
+                    name="categoryId"
+                    children={(field) => (
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>
+                          {tCommon("category")}
+                        </FieldLabel>
+                        <CategoryPicker
+                          id={field.name}
+                          value={field.state.value || null}
+                          onChange={(v) => field.handleChange(v ?? "")}
+                          categories={categories}
+                          kind={type}
+                          placeholder={tCommon("category")}
+                        />
+                      </Field>
+                    )}
+                  />
+                )
+              }
             />
 
             <form.Field

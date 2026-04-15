@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, desc, eq, gte, ilike, inArray, isNotNull, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -133,6 +133,7 @@ export const transactionRouter = createTRPCRouter({
       z
         .object({
           accountId: z.string().uuid().optional(),
+          categoryId: z.string().uuid().nullable().optional(),
           type: transactionTypeSchema.optional(),
           search: z.string().optional(),
           from: z.string().optional(), // ISO date YYYY-MM-DD
@@ -166,6 +167,13 @@ export const transactionRouter = createTRPCRouter({
       }
       if (input?.type) {
         conditions.push(eq(transaction.type, input.type));
+      }
+      if (input?.categoryId !== undefined) {
+        conditions.push(
+          input.categoryId === null
+            ? isNull(transaction.categoryId)
+            : eq(transaction.categoryId, input.categoryId),
+        );
       }
       if (input?.search && input.search.trim()) {
         const pattern = `%${input.search.trim()}%`;
@@ -201,6 +209,7 @@ export const transactionRouter = createTRPCRouter({
           description: z.string().min(1).max(500),
           note: z.string().max(1000).optional(),
           transferAccountId: z.string().uuid().optional(),
+          categoryId: z.string().uuid().optional(),
         })
         .refine(
           (data) => data.type !== "transfer" || !!data.transferAccountId,
@@ -215,7 +224,11 @@ export const transactionRouter = createTRPCRouter({
             message: "transferAccountId only applies to transfers",
             path: ["transferAccountId"],
           },
-        ),
+        )
+        .refine((data) => data.type !== "transfer" || !data.categoryId, {
+          message: "categoryId does not apply to transfers",
+          path: ["categoryId"],
+        }),
     )
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
@@ -237,6 +250,7 @@ export const transactionRouter = createTRPCRouter({
           date: input.date,
           description: input.description,
           note: input.note ?? null,
+          categoryId: input.categoryId ?? null,
         })
         .returning();
 
@@ -327,6 +341,7 @@ export const transactionRouter = createTRPCRouter({
         description: z.string().min(1).max(500).optional(),
         note: z.string().max(1000).nullable().optional(),
         transferAccountId: z.string().uuid().nullable().optional(),
+        categoryId: z.string().uuid().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

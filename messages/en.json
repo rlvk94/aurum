@@ -128,6 +128,23 @@
     },
     "emptyState": "No accounts yet. Add your first account to get started."
   },
+  "categories": {
+    "title": "Categories",
+    "addCategory": "Add category",
+    "editCategory": "Edit category",
+    "addCategoryDescription": "Create a new category for transactions",
+    "editCategoryDescription": "Update this category's details",
+    "categoryName": "Category name",
+    "categoryNamePlaceholder": "e.g. Groceries",
+    "categoryIcon": "Icon",
+    "categoryIconPlaceholder": "Pick an emoji",
+    "categoryKind": "Kind",
+    "parent": "Parent",
+    "noParent": "No parent (top-level)",
+    "expenseCategories": "Expense categories",
+    "incomeCategories": "Income categories",
+    "emptyState": "No categories yet. Add your first category to start classifying transactions."
+  },
   "transactions": {
     "title": "Transactions",
     "addTransaction": "Add transaction",
@@ -155,6 +172,7 @@
     "toAccount": "To account",
     "allAccounts": "All accounts",
     "allCategories": "All categories",
+    "uncategorizedFilter": "Uncategorized",
     "allTypes": "All types",
     "searchPlaceholder": "Search description or note...",
     "addTransactionDescription": "Record a new transaction manually",

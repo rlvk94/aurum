@@ -9,6 +9,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import { category } from "./category";
 import { family } from "./family";
 import { financialAccount } from "./financial-account";
 
@@ -36,6 +37,9 @@ export const transaction = pgTable(
       () => financialAccount.id,
       { onDelete: "set null" },
     ),
+    categoryId: uuid("category_id").references(() => category.id, {
+      onDelete: "set null",
+    }),
     type: transactionTypeEnum("type").notNull(),
     amount: integer("amount").notNull(),
     date: date("date", { mode: "string" }).notNull(),
@@ -73,5 +77,9 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
     fields: [transaction.transferAccountId],
     references: [financialAccount.id],
     relationName: "transferTransactions",
+  }),
+  category: one(category, {
+    fields: [transaction.categoryId],
+    references: [category.id],
   }),
 }));

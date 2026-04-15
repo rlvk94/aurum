@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ChevronUp, LogOut, Settings, Users } from "lucide-react";
 import { authClient } from "~/app/_lib/auth-client";
 import { api } from "~/trpc/react";
@@ -47,9 +48,11 @@ export function UserMenu() {
             side="top"
             align="start"
           >
-            <DropdownMenuItem>
-              <Settings />
-              {tCommon("settings")}
+            <DropdownMenuItem asChild>
+              <Link href="/settings">
+                <Settings />
+                {tCommon("settings")}
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem

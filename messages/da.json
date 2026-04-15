@@ -128,6 +128,23 @@
     },
     "emptyState": "Ingen konti endnu. Tilføj din første konto for at komme i gang."
   },
+  "categories": {
+    "title": "Kategorier",
+    "addCategory": "Tilføj kategori",
+    "editCategory": "Rediger kategori",
+    "addCategoryDescription": "Opret en ny kategori til transaktioner",
+    "editCategoryDescription": "Opdater kategoriens oplysninger",
+    "categoryName": "Kategorinavn",
+    "categoryNamePlaceholder": "F.eks. Dagligvarer",
+    "categoryIcon": "Ikon",
+    "categoryIconPlaceholder": "Vælg en emoji",
+    "categoryKind": "Type",
+    "parent": "Overordnet",
+    "noParent": "Ingen (topniveau)",
+    "expenseCategories": "Udgiftskategorier",
+    "incomeCategories": "Indkomstkategorier",
+    "emptyState": "Ingen kategorier endnu. Tilføj din første for at kategorisere transaktioner."
+  },
   "transactions": {
     "title": "Transaktioner",
     "addTransaction": "Tilføj transaktion",
@@ -155,6 +172,7 @@
     "toAccount": "Til konto",
     "allAccounts": "Alle konti",
     "allCategories": "Alle kategorier",
+    "uncategorizedFilter": "Ukategoriseret",
     "allTypes": "Alle typer",
     "searchPlaceholder": "Søg i beskrivelse eller note...",
     "addTransactionDescription": "Registrér en ny transaktion manuelt",
