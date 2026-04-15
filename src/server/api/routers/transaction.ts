@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, desc, eq, gte, ilike, inArray, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, isNotNull, lte, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -198,6 +198,80 @@ export const transactionRouter = createTRPCRouter({
         .returning();
 
       return created;
+    }),
+
+  bulkImport: protectedProcedure
+    .input(
+      z.object({
+        transactions: z
+          .array(
+            z.object({
+              accountId: z.string().uuid(),
+              type: transactionTypeSchema,
+              amount: z.number().int().positive(),
+              date: z.string(),
+              description: z.string().min(1).max(500),
+              note: z.string().max(1000).optional(),
+              externalId: z.string().min(1),
+              transferAccountId: z.string().uuid().optional(),
+            }),
+          )
+          .min(1)
+          .max(5000),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+
+      // Collect all unique account IDs referenced by the rows
+      const allAccountIds = new Set<string>();
+      for (const t of input.transactions) {
+        allAccountIds.add(t.accountId);
+        if (t.transferAccountId) allAccountIds.add(t.transferAccountId);
+      }
+
+      await assertAccountAccess(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+        Array.from(allAccountIds),
+      );
+
+      const now = new Date();
+      const values = input.transactions.map((t) => ({
+        familyId,
+        accountId: t.accountId,
+        transferAccountId: t.transferAccountId ?? null,
+        type: t.type,
+        amount: t.amount,
+        date: t.date,
+        description: t.description,
+        note: t.note ?? null,
+        externalId: t.externalId,
+        importedAt: now,
+      }));
+
+      // Insert in chunks to avoid query size limits
+      const CHUNK = 500;
+      let inserted = 0;
+      for (let i = 0; i < values.length; i += CHUNK) {
+        const chunk = values.slice(i, i + CHUNK);
+        const result = await ctx.db
+          .insert(transaction)
+          .values(chunk)
+          .onConflictDoNothing({
+            target: [transaction.accountId, transaction.externalId],
+            where: isNotNull(transaction.externalId),
+          })
+          .returning({ id: transaction.id });
+        inserted += result.length;
+      }
+
+      return {
+        total: input.transactions.length,
+        inserted,
+        skipped: input.transactions.length - inserted,
+      };
     }),
 
   update: protectedProcedure

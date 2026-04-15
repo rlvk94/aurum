@@ -41,6 +41,7 @@ import {
   TableRow,
 } from "~/app/_components/table";
 import { TransactionFormDialog } from "./_components/transaction-form-dialog";
+import { CsvImportDialog } from "./_components/csv-import-dialog";
 import { cn } from "~/app/_lib/utils";
 
 type Transaction = RouterOutputs["transaction"]["list"][number];
@@ -89,6 +90,7 @@ export default function TransactionsPage() {
   );
 
   const [createOpen, setCreateOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
 
   const deleteTx = api.transaction.delete.useMutation({
@@ -106,7 +108,11 @@ export default function TransactionsPage() {
         title={t("title")}
         actions={
           <>
-            <Button variant="outline">
+            <Button
+              variant="outline"
+              onClick={() => setImportOpen(true)}
+              disabled={!hasAccounts}
+            >
               <Upload />
               {t("importCsv")}
             </Button>
@@ -223,7 +229,7 @@ export default function TransactionsPage() {
                 return (
                   <TableRow key={tx.id}>
                     <TableCell className="whitespace-nowrap text-muted-foreground">
-                      {format(dateObj, "d. MMM", { locale: dateLocale })}
+                      {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
                     </TableCell>
                     <TableCell>
                       <p className="font-medium text-foreground">
@@ -293,6 +299,11 @@ export default function TransactionsPage() {
       <TransactionFormDialog
         open={createOpen}
         onOpenChange={setCreateOpen}
+        accounts={accounts}
+      />
+      <CsvImportDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
         accounts={accounts}
       />
       <TransactionFormDialog
