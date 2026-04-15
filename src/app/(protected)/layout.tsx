@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "~/server/better-auth/server";
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import {
   SidebarInset,
   SidebarProvider,
@@ -26,21 +26,30 @@ export default async function ProtectedLayout({
     redirect("/welcome");
   }
 
+  // Prefetch sidebar data so client components hydrate instantly
+  await Promise.all([
+    api.family.list.prefetch(),
+    api.user.getActiveFamily.prefetch(),
+    api.user.me.prefetch(),
+  ]);
+
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
-          <SidebarTrigger className="-ml-1" />
-          <Separator
-            orientation="vertical"
-            className="mr-2 data-[orientation=vertical]:h-4"
-          />
-        </header>
-        <div className="flex flex-1 flex-col gap-6 p-6">
-          {children}
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+    <HydrateClient>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
+            <SidebarTrigger className="-ml-1" />
+            <Separator
+              orientation="vertical"
+              className="mr-2 data-[orientation=vertical]:h-4"
+            />
+          </header>
+          <div className="flex flex-1 flex-col gap-6 p-6">
+            {children}
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </HydrateClient>
   );
 }

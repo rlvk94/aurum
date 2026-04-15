@@ -34,6 +34,19 @@ export const userRouter = createTRPCRouter({
       .where(eq(user.id, ctx.session.user.id));
   }),
 
+  me: protectedProcedure.query(async ({ ctx }) => {
+    const [row] = await ctx.db
+      .select({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        locale: user.locale,
+      })
+      .from(user)
+      .where(eq(user.id, ctx.session.user.id));
+    return row!;
+  }),
+
   getOnboardingState: protectedProcedure.query(async ({ ctx }) => {
     const [row] = await ctx.db
       .select({

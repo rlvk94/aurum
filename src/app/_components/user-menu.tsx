@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { ChevronUp, LogOut, Settings, Users } from "lucide-react";
 import { authClient } from "~/app/_lib/auth-client";
+import { api } from "~/trpc/react";
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -20,7 +21,7 @@ import {
 export function UserMenu() {
   const tCommon = useTranslations("common");
   const router = useRouter();
-  const { data: session } = authClient.useSession();
+  const { data: me } = api.user.me.useQuery();
 
   return (
     <SidebarMenu>
@@ -35,12 +36,8 @@ export function UserMenu() {
                 <Users className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold">
-                  {session?.user.name}
-                </span>
-                <span className="truncate text-xs">
-                  {session?.user.email}
-                </span>
+                <span className="truncate font-semibold">{me?.name}</span>
+                <span className="truncate text-xs">{me?.email}</span>
               </div>
               <ChevronUp className="ml-auto" />
             </SidebarMenuButton>
@@ -51,7 +48,7 @@ export function UserMenu() {
             align="start"
           >
             <DropdownMenuItem>
-              <Settings  />
+              <Settings />
               {tCommon("settings")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -61,7 +58,7 @@ export function UserMenu() {
                 router.push("/login");
               }}
             >
-              <LogOut  />
+              <LogOut />
               {tCommon("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
