@@ -1,0 +1,77 @@
+import { relations, sql } from "drizzle-orm";
+import {
+  date,
+  integer,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
+import { family } from "./family";
+import { financialAccount } from "./financial-account";
+
+// ── Enums ───────────────────────────────────────────────────────────────────
+
+export const transactionTypeEnum = pgEnum("transaction_type", [
+  "expense",
+  "income",
+  "transfer",
+]);
+
+// ── Tables ──────────────────────────────────────────────────────────────────
+
+export const transaction = pgTable(
+  "transaction",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    familyId: uuid("family_id")
+      .notNull()
+      .references(() => family.id, { onDelete: "cascade" }),
+    accountId: uuid("account_id")
+      .notNull()
+      .references(() => financialAccount.id, { onDelete: "cascade" }),
+    transferAccountId: uuid("transfer_account_id").references(
+      () => financialAccount.id,
+      { onDelete: "set null" },
+    ),
+    type: transactionTypeEnum("type").notNull(),
+    amount: integer("amount").notNull(),
+    date: date("date", { mode: "string" }).notNull(),
+    description: text("description").notNull(),
+    note: text("note"),
+    externalId: text("external_id"),
+    importedAt: timestamp("imported_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    uniqueIndex("transaction_account_external_idx")
+      .on(table.accountId, table.externalId)
+      .where(sql`${table.externalId} IS NOT NULL`),
+  ],
+);
+
+// ── Relations ───────────────────────────────────────────────────────────────
+
+export const transactionRelations = relations(transaction, ({ one }) => ({
+  family: one(family, {
+    fields: [transaction.familyId],
+    references: [family.id],
+  }),
+  account: one(financialAccount, {
+    fields: [transaction.accountId],
+    references: [financialAccount.id],
+    relationName: "accountTransactions",
+  }),
+  transferAccount: one(financialAccount, {
+    fields: [transaction.transferAccountId],
+    references: [financialAccount.id],
+    relationName: "transferTransactions",
+  }),
+}));

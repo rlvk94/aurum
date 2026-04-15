@@ -11,6 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 import { family } from "./family";
+import { transaction } from "./transaction";
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 
@@ -77,6 +78,10 @@ export const financialAccountRelations = relations(
       references: [family.id],
     }),
     accessList: many(financialAccountAccess),
+    transactions: many(transaction, { relationName: "accountTransactions" }),
+    transferTransactions: many(transaction, {
+      relationName: "transferTransactions",
+    }),
   }),
 );
 
