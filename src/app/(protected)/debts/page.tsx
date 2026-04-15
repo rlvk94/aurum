@@ -13,7 +13,7 @@ export default function DebtsPage() {
         title={t("title")}
         actions={
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus />
             {t("addDebt")}
           </Button>
         }

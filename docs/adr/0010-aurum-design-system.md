@@ -55,6 +55,18 @@ Dark sidebar (`hsl(220 20% 12%)`) with gold primary accent, matching the prototy
 - `shadow-card` — subtle shadow for card surfaces
 - `shadow-elevated` — stronger shadow for floating elements (dropdowns, modals)
 
+### Icon Styling in Components
+
+Several shadcn components (e.g. `Button`, `DropdownMenuItem`) apply automatic SVG styling via `[&_svg]:size-4 [&_svg]:shrink-0` and use `gap-2` for spacing. **Do not add manual size or spacing classes** (`mr-2`, `h-4 w-4`, `size-4`) to icons inside these components — just use the bare icon:
+
+```tsx
+// ✅ Correct
+<Button><Plus /> {t("add")}</Button>
+
+// ❌ Wrong — redundant classes
+<Button><Plus className="mr-2 h-4 w-4" /> {t("add")}</Button>
+```
+
 ### Design Principles
 
 - Clarity over density

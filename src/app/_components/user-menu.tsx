@@ -51,7 +51,7 @@ export function UserMenu() {
             align="start"
           >
             <DropdownMenuItem>
-              <Settings className="mr-2 size-4" />
+              <Settings  />
               {tCommon("settings")}
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -61,7 +61,7 @@ export function UserMenu() {
                 router.push("/login");
               }}
             >
-              <LogOut className="mr-2 size-4" />
+              <LogOut  />
               {tCommon("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>

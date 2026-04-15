@@ -14,11 +14,11 @@ export default function TransactionsPage() {
         actions={
           <>
             <Button variant="outline">
-              <Upload className="mr-2 h-4 w-4" />
+              <Upload />
               {t("importCsv")}
             </Button>
             <Button>
-              <Plus className="mr-2 h-4 w-4" />
+              <Plus />
               {t("addTransaction")}
             </Button>
           </>

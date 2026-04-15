@@ -13,7 +13,7 @@ export default function AnnualBudgetPage() {
         title={t("annualBudget")}
         actions={
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus />
             {t("createBudget")}
           </Button>
         }

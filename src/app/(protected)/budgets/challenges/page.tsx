@@ -13,7 +13,7 @@ export default function ChallengesPage() {
         title={t("challenges")}
         actions={
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus />
             {t("createChallenge")}
           </Button>
         }

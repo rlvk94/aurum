@@ -158,7 +158,7 @@ export default function AccountsPage() {
         title={t("title")}
         actions={
           <Button onClick={() => setCreateOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus />
             {t("addAccount")}
           </Button>
         }
@@ -208,7 +208,7 @@ export default function AccountsPage() {
                             })
                           }
                         >
-                          <Archive className="mr-2 h-4 w-4" />
+                          <Archive />
                           {t("archived")}
                         </DropdownMenuItem>
                         <DropdownMenuItem
@@ -217,7 +217,7 @@ export default function AccountsPage() {
                             deleteAccount.mutate({ id: account.id })
                           }
                         >
-                          <Trash2 className="mr-2 h-4 w-4" />
+                          <Trash2 />
                           {tCommon("delete")}
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -272,7 +272,7 @@ export default function AccountsPage() {
                               })
                             }
                           >
-                            <Archive className="mr-2 h-4 w-4" />
+                            <Archive />
                             {t("active")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
@@ -281,7 +281,7 @@ export default function AccountsPage() {
                               deleteAccount.mutate({ id: account.id })
                             }
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
+                            <Trash2 />
                             {tCommon("delete")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>

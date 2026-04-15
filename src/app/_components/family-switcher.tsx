@@ -98,7 +98,7 @@ export function FamilySwitcher() {
                 key={f.familyId}
                 onClick={() => setActiveFamily.mutate({ familyId: f.familyId })}
               >
-                <Home className="mr-2 size-4" />
+                <Home  />
                 <span className="flex-1 truncate">{f.familyName}</span>
                 {f.familyId === activeFamily?.familyId && (
                   <span className="ml-2 h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
@@ -107,7 +107,7 @@ export function FamilySwitcher() {
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setCreateDialogOpen(true)}>
-              <Plus className="mr-2 size-4" />
+              <Plus  />
               {tFamily("createFamily")}
             </DropdownMenuItem>
           </DropdownMenuContent>
