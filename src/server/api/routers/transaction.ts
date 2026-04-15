@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, desc, eq, gte, ilike, inArray, isNotNull, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, isNotNull, lte, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -84,7 +84,50 @@ async function assertAccountAccess(
   }
 }
 
+/** Return ISO date strings for the current week (Monday–Sunday) in Europe/Copenhagen. */
+function currentWeekRange(): { from: string; to: string } {
+  const now = new Date();
+  // Day of week: 0=Sun..6=Sat; we want Monday-based (0=Mon..6=Sun)
+  const day = (now.getDay() + 6) % 7;
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - day);
+  const sunday = new Date(monday);
+  sunday.setDate(monday.getDate() + 6);
+  const toIso = (d: Date) => d.toISOString().slice(0, 10);
+  return { from: toIso(monday), to: toIso(sunday) };
+}
+
 export const transactionRouter = createTRPCRouter({
+  weeklyExpense: protectedProcedure.query(async ({ ctx }) => {
+    const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+    const accessibleIds = await getAccessibleAccountIds(
+      ctx.db,
+      familyId,
+      ctx.session.user.id,
+    );
+
+    if (accessibleIds.length === 0) return 0;
+
+    const { from, to } = currentWeekRange();
+
+    const [row] = await ctx.db
+      .select({
+        sum: sql<number>`coalesce(sum(${transaction.amount}), 0)`,
+      })
+      .from(transaction)
+      .where(
+        and(
+          eq(transaction.familyId, familyId),
+          inArray(transaction.accountId, accessibleIds),
+          eq(transaction.type, "expense"),
+          gte(transaction.date, from),
+          lte(transaction.date, to),
+        ),
+      );
+
+    return Number(row?.sum ?? 0);
+  }),
+
   list: protectedProcedure
     .input(
       z
