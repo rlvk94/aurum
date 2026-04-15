@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, eq, or, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, or, inArray, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -60,7 +60,11 @@ export const financialAccountRouter = createTRPCRouter({
       ctx.session.user.id,
     );
 
-    return ctx.db.select().from(financialAccount).where(filter);
+    return ctx.db
+      .select()
+      .from(financialAccount)
+      .where(filter)
+      .orderBy(asc(sql`lower(${financialAccount.name})`));
   }),
 
   summary: protectedProcedure.query(async ({ ctx }) => {

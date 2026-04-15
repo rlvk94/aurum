@@ -102,6 +102,7 @@
   "accounts": {
     "title": "Accounts",
     "addAccount": "Add account",
+    "editAccount": "Edit account",
     "accountName": "Account name",
     "accountIdentifier": "Account ID",
     "accountIdentifierPlaceholder": "e.g. account number or alias",
@@ -112,6 +113,8 @@
     "includeInNetWorth": "Include in net worth",
     "active": "Active",
     "archived": "Archived",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
     "types": {
       "checking": "Checking",
       "savings": "Savings",

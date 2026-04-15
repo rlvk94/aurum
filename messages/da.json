@@ -102,6 +102,7 @@
   "accounts": {
     "title": "Konti",
     "addAccount": "Tilføj konto",
+    "editAccount": "Rediger konto",
     "accountName": "Kontonavn",
     "accountIdentifier": "Konto-ID",
     "accountIdentifierPlaceholder": "F.eks. kontonummer eller navn",
@@ -112,6 +113,8 @@
     "includeInNetWorth": "Medregn i formue",
     "active": "Aktiv",
     "archived": "Arkiveret",
+    "archive": "Arkiver",
+    "unarchive": "Gendan",
     "types": {
       "checking": "Lønkonto",
       "savings": "Opsparingskonto",
