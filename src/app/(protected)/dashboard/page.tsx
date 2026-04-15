@@ -6,6 +6,7 @@ export default async function DashboardPage() {
   await Promise.all([
     api.financialAccount.summary.prefetch(),
     api.financialAccount.list.prefetch(),
+    api.asset.summary.prefetch(),
     api.transaction.weeklyExpense.prefetch(),
     api.transaction.list.prefetch({ limit: 5 }),
   ]);

@@ -124,6 +124,7 @@ export function TransactionFormDialog({
   const createTx = api.transaction.create.useMutation({
     onSuccess: () => {
       onOpenChange(false);
+      form.reset();
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
     },

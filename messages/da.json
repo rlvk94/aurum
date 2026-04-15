@@ -202,9 +202,24 @@
   "assets": {
     "title": "Aktiver",
     "addAsset": "Tilføj aktiv",
+    "editAsset": "Rediger aktiv",
+    "addAssetDescription": "Registrér værdien af noget du ejer",
+    "editAssetDescription": "Opdater aktivets oplysninger",
+    "assetName": "Aktivnavn",
+    "assetNamePlaceholder": "F.eks. Familiens hus",
     "assetType": "Aktivtype",
     "currentValue": "Aktuel værdi",
-    "totalAssets": "Samlede aktiver"
+    "totalAssets": "Samlede aktiver",
+    "noteLabel": "Note",
+    "notePlaceholder": "Valgfri note",
+    "emptyState": "Ingen aktiver endnu. Tilføj dine aktiver for at se din formue.",
+    "types": {
+      "property": "Ejendom",
+      "vehicle": "Køretøj",
+      "investment": "Investering",
+      "collectible": "Samlerobjekt",
+      "other": "Andet"
+    }
   },
   "netWorth": {
     "title": "Formue",

@@ -202,9 +202,24 @@
   "assets": {
     "title": "Assets",
     "addAsset": "Add asset",
+    "editAsset": "Edit asset",
+    "addAssetDescription": "Track the value of something you own",
+    "editAssetDescription": "Update this asset's details",
+    "assetName": "Asset name",
+    "assetNamePlaceholder": "e.g. Family home",
     "assetType": "Asset type",
     "currentValue": "Current value",
-    "totalAssets": "Total assets"
+    "totalAssets": "Total assets",
+    "noteLabel": "Note",
+    "notePlaceholder": "Optional note",
+    "emptyState": "No assets yet. Add your first asset to track your wealth.",
+    "types": {
+      "property": "Property",
+      "vehicle": "Vehicle",
+      "investment": "Investment",
+      "collectible": "Collectible",
+      "other": "Other"
+    }
   },
   "netWorth": {
     "title": "Net Worth",

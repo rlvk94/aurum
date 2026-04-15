@@ -91,6 +91,7 @@ export function AccountFormDialog({
   const createAccount = api.financialAccount.create.useMutation({
     onSuccess: () => {
       onOpenChange(false);
+      form.reset();
       void utils.financialAccount.list.invalidate();
       void utils.financialAccount.summary.invalidate();
     },
@@ -236,7 +237,7 @@ export function AccountFormDialog({
                             "flex flex-col items-center gap-1 rounded-lg border p-3 text-xs transition-all",
                             field.state.value === accountType
                               ? "border-primary bg-accent text-accent-foreground"
-                              : "border-border bg-background text-muted-foreground hover:border-primary/30",
+                              : "border-border bg-card text-muted-foreground hover:border-primary/30",
                           )}
                         >
                           <Icon className="h-4 w-4" />

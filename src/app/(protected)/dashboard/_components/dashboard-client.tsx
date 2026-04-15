@@ -63,10 +63,16 @@ export function DashboardClient() {
   const dateLocale = locale === "da" ? da : enUS;
 
   const { data: summary } = api.financialAccount.summary.useQuery();
+  const { data: assetsSummary } = api.asset.summary.useQuery();
   const { data: weeklyExpense } = api.transaction.weeklyExpense.useQuery();
   const { data: accounts = [] } = api.financialAccount.list.useQuery();
   const { data: recent, isLoading: recentLoading } =
     api.transaction.list.useQuery({ limit: 5 });
+
+  const netWorth =
+    summary && assetsSummary
+      ? summary.netWorthBalance + assetsSummary.total
+      : undefined;
 
   const accountMap = new Map(accounts.map((a) => [a.id, a.name]));
 
@@ -94,7 +100,7 @@ export function DashboardClient() {
         />
         <StatCard
           title={t("netWorth")}
-          value={summary ? formatAmount(summary.netWorthBalance) : "–"}
+          value={netWorth !== undefined ? formatAmount(netWorth) : "–"}
           icon={TrendingUp}
           className="text-income"
         />
