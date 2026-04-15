@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, eq, or, inArray } from "drizzle-orm";
+import { and, eq, or, inArray, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -28,32 +28,61 @@ async function getActiveFamilyId(
   return dbUser.activeFamilyId;
 }
 
+async function getAccessibleAccountFilter(
+  db: typeof dbInstance,
+  familyId: string,
+  userId: string,
+) {
+  const accessRows = await db
+    .select({ accountId: financialAccountAccess.accountId })
+    .from(financialAccountAccess)
+    .where(eq(financialAccountAccess.userId, userId));
+
+  const accessibleIds = accessRows.map((r) => r.accountId);
+
+  return and(
+    eq(financialAccount.familyId, familyId),
+    or(
+      eq(financialAccount.visibility, "shared"),
+      accessibleIds.length > 0
+        ? inArray(financialAccount.id, accessibleIds)
+        : undefined,
+    ),
+  );
+}
+
 export const financialAccountRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
     const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+    const filter = await getAccessibleAccountFilter(
+      ctx.db,
+      familyId,
+      ctx.session.user.id,
+    );
 
-    // Get IDs of private accounts the user has access to
-    const accessRows = await ctx.db
-      .select({ accountId: financialAccountAccess.accountId })
-      .from(financialAccountAccess)
-      .where(eq(financialAccountAccess.userId, ctx.session.user.id));
+    return ctx.db.select().from(financialAccount).where(filter);
+  }),
 
-    const accessibleIds = accessRows.map((r) => r.accountId);
+  summary: protectedProcedure.query(async ({ ctx }) => {
+    const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+    const filter = await getAccessibleAccountFilter(
+      ctx.db,
+      familyId,
+      ctx.session.user.id,
+    );
 
-    return ctx.db
-      .select()
+    const [result] = await ctx.db
+      .select({
+        totalBalance: sql<number>`coalesce(sum(${financialAccount.balance}), 0)`,
+        netWorthBalance: sql<number>`coalesce(sum(case when ${financialAccount.includeInNetWorth} then ${financialAccount.balance} else 0 end), 0)`,
+      })
       .from(financialAccount)
-      .where(
-        and(
-          eq(financialAccount.familyId, familyId),
-          or(
-            eq(financialAccount.visibility, "shared"),
-            accessibleIds.length > 0
-              ? inArray(financialAccount.id, accessibleIds)
-              : undefined,
-          ),
-        ),
-      );
+      .where(and(filter, eq(financialAccount.archived, false)));
+
+    return {
+      totalBalance: Number(result?.totalBalance ?? 0),
+      netWorthBalance: Number(result?.netWorthBalance ?? 0),
+    };
   }),
 
   create: protectedProcedure
@@ -64,13 +93,13 @@ export const financialAccountRouter = createTRPCRouter({
         type: z.enum([
           "checking",
           "savings",
-          "cash",
-          "credit_card",
-          "e_wallet",
+          "gift",
+          "financial_freedom",
+          "fixed_costs",
+          "investment",
           "other",
         ]),
         visibility: z.enum(["shared", "private"]).default("shared"),
-        institution: z.string().max(100).optional(),
         balance: z.number().int().default(0),
         includeInNetWorth: z.boolean().default(true),
       }),
@@ -86,7 +115,6 @@ export const financialAccountRouter = createTRPCRouter({
           identifier: input.identifier,
           type: input.type,
           visibility: input.visibility,
-          institution: input.institution ?? null,
           balance: input.balance,
           includeInNetWorth: input.includeInNetWorth,
         })
@@ -113,13 +141,13 @@ export const financialAccountRouter = createTRPCRouter({
           .enum([
             "checking",
             "savings",
-            "cash",
-            "credit_card",
-            "e_wallet",
+            "gift",
+            "financial_freedom",
+            "fixed_costs",
+            "investment",
             "other",
           ])
           .optional(),
-        institution: z.string().max(100).nullable().optional(),
         includeInNetWorth: z.boolean().optional(),
         archived: z.boolean().optional(),
       }),

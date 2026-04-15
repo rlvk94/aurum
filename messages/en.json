@@ -115,9 +115,10 @@
     "types": {
       "checking": "Checking",
       "savings": "Savings",
-      "cash": "Cash",
-      "creditCard": "Credit card",
-      "eWallet": "E-wallet",
+      "gift": "Gift",
+      "financialFreedom": "Financial freedom",
+      "fixedCosts": "Fixed costs",
+      "investment": "Investment",
       "other": "Other"
     },
     "emptyState": "No accounts yet. Add your first account to get started."

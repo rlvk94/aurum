@@ -115,9 +115,10 @@
     "types": {
       "checking": "Lønkonto",
       "savings": "Opsparingskonto",
-      "cash": "Kontanter",
-      "creditCard": "Kreditkort",
-      "eWallet": "E-wallet",
+      "gift": "Gavekonto",
+      "financialFreedom": "Økonomisk frihed",
+      "fixedCosts": "Faste udgifter",
+      "investment": "Investering",
       "other": "Andet"
     },
     "emptyState": "Ingen konti endnu. Tilføj din første konto for at komme i gang."

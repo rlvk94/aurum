@@ -1,11 +1,13 @@
+"use client";
+
 import { useTranslations } from "next-intl";
 import {
   Wallet,
   TrendingDown,
   TrendingUp,
   ArrowLeftRight,
-  PieChart,
 } from "lucide-react";
+import { api } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import {
   Card,
@@ -13,6 +15,15 @@ import {
   CardHeader,
   CardTitle,
 } from "~/app/_components/card";
+
+function formatAmount(cents: number): string {
+  const value = cents / 100;
+  const formatted = new Intl.NumberFormat("da-DK", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(Math.abs(value));
+  return value < 0 ? `-${formatted} kr.` : `${formatted} kr.`;
+}
 
 function StatCard({
   title,
@@ -34,7 +45,7 @@ function StatCard({
         <Icon className={`h-4 w-4 ${className ?? "text-muted-foreground"}`} />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-semibold">{value}</div>
+        <div className="font-display text-2xl">{value}</div>
       </CardContent>
     </Card>
   );
@@ -42,6 +53,7 @@ function StatCard({
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
+  const { data: summary } = api.financialAccount.summary.useQuery();
 
   return (
     <div className="space-y-6">
@@ -55,7 +67,7 @@ export default function DashboardPage() {
         />
         <StatCard
           title={t("totalBalance")}
-          value="–"
+          value={summary ? formatAmount(summary.totalBalance) : "–"}
           icon={Wallet}
         />
         <StatCard
@@ -66,7 +78,7 @@ export default function DashboardPage() {
         />
         <StatCard
           title={t("netWorth")}
-          value="–"
+          value={summary ? formatAmount(summary.netWorthBalance) : "–"}
           icon={TrendingUp}
           className="text-income"
         />

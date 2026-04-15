@@ -6,18 +6,20 @@ import {
   Wallet,
   Plus,
   Landmark,
-  CreditCard,
-  Banknote,
-  Smartphone,
+  PiggyBank,
+  Gift,
+  ShieldCheck,
+  Receipt,
+  TrendingUp,
   MoreHorizontal,
   Archive,
   Trash2,
-  CircleDollarSign,
 } from "lucide-react";
 import { api } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import { EmptyState } from "~/app/_components/empty-state";
 import { Button } from "~/app/_components/button";
+import { Checkbox } from "~/app/_components/checkbox";
 import { Input } from "~/app/_components/input";
 import {
   Dialog,
@@ -36,10 +38,11 @@ import {
 
 const accountTypeIcons = {
   checking: Landmark,
-  savings: CircleDollarSign,
-  cash: Banknote,
-  credit_card: CreditCard,
-  e_wallet: Smartphone,
+  savings: PiggyBank,
+  gift: Gift,
+  financial_freedom: ShieldCheck,
+  fixed_costs: Receipt,
+  investment: TrendingUp,
   other: Wallet,
 } as const;
 
@@ -48,9 +51,10 @@ type AccountType = keyof typeof accountTypeIcons;
 const accountTypeKeys: Record<AccountType, string> = {
   checking: "checking",
   savings: "savings",
-  cash: "cash",
-  credit_card: "creditCard",
-  e_wallet: "eWallet",
+  gift: "gift",
+  financial_freedom: "financialFreedom",
+  fixed_costs: "fixedCosts",
+  investment: "investment",
   other: "other",
 };
 
@@ -73,7 +77,6 @@ export default function AccountsPage() {
   const [name, setName] = useState("");
   const [identifier, setIdentifier] = useState("");
   const [type, setType] = useState<AccountType>("checking");
-  const [institution, setInstitution] = useState("");
   const [balance, setBalance] = useState("");
   const [includeInNetWorth, setIncludeInNetWorth] = useState(true);
 
@@ -101,7 +104,6 @@ export default function AccountsPage() {
     setName("");
     setIdentifier("");
     setType("checking");
-    setInstitution("");
     setBalance("");
     setIncludeInNetWorth(true);
   };
@@ -113,7 +115,6 @@ export default function AccountsPage() {
       name: name.trim(),
       identifier: identifier.trim(),
       type,
-      institution: institution.trim() || undefined,
       balance: Math.round(parseFloat(balance || "0") * 100),
       includeInNetWorth,
     });
@@ -159,7 +160,6 @@ export default function AccountsPage() {
                         </p>
                         <p className="text-xs text-muted-foreground">
                           {t(`types.${accountTypeKeys[account.type as AccountType]}`)}
-                          {account.institution && ` · ${account.institution}`}
                         </p>
                         <p className="mt-1 font-display text-lg text-foreground">
                           {formatAmount(account.balance)}
@@ -334,18 +334,6 @@ export default function AccountsPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="institution" className="text-sm font-medium">
-                {t("institution")}
-              </label>
-              <Input
-                id="institution"
-                placeholder={t("institution")}
-                value={institution}
-                onChange={(e) => setInstitution(e.target.value)}
-              />
-            </div>
-
-            <div className="space-y-2">
               <label htmlFor="balance" className="text-sm font-medium">
                 {t("openingBalance")}
               </label>
@@ -359,15 +347,18 @@ export default function AccountsPage() {
               />
             </div>
 
-            <label className="flex items-center gap-2 text-sm">
-              <input
-                type="checkbox"
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="includeInNetWorth"
                 checked={includeInNetWorth}
-                onChange={(e) => setIncludeInNetWorth(e.target.checked)}
-                className="rounded border-input"
+                onCheckedChange={(checked) =>
+                  setIncludeInNetWorth(checked === true)
+                }
               />
-              {t("includeInNetWorth")}
-            </label>
+              <label htmlFor="includeInNetWorth" className="text-sm">
+                {t("includeInNetWorth")}
+              </label>
+            </div>
 
             {createAccount.error && (
               <p className="text-sm text-destructive">{tCommon("error")}</p>

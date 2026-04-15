@@ -17,9 +17,10 @@ import { family } from "./family";
 export const accountTypeEnum = pgEnum("account_type", [
   "checking",
   "savings",
-  "cash",
-  "credit_card",
-  "e_wallet",
+  "gift",
+  "financial_freedom",
+  "fixed_costs",
+  "investment",
   "other",
 ]);
 
@@ -39,7 +40,6 @@ export const financialAccount = pgTable("financial_account", {
   identifier: text("identifier").notNull().unique(),
   type: accountTypeEnum("type").notNull(),
   visibility: accountVisibilityEnum("visibility").default("shared").notNull(),
-  institution: text("institution"),
   balance: integer("balance").default(0).notNull(),
   includeInNetWorth: boolean("include_in_net_worth").default(true).notNull(),
   archived: boolean("archived").default(false).notNull(),
