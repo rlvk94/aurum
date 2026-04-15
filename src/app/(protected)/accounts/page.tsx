@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
 import {
   Wallet,
   Plus,
@@ -22,6 +24,12 @@ import { Button } from "~/app/_components/button";
 import { Checkbox } from "~/app/_components/checkbox";
 import { Input } from "~/app/_components/input";
 import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "~/app/_components/field";
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -35,6 +43,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/app/_components/dropdown-menu";
+import { cn } from "~/app/_lib/utils";
 
 const accountTypeIcons = {
   checking: Landmark,
@@ -58,6 +67,24 @@ const accountTypeKeys: Record<AccountType, string> = {
   other: "other",
 };
 
+const accountTypes = Object.keys(accountTypeIcons) as AccountType[];
+
+const createAccountSchema = z.object({
+  name: z.string().min(1, "Required").max(100),
+  identifier: z.string().min(1, "Required").max(50),
+  type: z.enum([
+    "checking",
+    "savings",
+    "gift",
+    "financial_freedom",
+    "fixed_costs",
+    "investment",
+    "other",
+  ]),
+  balance: z.string(),
+  includeInNetWorth: z.boolean(),
+});
+
 function formatAmount(cents: number): string {
   const value = cents / 100;
   const formatted = new Intl.NumberFormat("da-DK", {
@@ -74,51 +101,51 @@ export default function AccountsPage() {
 
   const { data: accounts, isLoading } = api.financialAccount.list.useQuery();
   const [createOpen, setCreateOpen] = useState(false);
-  const [name, setName] = useState("");
-  const [identifier, setIdentifier] = useState("");
-  const [type, setType] = useState<AccountType>("checking");
-  const [balance, setBalance] = useState("");
-  const [includeInNetWorth, setIncludeInNetWorth] = useState(true);
 
   const createAccount = api.financialAccount.create.useMutation({
     onSuccess: () => {
       setCreateOpen(false);
-      resetForm();
+      form.reset();
       void utils.financialAccount.list.invalidate();
+      void utils.financialAccount.summary.invalidate();
     },
   });
 
   const updateAccount = api.financialAccount.update.useMutation({
     onSuccess: () => {
       void utils.financialAccount.list.invalidate();
+      void utils.financialAccount.summary.invalidate();
     },
   });
 
   const deleteAccount = api.financialAccount.delete.useMutation({
     onSuccess: () => {
       void utils.financialAccount.list.invalidate();
+      void utils.financialAccount.summary.invalidate();
     },
   });
 
-  const resetForm = () => {
-    setName("");
-    setIdentifier("");
-    setType("checking");
-    setBalance("");
-    setIncludeInNetWorth(true);
-  };
-
-  const handleCreate = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!name.trim()) return;
-    createAccount.mutate({
-      name: name.trim(),
-      identifier: identifier.trim(),
-      type,
-      balance: Math.round(parseFloat(balance || "0") * 100),
-      includeInNetWorth,
-    });
-  };
+  const form = useForm({
+    defaultValues: {
+      name: "",
+      identifier: "",
+      type: "checking" as AccountType,
+      balance: "",
+      includeInNetWorth: true,
+    },
+    validators: {
+      onSubmit: createAccountSchema,
+    },
+    onSubmit: async ({ value }) => {
+      createAccount.mutate({
+        name: value.name.trim(),
+        identifier: value.identifier.trim(),
+        type: value.type,
+        balance: Math.round(parseFloat(value.balance || "0") * 100),
+        includeInNetWorth: value.includeInNetWorth,
+      });
+    },
+  });
 
   const activeAccounts = accounts?.filter((a) => !a.archived) ?? [];
   const archivedAccounts = accounts?.filter((a) => a.archived) ?? [];
@@ -273,7 +300,7 @@ export default function AccountsPage() {
         open={createOpen}
         onOpenChange={(open) => {
           setCreateOpen(open);
-          if (!open) resetForm();
+          if (!open) form.reset();
         }}
       >
         <DialogContent>
@@ -281,94 +308,144 @@ export default function AccountsPage() {
             <DialogTitle>{t("addAccount")}</DialogTitle>
             <DialogDescription>{t("emptyState")}</DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleCreate} className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="accountName" className="text-sm font-medium">
-                {t("accountName")}
-              </label>
-              <Input
-                id="accountName"
-                placeholder={t("accountName")}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                autoFocus
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="identifier" className="text-sm font-medium">
-                {t("accountIdentifier")}
-              </label>
-              <Input
-                id="identifier"
-                placeholder={t("accountIdentifierPlaceholder")}
-                value={identifier}
-                onChange={(e) => setIdentifier(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-sm font-medium">{t("accountType")}</label>
-              <div className="grid grid-cols-3 gap-2">
-                {(Object.keys(accountTypeIcons) as AccountType[]).map((t2) => {
-                  const Icon = accountTypeIcons[t2];
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+          >
+            <FieldGroup>
+              <form.Field
+                name="name"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
                   return (
-                    <button
-                      key={t2}
-                      type="button"
-                      onClick={() => setType(t2)}
-                      className={`flex flex-col items-center gap-1 rounded-lg border p-3 text-xs transition-all ${
-                        type === t2
-                          ? "border-primary bg-accent text-accent-foreground"
-                          : "border-border bg-background text-muted-foreground hover:border-primary/30"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {t(`types.${accountTypeKeys[t2]}`)}
-                    </button>
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        {t("accountName")}
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        placeholder={t("accountName")}
+                        autoFocus
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
                   );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="balance" className="text-sm font-medium">
-                {t("openingBalance")}
-              </label>
-              <Input
-                id="balance"
-                type="number"
-                step="0.01"
-                placeholder="0"
-                value={balance}
-                onChange={(e) => setBalance(e.target.value)}
+                }}
               />
-            </div>
 
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="includeInNetWorth"
-                checked={includeInNetWorth}
-                onCheckedChange={(checked) =>
-                  setIncludeInNetWorth(checked === true)
-                }
+              <form.Field
+                name="identifier"
+                children={(field) => {
+                  const isInvalid =
+                    field.state.meta.isTouched && !field.state.meta.isValid;
+                  return (
+                    <Field data-invalid={isInvalid}>
+                      <FieldLabel htmlFor={field.name}>
+                        {t("accountIdentifier")}
+                      </FieldLabel>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        aria-invalid={isInvalid}
+                        placeholder={t("accountIdentifierPlaceholder")}
+                      />
+                      {isInvalid && (
+                        <FieldError errors={field.state.meta.errors} />
+                      )}
+                    </Field>
+                  );
+                }}
               />
-              <label htmlFor="includeInNetWorth" className="text-sm">
-                {t("includeInNetWorth")}
-              </label>
-            </div>
+
+              <form.Field
+                name="type"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel>{t("accountType")}</FieldLabel>
+                    <div className="grid grid-cols-3 gap-2">
+                      {accountTypes.map((accountType) => {
+                        const Icon = accountTypeIcons[accountType];
+                        return (
+                          <button
+                            key={accountType}
+                            type="button"
+                            onClick={() => field.handleChange(accountType)}
+                            className={cn(
+                              "flex flex-col items-center gap-1 rounded-lg border p-3 text-xs transition-all",
+                              field.state.value === accountType
+                                ? "border-primary bg-accent text-accent-foreground"
+                                : "border-border bg-background text-muted-foreground hover:border-primary/30",
+                            )}
+                          >
+                            <Icon className="h-4 w-4" />
+                            {t(`types.${accountTypeKeys[accountType]}`)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </Field>
+                )}
+              />
+
+              <form.Field
+                name="balance"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>
+                      {t("openingBalance")}
+                    </FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="number"
+                      step="0.01"
+                      placeholder="0"
+                      value={field.state.value}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                    />
+                  </Field>
+                )}
+              />
+
+              <form.Field
+                name="includeInNetWorth"
+                children={(field) => (
+                  <Field orientation="horizontal">
+                    <Checkbox
+                      id={field.name}
+                      checked={field.state.value}
+                      onCheckedChange={(checked) =>
+                        field.handleChange(checked === true)
+                      }
+                    />
+                    <FieldLabel htmlFor={field.name} className="font-normal">
+                      {t("includeInNetWorth")}
+                    </FieldLabel>
+                  </Field>
+                )}
+              />
+            </FieldGroup>
 
             {createAccount.error && (
-              <p className="text-sm text-destructive">{tCommon("error")}</p>
+              <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
             )}
 
-            <DialogFooter>
-              <Button
-                type="submit"
-                disabled={!name.trim() || !identifier.trim() || createAccount.isPending}
-              >
+            <DialogFooter className="mt-6">
+              <Button type="submit" disabled={createAccount.isPending}>
                 {createAccount.isPending ? tCommon("loading") : tCommon("create")}
               </Button>
             </DialogFooter>
