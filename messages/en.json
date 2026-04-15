@@ -102,7 +102,9 @@
   "accounts": {
     "title": "Accounts",
     "addAccount": "Add account",
+    "addAccountDescription": "Add a new account to track its balance",
     "editAccount": "Edit account",
+    "editAccountDescription": "Update this account's details",
     "accountName": "Account name",
     "accountIdentifier": "Account ID",
     "accountIdentifierPlaceholder": "e.g. account number or alias",
@@ -139,6 +141,18 @@
     "toAccount": "To account",
     "allAccounts": "All accounts",
     "allCategories": "All categories",
+    "allTypes": "All types",
+    "searchPlaceholder": "Search description or note...",
+    "addTransactionDescription": "Record a new transaction manually",
+    "editTransactionDescription": "Update this transaction's details",
+    "editTransaction": "Edit transaction",
+    "account": "Account",
+    "amount": "Amount",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "e.g. Groceries",
+    "noteLabel": "Note",
+    "notePlaceholder": "Optional note",
+    "pickDate": "Pick a date",
     "emptyState": "No transactions yet. Add your first transaction or import a CSV file."
   },
   "budgets": {

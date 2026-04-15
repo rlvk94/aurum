@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, desc, eq, gte, inArray, lte, or } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, lte, or } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -91,6 +91,7 @@ export const transactionRouter = createTRPCRouter({
         .object({
           accountId: z.string().uuid().optional(),
           type: transactionTypeSchema.optional(),
+          search: z.string().optional(),
           from: z.string().optional(), // ISO date YYYY-MM-DD
           to: z.string().optional(),
           limit: z.number().int().min(1).max(500).default(100),
@@ -113,10 +114,23 @@ export const transactionRouter = createTRPCRouter({
       ];
 
       if (input?.accountId) {
-        conditions.push(eq(transaction.accountId, input.accountId));
+        // Include transactions where this account is either the source OR the transfer destination
+        const accountCondition = or(
+          eq(transaction.accountId, input.accountId),
+          eq(transaction.transferAccountId, input.accountId),
+        );
+        if (accountCondition) conditions.push(accountCondition);
       }
       if (input?.type) {
         conditions.push(eq(transaction.type, input.type));
+      }
+      if (input?.search && input.search.trim()) {
+        const pattern = `%${input.search.trim()}%`;
+        const searchCondition = or(
+          ilike(transaction.description, pattern),
+          ilike(transaction.note, pattern),
+        );
+        if (searchCondition) conditions.push(searchCondition);
       }
       if (input?.from) {
         conditions.push(gte(transaction.date, input.from));

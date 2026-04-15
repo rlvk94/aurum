@@ -151,7 +151,11 @@ export function AccountFormDialog({
           <DialogTitle>
             {isEdit ? t("editAccount") : t("addAccount")}
           </DialogTitle>
-          <DialogDescription>{t("emptyState")}</DialogDescription>
+          <DialogDescription>
+            {isEdit
+              ? t("editAccountDescription")
+              : t("addAccountDescription")}
+          </DialogDescription>
         </DialogHeader>
         <form
           onSubmit={(e) => {
