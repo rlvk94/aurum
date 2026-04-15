@@ -10,6 +10,10 @@ import {
   transaction,
   user,
 } from "~/server/db/schema";
+import {
+  findMatchingCategoryId,
+  loadRulesWithKind,
+} from "./categorization-rule";
 
 const transactionTypeSchema = z.enum(["expense", "income", "transfer"]);
 
@@ -294,19 +298,34 @@ export const transactionRouter = createTRPCRouter({
         Array.from(allAccountIds),
       );
 
+      // Load categorization rules once and apply to each row
+      const rules = await loadRulesWithKind(ctx.db, familyId);
+
       const now = new Date();
-      const values = input.transactions.map((t) => ({
-        familyId,
-        accountId: t.accountId,
-        transferAccountId: t.transferAccountId ?? null,
-        type: t.type,
-        amount: t.amount,
-        date: t.date,
-        description: t.description,
-        note: t.note ?? null,
-        externalId: t.externalId,
-        importedAt: now,
-      }));
+      const values = input.transactions.map((t) => {
+        const categoryId =
+          t.type !== "transfer"
+            ? findMatchingCategoryId(
+                rules,
+                t.description,
+                t.note ?? null,
+                t.type,
+              )
+            : null;
+        return {
+          familyId,
+          accountId: t.accountId,
+          transferAccountId: t.transferAccountId ?? null,
+          type: t.type,
+          amount: t.amount,
+          date: t.date,
+          description: t.description,
+          note: t.note ?? null,
+          categoryId,
+          externalId: t.externalId,
+          importedAt: now,
+        };
+      });
 
       // Insert in chunks to avoid query size limits
       const CHUNK = 500;
