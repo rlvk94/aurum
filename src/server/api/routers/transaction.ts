@@ -12,8 +12,8 @@ import {
 } from "~/server/db/schema";
 import {
   findMatchingCategoryId,
-  loadRulesWithKind,
-} from "./categorization-rule";
+  loadCategoriesWithKeywords,
+} from "./category";
 
 const transactionTypeSchema = z.enum(["expense", "income", "transfer"]);
 
@@ -273,6 +273,7 @@ export const transactionRouter = createTRPCRouter({
               date: z.string(),
               description: z.string().min(1).max(500),
               note: z.string().max(1000).optional(),
+              metadata: z.record(z.string(), z.string()).optional(),
               externalId: z.string().min(1),
               transferAccountId: z.string().uuid().optional(),
             }),
@@ -298,17 +299,21 @@ export const transactionRouter = createTRPCRouter({
         Array.from(allAccountIds),
       );
 
-      // Load categorization rules once and apply to each row
-      const rules = await loadRulesWithKind(ctx.db, familyId);
+      // Load categories with keywords once and apply to each row
+      const categoriesWithKeywords = await loadCategoriesWithKeywords(
+        ctx.db,
+        familyId,
+      );
 
       const now = new Date();
       const values = input.transactions.map((t) => {
         const categoryId =
           t.type !== "transfer"
             ? findMatchingCategoryId(
-                rules,
+                categoriesWithKeywords,
                 t.description,
                 t.note ?? null,
+                t.metadata ?? null,
                 t.type,
               )
             : null;
@@ -321,6 +326,7 @@ export const transactionRouter = createTRPCRouter({
           date: t.date,
           description: t.description,
           note: t.note ?? null,
+          metadata: t.metadata ?? null,
           categoryId,
           externalId: t.externalId,
           importedAt: now,

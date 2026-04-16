@@ -128,24 +128,6 @@
     },
     "emptyState": "Ingen konti endnu. Tilføj din første konto for at komme i gang."
   },
-  "rules": {
-    "title": "Kategoriseringsregler",
-    "addRule": "Tilføj regel",
-    "editRule": "Rediger regel",
-    "addRuleDescription": "Når en transaktion indeholder denne tekst, tildeles denne kategori",
-    "editRuleDescription": "Opdater denne regel",
-    "pattern": "Match tekst",
-    "patternPlaceholder": "F.eks. Netto",
-    "patternHelp": "Matches uafhængigt af store/små bogstaver mod beskrivelse og note",
-    "category": "Tildel kategori",
-    "priority": "Prioritet",
-    "priorityHelp": "Højere prioritet vinder når flere regler matcher",
-    "enabled": "Aktiv",
-    "applyToExisting": "Anvend på eksisterende",
-    "applyPreview": "{matches} af {uncategorized} ukategoriserede transaktioner vil blive opdateret",
-    "applySuccess": "{count, plural, one {# transaktion} other {# transaktioner}} kategoriseret",
-    "emptyState": "Ingen regler endnu. Opret regler for automatisk at kategorisere transaktioner ved import."
-  },
   "categories": {
     "title": "Kategorier",
     "addCategory": "Tilføj kategori",
@@ -156,11 +138,16 @@
     "categoryNamePlaceholder": "F.eks. Dagligvarer",
     "categoryIcon": "Ikon",
     "categoryIconPlaceholder": "Vælg en emoji",
+    "keywords": "Nøgleord",
+    "keywordsHelp": "Transaktioner der matcher disse nøgleord kategoriseres automatisk ved import",
+    "keywordsPlaceholder": "Skriv og tryk Enter",
     "categoryKind": "Type",
     "parent": "Overordnet",
     "noParent": "Ingen (topniveau)",
     "expenseCategories": "Udgiftskategorier",
     "incomeCategories": "Indkomstkategorier",
+    "applyKeywords": "Auto-kategorisér",
+    "applySuccess": "{count, plural, one {# transaktion} other {# transaktioner}} kategoriseret",
     "emptyState": "Ingen kategorier endnu. Tilføj din første for at kategorisere transaktioner."
   },
   "transactions": {

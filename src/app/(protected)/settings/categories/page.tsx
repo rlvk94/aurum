@@ -5,11 +5,13 @@ import { useTranslations } from "next-intl";
 import {
   Tag,
   Plus,
+  Play,
   MoreHorizontal,
   Pencil,
   Trash2,
 } from "lucide-react";
 import { api, type RouterOutputs } from "~/trpc/react";
+import { Badge } from "~/app/_components/badge";
 import { PageHeader } from "~/app/_components/page-header";
 import { EmptyState } from "~/app/_components/empty-state";
 import { Button } from "~/app/_components/button";
@@ -41,7 +43,18 @@ function CategoryRow({
     >
       <div className="flex items-center gap-3">
         <span className="text-xl">{category.icon ?? "📁"}</span>
-        <span className="font-medium text-foreground">{category.name}</span>
+        <div>
+          <span className="font-medium text-foreground">{category.name}</span>
+          {category.keywords.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {category.keywords.map((kw, i) => (
+                <Badge key={i} variant="secondary" className="text-xs">
+                  {kw}
+                </Badge>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -131,6 +144,12 @@ export default function CategoriesPage() {
     },
   });
 
+  const applyKeywords = api.category.applyKeywords.useMutation({
+    onSuccess: () => {
+      void utils.transaction.list.invalidate();
+    },
+  });
+
   const expenseCategories = useMemo(
     () => categories.filter((c) => c.kind === "expense" && !c.archived),
     [categories],
@@ -147,12 +166,28 @@ export default function CategoriesPage() {
       <PageHeader
         title={t("title")}
         actions={
-          <Button onClick={() => setCreateOpen(true)}>
-            <Plus />
-            {t("addCategory")}
-          </Button>
+          <>
+            <Button
+              variant="outline"
+              onClick={() => applyKeywords.mutate()}
+              disabled={applyKeywords.isPending}
+            >
+              <Play />
+              {t("applyKeywords")}
+            </Button>
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus />
+              {t("addCategory")}
+            </Button>
+          </>
         }
       />
+
+      {applyKeywords.data && applyKeywords.data.updated > 0 && (
+        <p className="text-sm text-income">
+          {t("applySuccess", { count: applyKeywords.data.updated })}
+        </p>
+      )}
 
       {categories.length === 0 ? (
         <EmptyState icon={Tag} message={t("emptyState")} />

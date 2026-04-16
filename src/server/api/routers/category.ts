@@ -1,12 +1,72 @@
 import { z } from "zod";
-import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, isNull, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db as dbInstance } from "~/server/db";
-import { category, user } from "~/server/db/schema";
+import { category, transaction, user } from "~/server/db/schema";
 
 const kindSchema = z.enum(["expense", "income"]);
+const keywordsSchema = z.array(z.string().min(1).max(100)).max(50);
+
+type CategoryWithKeywords = {
+  id: string;
+  kind: "expense" | "income";
+  keywords: string[];
+};
+
+/**
+ * Find the matching category for a transaction based on keywords.
+ * Builds keyword→category pairs sorted by keyword length desc (longest/most specific first).
+ * Matches case-insensitively against description + note + metadata values.
+ */
+export function findMatchingCategoryId(
+  categories: CategoryWithKeywords[],
+  description: string,
+  note: string | null,
+  metadata: Record<string, string> | null,
+  txType: "expense" | "income",
+): string | null {
+  const parts = [description, note ?? ""];
+  if (metadata) parts.push(...Object.values(metadata));
+  const haystack = parts.join("\n").toLowerCase();
+
+  // Build pairs sorted by keyword length desc — longest match wins
+  const pairs: Array<{ keyword: string; categoryId: string }> = [];
+  for (const cat of categories) {
+    if (cat.kind !== txType) continue;
+    for (const kw of cat.keywords) {
+      pairs.push({ keyword: kw.toLowerCase(), categoryId: cat.id });
+    }
+  }
+  pairs.sort((a, b) => b.keyword.length - a.keyword.length);
+
+  for (const { keyword, categoryId } of pairs) {
+    if (haystack.includes(keyword)) {
+      return categoryId;
+    }
+  }
+  return null;
+}
+
+/**
+ * Load all non-archived categories with keywords for a family.
+ */
+export async function loadCategoriesWithKeywords(
+  db: typeof dbInstance,
+  familyId: string,
+): Promise<CategoryWithKeywords[]> {
+  const rows = await db
+    .select({
+      id: category.id,
+      kind: category.kind,
+      keywords: category.keywords,
+    })
+    .from(category)
+    .where(and(eq(category.familyId, familyId), eq(category.archived, false)));
+
+  return rows.filter((r) => r.keywords.length > 0);
+}
 
 async function getActiveFamilyId(
   db: typeof dbInstance,
@@ -43,6 +103,7 @@ export const categoryRouter = createTRPCRouter({
         kind: kindSchema,
         parentId: z.string().uuid().nullable().optional(),
         icon: z.string().max(16).nullable().optional(),
+        keywords: keywordsSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -92,6 +153,7 @@ export const categoryRouter = createTRPCRouter({
           kind: input.kind,
           parentId: input.parentId ?? null,
           icon: input.icon ?? null,
+          keywords: input.keywords ?? [],
         })
         .returning();
 
@@ -105,6 +167,7 @@ export const categoryRouter = createTRPCRouter({
         name: z.string().min(1).max(100).optional(),
         parentId: z.string().uuid().nullable().optional(),
         icon: z.string().max(16).nullable().optional(),
+        keywords: keywordsSchema.optional(),
         archived: z.boolean().optional(),
       }),
     )
@@ -197,4 +260,51 @@ export const categoryRouter = createTRPCRouter({
         .delete(category)
         .where(and(eq(category.id, input.id), eq(category.familyId, familyId)));
     }),
+
+  applyKeywords: protectedProcedure.mutation(async ({ ctx }) => {
+    const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+    const cats = await loadCategoriesWithKeywords(ctx.db, familyId);
+    if (cats.length === 0) return { updated: 0 };
+
+    const uncategorized = await ctx.db
+      .select({
+        id: transaction.id,
+        description: transaction.description,
+        note: transaction.note,
+        metadata: transaction.metadata,
+        type: transaction.type,
+      })
+      .from(transaction)
+      .where(
+        and(
+          eq(transaction.familyId, familyId),
+          isNull(transaction.categoryId),
+          or(
+            eq(transaction.type, "expense"),
+            eq(transaction.type, "income"),
+          ),
+        ),
+      );
+
+    let updated = 0;
+    for (const tx of uncategorized) {
+      if (tx.type === "transfer") continue;
+      const matched = findMatchingCategoryId(
+        cats,
+        tx.description,
+        tx.note,
+        tx.metadata,
+        tx.type,
+      );
+      if (matched) {
+        await ctx.db
+          .update(transaction)
+          .set({ categoryId: matched, updatedAt: new Date() })
+          .where(eq(transaction.id, tx.id));
+        updated++;
+      }
+    }
+
+    return { updated };
+  }),
 });

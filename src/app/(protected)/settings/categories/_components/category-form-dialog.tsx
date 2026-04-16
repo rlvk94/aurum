@@ -1,13 +1,17 @@
 "use client";
 
+import { useState, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "@tanstack/react-form";
+import { X } from "lucide-react";
 import { z } from "zod";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
+import { Badge } from "~/app/_components/badge";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -33,11 +37,68 @@ type Category = RouterOutputs["category"]["list"][number];
 
 const NO_PARENT = "__none__";
 
+function KeywordsField({
+  value,
+  onChange,
+  placeholder,
+  label,
+  help,
+}: {
+  value: string[];
+  onChange: (value: string[]) => void;
+  placeholder: string;
+  label: string;
+  help: string;
+}) {
+  const [input, setInput] = useState("");
+  const addKeyword = useCallback(() => {
+    const trimmed = input.trim();
+    if (trimmed && !value.includes(trimmed)) {
+      onChange([...value, trimmed]);
+    }
+    setInput("");
+  }, [input, value, onChange]);
+
+  return (
+    <Field>
+      <FieldLabel>{label}</FieldLabel>
+      <div className="flex flex-wrap gap-1.5">
+        {value.map((kw, i) => (
+          <Badge key={i} variant="secondary" className="gap-1 pr-1">
+            {kw}
+            <button
+              type="button"
+              onClick={() => onChange(value.filter((_, j) => j !== i))}
+              className="rounded-full p-0.5 hover:bg-muted"
+            >
+              <X className="size-3" />
+            </button>
+          </Badge>
+        ))}
+      </div>
+      <Input
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            e.preventDefault();
+            addKeyword();
+          }
+        }}
+        onBlur={addKeyword}
+        placeholder={placeholder}
+      />
+      <FieldDescription>{help}</FieldDescription>
+    </Field>
+  );
+}
+
 const categoryFormSchema = z.object({
   name: z.string().min(1, "Required").max(100),
   kind: z.enum(["expense", "income"]),
   parentId: z.string(),
   icon: z.string(),
+  keywords: z.array(z.string()),
 });
 
 export function CategoryFormDialog({
@@ -80,6 +141,7 @@ export function CategoryFormDialog({
       kind: (category?.kind as "expense" | "income") ?? defaultKind ?? "expense",
       parentId: category?.parentId ?? "",
       icon: category?.icon ?? "",
+      keywords: category?.keywords ?? [],
     },
     validators: {
       onSubmit: categoryFormSchema,
@@ -91,6 +153,7 @@ export function CategoryFormDialog({
           name: value.name.trim(),
           parentId: value.parentId || null,
           icon: value.icon.trim() || null,
+          keywords: value.keywords,
         });
       } else {
         createCategory.mutate({
@@ -98,6 +161,7 @@ export function CategoryFormDialog({
           kind: value.kind,
           parentId: value.parentId || null,
           icon: value.icon.trim() || null,
+          keywords: value.keywords,
         });
       }
     },
@@ -173,6 +237,19 @@ export function CategoryFormDialog({
                     className="w-24 text-center text-lg"
                   />
                 </Field>
+              )}
+            />
+
+            <form.Field
+              name="keywords"
+              children={(field) => (
+                <KeywordsField
+                  value={field.state.value}
+                  onChange={field.handleChange}
+                  label={t("keywords")}
+                  placeholder={t("keywordsPlaceholder")}
+                  help={t("keywordsHelp")}
+                />
               )}
             />
 

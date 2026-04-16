@@ -19,6 +19,12 @@ export type ParsedTransaction = {
   balance: number;
   /** Optional user-facing note / supplementary text from the bank. */
   note: string;
+  /**
+   * Extra fields from the source (e.g. payer info, supplementary text).
+   * Stored on the transaction but not shown in the UI.
+   * Used to widen the search text for categorization rules.
+   */
+  metadata: Record<string, string>;
 };
 
 export type CsvParser = {

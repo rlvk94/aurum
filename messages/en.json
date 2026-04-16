@@ -128,24 +128,6 @@
     },
     "emptyState": "No accounts yet. Add your first account to get started."
   },
-  "rules": {
-    "title": "Categorization rules",
-    "addRule": "Add rule",
-    "editRule": "Edit rule",
-    "addRuleDescription": "When a transaction description contains this text, assign this category",
-    "editRuleDescription": "Update this rule",
-    "pattern": "Match text",
-    "patternPlaceholder": "e.g. Netto",
-    "patternHelp": "Case-insensitive match against description and note",
-    "category": "Assign category",
-    "priority": "Priority",
-    "priorityHelp": "Higher priority wins when multiple rules match",
-    "enabled": "Enabled",
-    "applyToExisting": "Apply to existing",
-    "applyPreview": "{matches} of {uncategorized} uncategorized transactions will be updated",
-    "applySuccess": "{count, plural, one {# transaction} other {# transactions}} categorized",
-    "emptyState": "No rules yet. Create rules to auto-categorize transactions on import."
-  },
   "categories": {
     "title": "Categories",
     "addCategory": "Add category",
@@ -156,11 +138,16 @@
     "categoryNamePlaceholder": "e.g. Groceries",
     "categoryIcon": "Icon",
     "categoryIconPlaceholder": "Pick an emoji",
+    "keywords": "Keywords",
+    "keywordsHelp": "Transactions matching these keywords are auto-categorized on import",
+    "keywordsPlaceholder": "Type and press Enter",
     "categoryKind": "Kind",
     "parent": "Parent",
     "noParent": "No parent (top-level)",
     "expenseCategories": "Expense categories",
     "incomeCategories": "Income categories",
+    "applyKeywords": "Auto-categorize",
+    "applySuccess": "{count, plural, one {# transaction} other {# transactions}} categorized",
     "emptyState": "No categories yet. Add your first category to start classifying transactions."
   },
   "transactions": {

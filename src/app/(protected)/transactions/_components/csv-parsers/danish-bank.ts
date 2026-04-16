@@ -49,6 +49,13 @@ export const danishBankParser: CsvParser = {
       const counterAccount =
         direction === "outgoing" ? toAccount : fromAccount;
 
+      const payer = (fields[7] ?? "").trim();
+      const suppText = (fields[8] ?? "").trim();
+
+      const metadata: Record<string, string> = {};
+      if (payer) metadata.payer = payer;
+      if (suppText) metadata.suppText = suppText;
+
       rows.push({
         exportAccount,
         counterAccount,
@@ -58,6 +65,7 @@ export const danishBankParser: CsvParser = {
         amount,
         balance,
         note: (fields[9] ?? "").trim(),
+        metadata,
       });
     }
 

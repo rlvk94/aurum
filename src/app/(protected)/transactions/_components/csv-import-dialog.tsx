@@ -36,6 +36,7 @@ type ImportableRow = {
   date: string;
   description: string;
   note?: string;
+  metadata?: Record<string, string>;
   externalId: string;
   transferAccountId?: string;
 };
@@ -83,6 +84,8 @@ function resolveRows(
       date: row.date,
       description: row.description || "—",
       note: row.note || undefined,
+      metadata:
+        Object.keys(row.metadata).length > 0 ? row.metadata : undefined,
       externalId: `${row.date}:${row.amount}:${row.balance}`,
       transferAccountId,
     });

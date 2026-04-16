@@ -2,6 +2,7 @@ import { relations, sql } from "drizzle-orm";
 import {
   date,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -45,6 +46,11 @@ export const transaction = pgTable(
     date: date("date", { mode: "string" }).notNull(),
     description: text("description").notNull(),
     note: text("note"),
+    /**
+     * Extra fields from source data (e.g. CSV payer, supplementary text).
+     * Used for rule matching but not displayed in the UI.
+     */
+    metadata: jsonb("metadata").$type<Record<string, string>>(),
     externalId: text("external_id"),
     importedAt: timestamp("imported_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })

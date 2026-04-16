@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ChevronRight, Users, Tag, Globe, Home, Wand2 } from "lucide-react";
+import { ChevronRight, Users, Tag, Globe, Home } from "lucide-react";
 import { PageHeader } from "~/app/_components/page-header";
 
 function SettingsLink({
@@ -35,8 +35,6 @@ export default function SettingsPage() {
   const t = useTranslations("settings");
   const tFamily = useTranslations("family");
   const tCategories = useTranslations("categories");
-  const tRules = useTranslations("rules");
-
   return (
     <div className="space-y-6">
       <PageHeader title={t("title")} />
@@ -59,12 +57,6 @@ export default function SettingsPage() {
           icon={Tag}
           title={tCategories("title")}
           description={tCategories("emptyState")}
-        />
-        <SettingsLink
-          href="/settings/rules"
-          icon={Wand2}
-          title={tRules("title")}
-          description={tRules("emptyState")}
         />
         <SettingsLink
           href="/settings/language"
