@@ -7,6 +7,7 @@ export default async function DashboardPage() {
     api.financialAccount.summary.prefetch(),
     api.financialAccount.list.prefetch(),
     api.asset.summary.prefetch(),
+    api.debt.summary.prefetch(),
     api.transaction.weeklyExpense.prefetch(),
     api.transaction.list.prefetch({ limit: 5 }),
   ]);

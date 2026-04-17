@@ -55,51 +55,84 @@ function AssetCard({
   const tCommon = useTranslations("common");
   const Icon = assetTypeIcons[asset.type as AssetType];
 
+  const hasLoans = asset.linkedDebts.length > 0;
+  const equityPct =
+    asset.value > 0
+      ? Math.max(0, Math.min(100, Math.round((asset.equity / asset.value) * 100)))
+      : 0;
+  const underwater = asset.equity < 0;
+
   return (
     <div
-      className={`flex items-start justify-between rounded-lg border border-border bg-card p-4 shadow-card ${archived ? "opacity-60" : ""}`}
+      className={`rounded-lg border border-border bg-card p-4 shadow-card ${archived ? "opacity-60" : ""}`}
     >
-      <div className="flex gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
-          <Icon className="h-5 w-5 text-accent-foreground" />
+      <div className="flex items-start justify-between">
+        <div className="flex gap-3">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
+            <Icon className="h-5 w-5 text-accent-foreground" />
+          </div>
+          <div>
+            <p className="font-medium text-foreground">{asset.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {t(`types.${asset.type as AssetType}`)}
+            </p>
+            <p className="mt-1 font-display text-lg text-foreground">
+              {formatAmount(asset.value)}
+            </p>
+            {asset.note && (
+              <p className="mt-1 text-xs text-muted-foreground">{asset.note}</p>
+            )}
+          </div>
         </div>
-        <div>
-          <p className="font-medium text-foreground">{asset.name}</p>
-          <p className="text-xs text-muted-foreground">
-            {t(`types.${asset.type as AssetType}`)}
-          </p>
-          <p className="mt-1 font-display text-lg text-foreground">
-            {formatAmount(asset.value)}
-          </p>
-          {asset.note && (
-            <p className="mt-1 text-xs text-muted-foreground">{asset.note}</p>
-          )}
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={onEdit}>
+              <Pencil />
+              {tCommon("edit")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onArchiveToggle}>
+              <Archive />
+              {archived ? tAccounts("unarchive") : tAccounts("archive")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 />
+              {tCommon("delete")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onEdit}>
-            <Pencil />
-            {tCommon("edit")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onArchiveToggle}>
-            <Archive />
-            {archived ? tAccounts("unarchive") : tAccounts("archive")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive"
-            onClick={onDelete}
-          >
-            <Trash2 />
-            {tCommon("delete")}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
+      {hasLoans && (
+        <div className="mt-4 space-y-2 border-t border-border pt-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">{t("equity")}</span>
+            <span
+              className={`font-medium ${underwater ? "text-debt" : "text-foreground"}`}
+            >
+              {formatAmount(asset.equity)} · {equityPct}%
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div
+              className={`h-full transition-all ${underwater ? "bg-debt" : "bg-income"}`}
+              style={{ width: `${equityPct}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {t("loanOutstanding", {
+              count: asset.linkedDebts.length,
+              amount: formatAmount(asset.debtOutstanding),
+            })}
+          </p>
+        </div>
+      )}
     </div>
   );
 }

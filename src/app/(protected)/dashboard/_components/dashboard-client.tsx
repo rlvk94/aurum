@@ -64,14 +64,15 @@ export function DashboardClient() {
 
   const { data: summary } = api.financialAccount.summary.useQuery();
   const { data: assetsSummary } = api.asset.summary.useQuery();
+  const { data: debtSummary } = api.debt.summary.useQuery();
   const { data: weeklyExpense } = api.transaction.weeklyExpense.useQuery();
   const { data: accounts = [] } = api.financialAccount.list.useQuery();
   const { data: recent, isLoading: recentLoading } =
     api.transaction.list.useQuery({ limit: 5 });
 
   const netWorth =
-    summary && assetsSummary
-      ? summary.netWorthBalance + assetsSummary.total
+    summary && assetsSummary && debtSummary
+      ? summary.netWorthBalance + assetsSummary.total - debtSummary.totalOutstanding
       : undefined;
 
   const accountMap = new Map(accounts.map((a) => [a.id, a.name]));
@@ -94,7 +95,9 @@ export function DashboardClient() {
         />
         <StatCard
           title={t("totalDebt")}
-          value="–"
+          value={
+            debtSummary ? formatAmount(debtSummary.totalOutstanding) : "–"
+          }
           icon={TrendingDown}
           className="text-debt"
         />

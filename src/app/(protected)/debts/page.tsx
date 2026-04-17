@@ -1,25 +1,12 @@
-import { useTranslations } from "next-intl";
-import { CreditCard, Plus } from "lucide-react";
-import { PageHeader } from "~/app/_components/page-header";
-import { EmptyState } from "~/app/_components/empty-state";
-import { Button } from "~/app/_components/button";
+import { api, HydrateClient } from "~/trpc/server";
+import { DebtsClient } from "./_components/debts-client";
 
-export default function DebtsPage() {
-  const t = useTranslations("debts");
+export default async function DebtsPage() {
+  await Promise.all([api.debt.list.prefetch(), api.debt.summary.prefetch()]);
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t("title")}
-        actions={
-          <Button>
-            <Plus />
-            {t("addDebt")}
-          </Button>
-        }
-      />
-
-      <EmptyState icon={CreditCard} message={t("emptyState")} />
-    </div>
+    <HydrateClient>
+      <DebtsClient />
+    </HydrateClient>
   );
 }
