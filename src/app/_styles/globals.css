@@ -68,8 +68,8 @@
   --sidebar-ring: hsl(38 60% 50%);
 
   /* Shadows */
-  --shadow-card: 0 1px 3px 0 hsl(220 20% 12% / 0.04), 0 1px 2px -1px hsl(220 20% 12% / 0.04);
-  --shadow-elevated: 0 4px 12px -2px hsl(220 20% 12% / 0.08), 0 2px 6px -2px hsl(220 20% 12% / 0.04);
+  --elevation-card: 0 1px 3px 0 hsl(220 20% 12% / 0.04), 0 1px 2px -1px hsl(220 20% 12% / 0.04);
+  --elevation-elevated: 0 4px 12px -2px hsl(220 20% 12% / 0.08), 0 2px 6px -2px hsl(220 20% 12% / 0.04);
 }
 
 /* ── Tailwind v4 Theme Tokens ────────────────────────────────────────────── */
@@ -134,8 +134,8 @@
   --radius-xl: calc(var(--radius) + 4px);
 
   /* Shadows */
-  --shadow-card: 0 1px 3px 0 hsl(220 20% 12% / 0.04), 0 1px 2px -1px hsl(220 20% 12% / 0.04);
-  --shadow-elevated: 0 4px 12px -2px hsl(220 20% 12% / 0.08), 0 2px 6px -2px hsl(220 20% 12% / 0.04);
+  --shadow-card: var(--elevation-card);
+  --shadow-elevated: var(--elevation-elevated);
 
   /* Animations */
   --animate-accordion-down: accordion-down 0.2s ease-out;
@@ -177,12 +177,66 @@
 }
 
 .dark {
-  --sidebar: hsl(240 5.9% 10%);
-  --sidebar-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-primary: hsl(224.3 76.3% 48%);
-  --sidebar-primary-foreground: hsl(0 0% 100%);
-  --sidebar-accent: hsl(240 3.7% 15.9%);
-  --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
-  --sidebar-border: hsl(240 3.7% 15.9%);
-  --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --background: hsl(30 8% 8%);
+  --foreground: hsl(40 15% 94%);
+
+  --card: hsl(30 7% 12%);
+  --card-foreground: hsl(40 15% 94%);
+
+  --popover: hsl(30 7% 12%);
+  --popover-foreground: hsl(40 15% 94%);
+
+  --primary: hsl(38 65% 55%);
+  --primary-foreground: hsl(30 20% 10%);
+
+  --secondary: hsl(30 6% 16%);
+  --secondary-foreground: hsl(40 15% 94%);
+
+  --muted: hsl(30 6% 16%);
+  --muted-foreground: hsl(40 8% 65%);
+
+  --accent: hsl(38 30% 20%);
+  --accent-foreground: hsl(38 70% 75%);
+
+  --destructive: hsl(0 60% 55%);
+  --destructive-foreground: hsl(0 0% 100%);
+
+  --border: hsl(30 6% 20%);
+  --input: hsl(30 6% 20%);
+  --ring: hsl(38 65% 55%);
+
+  /* Semantic finance colors — brighter fills, deep tinted muted backgrounds */
+  --income: hsl(152 50% 55%);
+  --income-foreground: hsl(152 40% 10%);
+  --income-muted: hsl(152 30% 16%);
+
+  --expense: hsl(0 60% 62%);
+  --expense-foreground: hsl(0 40% 10%);
+  --expense-muted: hsl(0 30% 18%);
+
+  --debt: hsl(25 70% 58%);
+  --debt-foreground: hsl(25 40% 10%);
+  --debt-muted: hsl(25 40% 18%);
+
+  --savings: hsl(210 60% 62%);
+  --savings-foreground: hsl(210 40% 10%);
+  --savings-muted: hsl(210 30% 18%);
+
+  --warning: hsl(40 75% 60%);
+  --warning-foreground: hsl(40 80% 12%);
+  --warning-muted: hsl(40 40% 18%);
+
+  /* Sidebar — even darker than main content; keep gold accent */
+  --sidebar: hsl(30 8% 6%);
+  --sidebar-foreground: hsl(40 10% 82%);
+  --sidebar-primary: hsl(38 65% 55%);
+  --sidebar-primary-foreground: hsl(30 20% 10%);
+  --sidebar-accent: hsl(30 8% 14%);
+  --sidebar-accent-foreground: hsl(40 15% 94%);
+  --sidebar-border: hsl(30 8% 14%);
+  --sidebar-ring: hsl(38 65% 55%);
+
+  /* Shadows — deeper, pure-black based so they read on dark surfaces */
+  --elevation-card: 0 1px 3px 0 hsl(0 0% 0% / 0.4), 0 1px 2px -1px hsl(0 0% 0% / 0.3);
+  --elevation-elevated: 0 4px 12px -2px hsl(0 0% 0% / 0.5), 0 2px 6px -2px hsl(0 0% 0% / 0.3);
 }
