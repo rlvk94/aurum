@@ -277,6 +277,92 @@
     "language": "Sprog",
     "languageDa": "Dansk",
     "languageEn": "English",
-    "dangerZone": "Farezone"
+    "dangerZone": "Farezone",
+    "saved": "Gemt",
+    "nav": {
+      "backToApp": "Tilbage til appen",
+      "settings": "Indstillinger",
+      "account": "Konto",
+      "profile": "Profil",
+      "family": "Familie",
+      "familyGeneral": "Generelt",
+      "members": "Medlemmer",
+      "categories": "Kategorier",
+      "preferences": "Præferencer",
+      "appearance": "Udseende"
+    },
+    "profile": {
+      "title": "Profil",
+      "description": "Administrér dine personlige oplysninger",
+      "nameLabel": "Navn",
+      "emailLabel": "E-mail",
+      "avatarLabel": "Profilbillede",
+      "avatarUrlPlaceholder": "https://...",
+      "avatarHelp": "Indsæt et link til et billede. Filupload kommer snart.",
+      "avatarClear": "Fjern billede",
+      "saveChanges": "Gem ændringer",
+      "changeEmail": "Skift e-mail",
+      "pendingEmailNotice": "Afventer bekræftelse til {email}",
+      "resume": "Genoptag",
+      "cancelEmailChange": "Annullér ændring",
+      "emailChangeDialog": {
+        "title": "Skift e-mail",
+        "step1Description": "Indtast din nye e-mail. Vi sender en bekræftelseskode.",
+        "newEmailLabel": "Ny e-mail",
+        "sendCode": "Send kode",
+        "step2Description": "Indtast den 6-cifrede kode vi sendte til {email}.",
+        "codeLabel": "Bekræftelseskode",
+        "confirm": "Bekræft"
+      }
+    },
+    "family": {
+      "title": "Familieindstillinger",
+      "description": "Rediger familiens grundlæggende oplysninger",
+      "nameLabel": "Familienavn",
+      "saveChanges": "Gem ændringer",
+      "readOnlyNotice": "Kun ejere kan redigere familieindstillinger"
+    },
+    "members": {
+      "title": "Medlemmer",
+      "description": "Administrér hvem der har adgang til familiens økonomi",
+      "you": "Dig",
+      "roleOwner": "Ejer",
+      "roleMember": "Medlem",
+      "changeRole": "Skift rolle",
+      "remove": "Fjern",
+      "leave": "Forlad familie",
+      "confirmRemove": "Fjern {name} fra familien?",
+      "confirmLeave": "Vil du forlade familien? Du mister adgang til dens økonomi.",
+      "lastOwnerBlocked": "Du er den sidste ejer. Gør et andet medlem til ejer før du forlader.",
+      "empty": "Ingen andre medlemmer endnu",
+      "invite": {
+        "title": "Inviter et medlem",
+        "description": "Send en invitation via e-mail",
+        "emailLabel": "E-mail",
+        "emailPlaceholder": "navn@eksempel.dk",
+        "send": "Send invitation",
+        "stubNotice": "E-mails sendes ikke automatisk endnu — kopiér invitationslinket og del det manuelt.",
+        "copyLink": "Kopiér link",
+        "linkCopied": "Link kopieret"
+      },
+      "pending": {
+        "title": "Afventende invitationer",
+        "sentAt": "Sendt {date}",
+        "revoke": "Tilbagekald",
+        "empty": "Ingen afventende invitationer"
+      }
+    },
+    "appearance": {
+      "title": "Udseende",
+      "description": "Tilpas hvordan Aurum ser ud og opfører sig",
+      "languageTitle": "Sprog",
+      "languageDescription": "Bruges overalt i appen",
+      "themeTitle": "Tema",
+      "themeDescription": "Vælg hvordan Aurum vises for dig",
+      "themeLight": "Lyst",
+      "themeDark": "Mørkt",
+      "themeSystem": "System",
+      "themeSystemDescription": "Følg din enheds indstilling"
+    }
   }
 }

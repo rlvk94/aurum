@@ -1,0 +1,362 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { MoreHorizontal, UserRound } from "lucide-react";
+
+import { api, type RouterOutputs } from "~/trpc/react";
+import { PageHeader } from "~/app/_components/page-header";
+import { Button } from "~/app/_components/button";
+import { Input } from "~/app/_components/input";
+import { Badge } from "~/app/_components/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "~/app/_components/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/app/_components/dropdown-menu";
+
+type Member = RouterOutputs["family"]["listMembers"][number];
+
+function MemberAvatar({
+  image,
+  name,
+}: {
+  image: string | null;
+  name: string;
+}) {
+  const initials =
+    name
+      .split(/\s+/)
+      .map((w) => w[0] ?? "")
+      .slice(0, 2)
+      .join("")
+      .toUpperCase() || "?";
+  if (image) {
+    return (
+      <div className="h-9 w-9 overflow-hidden rounded-full border border-border bg-muted">
+        <img
+          src={image}
+          alt=""
+          className="h-full w-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-medium text-accent-foreground">
+      {initials || <UserRound className="size-4" />}
+    </div>
+  );
+}
+
+function MemberRow({
+  member,
+  isSelf,
+  isOwnerViewer,
+  isLastOwner,
+  onChangeRole,
+  onRemove,
+  onLeave,
+}: {
+  member: Member;
+  isSelf: boolean;
+  isOwnerViewer: boolean;
+  isLastOwner: boolean;
+  onChangeRole: (role: "owner" | "member") => void;
+  onRemove: () => void;
+  onLeave: () => void;
+}) {
+  const t = useTranslations("settings.members");
+
+  const canShowActions =
+    (isOwnerViewer && !isSelf) || (isSelf && !isLastOwner);
+
+  return (
+    <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
+      <MemberAvatar image={member.image} name={member.name} />
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2">
+          <span className="truncate font-medium">{member.name}</span>
+          {isSelf && (
+            <Badge variant="secondary" className="shrink-0">
+              {t("you")}
+            </Badge>
+          )}
+        </div>
+        <p className="truncate text-sm text-muted-foreground">
+          {member.email}
+        </p>
+      </div>
+      <Badge variant={member.role === "owner" ? "default" : "outline"}>
+        {member.role === "owner" ? t("roleOwner") : t("roleMember")}
+      </Badge>
+      {canShowActions && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <MoreHorizontal />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {isOwnerViewer && !isSelf && (
+              <>
+                {member.role === "member" ? (
+                  <DropdownMenuItem onClick={() => onChangeRole("owner")}>
+                    {t("roleOwner")}
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem onClick={() => onChangeRole("member")}>
+                    {t("roleMember")}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem
+                  onClick={onRemove}
+                  className="text-destructive focus:text-destructive"
+                >
+                  {t("remove")}
+                </DropdownMenuItem>
+              </>
+            )}
+            {isSelf && !isLastOwner && (
+              <DropdownMenuItem
+                onClick={onLeave}
+                className="text-destructive focus:text-destructive"
+              >
+                {t("leave")}
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
+  );
+}
+
+function InviteForm({ familyName }: { familyName: string | undefined }) {
+  const t = useTranslations("settings.members.invite");
+  const tCommon = useTranslations("common");
+  const utils = api.useUtils();
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState<string | null>(null);
+
+  const createInvite = api.invitation.create.useMutation({
+    onSuccess: () => {
+      void utils.invitation.list.invalidate();
+      setEmail("");
+    },
+    onError: (e) => setError(e.message),
+  });
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-base">{t("title")}</CardTitle>
+        <CardDescription>
+          {familyName ? `${t("description")} · ${familyName}` : t("description")}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            setError(null);
+            createInvite.mutate({ email: email.trim() });
+          }}
+          className="flex flex-col gap-2 sm:flex-row"
+        >
+          <Input
+            type="email"
+            placeholder={t("emailPlaceholder")}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="sm:flex-1"
+          />
+          <Button type="submit" disabled={createInvite.isPending}>
+            {createInvite.isPending ? tCommon("loading") : t("send")}
+          </Button>
+        </form>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+        <p className="text-xs text-muted-foreground">{t("stubNotice")}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function PendingInvitation({
+  id,
+  email,
+  token,
+  createdAt,
+  canRevoke,
+}: {
+  id: string;
+  email: string;
+  token: string;
+  createdAt: Date;
+  canRevoke: boolean;
+}) {
+  const t = useTranslations("settings.members.invite");
+  const tPending = useTranslations("settings.members.pending");
+  const utils = api.useUtils();
+  const [copied, setCopied] = useState(false);
+
+  const revoke = api.invitation.revoke.useMutation({
+    onSuccess: () => void utils.invitation.list.invalidate(),
+  });
+
+  const inviteUrl =
+    typeof window === "undefined"
+      ? `/invite/${token}`
+      : `${window.location.origin}/invite/${token}`;
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore
+    }
+  };
+
+  return (
+    <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
+      <div className="min-w-0 flex-1">
+        <p className="truncate font-medium">{email}</p>
+        <p className="text-xs text-muted-foreground">
+          {tPending("sentAt", {
+            date: createdAt.toLocaleDateString(),
+          })}
+        </p>
+      </div>
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={handleCopy}>
+          {copied ? t("linkCopied") : t("copyLink")}
+        </Button>
+        {canRevoke && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => revoke.mutate({ id })}
+            disabled={revoke.isPending}
+            className="text-destructive hover:text-destructive"
+          >
+            {tPending("revoke")}
+          </Button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function MembersClient() {
+  const t = useTranslations("settings.members");
+  const tPending = useTranslations("settings.members.pending");
+  const utils = api.useUtils();
+
+  const { data: current } = api.family.current.useQuery();
+  const { data: members } = api.family.listMembers.useQuery();
+  const { data: invitations } = api.invitation.list.useQuery();
+  const { data: me } = api.user.me.useQuery();
+
+  const isOwner = current?.role === "owner";
+
+  const ownerCount = members?.filter((m) => m.role === "owner").length ?? 0;
+
+  const changeRole = api.family.updateMemberRole.useMutation({
+    onSuccess: () => void utils.family.listMembers.invalidate(),
+  });
+  const removeMember = api.family.removeMember.useMutation({
+    onSuccess: () => void utils.family.listMembers.invalidate(),
+  });
+  const leaveFamily = api.family.leave.useMutation({
+    onSuccess: () => {
+      void utils.family.listMembers.invalidate();
+      void utils.family.list.invalidate();
+      void utils.user.getActiveFamily.invalidate();
+      window.location.href = "/dashboard";
+    },
+  });
+
+  return (
+    <div className="mx-auto w-full max-w-2xl space-y-6">
+      <PageHeader title={t("title")} description={t("description")} />
+
+      {isOwner && <InviteForm familyName={current?.name} />}
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("title")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {(members ?? []).map((m) => {
+            const isSelf = m.userId === me?.id;
+            const isLastOwner = m.role === "owner" && ownerCount <= 1;
+            return (
+              <MemberRow
+                key={m.userId}
+                member={m}
+                isSelf={isSelf}
+                isOwnerViewer={!!isOwner}
+                isLastOwner={isLastOwner}
+                onChangeRole={(role) =>
+                  changeRole.mutate({ userId: m.userId, role })
+                }
+                onRemove={() => {
+                  if (window.confirm(t("confirmRemove", { name: m.name }))) {
+                    removeMember.mutate({ userId: m.userId });
+                  }
+                }}
+                onLeave={() => {
+                  if (window.confirm(t("confirmLeave"))) {
+                    leaveFamily.mutate();
+                  }
+                }}
+              />
+            );
+          })}
+          {members?.length === 0 && (
+            <p className="py-4 text-center text-sm text-muted-foreground">
+              {t("empty")}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {isOwner && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">{tPending("title")}</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            {(invitations ?? []).map((inv) => (
+              <PendingInvitation
+                key={inv.id}
+                id={inv.id}
+                email={inv.email}
+                token={inv.token}
+                createdAt={inv.createdAt}
+                canRevoke={isOwner}
+              />
+            ))}
+            {invitations?.length === 0 && (
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                {tPending("empty")}
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}

@@ -14,6 +14,8 @@ import { usersToFamilies } from "./family";
 
 export const localeEnum = pgEnum("locale", ["da", "en"]);
 
+export const themeEnum = pgEnum("theme", ["light", "dark", "system"]);
+
 // ── BetterAuth tables ───────────────────────────────────────────────────────
 
 export const user = pgTable("user", {
@@ -25,9 +27,15 @@ export const user = pgTable("user", {
     .notNull(),
   image: text("image"),
   locale: localeEnum("locale").default("da").notNull(),
+  theme: themeEnum("theme").default("system").notNull(),
   activeFamilyId: uuid("active_family_id"),
   onboardingStep: integer("onboarding_step").default(0).notNull(),
   onboardedAt: timestamp("onboarded_at", { withTimezone: true }),
+  pendingEmail: text("pending_email"),
+  pendingEmailToken: text("pending_email_token"),
+  pendingEmailExpiresAt: timestamp("pending_email_expires_at", {
+    withTimezone: true,
+  }),
   createdAt: timestamp("created_at", { withTimezone: true })
     .$defaultFn(() => new Date())
     .notNull(),

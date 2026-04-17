@@ -277,6 +277,92 @@
     "language": "Language",
     "languageDa": "Dansk",
     "languageEn": "English",
-    "dangerZone": "Danger zone"
+    "dangerZone": "Danger zone",
+    "saved": "Saved",
+    "nav": {
+      "backToApp": "Back to app",
+      "settings": "Settings",
+      "account": "Account",
+      "profile": "Profile",
+      "family": "Family",
+      "familyGeneral": "General",
+      "members": "Members",
+      "categories": "Categories",
+      "preferences": "Preferences",
+      "appearance": "Appearance"
+    },
+    "profile": {
+      "title": "Profile",
+      "description": "Manage your personal details",
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "avatarLabel": "Avatar",
+      "avatarUrlPlaceholder": "https://...",
+      "avatarHelp": "Paste a link to an image. File upload coming soon.",
+      "avatarClear": "Clear image",
+      "saveChanges": "Save changes",
+      "changeEmail": "Change email",
+      "pendingEmailNotice": "Pending verification for {email}",
+      "resume": "Resume",
+      "cancelEmailChange": "Cancel change",
+      "emailChangeDialog": {
+        "title": "Change email",
+        "step1Description": "Enter your new email. We'll send a verification code.",
+        "newEmailLabel": "New email",
+        "sendCode": "Send code",
+        "step2Description": "Enter the 6-digit code we sent to {email}.",
+        "codeLabel": "Verification code",
+        "confirm": "Confirm"
+      }
+    },
+    "family": {
+      "title": "Family settings",
+      "description": "Edit your family's basic information",
+      "nameLabel": "Family name",
+      "saveChanges": "Save changes",
+      "readOnlyNotice": "Only owners can edit family settings"
+    },
+    "members": {
+      "title": "Members",
+      "description": "Manage who has access to this family's finances",
+      "you": "You",
+      "roleOwner": "Owner",
+      "roleMember": "Member",
+      "changeRole": "Change role",
+      "remove": "Remove",
+      "leave": "Leave family",
+      "confirmRemove": "Remove {name} from the family?",
+      "confirmLeave": "Leave this family? You'll lose access to its finances.",
+      "lastOwnerBlocked": "You're the last owner. Promote another member before leaving.",
+      "empty": "No other members yet",
+      "invite": {
+        "title": "Invite a member",
+        "description": "Send an invitation by email",
+        "emailLabel": "Email",
+        "emailPlaceholder": "name@example.com",
+        "send": "Send invitation",
+        "stubNotice": "Emails aren't delivered yet — copy the invite link and share it manually.",
+        "copyLink": "Copy link",
+        "linkCopied": "Link copied"
+      },
+      "pending": {
+        "title": "Pending invitations",
+        "sentAt": "Sent {date}",
+        "revoke": "Revoke",
+        "empty": "No pending invitations"
+      }
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize how Aurum looks and feels",
+      "languageTitle": "Language",
+      "languageDescription": "Used across the app",
+      "themeTitle": "Theme",
+      "themeDescription": "Choose how Aurum appears to you",
+      "themeLight": "Light",
+      "themeDark": "Dark",
+      "themeSystem": "System",
+      "themeSystemDescription": "Match your device setting"
+    }
   }
 }
