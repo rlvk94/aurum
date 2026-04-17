@@ -169,7 +169,7 @@ Server code lives outside `src/app/`:
 - `0005` — Email OTP-only authentication
 - `0006` — Family-scoped multi-tenancy
 - `0007` — Manual-first financial data entry
-- `0008` — Annual budget with spending challenges
+- `0008` — Annual budget with gamified challenges
 - `0009` — Use shadcn/ui as component library
 - `0010` — Aurum design system from Lovable prototype
 - `0011` — Use next-intl for internationalization

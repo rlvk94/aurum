@@ -9,8 +9,11 @@ import {
   TrendingDown,
   TrendingUp,
   ArrowLeftRight,
+  CircleDollarSign,
+  PiggyBank,
+  Target,
 } from "lucide-react";
-import { api } from "~/trpc/react";
+import { api, type RouterOutputs } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import {
   Card,
@@ -18,8 +21,17 @@ import {
   CardHeader,
   CardTitle,
 } from "~/app/_components/card";
+import { Badge } from "~/app/_components/badge";
 import { Skeleton } from "~/app/_components/skeleton";
 import { cn } from "~/app/_lib/utils";
+
+type Challenge = RouterOutputs["challenge"]["list"][number];
+
+const challengeTypeIcon = {
+  spend_less: TrendingDown,
+  savings: PiggyBank,
+  pay_off_loan: CircleDollarSign,
+} as const;
 
 function formatAmount(cents: number): string {
   const value = cents / 100;
@@ -28,6 +40,68 @@ function formatAmount(cents: number): string {
     maximumFractionDigits: 2,
   }).format(Math.abs(value));
   return value < 0 ? `-${formatted} kr.` : `${formatted} kr.`;
+}
+
+function ChallengeRow({ challenge }: { challenge: Challenge }) {
+  const t = useTranslations("budgets");
+  const Icon = challengeTypeIcon[challenge.type];
+  const isSpendLess = challenge.type === "spend_less";
+  const todayIso = new Date().toISOString().slice(0, 10);
+  const notStarted = challenge.currentInstance
+    ? challenge.currentInstance.periodStart > todayIso
+    : false;
+  const ratio =
+    challenge.targetAmount > 0
+      ? Math.max(0, challenge.progress) / challenge.targetAmount
+      : 0;
+  const pct = notStarted ? 0 : Math.min(100, Math.round(ratio * 100));
+  const isOver = isSpendLess && challenge.progress > challenge.targetAmount;
+  const met = isSpendLess
+    ? challenge.progress <= challenge.targetAmount
+    : challenge.progress >= challenge.targetAmount;
+
+  const color = notStarted
+    ? "bg-muted-foreground/30"
+    : isSpendLess
+      ? isOver
+        ? "bg-expense"
+        : "bg-primary"
+      : met
+        ? "bg-income"
+        : "bg-primary";
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-accent">
+            <Icon className="h-3.5 w-3.5 text-primary" />
+          </div>
+          <p className="truncate text-sm font-medium text-foreground">
+            {challenge.name}
+          </p>
+          <Badge
+            variant={notStarted ? "outline" : "secondary"}
+            className="shrink-0 text-[10px]"
+          >
+            {notStarted
+              ? t("challengeNotStarted")
+              : t(`challengeRepetitions.${challenge.repetition}`)}
+          </Badge>
+        </div>
+        <span className="shrink-0 text-xs tabular-nums text-muted-foreground">
+          {formatAmount(challenge.progress)} /{" "}
+          {formatAmount(challenge.targetAmount)}
+        </span>
+      </div>
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div
+          className={`h-full rounded-full transition-all ${color}`}
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+    </div>
+  );
 }
 
 function StatCard({
@@ -62,6 +136,8 @@ export function DashboardClient() {
   const locale = useLocale();
   const dateLocale = locale === "da" ? da : enUS;
 
+  const tBudgets = useTranslations("budgets");
+
   const { data: summary } = api.financialAccount.summary.useQuery();
   const { data: assetsSummary } = api.asset.summary.useQuery();
   const { data: debtSummary } = api.debt.summary.useQuery();
@@ -69,6 +145,8 @@ export function DashboardClient() {
   const { data: accounts = [] } = api.financialAccount.list.useQuery();
   const { data: recent, isLoading: recentLoading } =
     api.transaction.list.useQuery({ limit: 5 });
+  const { data: challenges } = api.challenge.list.useQuery();
+  const activeChallenges = (challenges ?? []).slice(0, 4);
 
   const netWorth =
     summary && assetsSummary && debtSummary
@@ -179,11 +257,32 @@ export function DashboardClient() {
         </Card>
 
         <Card>
-          <CardHeader>
-            <CardTitle className="text-lg">{t("budgetStatus")}</CardTitle>
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-lg">
+              {tBudgets("challenges")}
+            </CardTitle>
+            <Link
+              href="/budgets/challenges"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              →
+            </Link>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground">–</p>
+            {activeChallenges.length === 0 ? (
+              <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
+                <Target className="h-6 w-6 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">
+                  {tBudgets("challengesEmptyState")}
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {activeChallenges.map((c) => (
+                  <ChallengeRow key={c.id} challenge={c} />
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

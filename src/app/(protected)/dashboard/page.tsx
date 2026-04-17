@@ -1,4 +1,4 @@
-import { api } from "~/trpc/server";
+import { api, HydrateClient } from "~/trpc/server";
 import { DashboardClient } from "./_components/dashboard-client";
 
 export default async function DashboardPage() {
@@ -10,7 +10,12 @@ export default async function DashboardPage() {
     api.debt.summary.prefetch(),
     api.transaction.weeklyExpense.prefetch(),
     api.transaction.list.prefetch({ limit: 5 }),
+    api.challenge.list.prefetch(),
   ]);
 
-  return <DashboardClient />;
+  return (
+    <HydrateClient>
+      <DashboardClient />
+    </HydrateClient>
+  );
 }

@@ -1,4 +1,4 @@
-# ADR-0008: Annual Budget with Spending Challenges
+# ADR-0008: Annual Budget with Gamified Challenges
 
 ## Status
 
@@ -6,7 +6,11 @@ Accepted
 
 ## Date
 
-2026-04-12
+2026-04-17 (amended from 2026-04-12)
+
+## Amendments
+
+- **2026-04-17:** Expanded the Challenges section to cover three challenge types (spend-less, savings, pay-off-loan) and one-off vs repeating durations with per-period instance history. The original formulation covered only spend-less weekly/monthly challenges.
 
 ## Context
 
@@ -35,20 +39,35 @@ Supported recurrence types:
 
 Each budget line produces a **planned amount per month**, enabling a 12-month overview. Budget vs actual for a given month is calculated by summing categorized expense transactions in that month against the planned amounts.
 
-### 2. Spending Challenges
+### 2. Challenges
 
-A **Challenge** is a separate, time-boxed spending goal with a flexible duration.
+A **Challenge** is a time-boxed goal that layers on top of the annual budget as a gamification mechanic. Challenges come in three **types**, each with the same structural shell but a different progress metric:
 
-- A challenge has a **start date**, **end date**, **category** (or set of categories), and a **target amount**.
-- Duration is flexible: 1 week, 2 weeks, 1 month, or any custom range.
-- Challenges are independent of the annual budget — they layer on top as short-term motivational tools.
-- The UI shows progress (spent vs target, remaining amount, days left) and whether the challenge is on track.
+- **Spend-less** — "keep spending in category X below Y during the period." Progress = sum of expense transactions in the chosen category during the period. On-track when `progress ≤ target`.
+- **Savings** — "grow account X's balance by Y during the period." Progress = net balance change on the chosen account during the period (income and inbound transfers add; expenses and outbound transfers subtract). On-track when `progress ≥ target`.
+- **Pay-off-loan** — "pay Y extra towards a loan during the period." Progress = sum of expense transactions in the linked "loan payment" category during the period. A specific Debt can optionally be linked for context. On-track when `progress ≥ target`.
 
-Examples:
+#### Duration
 
-- "Groceries challenge: stay under 1.500 kr. this week"
-- "No dining out for 2 weeks"
-- "Keep shopping under 3.000 kr. this month"
+Every challenge is either **one-off** or **repeating**:
+
+- **One-off** — fixed `startDate` + `endDate`.
+- **Repeating** — `startDate` + repetition (`weekly`, `monthly`, `yearly`, or `custom N days`). Periods are anchored to `startDate` (not calendar boundaries), so a monthly challenge starting on the 15th runs the 15th → 14th each month.
+
+#### Per-period instances
+
+To preserve history for repeating challenges, each period is represented by a **ChallengeInstance** row (`periodStart`, `periodEnd`, `status`, `finalAmount`). Instances are created lazily on view: when a user opens the challenges list, any repeating challenge whose latest instance has ended is closed (status set to `completed` or `failed` based on target comparison, `finalAmount` snapshotted) and the next instance is spawned. One-off challenges always have exactly one instance.
+
+#### UI
+
+Each challenge card shows: the current period's progress vs target, remaining amount (or over-by for spend-less), days left, and an on-track vs off-track indicator computed from pace. Detail view (future) surfaces historical instances.
+
+#### Examples
+
+- Spend-less, weekly: "Groceries under 1.500 kr. each week"
+- Spend-less, one-off: "No dining out for the next 2 weeks"
+- Savings, monthly: "Save 5.000 kr. to the holiday account each month"
+- Pay-off-loan, yearly: "Pay 20.000 kr. extra on the car loan this year"
 
 ### Key behaviors
 

@@ -1,25 +1,17 @@
-import { useTranslations } from "next-intl";
-import { Target, Plus } from "lucide-react";
-import { PageHeader } from "~/app/_components/page-header";
-import { EmptyState } from "~/app/_components/empty-state";
-import { Button } from "~/app/_components/button";
+import { api, HydrateClient } from "~/trpc/server";
+import { ChallengesClient } from "./_components/challenges-client";
 
-export default function ChallengesPage() {
-  const t = useTranslations("budgets");
+export default async function ChallengesPage() {
+  await Promise.all([
+    api.challenge.list.prefetch(),
+    api.category.list.prefetch(),
+    api.financialAccount.list.prefetch(),
+    api.debt.list.prefetch(),
+  ]);
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title={t("challenges")}
-        actions={
-          <Button>
-            <Plus />
-            {t("createChallenge")}
-          </Button>
-        }
-      />
-
-      <EmptyState icon={Target} message={t("emptyState")} />
-    </div>
+    <HydrateClient>
+      <ChallengesClient />
+    </HydrateClient>
   );
 }
