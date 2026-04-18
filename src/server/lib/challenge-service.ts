@@ -6,6 +6,7 @@ import {
   challenge,
   challengeAccount,
   challengeInstance,
+  financialAccount,
   transaction,
 } from "~/server/db/schema";
 import {
@@ -22,8 +23,9 @@ export function todayIso(): string {
 
 /**
  * Sum of expense transactions for a category in a family across the window,
- * optionally scoped to a subset of accounts. Empty `accountIds` means no
- * account scoping (include all family accounts).
+ * optionally scoped to a subset of accounts. Empty `accountIds` means
+ * "all shared accounts" — private accounts are excluded so that challenges
+ * without explicit scope never leak private-account activity to other members.
  */
 async function sumExpenseInWindow(
   db: typeof dbInstance,
@@ -42,6 +44,23 @@ async function sumExpenseInWindow(
   ];
   if (accountIds.length > 0) {
     conditions.push(inArray(transaction.accountId, accountIds));
+  } else {
+    const sharedRows = await db
+      .select({ id: financialAccount.id })
+      .from(financialAccount)
+      .where(
+        and(
+          eq(financialAccount.familyId, familyId),
+          eq(financialAccount.visibility, "shared"),
+        ),
+      );
+    if (sharedRows.length === 0) return 0;
+    conditions.push(
+      inArray(
+        transaction.accountId,
+        sharedRows.map((r) => r.id),
+      ),
+    );
   }
 
   const [row] = await db

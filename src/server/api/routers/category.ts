@@ -1,10 +1,16 @@
 import { z } from "zod";
-import { and, asc, eq, isNull, or, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db as dbInstance } from "~/server/db";
-import { category, transaction, user } from "~/server/db/schema";
+import {
+  category,
+  financialAccount,
+  financialAccountAccess,
+  transaction,
+  user,
+} from "~/server/db/schema";
 
 const kindSchema = z.enum(["expense", "income"]);
 const keywordsSchema = z.array(z.string().min(1).max(100)).max(50);
@@ -266,6 +272,29 @@ export const categoryRouter = createTRPCRouter({
     const cats = await loadCategoriesWithKeywords(ctx.db, familyId);
     if (cats.length === 0) return { updated: 0 };
 
+    // Only re-categorize transactions on accounts this user can access, so
+    // a bulk categorize never reaches into another member's private account.
+    const accessRows = await ctx.db
+      .select({ accountId: financialAccountAccess.accountId })
+      .from(financialAccountAccess)
+      .where(eq(financialAccountAccess.userId, ctx.session.user.id));
+    const privateIds = accessRows.map((r) => r.accountId);
+    const accessibleAccounts = await ctx.db
+      .select({ id: financialAccount.id })
+      .from(financialAccount)
+      .where(
+        and(
+          eq(financialAccount.familyId, familyId),
+          or(
+            eq(financialAccount.visibility, "shared"),
+            privateIds.length > 0
+              ? inArray(financialAccount.id, privateIds)
+              : undefined,
+          ),
+        ),
+      );
+    if (accessibleAccounts.length === 0) return { updated: 0 };
+
     const uncategorized = await ctx.db
       .select({
         id: transaction.id,
@@ -278,6 +307,10 @@ export const categoryRouter = createTRPCRouter({
       .where(
         and(
           eq(transaction.familyId, familyId),
+          inArray(
+            transaction.accountId,
+            accessibleAccounts.map((a) => a.id),
+          ),
           isNull(transaction.categoryId),
           or(
             eq(transaction.type, "expense"),

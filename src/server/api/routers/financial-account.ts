@@ -8,6 +8,7 @@ import {
   financialAccount,
   financialAccountAccess,
   user,
+  usersToFamilies,
 } from "~/server/db/schema";
 
 async function getActiveFamilyId(
@@ -51,6 +52,102 @@ async function getAccessibleAccountFilter(
   );
 }
 
+async function assertUsersInFamily(
+  db: typeof dbInstance,
+  familyId: string,
+  userIds: string[],
+) {
+  if (userIds.length === 0) return;
+  const rows = await db
+    .select({ userId: usersToFamilies.userId })
+    .from(usersToFamilies)
+    .where(
+      and(
+        eq(usersToFamilies.familyId, familyId),
+        inArray(usersToFamilies.userId, userIds),
+      ),
+    );
+  if (rows.length !== new Set(userIds).size) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "One or more users are not members of this family",
+    });
+  }
+}
+
+async function assertUserCanEditAccount(
+  db: typeof dbInstance,
+  familyId: string,
+  userId: string,
+  accountId: string,
+) {
+  const [existing] = await db
+    .select({
+      id: financialAccount.id,
+      visibility: financialAccount.visibility,
+    })
+    .from(financialAccount)
+    .where(
+      and(
+        eq(financialAccount.id, accountId),
+        eq(financialAccount.familyId, familyId),
+      ),
+    );
+  if (!existing) {
+    throw new TRPCError({ code: "NOT_FOUND" });
+  }
+  if (existing.visibility === "private") {
+    const [has] = await db
+      .select({ userId: financialAccountAccess.userId })
+      .from(financialAccountAccess)
+      .where(
+        and(
+          eq(financialAccountAccess.accountId, accountId),
+          eq(financialAccountAccess.userId, userId),
+        ),
+      );
+    if (!has) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "No access to this account",
+      });
+    }
+  }
+  return existing;
+}
+
+async function replaceAccessList(
+  db: typeof dbInstance,
+  accountId: string,
+  userIds: string[],
+) {
+  const targetSet = new Set(userIds);
+  const existingRows = await db
+    .select({ userId: financialAccountAccess.userId })
+    .from(financialAccountAccess)
+    .where(eq(financialAccountAccess.accountId, accountId));
+  const existingSet = new Set(existingRows.map((r) => r.userId));
+
+  const toDelete = [...existingSet].filter((u) => !targetSet.has(u));
+  const toAdd = [...targetSet].filter((u) => !existingSet.has(u));
+
+  if (toDelete.length > 0) {
+    await db
+      .delete(financialAccountAccess)
+      .where(
+        and(
+          eq(financialAccountAccess.accountId, accountId),
+          inArray(financialAccountAccess.userId, toDelete),
+        ),
+      );
+  }
+  if (toAdd.length > 0) {
+    await db.insert(financialAccountAccess).values(
+      toAdd.map((userId) => ({ accountId, userId })),
+    );
+  }
+}
+
 export const financialAccountRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {
     const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
@@ -89,6 +186,24 @@ export const financialAccountRouter = createTRPCRouter({
     };
   }),
 
+  listAccess: protectedProcedure
+    .input(z.object({ accountId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      await assertUserCanEditAccount(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+        input.accountId,
+      );
+
+      const rows = await ctx.db
+        .select({ userId: financialAccountAccess.userId })
+        .from(financialAccountAccess)
+        .where(eq(financialAccountAccess.accountId, input.accountId));
+      return rows.map((r) => r.userId);
+    }),
+
   create: protectedProcedure
     .input(
       z.object({
@@ -104,6 +219,7 @@ export const financialAccountRouter = createTRPCRouter({
           "other",
         ]),
         visibility: z.enum(["shared", "private"]).default("shared"),
+        accessUserIds: z.array(z.string()).optional(),
         balance: z.number().int().default(0),
         includeInNetWorth: z.boolean().default(true),
       }),
@@ -124,12 +240,14 @@ export const financialAccountRouter = createTRPCRouter({
         })
         .returning();
 
-      // If private, grant access to the creator
       if (input.visibility === "private" && created) {
-        await ctx.db.insert(financialAccountAccess).values({
-          accountId: created.id,
-          userId: ctx.session.user.id,
-        });
+        const targetUserIds = new Set<string>(input.accessUserIds ?? []);
+        targetUserIds.add(ctx.session.user.id);
+        const ids = Array.from(targetUserIds);
+        await assertUsersInFamily(ctx.db, familyId, ids);
+        await ctx.db.insert(financialAccountAccess).values(
+          ids.map((userId) => ({ accountId: created.id, userId })),
+        );
       }
 
       return created;
@@ -152,29 +270,64 @@ export const financialAccountRouter = createTRPCRouter({
             "other",
           ])
           .optional(),
+        visibility: z.enum(["shared", "private"]).optional(),
+        accessUserIds: z.array(z.string()).optional(),
         includeInNetWorth: z.boolean().optional(),
         archived: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
-      const { id, ...data } = input;
+      const { id, accessUserIds, visibility, ...data } = input;
+
+      const existing = await assertUserCanEditAccount(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+        id,
+      );
+
+      const nextVisibility = visibility ?? existing.visibility;
 
       await ctx.db
         .update(financialAccount)
-        .set({ ...data, updatedAt: new Date() })
+        .set({
+          ...data,
+          ...(visibility !== undefined ? { visibility } : {}),
+          updatedAt: new Date(),
+        })
         .where(
           and(
             eq(financialAccount.id, id),
             eq(financialAccount.familyId, familyId),
           ),
         );
+
+      if (visibility !== undefined || accessUserIds !== undefined) {
+        if (nextVisibility === "shared") {
+          await ctx.db
+            .delete(financialAccountAccess)
+            .where(eq(financialAccountAccess.accountId, id));
+        } else {
+          const targetUserIds = new Set<string>(accessUserIds ?? []);
+          targetUserIds.add(ctx.session.user.id);
+          const ids = Array.from(targetUserIds);
+          await assertUsersInFamily(ctx.db, familyId, ids);
+          await replaceAccessList(ctx.db, id, ids);
+        }
+      }
     }),
 
   delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      await assertUserCanEditAccount(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+        input.id,
+      );
 
       await ctx.db
         .delete(financialAccount)

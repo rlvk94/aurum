@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, asc, eq, inArray, isNull, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -11,6 +11,7 @@ import {
   challengeInstance,
   debt,
   financialAccount,
+  financialAccountAccess,
   user,
 } from "~/server/db/schema";
 import {
@@ -116,32 +117,60 @@ async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   return dbUser.activeFamilyId;
 }
 
-async function assertAccountsInFamily(
+/**
+ * Returns the set of account IDs in the family that the given user can access
+ * (shared accounts + private accounts explicitly granted to them).
+ */
+async function getAccessibleAccountIds(
   db: typeof dbInstance,
   familyId: string,
-  accountIds: string[],
-) {
-  if (accountIds.length === 0) return;
+  userId: string,
+): Promise<Set<string>> {
+  const accessRows = await db
+    .select({ accountId: financialAccountAccess.accountId })
+    .from(financialAccountAccess)
+    .where(eq(financialAccountAccess.userId, userId));
+  const privateIds = accessRows.map((r) => r.accountId);
+
   const rows = await db
     .select({ id: financialAccount.id })
     .from(financialAccount)
     .where(
       and(
         eq(financialAccount.familyId, familyId),
-        inArray(financialAccount.id, accountIds),
+        or(
+          eq(financialAccount.visibility, "shared"),
+          privateIds.length > 0
+            ? inArray(financialAccount.id, privateIds)
+            : undefined,
+        ),
       ),
     );
-  if (rows.length !== accountIds.length) {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "One or more accounts not found in this family",
-    });
+  return new Set(rows.map((r) => r.id));
+}
+
+async function assertAccountsAccessible(
+  db: typeof dbInstance,
+  familyId: string,
+  userId: string,
+  accountIds: string[],
+) {
+  if (accountIds.length === 0) return;
+  const accessible = await getAccessibleAccountIds(db, familyId, userId);
+  for (const id of accountIds) {
+    if (!accessible.has(id)) {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "No access to one or more referenced accounts",
+      });
+    }
   }
 }
 
 async function assertFamilyResource(
   db: typeof dbInstance,
   familyId: string,
+  userId: string,
   opts: {
     categoryId?: string | null;
     accountId?: string | null;
@@ -163,21 +192,7 @@ async function assertFamilyResource(
     }
   }
   if (opts.accountId) {
-    const [row] = await db
-      .select({ id: financialAccount.id })
-      .from(financialAccount)
-      .where(
-        and(
-          eq(financialAccount.id, opts.accountId),
-          eq(financialAccount.familyId, familyId),
-        ),
-      );
-    if (!row) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Account not found in this family",
-      });
-    }
+    await assertAccountsAccessible(db, familyId, userId, [opts.accountId]);
   }
   if (opts.debtId) {
     const [row] = await db
@@ -193,6 +208,26 @@ async function assertFamilyResource(
   }
 }
 
+/**
+ * A challenge is visible to a user only if every account it references is
+ * accessible. For savings challenges that's `row.accountId`; for spend-less
+ * and pay-off-loan challenges it's any scoped accountIds (an empty scoped
+ * list means "all family accounts", which imposes no additional restriction).
+ */
+function isChallengeVisible(
+  row: typeof challenge.$inferSelect,
+  scopedAccountIds: string[],
+  accessible: Set<string>,
+): boolean {
+  if (row.type === "savings" && row.accountId) {
+    if (!accessible.has(row.accountId)) return false;
+  }
+  for (const accountId of scopedAccountIds) {
+    if (!accessible.has(accountId)) return false;
+  }
+  return true;
+}
+
 // ── Router ──────────────────────────────────────────────────────────────────
 
 export const challengeRouter = createTRPCRouter({
@@ -206,6 +241,11 @@ export const challengeRouter = createTRPCRouter({
     )
     .query(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const accessible = await getAccessibleAccountIds(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+      );
 
       const rows = await ctx.db
         .select()
@@ -238,6 +278,9 @@ export const challengeRouter = createTRPCRouter({
       const asOf = todayIso();
       const results = [];
       for (const row of rows) {
+        const scoped = accountsByChallenge.get(row.id) ?? [];
+        if (!isChallengeVisible(row, scoped, accessible)) continue;
+
         const current = await rotateChallenge(ctx.db, row);
         const progress = current
           ? await computeProgress(ctx.db, row, current, asOf)
@@ -246,7 +289,7 @@ export const challengeRouter = createTRPCRouter({
           ...row,
           currentInstance: current,
           progress,
-          accountIds: accountsByChallenge.get(row.id) ?? [],
+          accountIds: scoped,
         });
       }
       return results;
@@ -264,17 +307,27 @@ export const challengeRouter = createTRPCRouter({
         );
       if (!row) throw new TRPCError({ code: "NOT_FOUND" });
 
+      const accountLinks = await ctx.db
+        .select({ accountId: challengeAccount.accountId })
+        .from(challengeAccount)
+        .where(eq(challengeAccount.challengeId, row.id));
+      const scoped = accountLinks.map((l) => l.accountId);
+
+      const accessible = await getAccessibleAccountIds(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+      );
+      if (!isChallengeVisible(row, scoped, accessible)) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
       const current = await rotateChallenge(ctx.db, row);
       const instances = await ctx.db
         .select()
         .from(challengeInstance)
         .where(eq(challengeInstance.challengeId, row.id))
         .orderBy(sql`${challengeInstance.periodStart} desc`);
-
-      const accountLinks = await ctx.db
-        .select({ accountId: challengeAccount.accountId })
-        .from(challengeAccount)
-        .where(eq(challengeAccount.challengeId, row.id));
 
       const asOf = todayIso();
       const progress = current
@@ -286,7 +339,7 @@ export const challengeRouter = createTRPCRouter({
         currentInstance: current,
         instances,
         progress,
-        accountIds: accountLinks.map((l) => l.accountId),
+        accountIds: scoped,
       };
     }),
 
@@ -294,13 +347,18 @@ export const challengeRouter = createTRPCRouter({
     .input(createSchema)
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
-      await assertFamilyResource(ctx.db, familyId, {
+      await assertFamilyResource(ctx.db, familyId, ctx.session.user.id, {
         categoryId: input.categoryId,
         accountId: input.accountId,
         debtId: input.debtId,
       });
       const scopedAccountIds = Array.from(new Set(input.accountIds ?? []));
-      await assertAccountsInFamily(ctx.db, familyId, scopedAccountIds);
+      await assertAccountsAccessible(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+        scopedAccountIds,
+      );
 
       const [created] = await ctx.db
         .insert(challenge)
@@ -358,7 +416,7 @@ export const challengeRouter = createTRPCRouter({
         );
       if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
 
-      await assertFamilyResource(ctx.db, familyId, {
+      await assertFamilyResource(ctx.db, familyId, ctx.session.user.id, {
         categoryId: input.categoryId,
         accountId: input.accountId,
         debtId: input.debtId,
@@ -372,7 +430,12 @@ export const challengeRouter = createTRPCRouter({
 
       if (accountIds !== undefined) {
         const deduped = Array.from(new Set(accountIds));
-        await assertAccountsInFamily(ctx.db, familyId, deduped);
+        await assertAccountsAccessible(
+          ctx.db,
+          familyId,
+          ctx.session.user.id,
+          deduped,
+        );
         await ctx.db
           .delete(challengeAccount)
           .where(eq(challengeAccount.challengeId, id));

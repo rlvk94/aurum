@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
@@ -11,6 +12,8 @@ import {
   ShieldCheck,
   Receipt,
   TrendingUp,
+  Users,
+  Lock,
 } from "lucide-react";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
@@ -18,6 +21,7 @@ import { Checkbox } from "~/app/_components/checkbox";
 import { Input } from "~/app/_components/input";
 import {
   Field,
+  FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
@@ -56,6 +60,8 @@ export const accountTypeKeys: Record<AccountType, string> = {
 
 const accountTypes = Object.keys(accountTypeIcons) as AccountType[];
 
+type Visibility = "shared" | "private";
+
 const accountFormSchema = z.object({
   name: z.string().min(1, "Required").max(100),
   identifier: z.string().min(1, "Required").max(50),
@@ -70,6 +76,8 @@ const accountFormSchema = z.object({
   ]),
   balance: z.string(),
   includeInNetWorth: z.boolean(),
+  visibility: z.enum(["shared", "private"]),
+  accessUserIds: z.array(z.string()),
 });
 
 type Account = RouterOutputs["financialAccount"]["list"][number];
@@ -85,8 +93,18 @@ export function AccountFormDialog({
 }) {
   const t = useTranslations("accounts");
   const tCommon = useTranslations("common");
+  const tFamily = useTranslations("family");
   const utils = api.useUtils();
   const isEdit = !!account;
+
+  const { data: session } = api.user.me.useQuery();
+  const { data: members = [] } = api.family.listMembers.useQuery();
+  const { data: existingAccess } = api.financialAccount.listAccess.useQuery(
+    { accountId: account?.id ?? "" },
+    {
+      enabled: isEdit && account?.visibility === "private" && open,
+    },
+  );
 
   const createAccount = api.financialAccount.create.useMutation({
     onSuccess: () => {
@@ -102,6 +120,11 @@ export function AccountFormDialog({
       onOpenChange(false);
       void utils.financialAccount.list.invalidate();
       void utils.financialAccount.summary.invalidate();
+      if (account?.id) {
+        void utils.financialAccount.listAccess.invalidate({
+          accountId: account.id,
+        });
+      }
     },
   });
 
@@ -112,11 +135,18 @@ export function AccountFormDialog({
       type: (account?.type as AccountType) ?? "checking",
       balance: account ? String(account.balance / 100) : "",
       includeInNetWorth: account?.includeInNetWorth ?? true,
+      visibility: (account?.visibility ?? "shared") as Visibility,
+      accessUserIds: [] as string[],
     },
     validators: {
       onSubmit: accountFormSchema,
     },
     onSubmit: async ({ value }) => {
+      const isPrivate = value.visibility === "private";
+      const sharedPayload = {
+        visibility: value.visibility,
+        accessUserIds: isPrivate ? value.accessUserIds : [],
+      };
       if (isEdit) {
         updateAccount.mutate({
           id: account.id,
@@ -124,6 +154,7 @@ export function AccountFormDialog({
           identifier: value.identifier.trim(),
           type: value.type,
           includeInNetWorth: value.includeInNetWorth,
+          ...sharedPayload,
         });
       } else {
         createAccount.mutate({
@@ -132,12 +163,22 @@ export function AccountFormDialog({
           type: value.type,
           balance: Math.round(parseFloat(value.balance || "0") * 100),
           includeInNetWorth: value.includeInNetWorth,
+          ...sharedPayload,
         });
       }
     },
   });
 
+  // Populate access list when editing a private account — once the access
+  // list loads, seed the form so pre-existing grants are preserved.
+  useEffect(() => {
+    if (isEdit && existingAccess) {
+      form.setFieldValue("accessUserIds", existingAccess);
+    }
+  }, [isEdit, existingAccess, form]);
+
   const mutation = isEdit ? updateAccount : createAccount;
+  const currentUserId = session?.id;
 
   return (
     <Dialog
@@ -147,7 +188,7 @@ export function AccountFormDialog({
         if (!next) form.reset();
       }}
     >
-      <DialogContent>
+      <DialogContent className="max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEdit ? t("editAccount") : t("addAccount")}
@@ -272,6 +313,126 @@ export function AccountFormDialog({
                 )}
               />
             )}
+
+            <form.Field
+              name="visibility"
+              children={(field) => (
+                <Field>
+                  <FieldLabel>{t("visibility")}</FieldLabel>
+                  <div className="grid grid-cols-2 gap-2">
+                    {(["shared", "private"] as const).map((value) => {
+                      const Icon = value === "shared" ? Users : Lock;
+                      const isSelected = field.state.value === value;
+                      return (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => field.handleChange(value)}
+                          className={cn(
+                            "flex items-start gap-3 rounded-lg border p-3 text-left transition-all",
+                            isSelected
+                              ? "border-primary bg-accent text-accent-foreground"
+                              : "border-border bg-card hover:border-primary/30",
+                          )}
+                        >
+                          <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+                          <div className="space-y-0.5">
+                            <p className="text-sm font-medium">
+                              {t(
+                                value === "shared"
+                                  ? "visibilityShared"
+                                  : "visibilityPrivate",
+                              )}
+                            </p>
+                            <p className="text-xs text-muted-foreground">
+                              {t(
+                                value === "shared"
+                                  ? "visibilitySharedDescription"
+                                  : "visibilityPrivateDescription",
+                              )}
+                            </p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </Field>
+              )}
+            />
+
+            <form.Subscribe selector={(s) => s.values.visibility}>
+              {(visibility) =>
+                visibility === "private" && (
+                  <form.Field
+                    name="accessUserIds"
+                    children={(field) => {
+                      const selected = new Set(field.state.value);
+                      return (
+                        <Field>
+                          <FieldLabel>{t("sharedWith")}</FieldLabel>
+                          <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
+                            {members.map((m) => {
+                              const isSelf = m.userId === currentUserId;
+                              const checked = isSelf || selected.has(m.userId);
+                              const id = `access-${m.userId}`;
+                              return (
+                                <label
+                                  key={m.userId}
+                                  htmlFor={id}
+                                  className={cn(
+                                    "flex items-center gap-3",
+                                    isSelf
+                                      ? "cursor-not-allowed opacity-80"
+                                      : "cursor-pointer",
+                                  )}
+                                >
+                                  <Checkbox
+                                    id={id}
+                                    checked={checked}
+                                    disabled={isSelf}
+                                    onCheckedChange={(next) => {
+                                      if (isSelf) return;
+                                      const updated = new Set(
+                                        field.state.value,
+                                      );
+                                      if (next) {
+                                        updated.add(m.userId);
+                                      } else {
+                                        updated.delete(m.userId);
+                                      }
+                                      field.handleChange(Array.from(updated));
+                                    }}
+                                    className="h-4 w-4"
+                                  />
+                                  <div className="flex-1">
+                                    <p className="text-sm font-medium">
+                                      {m.name}
+                                      {isSelf && (
+                                        <span className="ml-1 text-xs text-muted-foreground">
+                                          ({t("you")})
+                                        </span>
+                                      )}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {m.role === "owner"
+                                        ? tFamily("owner")
+                                        : tFamily("member")}
+                                    </p>
+                                  </div>
+                                </label>
+                              );
+                            })}
+                          </div>
+                          <FieldDescription>
+                            {t("sharedWithHelp")}
+                          </FieldDescription>
+                        </Field>
+                      );
+                    }}
+                  />
+                )
+              }
+            </form.Subscribe>
 
             <form.Field
               name="includeInNetWorth"
