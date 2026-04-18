@@ -131,7 +131,31 @@
       "investment": "Investment",
       "other": "Other"
     },
-    "emptyState": "No accounts yet. Add your first account to get started."
+    "emptyState": "No accounts yet. Add your first account to get started.",
+    "detail": {
+      "backToAccounts": "Back to accounts",
+      "currentBalance": "Current balance",
+      "totalIncome": "Income",
+      "totalExpense": "Expenses",
+      "netChange": "Net change",
+      "last12Months": "Last 12 months",
+      "monthlyActivity": "Monthly activity",
+      "monthlyDescription": "Income and expenses per month — transfers excluded",
+      "categoryBreakdown": "Category breakdown",
+      "categoryDescription": "Expenses by category over the last 12 months",
+      "uncategorized": "Uncategorized",
+      "transactionsTitle": "Transactions",
+      "noTransactions": "No transactions on this account yet",
+      "noExpenses": "No expenses recorded in this period",
+      "noMonthlyData": "No activity in this period",
+      "notFound": "Account not found",
+      "period12Months": "12 months",
+      "periodMonth": "Month",
+      "periodWeek": "Week",
+      "previous": "Previous",
+      "next": "Next",
+      "weekShort": "Week {n}, {year}"
+    }
   },
   "categories": {
     "title": "Categories",

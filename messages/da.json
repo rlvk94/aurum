@@ -131,7 +131,31 @@
       "investment": "Investering",
       "other": "Andet"
     },
-    "emptyState": "Ingen konti endnu. Tilføj din første konto for at komme i gang."
+    "emptyState": "Ingen konti endnu. Tilføj din første konto for at komme i gang.",
+    "detail": {
+      "backToAccounts": "Tilbage til konti",
+      "currentBalance": "Nuværende saldo",
+      "totalIncome": "Indkomst",
+      "totalExpense": "Udgifter",
+      "netChange": "Nettoændring",
+      "last12Months": "Sidste 12 måneder",
+      "monthlyActivity": "Månedlig aktivitet",
+      "monthlyDescription": "Indkomst og udgifter pr. måned — overførsler medregnes ikke",
+      "categoryBreakdown": "Fordeling på kategorier",
+      "categoryDescription": "Udgifter fordelt på kategori i de sidste 12 måneder",
+      "uncategorized": "Ukategoriseret",
+      "transactionsTitle": "Transaktioner",
+      "noTransactions": "Ingen transaktioner på denne konto endnu",
+      "noExpenses": "Ingen udgifter registreret i denne periode",
+      "noMonthlyData": "Ingen aktivitet i denne periode",
+      "notFound": "Konto ikke fundet",
+      "period12Months": "12 måneder",
+      "periodMonth": "Måned",
+      "periodWeek": "Uge",
+      "previous": "Forrige",
+      "next": "Næste",
+      "weekShort": "Uge {n}, {year}"
+    }
   },
   "categories": {
     "title": "Kategorier",

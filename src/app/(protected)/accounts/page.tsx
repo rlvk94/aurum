@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import {
   Wallet,
@@ -55,9 +56,12 @@ function AccountCard({
   const tCommon = useTranslations("common");
   const Icon = accountTypeIcons[account.type as AccountType];
 
+  const stop = (e: React.MouseEvent) => e.stopPropagation();
+
   return (
-    <div
-      className={`flex items-start justify-between rounded-lg border border-border bg-card p-4 shadow-card ${archived ? "opacity-60" : ""}`}
+    <Link
+      href={`/accounts/${account.id}`}
+      className={`group relative flex items-start justify-between rounded-lg border border-border bg-card p-4 shadow-card transition-shadow hover:shadow-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${archived ? "opacity-60" : ""}`}
     >
       <div className="flex gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
@@ -73,31 +77,51 @@ function AccountCard({
           </p>
         </div>
       </div>
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <MoreHorizontal className="h-4 w-4" />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuItem onClick={onEdit}>
-            <Pencil />
-            {tCommon("edit")}
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={onArchiveToggle}>
-            <Archive />
-            {archived ? t("unarchive") : t("archive")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            className="text-destructive"
-            onClick={onDelete}
-          >
-            <Trash2 />
-            {tCommon("delete")}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+      <div onClick={stop}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              onClick={stop}
+            >
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" onClick={stop}>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                onEdit();
+              }}
+            >
+              <Pencil />
+              {tCommon("edit")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={(e) => {
+                e.preventDefault();
+                onArchiveToggle();
+              }}
+            >
+              <Archive />
+              {archived ? t("unarchive") : t("archive")}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              className="text-destructive"
+              onSelect={(e) => {
+                e.preventDefault();
+                onDelete();
+              }}
+            >
+              <Trash2 />
+              {tCommon("delete")}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+    </Link>
   );
 }
 

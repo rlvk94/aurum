@@ -1,12 +1,14 @@
 import { z } from "zod";
-import { and, asc, eq, or, inArray, sql } from "drizzle-orm";
+import { and, asc, eq, gte, lte, or, inArray, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db as dbInstance } from "~/server/db";
 import {
+  category,
   financialAccount,
   financialAccountAccess,
+  transaction,
   user,
 } from "~/server/db/schema";
 
@@ -88,6 +90,222 @@ export const financialAccountRouter = createTRPCRouter({
       netWorthBalance: Number(result?.netWorthBalance ?? 0),
     };
   }),
+
+  get: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const filter = await getAccessibleAccountFilter(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+      );
+
+      const [account] = await ctx.db
+        .select()
+        .from(financialAccount)
+        .where(and(filter, eq(financialAccount.id, input.id)));
+
+      if (!account) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      return account;
+    }),
+
+  stats: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        months: z.number().int().min(1).max(36).default(12),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const filter = await getAccessibleAccountFilter(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+      );
+
+      const [account] = await ctx.db
+        .select({ id: financialAccount.id })
+        .from(financialAccount)
+        .where(and(filter, eq(financialAccount.id, input.id)));
+
+      if (!account) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      // Build the month window: first day of (now - (months-1)) through now.
+      const now = new Date();
+      const startDate = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (input.months - 1), 1),
+      );
+      const endDate = new Date(
+        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0),
+      );
+      const toIso = (d: Date) => d.toISOString().slice(0, 10);
+      const fromStr = toIso(startDate);
+      const toStr = toIso(endDate);
+
+      const monthKeys: string[] = [];
+      for (let i = 0; i < input.months; i++) {
+        const d = new Date(
+          Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth() + i, 1),
+        );
+        monthKeys.push(
+          `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}`,
+        );
+      }
+
+      // Monthly aggregation: expense + income only (transfers excluded, matching
+      // budget-actual semantics). Scoped to transactions *from* this account —
+      // transfers aren't counted either way.
+      const monthlyRows = await ctx.db
+        .select({
+          month: sql<string>`to_char(${transaction.date}, 'YYYY-MM')`,
+          type: transaction.type,
+          total: sql<number>`coalesce(sum(${transaction.amount}), 0)`,
+        })
+        .from(transaction)
+        .where(
+          and(
+            eq(transaction.familyId, familyId),
+            eq(transaction.accountId, input.id),
+            inArray(transaction.type, ["expense", "income"]),
+            gte(transaction.date, fromStr),
+            lte(transaction.date, toStr),
+          ),
+        )
+        .groupBy(sql`to_char(${transaction.date}, 'YYYY-MM')`, transaction.type);
+
+      const monthMap = new Map<
+        string,
+        { incomeCents: number; expenseCents: number }
+      >();
+      for (const key of monthKeys) {
+        monthMap.set(key, { incomeCents: 0, expenseCents: 0 });
+      }
+      for (const row of monthlyRows) {
+        const bucket = monthMap.get(row.month);
+        if (!bucket) continue;
+        const total = Number(row.total);
+        if (row.type === "income") bucket.incomeCents = total;
+        else if (row.type === "expense") bucket.expenseCents = total;
+      }
+
+      const monthly = monthKeys.map((month) => ({
+        month,
+        incomeCents: monthMap.get(month)?.incomeCents ?? 0,
+        expenseCents: monthMap.get(month)?.expenseCents ?? 0,
+      }));
+
+      // Category split: expenses only, grouped by category (null = uncategorized).
+      const splitRows = await ctx.db
+        .select({
+          categoryId: transaction.categoryId,
+          categoryName: category.name,
+          categoryIcon: category.icon,
+          totalCents: sql<number>`coalesce(sum(${transaction.amount}), 0)`,
+        })
+        .from(transaction)
+        .leftJoin(category, eq(category.id, transaction.categoryId))
+        .where(
+          and(
+            eq(transaction.familyId, familyId),
+            eq(transaction.accountId, input.id),
+            eq(transaction.type, "expense"),
+            gte(transaction.date, fromStr),
+            lte(transaction.date, toStr),
+          ),
+        )
+        .groupBy(transaction.categoryId, category.name, category.icon);
+
+      const categorySplit = splitRows
+        .map((r) => ({
+          categoryId: r.categoryId,
+          categoryName: r.categoryName,
+          categoryIcon: r.categoryIcon,
+          totalCents: Number(r.totalCents),
+        }))
+        .sort((a, b) => b.totalCents - a.totalCents);
+
+      const incomeCents = monthly.reduce((s, m) => s + m.incomeCents, 0);
+      const expenseCents = monthly.reduce((s, m) => s + m.expenseCents, 0);
+
+      return {
+        windowFrom: fromStr,
+        windowTo: toStr,
+        months: input.months,
+        monthly,
+        categorySplit,
+        totals: {
+          incomeCents,
+          expenseCents,
+          netChangeCents: incomeCents - expenseCents,
+        },
+      };
+    }),
+
+  categorySplit: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+        to: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const filter = await getAccessibleAccountFilter(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+      );
+
+      const [account] = await ctx.db
+        .select({ id: financialAccount.id })
+        .from(financialAccount)
+        .where(and(filter, eq(financialAccount.id, input.id)));
+
+      if (!account) {
+        throw new TRPCError({ code: "NOT_FOUND" });
+      }
+
+      const rows = await ctx.db
+        .select({
+          categoryId: transaction.categoryId,
+          categoryName: category.name,
+          categoryIcon: category.icon,
+          totalCents: sql<number>`coalesce(sum(${transaction.amount}), 0)`,
+        })
+        .from(transaction)
+        .leftJoin(category, eq(category.id, transaction.categoryId))
+        .where(
+          and(
+            eq(transaction.familyId, familyId),
+            eq(transaction.accountId, input.id),
+            eq(transaction.type, "expense"),
+            gte(transaction.date, input.from),
+            lte(transaction.date, input.to),
+          ),
+        )
+        .groupBy(transaction.categoryId, category.name, category.icon);
+
+      const entries = rows
+        .map((r) => ({
+          categoryId: r.categoryId,
+          categoryName: r.categoryName,
+          categoryIcon: r.categoryIcon,
+          totalCents: Number(r.totalCents),
+        }))
+        .sort((a, b) => b.totalCents - a.totalCents);
+
+      const totalCents = entries.reduce((s, e) => s + e.totalCents, 0);
+
+      return { entries, totalCents };
+    }),
 
   create: protectedProcedure
     .input(
