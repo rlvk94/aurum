@@ -231,6 +231,7 @@
     "importNoMatchingAccount": "Ingen konto matcher denne eksport. Sørg for at kontoens ID stemmer overens med bankkontonummeret.",
     "importPreviewTitle": "{count, plural, one {# transaktion} other {# transaktioner}} til import",
     "importPreviewTransfers": "{count, plural, one {# overførsel fundet} other {# overførsler fundet}}",
+    "importMirrorSkipped": "{count, plural, one {# modpost af intern overførsel udeladt} other {# modposter af interne overførsler udeladt}}",
     "importConfirm": "Importér",
     "importSuccess": "Importerede {inserted} af {total} transaktioner ({skipped} sprunget over som duplikater)",
     "importPreviewMore": "…{count} flere",

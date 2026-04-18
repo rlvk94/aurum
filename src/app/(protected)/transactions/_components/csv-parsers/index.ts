@@ -23,3 +23,5 @@ export async function detectParser(file: File): Promise<CsvParser> {
 
 export type { CsvParser, ParsedTransaction };
 export { normalizeAccountNumber } from "./utils";
+export { resolveRows } from "./resolve-rows";
+export type { ImportableRow, ResolveResult } from "./resolve-rows";

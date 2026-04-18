@@ -231,6 +231,7 @@
     "importNoMatchingAccount": "No account found matching this export. Make sure the account's identifier matches the bank account number.",
     "importPreviewTitle": "{count, plural, one {# transaction} other {# transactions}} to import",
     "importPreviewTransfers": "{count, plural, one {# transfer detected} other {# transfers detected}}",
+    "importMirrorSkipped": "{count, plural, one {# mirror of an internal transfer excluded} other {# mirrors of internal transfers excluded}}",
     "importConfirm": "Import",
     "importSuccess": "Imported {inserted} of {total} transactions ({skipped} skipped as duplicates)",
     "importPreviewMore": "…{count} more",

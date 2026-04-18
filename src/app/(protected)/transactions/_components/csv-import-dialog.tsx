@@ -18,6 +18,7 @@ import {
 import {
   detectParser,
   normalizeAccountNumber,
+  resolveRows,
   type CsvParser,
   type ParsedTransaction,
 } from "./csv-parsers";
@@ -28,71 +29,6 @@ type Parsed = {
   parser: CsvParser;
   rows: ParsedTransaction[];
 };
-
-type ImportableRow = {
-  accountId: string;
-  type: "expense" | "income" | "transfer";
-  amount: number;
-  date: string;
-  description: string;
-  note?: string;
-  metadata?: Record<string, string>;
-  externalId: string;
-  transferAccountId?: string;
-};
-
-/**
- * Resolve each row to an accountId (via exportAccount) and return
- * separated matched and skipped rows.
- */
-function resolveRows(
-  rows: ParsedTransaction[],
-  accountIdByIdentifier: Map<string, string>,
-): { matched: ImportableRow[]; skipped: number; matchedAccountIds: Set<string> } {
-  const matched: ImportableRow[] = [];
-  const matchedAccountIds = new Set<string>();
-  let skipped = 0;
-
-  for (const row of rows) {
-    const exportCanonical = normalizeAccountNumber(row.exportAccount);
-    const accountId = accountIdByIdentifier.get(exportCanonical);
-    if (!accountId) {
-      skipped++;
-      continue;
-    }
-    matchedAccountIds.add(accountId);
-
-    const counterCanonical = normalizeAccountNumber(row.counterAccount);
-    const candidateTransferId = counterCanonical
-      ? accountIdByIdentifier.get(counterCanonical)
-      : undefined;
-    const transferAccountId =
-      candidateTransferId && candidateTransferId !== accountId
-        ? candidateTransferId
-        : undefined;
-
-    const type: "expense" | "income" | "transfer" = transferAccountId
-      ? "transfer"
-      : row.direction === "outgoing"
-        ? "expense"
-        : "income";
-
-    matched.push({
-      accountId,
-      type,
-      amount: Math.abs(row.amount),
-      date: row.date,
-      description: row.description || "—",
-      note: row.note || undefined,
-      metadata:
-        Object.keys(row.metadata).length > 0 ? row.metadata : undefined,
-      externalId: `${row.date}:${row.amount}:${row.balance}`,
-      transferAccountId,
-    });
-  }
-
-  return { matched, skipped, matchedAccountIds };
-}
 
 export function CsvImportDialog({
   open,
@@ -243,6 +179,13 @@ export function CsvImportDialog({
               {transferCount > 0 && (
                 <p className="text-muted-foreground">
                   {t("importPreviewTransfers", { count: transferCount })}
+                </p>
+              )}
+              {resolved.mirroredSkipped > 0 && (
+                <p className="text-muted-foreground">
+                  {t("importMirrorSkipped", {
+                    count: resolved.mirroredSkipped,
+                  })}
                 </p>
               )}
               {resolved.skipped > 0 && (
