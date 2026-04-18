@@ -5,6 +5,7 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { db as dbInstance } from "~/server/db";
 import { family, user, usersToFamilies } from "~/server/db/schema";
+import { seedDefaultCategories } from "~/server/db/seeds/seed-categories";
 
 export async function getActiveFamilyId(
   db: typeof dbInstance,
@@ -111,24 +112,36 @@ export const familyRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const [newFamily] = await ctx.db
-        .insert(family)
-        .values({ name: input.name })
-        .returning();
+      return ctx.db.transaction(async (tx) => {
+        const [newFamily] = await tx
+          .insert(family)
+          .values({ name: input.name })
+          .returning();
 
-      await ctx.db.insert(usersToFamilies).values({
-        userId: ctx.session.user.id,
-        familyId: newFamily!.id,
-        role: "owner",
+        await tx.insert(usersToFamilies).values({
+          userId: ctx.session.user.id,
+          familyId: newFamily!.id,
+          role: "owner",
+        });
+
+        const [dbUser] = await tx
+          .select({ locale: user.locale })
+          .from(user)
+          .where(eq(user.id, ctx.session.user.id));
+
+        await seedDefaultCategories(
+          tx,
+          newFamily!.id,
+          dbUser?.locale ?? "da",
+        );
+
+        await tx
+          .update(user)
+          .set({ activeFamilyId: newFamily!.id })
+          .where(eq(user.id, ctx.session.user.id));
+
+        return newFamily;
       });
-
-      // Set as active family
-      await ctx.db
-        .update(user)
-        .set({ activeFamilyId: newFamily!.id })
-        .where(eq(user.id, ctx.session.user.id));
-
-      return newFamily;
     }),
 
   current: protectedProcedure.query(async ({ ctx }) => {

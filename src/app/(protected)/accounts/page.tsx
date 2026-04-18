@@ -10,6 +10,7 @@ import {
   Archive,
   Trash2,
   Pencil,
+  Lock,
 } from "lucide-react";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
@@ -68,7 +69,18 @@ function AccountCard({
           <Icon className="h-5 w-5 text-accent-foreground" />
         </div>
         <div>
-          <p className="font-medium text-foreground">{account.name}</p>
+          <div className="flex items-center gap-1.5">
+            <p className="font-medium text-foreground">{account.name}</p>
+            {account.visibility === "private" && (
+              <span
+                className="flex items-center gap-0.5 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                title={t("privateBadge")}
+              >
+                <Lock className="h-2.5 w-2.5" />
+                {t("privateBadge")}
+              </span>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">
             {t(`types.${accountTypeKeys[account.type as AccountType]}`)}
           </p>
