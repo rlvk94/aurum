@@ -1,5 +1,19 @@
 {
   "enabledPlugins": {
     "frontend-design@claude-plugins-official": true
+  },
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "timeout": 300,
+            "statusMessage": "Setting up worktree (.env + npm install)",
+            "command": "jq -r '.worktree_path // empty' | { read -r WT; [ -n \"$WT\" ] && [ -d \"$WT\" ] || exit 0; [ -f \"$CLAUDE_PROJECT_DIR/.env\" ] && cp \"$CLAUDE_PROJECT_DIR/.env\" \"$WT/.env\"; cd \"$WT\" && npm install; }"
+          }
+        ]
+      }
+    ]
   }
 }
