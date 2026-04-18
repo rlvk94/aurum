@@ -3,7 +3,16 @@
 import { useState, useCallback, useMemo, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
-import { ArrowRight, ArrowLeft, Loader2, Check, LogOut } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowLeft,
+  Loader2,
+  Check,
+  LogOut,
+  Sun,
+  Moon,
+  Monitor,
+} from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { authClient } from "~/app/_lib/auth-client";
 import { api } from "~/trpc/react";
@@ -11,7 +20,24 @@ import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
 import { cn } from "~/app/_lib/utils";
 
-type Step = "name" | "language" | "family";
+type Step = "name" | "language" | "theme" | "family";
+type Theme = "light" | "dark" | "system";
+
+const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+function applyTheme(theme: Theme) {
+  const prefersDark = window.matchMedia(
+    "(prefers-color-scheme: dark)",
+  ).matches;
+  const isDark = theme === "dark" || (theme === "system" && prefersDark);
+  document.documentElement.classList.toggle("dark", isDark);
+}
+
+function readThemeCookie(): Theme {
+  if (typeof document === "undefined") return "system";
+  const match = /(?:^|;\s*)theme=(light|dark|system)/.exec(document.cookie);
+  return (match?.[1] as Theme | undefined) ?? "system";
+}
 
 const stepVariants = {
   enter: (direction: number) => ({
@@ -32,6 +58,12 @@ const languages = [
   { code: "en" as const, label: "English", flag: "🇬🇧" },
 ];
 
+const themes = [
+  { code: "light" as const, icon: Sun },
+  { code: "dark" as const, icon: Moon },
+  { code: "system" as const, icon: Monitor },
+];
+
 export default function WelcomePage() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
@@ -42,6 +74,7 @@ export default function WelcomePage() {
   const [locale, setLocale] = useState<"da" | "en">(
     currentLocale === "en" ? "en" : "da",
   );
+  const [theme, setTheme] = useState<Theme>("system");
   const [familyName, setFamilyName] = useState("");
   const [ready, setReady] = useState(false);
 
@@ -51,7 +84,7 @@ export default function WelcomePage() {
   const needsFamily = !familiesLoading && families?.length === 0;
 
   const steps = useMemo<Step[]>(() => {
-    const s: Step[] = ["name", "language"];
+    const s: Step[] = ["name", "language", "theme"];
     if (needsFamily) s.push("family");
     return s;
   }, [needsFamily]);
@@ -68,6 +101,7 @@ export default function WelcomePage() {
         steps.length - 1,
       );
       setCurrentStepIndex(resumeIndex);
+      setTheme(readThemeCookie());
       setReady(true);
     }
   }, [onboardingState, steps.length, ready]);
@@ -95,6 +129,7 @@ export default function WelcomePage() {
   const canContinue =
     (currentStep === "name" && name.trim().length > 0) ||
     currentStep === "language" ||
+    currentStep === "theme" ||
     (currentStep === "family" && familyName.trim().length > 0);
 
   const handleContinue = useCallback(() => {
@@ -128,6 +163,23 @@ export default function WelcomePage() {
           },
         );
       }
+    } else if (currentStep === "theme") {
+      if (isLastStep) {
+        updateProfile.mutate(
+          { theme },
+          { onSuccess: () => completeOnboarding.mutate() },
+        );
+      } else {
+        updateProfile.mutate(
+          { theme, onboardingStep: nextIndex },
+          {
+            onSuccess: () => {
+              setDirection(1);
+              setCurrentStepIndex(nextIndex);
+            },
+          },
+        );
+      }
     } else if (currentStep === "family" && familyName.trim()) {
       createFamily.mutate({ name: familyName.trim() });
     }
@@ -137,6 +189,7 @@ export default function WelcomePage() {
     totalSteps,
     name,
     locale,
+    theme,
     familyName,
     updateProfile,
     completeOnboarding,
@@ -164,6 +217,12 @@ export default function WelcomePage() {
     },
     [router],
   );
+
+  const handleThemeChange = useCallback((newTheme: Theme) => {
+    setTheme(newTheme);
+    document.cookie = `theme=${newTheme};path=/;max-age=${THEME_COOKIE_MAX_AGE}`;
+    applyTheme(newTheme);
+  }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
@@ -345,6 +404,81 @@ export default function WelcomePage() {
                         )}
                       </button>
                     ))}
+                  </motion.div>
+                </div>
+              )}
+
+              {/* Step: Theme */}
+              {currentStep === "theme" && (
+                <div>
+                  <div className="mb-8 h-px w-12 bg-primary/40" />
+
+                  <h1 className="font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
+                    {t("themeTitle")}
+                  </h1>
+                  <p className="mt-3 text-lg text-muted-foreground">
+                    {t("themeDescription")}
+                  </p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 0.2,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className="mt-10 space-y-3"
+                  >
+                    {themes.map((option) => {
+                      const Icon = option.icon;
+                      const isSelected = theme === option.code;
+                      const labelKey =
+                        option.code === "light"
+                          ? "themeLight"
+                          : option.code === "dark"
+                            ? "themeDark"
+                            : "themeSystem";
+                      return (
+                        <button
+                          key={option.code}
+                          type="button"
+                          onClick={() => handleThemeChange(option.code)}
+                          className={cn(
+                            "flex w-full items-center gap-4 rounded-lg border px-4 py-4 text-left transition-all",
+                            isSelected
+                              ? "border-primary bg-accent"
+                              : "border-border bg-background hover:border-primary/30 hover:bg-accent/50",
+                          )}
+                        >
+                          <Icon className="size-5 text-foreground" />
+                          <div className="flex-1">
+                            <div className="text-base font-medium text-foreground">
+                              {t(labelKey)}
+                            </div>
+                            {option.code === "system" && (
+                              <div className="text-xs text-muted-foreground">
+                                {t("themeSystemDescription")}
+                              </div>
+                            )}
+                          </div>
+                          {isSelected && (
+                            <motion.div
+                              initial={{ scale: 0 }}
+                              animate={{ scale: 1 }}
+                              transition={{
+                                type: "spring",
+                                stiffness: 500,
+                                damping: 30,
+                              }}
+                              className="flex h-5 w-5 items-center justify-center rounded-full bg-primary"
+                            >
+                              <Check className="h-3 w-3 text-primary-foreground" />
+                            </motion.div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </motion.div>
                 </div>
               )}
