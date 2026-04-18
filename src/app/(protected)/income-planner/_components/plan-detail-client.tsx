@@ -1,13 +1,13 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowLeft, Pencil, Sparkles } from "lucide-react";
+import { Pencil, Sparkles } from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Badge } from "~/app/_components/badge";
 import { Button } from "~/app/_components/button";
+import { usePageMetadata } from "~/app/_components/page-metadata";
 
 import { AllocationBar } from "./allocation-bar";
 import { AllocationsEditor } from "./allocations-editor";
@@ -55,6 +55,10 @@ export function PlanDetailClient({ planId }: { planId: string }) {
     };
   }, [plan, totalIncome]);
 
+  usePageMetadata(
+    plan ? { title: plan.name, parentPath: "/income-planner" } : null,
+  );
+
   if (!plan) return null;
 
   const activeAccounts = (accounts ?? []).filter((a) => !a.archived);
@@ -69,31 +73,21 @@ export function PlanDetailClient({ planId }: { planId: string }) {
 
   return (
     <div className="space-y-8">
-      {/* Top breadcrumb */}
-      <div className="flex items-center justify-between">
-        <Link
-          href="/income-planner"
-          className="group inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
-          {t("backToPlans")}
-        </Link>
-        <div className="flex items-center gap-2">
-          {!plan.isActive && !plan.archived && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setActive.mutate({ id: planId })}
-            >
-              <Sparkles />
-              {t("setActive")}
-            </Button>
-          )}
-          <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-            <Pencil />
-            {t("editPlan")}
+      <div className="flex items-center justify-end gap-2">
+        {!plan.isActive && !plan.archived && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setActive.mutate({ id: planId })}
+          >
+            <Sparkles />
+            {t("setActive")}
           </Button>
-        </div>
+        )}
+        <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
+          <Pencil />
+          {t("editPlan")}
+        </Button>
       </div>
 
       {/* Hero */}

@@ -50,6 +50,27 @@
     "incomePlanner": "Income Planner",
     "importData": "Import Data"
   },
+  "favorites": {
+    "sectionTitle": "Favorites",
+    "addLabel": "Add to favorites",
+    "removeLabel": "Remove from favorites"
+  },
+  "commandPalette": {
+    "title": "Command palette",
+    "description": "Search for navigation, actions, and favorites",
+    "placeholder": "Type a command or search…",
+    "empty": "No results found.",
+    "favorites": "Favorites",
+    "navigation": "Navigation",
+    "launcherPlaceholder": "Search…",
+    "launcherAriaLabel": "Open command palette",
+    "actions": {
+      "heading": "Actions",
+      "newTransaction": "New transaction",
+      "newAccount": "New account",
+      "newChallenge": "New challenge"
+    }
+  },
   "auth": {
     "loginTitle": "Log in to Aurum",
     "loginDescription": "Enter your email to receive a one-time code",

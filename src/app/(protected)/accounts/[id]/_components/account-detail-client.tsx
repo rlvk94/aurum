@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { ArrowLeft, Pencil } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 import { api } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
+import { usePageMetadata } from "~/app/_components/page-metadata";
 import { Button } from "~/app/_components/button";
 import { Badge } from "~/app/_components/badge";
 import {
@@ -48,16 +48,13 @@ export function AccountDetailClient({ id }: { id: string }) {
     months: 12,
   });
 
+  usePageMetadata(
+    account ? { title: account.name, parentPath: "/accounts" } : null,
+  );
+
   if (!account) {
     return (
       <div className="space-y-6">
-        <Link
-          href="/accounts"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {tDetail("backToAccounts")}
-        </Link>
         <p className="text-muted-foreground">{tDetail("notFound")}</p>
       </div>
     );
@@ -68,16 +65,6 @@ export function AccountDetailClient({ id }: { id: string }) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link
-          href="/accounts"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {tDetail("backToAccounts")}
-        </Link>
-      </div>
-
       <PageHeader
         title={account.name}
         description={typeLabel}

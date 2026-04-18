@@ -36,6 +36,7 @@ import {
   CollapsibleTrigger,
 } from "~/app/_components/collapsible";
 import { FamilySwitcher } from "~/app/_components/family-switcher";
+import { FavoritesNavGroup } from "~/app/_components/favorites-nav-group";
 import { UserMenu } from "~/app/_components/user-menu";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -67,6 +68,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        <FavoritesNavGroup />
 
         {/* Finance */}
         <SidebarGroup>

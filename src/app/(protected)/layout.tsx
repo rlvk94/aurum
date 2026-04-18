@@ -7,7 +7,11 @@ import {
   SidebarTrigger,
 } from "~/app/_components/sidebar";
 import { Separator } from "~/app/_components/separator";
+import { CommandPaletteProvider } from "~/app/_components/command-palette";
+import { KeyboardShortcutsProvider } from "~/app/_components/keyboard-shortcuts-provider";
+import { PageMetadataProvider } from "~/app/_components/page-metadata";
 import { ProtectedSidebar } from "~/app/_components/protected-sidebar";
+import { TopNav } from "~/app/_components/top-nav";
 
 export default async function ProtectedLayout({
   children,
@@ -31,24 +35,32 @@ export default async function ProtectedLayout({
     api.family.list.prefetch(),
     api.user.getActiveFamily.prefetch(),
     api.user.me.prefetch(),
+    api.favorite.list.prefetch(),
   ]);
 
   return (
     <HydrateClient>
       <SidebarProvider>
-        <ProtectedSidebar />
-        <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-6">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-          </header>
-          <div className="flex flex-1 flex-col gap-6 p-6">
-            {children}
-          </div>
-        </SidebarInset>
+        <CommandPaletteProvider>
+          <KeyboardShortcutsProvider>
+            <PageMetadataProvider>
+              <ProtectedSidebar />
+              <SidebarInset>
+                <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                  <SidebarTrigger className="-ml-1" />
+                  <Separator
+                    orientation="vertical"
+                    className="mr-2 data-[orientation=vertical]:h-4"
+                  />
+                  <TopNav />
+                </header>
+                <div className="flex flex-1 flex-col gap-6 p-6">
+                  {children}
+                </div>
+              </SidebarInset>
+            </PageMetadataProvider>
+          </KeyboardShortcutsProvider>
+        </CommandPaletteProvider>
       </SidebarProvider>
     </HydrateClient>
   );

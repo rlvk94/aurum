@@ -50,6 +50,27 @@
     "incomePlanner": "Indkomstplanlægger",
     "importData": "Importér data"
   },
+  "favorites": {
+    "sectionTitle": "Favoritter",
+    "addLabel": "Tilføj til favoritter",
+    "removeLabel": "Fjern fra favoritter"
+  },
+  "commandPalette": {
+    "title": "Kommandopanel",
+    "description": "Søg efter sider, handlinger og favoritter",
+    "placeholder": "Skriv en kommando eller søg…",
+    "empty": "Ingen resultater.",
+    "favorites": "Favoritter",
+    "navigation": "Navigation",
+    "launcherPlaceholder": "Søg…",
+    "launcherAriaLabel": "Åbn kommandopanel",
+    "actions": {
+      "heading": "Handlinger",
+      "newTransaction": "Ny transaktion",
+      "newAccount": "Ny konto",
+      "newChallenge": "Ny udfordring"
+    }
+  },
   "auth": {
     "loginTitle": "Log ind på Aurum",
     "loginDescription": "Indtast din e-mail for at modtage en engangskode",

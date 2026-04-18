@@ -2,14 +2,14 @@
 
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import Link from "next/link";
 import { format, parse } from "date-fns";
 import { da, enUS } from "date-fns/locale";
-import { ArrowLeft, ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { api } from "~/trpc/react";
 import { PERIOD_MONTHS } from "~/server/lib/amortization";
 import { PageHeader } from "~/app/_components/page-header";
+import { usePageMetadata } from "~/app/_components/page-metadata";
 import { Button } from "~/app/_components/button";
 import { Badge } from "~/app/_components/badge";
 import {
@@ -53,6 +53,8 @@ export function DebtDetailClient({ id }: { id: string }) {
 
   const { data: debt } = api.debt.get.useQuery({ id });
 
+  usePageMetadata(debt ? { title: debt.name, parentPath: "/debts" } : null);
+
   if (!debt) return null;
 
   const { summary, schedule } = debt;
@@ -71,16 +73,6 @@ export function DebtDetailClient({ id }: { id: string }) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <Link
-          href="/debts"
-          className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          {t("backToDebts")}
-        </Link>
-      </div>
-
       <PageHeader
         title={debt.name}
         description={debt.lender}
