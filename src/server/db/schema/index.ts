@@ -5,4 +5,5 @@ export * from "./challenge";
 export * from "./debt";
 export * from "./family";
 export * from "./financial-account";
+export * from "./income-plan";
 export * from "./transaction";

@@ -5,6 +5,7 @@ import { challengeRouter } from "~/server/api/routers/challenge";
 import { debtRouter } from "~/server/api/routers/debt";
 import { familyRouter } from "~/server/api/routers/family";
 import { financialAccountRouter } from "~/server/api/routers/financial-account";
+import { incomePlanRouter } from "~/server/api/routers/income-plan";
 import { invitationRouter } from "~/server/api/routers/invitation";
 import { transactionRouter } from "~/server/api/routers/transaction";
 import { userRouter } from "~/server/api/routers/user";
@@ -21,6 +22,7 @@ export const appRouter = createTRPCRouter({
   debt: debtRouter,
   family: familyRouter,
   financialAccount: financialAccountRouter,
+  incomePlan: incomePlanRouter,
   invitation: invitationRouter,
   transaction: transactionRouter,
   user: userRouter,
