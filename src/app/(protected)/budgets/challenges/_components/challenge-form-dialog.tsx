@@ -44,7 +44,12 @@ type Challenge = RouterOutputs["challenge"]["list"][number];
 type ChallengeType = Challenge["type"];
 type Repetition = Challenge["repetition"];
 
-const TYPES: ChallengeType[] = ["spend_less", "savings", "pay_off_loan"];
+const TYPES: ChallengeType[] = [
+  "spend_less",
+  "savings",
+  "pay_off_loan",
+  "net_worth_goal",
+];
 const REPETITIONS: Repetition[] = [
   "one_off",
   "weekly",
@@ -77,7 +82,12 @@ export function ChallengeFormDialog({
     return z.object({
       name: z.string().min(1, required).max(100),
       description: z.string(),
-      type: z.enum(["spend_less", "savings", "pay_off_loan"]),
+      type: z.enum([
+        "spend_less",
+        "savings",
+        "pay_off_loan",
+        "net_worth_goal",
+      ]),
       repetition: z.enum(["one_off", "weekly", "monthly", "yearly", "custom"]),
       targetAmount: z
         .string()
@@ -225,9 +235,13 @@ export function ChallengeFormDialog({
                     <FieldLabel>{t("challengeType")}</FieldLabel>
                     <RadioGroup
                       value={field.state.value}
-                      onValueChange={(v) =>
-                        field.handleChange(v as ChallengeType)
-                      }
+                      onValueChange={(v) => {
+                        const next = v as ChallengeType;
+                        field.handleChange(next);
+                        if (next === "net_worth_goal") {
+                          form.setFieldValue("repetition", "one_off");
+                        }
+                      }}
                       className="gap-2"
                     >
                       {TYPES.map((type) => (
@@ -316,32 +330,38 @@ export function ChallengeFormDialog({
             </form.Field>
 
             {!isEdit && (
-              <form.Field name="repetition">
-                {(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>
-                      {t("challengeRepetition")}
-                    </FieldLabel>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(v) =>
-                        field.handleChange(v as Repetition)
-                      }
-                    >
-                      <SelectTrigger id={field.name}>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {REPETITIONS.map((r) => (
-                          <SelectItem key={r} value={r}>
-                            {t(`challengeRepetitions.${r}`)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                )}
-              </form.Field>
+              <form.Subscribe selector={(s) => s.values.type}>
+                {(type) =>
+                  type === "net_worth_goal" ? null : (
+                    <form.Field name="repetition">
+                      {(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {t("challengeRepetition")}
+                          </FieldLabel>
+                          <Select
+                            value={field.state.value}
+                            onValueChange={(v) =>
+                              field.handleChange(v as Repetition)
+                            }
+                          >
+                            <SelectTrigger id={field.name}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {REPETITIONS.map((r) => (
+                                <SelectItem key={r} value={r}>
+                                  {t(`challengeRepetitions.${r}`)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </Field>
+                      )}
+                    </form.Field>
+                  )
+                }
+              </form.Subscribe>
             )}
 
             {!isEdit && (

@@ -310,6 +310,7 @@
     "challengeSpent": "Brugt",
     "challengeSaved": "Sparet",
     "challengePaid": "Afdraget",
+    "challengeNetWorth": "Formue",
     "challengeArchive": "Arkivér",
     "challengeUnarchive": "Genaktivér",
     "challengeDelete": "Slet",
@@ -320,7 +321,9 @@
       "savings": "Opsparing",
       "savingsDescription": "Sæt en sum til side på en konto i en periode",
       "pay_off_loan": "Afdrag på lån",
-      "pay_off_loanDescription": "Læg ekstra afdrag på et lån gennem en valgt kategori"
+      "pay_off_loanDescription": "Læg ekstra afdrag på et lån gennem en valgt kategori",
+      "net_worth_goal": "Formuemål",
+      "net_worth_goalDescription": "Nå en samlet formue (konti + aktiver − gæld) inden en dato"
     },
     "challengeRepetitions": {
       "one_off": "Éngangs",

@@ -9,6 +9,7 @@ import {
   Pencil,
   Trash2,
   TrendingDown,
+  TrendingUp,
 } from "lucide-react";
 
 import { type RouterOutputs } from "~/trpc/react";
@@ -37,6 +38,7 @@ const typeIcon = {
   spend_less: TrendingDown,
   savings: PiggyBank,
   pay_off_loan: CircleDollarSign,
+  net_worth_goal: TrendingUp,
 } as const;
 
 function daysBetween(fromIso: string, toIso: string): number {
@@ -129,7 +131,9 @@ export function ChallengeCard({
     ? t("challengeSpent")
     : challenge.type === "savings"
       ? t("challengeSaved")
-      : t("challengePaid");
+      : challenge.type === "net_worth_goal"
+        ? t("challengeNetWorth")
+        : t("challengePaid");
 
   return (
     <Card className={archived ? "opacity-60" : ""}>

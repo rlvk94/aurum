@@ -3,9 +3,11 @@ import { and, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
 
 import type { db as dbInstance } from "~/server/db";
 import {
+  asset,
   challenge,
   challengeAccount,
   challengeInstance,
+  debt,
   financialAccount,
   transaction,
 } from "~/server/db/schema";
@@ -13,6 +15,7 @@ import {
   computePeriodWindow,
   nextPeriodStart,
 } from "~/server/lib/challenge-period";
+import { summarize, type LoanParams } from "~/server/lib/amortization";
 
 export type ChallengeRow = typeof challenge.$inferSelect;
 export type InstanceRow = typeof challengeInstance.$inferSelect;
@@ -121,12 +124,73 @@ async function accountBalanceDelta(
   return Number(row?.delta ?? 0);
 }
 
+/**
+ * Snapshot of the family's current net worth:
+ *   sum(accounts.balance where includeInNetWorth) + sum(assets.value) − sum(debt outstanding)
+ * Net-worth-goal challenges use this as "progress"; the period window is not
+ * applied since net worth is a point-in-time value.
+ */
+async function computeFamilyNetWorth(
+  db: typeof dbInstance,
+  familyId: string,
+  asOf: string,
+): Promise<number> {
+  const [accountRow] = await db
+    .select({
+      balance: sql<number>`coalesce(sum(case when ${financialAccount.includeInNetWorth} then ${financialAccount.balance} else 0 end), 0)`,
+    })
+    .from(financialAccount)
+    .where(
+      and(
+        eq(financialAccount.familyId, familyId),
+        eq(financialAccount.archived, false),
+      ),
+    );
+
+  const [assetRow] = await db
+    .select({
+      total: sql<number>`coalesce(sum(${asset.value}), 0)`,
+    })
+    .from(asset)
+    .where(and(eq(asset.familyId, familyId), eq(asset.archived, false)));
+
+  const debtRows = await db
+    .select({
+      principal: debt.principal,
+      interestRateBps: debt.interestRateBps,
+      startDate: debt.startDate,
+      termMonths: debt.termMonths,
+      paymentFrequency: debt.paymentFrequency,
+    })
+    .from(debt)
+    .where(and(eq(debt.familyId, familyId), isNull(debt.archivedAt)));
+
+  let totalDebt = 0;
+  for (const row of debtRows) {
+    const params: LoanParams = {
+      principal: row.principal,
+      interestRateBps: row.interestRateBps,
+      termMonths: row.termMonths,
+      paymentFrequency: row.paymentFrequency,
+    };
+    totalDebt += summarize(params, row.startDate, asOf).outstandingBalance;
+  }
+
+  return (
+    Number(accountRow?.balance ?? 0) + Number(assetRow?.total ?? 0) - totalDebt
+  );
+}
+
 export async function computeProgress(
   db: typeof dbInstance,
   row: ChallengeRow,
   instance: InstanceRow,
   asOf: string,
 ): Promise<number> {
+  if (row.type === "net_worth_goal") {
+    return computeFamilyNetWorth(db, row.familyId, asOf);
+  }
+
   const effectiveTo = instance.periodEnd < asOf ? instance.periodEnd : asOf;
   if (effectiveTo < instance.periodStart) return 0;
   // If the period hasn't started yet (e.g. a future-dated challenge), no progress.

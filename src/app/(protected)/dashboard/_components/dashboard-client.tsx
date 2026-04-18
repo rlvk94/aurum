@@ -31,6 +31,7 @@ const challengeTypeIcon = {
   spend_less: TrendingDown,
   savings: PiggyBank,
   pay_off_loan: CircleDollarSign,
+  net_worth_goal: TrendingUp,
 } as const;
 
 function formatAmount(cents: number): string {

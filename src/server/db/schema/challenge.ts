@@ -21,6 +21,7 @@ export const challengeTypeEnum = pgEnum("challenge_type", [
   "spend_less",
   "savings",
   "pay_off_loan",
+  "net_worth_goal",
 ]);
 
 export const challengeRepetitionEnum = pgEnum("challenge_repetition", [
@@ -40,11 +41,13 @@ export const challengeInstanceStatusEnum = pgEnum("challenge_instance_status", [
 
 // ── Tables ──────────────────────────────────────────────────────────────────
 
-// Gamified, time-boxed goal. Three types:
+// Gamified, time-boxed goal. Four types:
 //   - spend_less     → sum of expense transactions in a category ≤ target
 //   - savings        → increase of an account balance ≥ target
 //   - pay_off_loan   → sum of expense transactions in a category ≥ target (optional debt link)
+//   - net_worth_goal → family net worth (accounts + assets − debt) ≥ target by endDate
 // One-off: fixed start+end date. Repeating: per-period instances spawned lazily.
+// net_worth_goal is always one-off.
 export const challenge = pgTable("challenge", {
   id: uuid("id").primaryKey().defaultRandom(),
   familyId: uuid("family_id")

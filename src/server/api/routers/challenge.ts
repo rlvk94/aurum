@@ -33,6 +33,7 @@ const challengeTypeSchema = z.enum([
   "spend_less",
   "savings",
   "pay_off_loan",
+  "net_worth_goal",
 ]);
 
 const challengeRepetitionSchema = z.enum([
@@ -97,6 +98,22 @@ const createSchema = z
         message: "categoryId is required for pay-off-loan challenges",
         path: ["categoryId"],
       });
+    }
+    if (data.type === "net_worth_goal") {
+      if (data.repetition !== "one_off") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "net_worth_goal challenges must be one-off",
+          path: ["repetition"],
+        });
+      }
+      if (!data.endDate) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "endDate is required for net_worth_goal challenges",
+          path: ["endDate"],
+        });
+      }
     }
   });
 

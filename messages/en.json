@@ -310,6 +310,7 @@
     "challengeSpent": "Spent",
     "challengeSaved": "Saved",
     "challengePaid": "Paid",
+    "challengeNetWorth": "Net worth",
     "challengeArchive": "Archive",
     "challengeUnarchive": "Unarchive",
     "challengeDelete": "Delete",
@@ -320,7 +321,9 @@
       "savings": "Savings",
       "savingsDescription": "Grow a chosen account balance by a target over the period",
       "pay_off_loan": "Pay off debt",
-      "pay_off_loanDescription": "Route extra payments to a loan through a chosen category"
+      "pay_off_loanDescription": "Route extra payments to a loan through a chosen category",
+      "net_worth_goal": "Net worth goal",
+      "net_worth_goalDescription": "Reach a total net worth (accounts + assets − debt) by a date"
     },
     "challengeRepetitions": {
       "one_off": "One-off",
