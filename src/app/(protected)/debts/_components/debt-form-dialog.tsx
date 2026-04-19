@@ -6,6 +6,7 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { format } from "date-fns";
 
+import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
@@ -91,14 +92,22 @@ export function DebtFormDialog({
         "semi_annual",
         "annual",
       ]),
-      startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, tValidation("invalid")),
+      startDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/, tValidation("invalid")),
       assetId: z.string(),
       note: z.string(),
     });
   }, [tValidation]);
 
   const createDebt = api.debt.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      posthog.capture("debt_created", {
+        principal_cents: variables.principal,
+        term_months: variables.termMonths,
+        payment_frequency: variables.paymentFrequency,
+        has_linked_asset: !!variables.assetId,
+      });
       onOpenChange(false);
       form.reset();
       void utils.debt.list.invalidate();
@@ -125,7 +134,8 @@ export function DebtFormDialog({
       principal: debt ? String(debt.principal / 100) : "",
       interestRate: debt ? String(debt.interestRateBps / 100) : "",
       termMonths: debt ? String(debt.termMonths) : "",
-      paymentFrequency: (debt?.paymentFrequency ?? "monthly") as PaymentFrequency,
+      paymentFrequency: (debt?.paymentFrequency ??
+        "monthly") as PaymentFrequency,
       startDate: debt?.startDate ?? format(new Date(), "yyyy-MM-dd"),
       assetId: debt?.assetId ?? "",
       note: debt?.note ?? "",
@@ -349,9 +359,7 @@ export function DebtFormDialog({
             <form.Field name="startDate">
               {(field) => (
                 <Field>
-                  <FieldLabel htmlFor={field.name}>
-                    {t("startDate")}
-                  </FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t("startDate")}</FieldLabel>
                   <DatePicker
                     id={field.name}
                     value={field.state.value}
@@ -394,14 +402,14 @@ export function DebtFormDialog({
                 });
                 const n = Math.ceil(term / PERIOD_MONTHS[paymentFrequency]);
                 return (
-                  <div className="rounded-lg border border-border bg-card p-4 shadow-card">
-                    <p className="text-xs uppercase tracking-wide text-muted-foreground">
+                  <div className="border-border bg-card shadow-card rounded-lg border p-4">
+                    <p className="text-muted-foreground text-xs tracking-wide uppercase">
                       {t(`paymentPerFrequency.${paymentFrequency}`)}
                     </p>
-                    <p className="mt-1 font-display text-2xl text-foreground">
+                    <p className="font-display text-foreground mt-1 text-2xl">
                       {formatMoney(payment)}
                     </p>
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="text-muted-foreground mt-1 text-xs">
                       {t("monthlyPaymentHelp")} · {n} ×{" "}
                       {t(`frequency.${paymentFrequency}`).toLowerCase()}
                     </p>
@@ -426,9 +434,7 @@ export function DebtFormDialog({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="none">
-                        {t("noLinkedAsset")}
-                      </SelectItem>
+                      <SelectItem value="none">{t("noLinkedAsset")}</SelectItem>
                       {(assets ?? [])
                         .filter((a) => !a.archived)
                         .map((a) => (
@@ -460,7 +466,7 @@ export function DebtFormDialog({
           </FieldGroup>
 
           {mutation.error && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6">

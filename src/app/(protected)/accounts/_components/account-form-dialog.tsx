@@ -15,6 +15,7 @@ import {
   Users,
   Lock,
 } from "lucide-react";
+import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Checkbox } from "~/app/_components/checkbox";
@@ -107,7 +108,12 @@ export function AccountFormDialog({
   );
 
   const createAccount = api.financialAccount.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      posthog.capture("account_created", {
+        type: variables.type,
+        visibility: variables.visibility,
+        include_in_net_worth: variables.includeInNetWorth,
+      });
       onOpenChange(false);
       form.reset();
       void utils.financialAccount.list.invalidate();
@@ -116,7 +122,12 @@ export function AccountFormDialog({
   });
 
   const updateAccount = api.financialAccount.update.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      posthog.capture("account_updated", {
+        type: variables.type,
+        visibility: variables.visibility,
+        include_in_net_worth: variables.includeInNetWorth,
+      });
       onOpenChange(false);
       void utils.financialAccount.list.invalidate();
       void utils.financialAccount.summary.invalidate();
@@ -194,9 +205,7 @@ export function AccountFormDialog({
             {isEdit ? t("editAccount") : t("addAccount")}
           </DialogTitle>
           <DialogDescription>
-            {isEdit
-              ? t("editAccountDescription")
-              : t("addAccountDescription")}
+            {isEdit ? t("editAccountDescription") : t("addAccountDescription")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -344,7 +353,7 @@ export function AccountFormDialog({
                                   : "visibilityPrivate",
                               )}
                             </p>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {t(
                                 value === "shared"
                                   ? "visibilitySharedDescription"
@@ -370,7 +379,7 @@ export function AccountFormDialog({
                       return (
                         <Field>
                           <FieldLabel>{t("sharedWith")}</FieldLabel>
-                          <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
+                          <div className="border-border bg-card flex flex-col gap-2 rounded-lg border p-3">
                             {members.map((m) => {
                               const isSelf = m.userId === currentUserId;
                               const checked = isSelf || selected.has(m.userId);
@@ -408,12 +417,12 @@ export function AccountFormDialog({
                                     <p className="text-sm font-medium">
                                       {m.name}
                                       {isSelf && (
-                                        <span className="ml-1 text-xs text-muted-foreground">
+                                        <span className="text-muted-foreground ml-1 text-xs">
                                           ({t("you")})
                                         </span>
                                       )}
                                     </p>
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-muted-foreground text-xs">
                                       {m.role === "owner"
                                         ? tFamily("owner")
                                         : tFamily("member")}
@@ -454,7 +463,7 @@ export function AccountFormDialog({
           </FieldGroup>
 
           {mutation.error && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6">

@@ -6,6 +6,7 @@ import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { format } from "date-fns";
 
+import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
@@ -32,10 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/app/_components/select";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "~/app/_components/radio-group";
+import { RadioGroup, RadioGroupItem } from "~/app/_components/radio-group";
 import { Label } from "~/app/_components/label";
 import { Checkbox } from "~/app/_components/checkbox";
 import { CategoryPicker } from "~/app/_components/category-picker";
@@ -82,19 +80,11 @@ export function ChallengeFormDialog({
     return z.object({
       name: z.string().min(1, required).max(100),
       description: z.string(),
-      type: z.enum([
-        "spend_less",
-        "savings",
-        "pay_off_loan",
-        "net_worth_goal",
-      ]),
+      type: z.enum(["spend_less", "savings", "pay_off_loan", "net_worth_goal"]),
       repetition: z.enum(["one_off", "weekly", "monthly", "yearly", "custom"]),
       targetAmount: z
         .string()
-        .refine(
-          (v) => parseFloat(v) > 0,
-          tValidation("positiveNumber"),
-        ),
+        .refine((v) => parseFloat(v) > 0, tValidation("positiveNumber")),
       startDate: z
         .string()
         .regex(/^\d{4}-\d{2}-\d{2}$/, tValidation("invalid")),
@@ -108,7 +98,12 @@ export function ChallengeFormDialog({
   }, [tValidation]);
 
   const createChallenge = api.challenge.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      posthog.capture("challenge_created", {
+        type: variables.type,
+        repetition: variables.repetition,
+        target_amount_cents: variables.targetAmount,
+      });
       onOpenChange(false);
       form.reset();
       void utils.challenge.list.invalidate();
@@ -248,7 +243,7 @@ export function ChallengeFormDialog({
                         <label
                           key={type}
                           htmlFor={`type-${type}`}
-                          className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 hover:bg-accent data-[state=checked]:border-primary"
+                          className="border-border bg-card hover:bg-accent data-[state=checked]:border-primary flex cursor-pointer items-start gap-3 rounded-lg border p-3"
                           data-state={
                             field.state.value === type ? "checked" : undefined
                           }
@@ -259,10 +254,13 @@ export function ChallengeFormDialog({
                             className="mt-0.5"
                           />
                           <div className="flex-1 space-y-0.5">
-                            <Label htmlFor={`type-${type}`} className="font-medium">
+                            <Label
+                              htmlFor={`type-${type}`}
+                              className="font-medium"
+                            >
                               {t(`challengeTypes.${type}`)}
                             </Label>
-                            <p className="text-xs text-muted-foreground">
+                            <p className="text-muted-foreground text-xs">
                               {t(`challengeTypes.${type}Description`)}
                             </p>
                           </div>
@@ -320,7 +318,9 @@ export function ChallengeFormDialog({
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
                     />
-                    <FieldDescription>{t("challengeTargetHelp")}</FieldDescription>
+                    <FieldDescription>
+                      {t("challengeTargetHelp")}
+                    </FieldDescription>
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}
@@ -465,11 +465,11 @@ export function ChallengeFormDialog({
                             <Field>
                               <FieldLabel>{t("challengeAccounts")}</FieldLabel>
                               {activeAccounts.length === 0 ? (
-                                <p className="text-xs text-muted-foreground">
+                                <p className="text-muted-foreground text-xs">
                                   {t("challengeAllAccounts")}
                                 </p>
                               ) : (
-                                <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
+                                <div className="border-border bg-card flex flex-col gap-2 rounded-lg border p-3">
                                   {activeAccounts.map((a) => {
                                     const checked = selected.has(a.id);
                                     const id = `account-${a.id}`;
@@ -497,7 +497,9 @@ export function ChallengeFormDialog({
                                           }}
                                           className="h-4 w-4"
                                         />
-                                        <span className="text-sm">{a.name}</span>
+                                        <span className="text-sm">
+                                          {a.name}
+                                        </span>
                                       </label>
                                     );
                                   })}
@@ -597,7 +599,7 @@ export function ChallengeFormDialog({
           </FieldGroup>
 
           {mutation.error && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6">

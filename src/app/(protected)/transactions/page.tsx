@@ -40,6 +40,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/app/_components/table";
+import posthog from "posthog-js";
 import { TransactionFormDialog } from "./_components/transaction-form-dialog";
 import { CsvImportDialog } from "./_components/csv-import-dialog";
 import { cn } from "~/app/_lib/utils";
@@ -107,7 +108,8 @@ export default function TransactionsPage() {
   const [editing, setEditing] = useState<Transaction | null>(null);
 
   const deleteTx = api.transaction.delete.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      posthog.capture("transaction_deleted", { transaction_id: variables.id });
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
     },
@@ -129,10 +131,7 @@ export default function TransactionsPage() {
               <Upload />
               {t("importCsv")}
             </Button>
-            <Button
-              onClick={() => setCreateOpen(true)}
-              disabled={!hasAccounts}
-            >
+            <Button onClick={() => setCreateOpen(true)} disabled={!hasAccounts}>
               <Plus />
               {t("addTransaction")}
             </Button>
@@ -143,7 +142,7 @@ export default function TransactionsPage() {
       {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative w-full max-w-xs">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             type="search"
             value={search}
@@ -200,7 +199,7 @@ export default function TransactionsPage() {
       </div>
 
       {isLoading ? (
-        <div className="rounded-lg border border-border bg-card shadow-card">
+        <div className="border-border bg-card shadow-card rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -239,7 +238,7 @@ export default function TransactionsPage() {
       ) : transactions?.length === 0 ? (
         <EmptyState icon={ArrowLeftRight} message={t("emptyState")} />
       ) : (
-        <div className="rounded-lg border border-border bg-card shadow-card">
+        <div className="border-border bg-card shadow-card rounded-lg border">
           <Table>
             <TableHeader>
               <TableRow>
@@ -262,34 +261,30 @@ export default function TransactionsPage() {
                   : null;
                 const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
                 const sign =
-                  tx.type === "expense"
-                    ? -1
-                    : tx.type === "income"
-                      ? 1
-                      : 0;
+                  tx.type === "expense" ? -1 : tx.type === "income" ? 1 : 0;
                 return (
                   <TableRow key={tx.id}>
-                    <TableCell className="whitespace-nowrap text-muted-foreground">
+                    <TableCell className="text-muted-foreground whitespace-nowrap">
                       {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium text-foreground">
+                      <p className="text-foreground font-medium">
                         {tx.description}
                       </p>
                       {tx.note && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-muted-foreground text-xs">
                           {tx.note}
                         </p>
                       )}
                     </TableCell>
                     <TableCell>
                       {category ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+                        <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
                           {category.icon && <span>{category.icon}</span>}
                           {category.name}
                         </span>
                       ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
+                        <span className="text-muted-foreground text-xs">—</span>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -303,7 +298,7 @@ export default function TransactionsPage() {
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "whitespace-nowrap text-right font-medium",
+                        "text-right font-medium whitespace-nowrap",
                         tx.type === "expense" && "text-expense",
                         tx.type === "income" && "text-income",
                         tx.type === "transfer" && "text-savings",

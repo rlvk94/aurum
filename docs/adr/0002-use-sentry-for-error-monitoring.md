@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted
+Superseded by [ADR-0013](0013-use-posthog-for-analytics-and-error-monitoring.md)
 
 ## Date
 

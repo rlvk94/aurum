@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 
+import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
@@ -50,6 +51,7 @@ export function CreatePlanDialog({
 
   const createPlan = api.incomePlan.create.useMutation({
     onSuccess: () => {
+      posthog.capture("income_plan_created");
       onOpenChange(false);
       form.reset();
       void utils.incomePlan.list.invalidate();
@@ -99,9 +101,7 @@ export function CreatePlanDialog({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{isEdit ? t("editPlan") : t("newPlan")}</DialogTitle>
-          <DialogDescription>
-            {t("subtitle")}
-          </DialogDescription>
+          <DialogDescription>{t("subtitle")}</DialogDescription>
         </DialogHeader>
         <form
           onSubmit={(e) => {

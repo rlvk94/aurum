@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { MoreHorizontal, UserRound } from "lucide-react";
 
+import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import { Button } from "~/app/_components/button";
@@ -25,13 +26,7 @@ import {
 
 type Member = RouterOutputs["family"]["listMembers"][number];
 
-function MemberAvatar({
-  image,
-  name,
-}: {
-  image: string | null;
-  name: string;
-}) {
+function MemberAvatar({ image, name }: { image: string | null; name: string }) {
   const initials =
     name
       .split(/\s+/)
@@ -41,7 +36,7 @@ function MemberAvatar({
       .toUpperCase() || "?";
   if (image) {
     return (
-      <div className="h-9 w-9 overflow-hidden rounded-full border border-border bg-muted">
+      <div className="border-border bg-muted h-9 w-9 overflow-hidden rounded-full border">
         <img
           src={image}
           alt=""
@@ -52,7 +47,7 @@ function MemberAvatar({
     );
   }
   return (
-    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-sm font-medium text-accent-foreground">
+    <div className="bg-accent text-accent-foreground flex h-9 w-9 items-center justify-center rounded-full text-sm font-medium">
       {initials || <UserRound className="size-4" />}
     </div>
   );
@@ -77,11 +72,10 @@ function MemberRow({
 }) {
   const t = useTranslations("settings.members");
 
-  const canShowActions =
-    (isOwnerViewer && !isSelf) || (isSelf && !isLastOwner);
+  const canShowActions = (isOwnerViewer && !isSelf) || (isSelf && !isLastOwner);
 
   return (
-    <div className="flex items-center gap-3 rounded-lg border border-border bg-card p-3">
+    <div className="border-border bg-card flex items-center gap-3 rounded-lg border p-3">
       <MemberAvatar image={member.image} name={member.name} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
@@ -92,9 +86,7 @@ function MemberRow({
             </Badge>
           )}
         </div>
-        <p className="truncate text-sm text-muted-foreground">
-          {member.email}
-        </p>
+        <p className="text-muted-foreground truncate text-sm">{member.email}</p>
       </div>
       <Badge variant={member.role === "owner" ? "default" : "outline"}>
         {member.role === "owner" ? t("roleOwner") : t("roleMember")}
@@ -150,6 +142,7 @@ function InviteForm({ familyName }: { familyName: string | undefined }) {
 
   const createInvite = api.invitation.create.useMutation({
     onSuccess: () => {
+      posthog.capture("member_invited");
       void utils.invitation.list.invalidate();
       setEmail("");
     },
@@ -161,7 +154,9 @@ function InviteForm({ familyName }: { familyName: string | undefined }) {
       <CardHeader>
         <CardTitle className="text-base">{t("title")}</CardTitle>
         <CardDescription>
-          {familyName ? `${t("description")} · ${familyName}` : t("description")}
+          {familyName
+            ? `${t("description")} · ${familyName}`
+            : t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
@@ -185,7 +180,7 @@ function InviteForm({ familyName }: { familyName: string | undefined }) {
             {createInvite.isPending ? tCommon("loading") : t("send")}
           </Button>
         </form>
-        {error && <p className="text-sm text-destructive">{error}</p>}
+        {error && <p className="text-destructive text-sm">{error}</p>}
       </CardContent>
     </Card>
   );
@@ -211,10 +206,10 @@ function PendingInvitation({
   });
 
   return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
+    <div className="border-border bg-card flex flex-col gap-2 rounded-lg border p-3 sm:flex-row sm:items-center">
       <div className="min-w-0 flex-1">
         <p className="truncate font-medium">{email}</p>
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {tPending("sentAt", {
             date: format.dateTime(createdAt, {
               dateStyle: "medium",
@@ -305,7 +300,7 @@ export function MembersClient() {
             );
           })}
           {members?.length === 0 && (
-            <p className="py-4 text-center text-sm text-muted-foreground">
+            <p className="text-muted-foreground py-4 text-center text-sm">
               {t("empty")}
             </p>
           )}
@@ -328,7 +323,7 @@ export function MembersClient() {
               />
             ))}
             {invitations?.length === 0 && (
-              <p className="py-4 text-center text-sm text-muted-foreground">
+              <p className="text-muted-foreground py-4 text-center text-sm">
                 {tPending("empty")}
               </p>
             )}

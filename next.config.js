@@ -3,7 +3,6 @@
  * for Docker builds.
  */
 import "./src/env.js";
-import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
@@ -11,14 +10,19 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 /** @type {import("next").NextConfig} */
 const config = {
   serverExternalPackages: ["postgres"],
+  async rewrites() {
+    return [
+      {
+        source: "/aurum-relay/static/:path*",
+        destination: "https://eu-assets.i.posthog.com/static/:path*",
+      },
+      {
+        source: "/aurum-relay/:path*",
+        destination: "https://eu.i.posthog.com/:path*",
+      },
+    ];
+  },
+  skipTrailingSlashRedirect: true,
 };
 
-export default withSentryConfig(withNextIntl(config), {
-  // Upload source maps to Sentry for readable stack traces in production
-  sourcemaps: {
-    deleteSourcemapsAfterUpload: true,
-  },
-
-  // Suppress noisy Sentry build logs
-  silent: !process.env.CI,
-});
+export default withNextIntl(config);

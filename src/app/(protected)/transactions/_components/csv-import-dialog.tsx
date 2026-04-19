@@ -15,6 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/app/_components/dialog";
+import posthog from "posthog-js";
 import {
   detectParser,
   normalizeAccountNumber,
@@ -50,7 +51,12 @@ export function CsvImportDialog({
   const [isParsing, setIsParsing] = useState(false);
 
   const bulkImport = api.transaction.bulkImport.useMutation({
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
+      posthog.capture("csv_import_completed", {
+        total_count: data.total,
+        inserted_count: data.inserted,
+        skipped_count: data.skipped,
+      });
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
       reset();
@@ -126,9 +132,9 @@ export function CsvImportDialog({
         </DialogHeader>
 
         {!parsed && !isParsing && (
-          <label className="flex cursor-pointer flex-col items-center gap-3 rounded-lg border border-dashed border-border bg-card px-6 py-10 text-sm hover:border-primary/40 transition-colors">
-            <Upload className="size-6 text-muted-foreground" />
-            <span className="font-medium text-foreground">
+          <label className="border-border bg-card hover:border-primary/40 flex cursor-pointer flex-col items-center gap-3 rounded-lg border border-dashed px-6 py-10 text-sm transition-colors">
+            <Upload className="text-muted-foreground size-6" />
+            <span className="text-foreground font-medium">
               {t("importSelectFile")}
             </span>
             <input
@@ -145,30 +151,30 @@ export function CsvImportDialog({
         )}
 
         {isParsing && (
-          <div className="flex items-center justify-center py-10 text-muted-foreground">
+          <div className="text-muted-foreground flex items-center justify-center py-10">
             <Loader2 className="mr-2 size-4 animate-spin" />
             {tCommon("loading")}
           </div>
         )}
 
-        {parseError && <p className="text-sm text-destructive">{parseError}</p>}
+        {parseError && <p className="text-destructive text-sm">{parseError}</p>}
 
         {parsed && resolved && (
           <div className="space-y-4">
-            <div className="flex items-start gap-2 rounded-lg border border-border bg-card p-3 text-sm">
-              <CheckCircle2 className="size-4 shrink-0 text-income" />
+            <div className="border-border bg-card flex items-start gap-2 rounded-lg border p-3 text-sm">
+              <CheckCircle2 className="text-income size-4 shrink-0" />
               <div className="space-y-0.5">
-                <p className="font-medium text-foreground">
+                <p className="text-foreground font-medium">
                   {t("importFileReady")}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {parsed.parser.label}
                 </p>
               </div>
             </div>
 
             <div className="space-y-1 text-sm">
-              <p className="font-medium text-foreground">
+              <p className="text-foreground font-medium">
                 {t("importPreviewTitle", { count: resolved.matched.length })}
               </p>
               <p className="text-muted-foreground">
@@ -196,13 +202,13 @@ export function CsvImportDialog({
             </div>
 
             {resolved.matched.length > 0 && (
-              <div className="max-h-60 space-y-1 overflow-y-auto rounded-lg border border-border bg-card p-2 text-xs">
+              <div className="border-border bg-card max-h-60 space-y-1 overflow-y-auto rounded-lg border p-2 text-xs">
                 {resolved.matched.slice(0, 50).map((row, i) => (
                   <div
                     key={i}
                     className="flex items-center justify-between gap-2 py-1"
                   >
-                    <span className="whitespace-nowrap text-muted-foreground">
+                    <span className="text-muted-foreground whitespace-nowrap">
                       {format(
                         parse(row.date, "yyyy-MM-dd", new Date()),
                         "d. MMM yyyy",
@@ -230,7 +236,7 @@ export function CsvImportDialog({
                   </div>
                 ))}
                 {resolved.matched.length > 50 && (
-                  <p className="pt-2 text-center text-muted-foreground">
+                  <p className="text-muted-foreground pt-2 text-center">
                     {t("importPreviewMore", {
                       count: resolved.matched.length - 50,
                     })}
@@ -240,11 +246,11 @@ export function CsvImportDialog({
             )}
 
             {bulkImport.error && (
-              <p className="text-sm text-destructive">{tCommon("error")}</p>
+              <p className="text-destructive text-sm">{tCommon("error")}</p>
             )}
 
             {bulkImport.data && (
-              <p className="text-sm text-income">
+              <p className="text-income text-sm">
                 {t("importSuccess", bulkImport.data)}
               </p>
             )}

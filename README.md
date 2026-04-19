@@ -28,7 +28,7 @@ It replaces a combination of a spend-tracking app and a custom finance spreadshe
 - **Auth:** [BetterAuth](https://www.better-auth.com/) (email OTP)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
 - **Language:** TypeScript (strict mode)
-- **Error Monitoring:** [Sentry](https://sentry.io/)
+- **Product Analytics & Error Monitoring:** [PostHog](https://posthog.com/)
 - **Testing:** [Vitest](https://vitest.dev/)
 
 ## Getting Started
@@ -158,7 +158,7 @@ Current ADRs:
 | # | Decision |
 |---|----------|
 | 0001 | [Use T3 Stack](docs/adr/0001-use-t3-stack.md) |
-| 0002 | [Use Sentry for Error Monitoring](docs/adr/0002-use-sentry-for-error-monitoring.md) |
+| 0002 | [Use Sentry for Error Monitoring](docs/adr/0002-use-sentry-for-error-monitoring.md) (superseded by 0013) |
 | 0003 | [Use Drizzle ORM](docs/adr/0003-use-drizzle-orm.md) |
 | 0004 | [Use BetterAuth](docs/adr/0004-use-betterauth.md) |
 | 0005 | [Email OTP-Only Authentication](docs/adr/0005-email-otp-only-auth.md) |
@@ -169,6 +169,7 @@ Current ADRs:
 | 0010 | [Aurum Design System from Lovable Prototype](docs/adr/0010-aurum-design-system.md) |
 | 0011 | [Use next-intl for Internationalization](docs/adr/0011-use-next-intl.md) |
 | 0012 | [All User-Facing Text Must Use Translation Keys](docs/adr/0012-translatable-labels.md) |
+| 0013 | [Use PostHog for Product Analytics and Error Monitoring](docs/adr/0013-use-posthog-for-analytics-and-error-monitoring.md) |
 
 ## Further Documentation
 
@@ -177,4 +178,4 @@ Current ADRs:
 - [tRPC Documentation](https://trpc.io/docs)
 - [Drizzle ORM Documentation](https://orm.drizzle.team/docs/overview)
 - [BetterAuth Documentation](https://www.better-auth.com/docs)
-- [Sentry Next.js Guide](https://docs.sentry.io/platforms/javascript/guides/nextjs/)
+- [PostHog Next.js Guide](https://posthog.com/docs/libraries/next-js)

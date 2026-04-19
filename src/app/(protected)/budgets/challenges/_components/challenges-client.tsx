@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Plus, Target } from "lucide-react";
 
+import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import { EmptyState } from "~/app/_components/empty-state";
@@ -29,7 +30,10 @@ export function ChallengesClient() {
   };
 
   const setArchived = api.challenge.setArchived.useMutation({
-    onSuccess: invalidate,
+    onSuccess: (_, variables) => {
+      posthog.capture("challenge_archived", { archived: variables.archived });
+      invalidate();
+    },
   });
   const deleteChallenge = api.challenge.delete.useMutation({
     onSuccess: invalidate,
@@ -79,7 +83,7 @@ export function ChallengesClient() {
           )}
           {archived.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+              <h2 className="text-muted-foreground mb-3 text-sm font-medium">
                 {t("challengeStatuses.archived")}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -100,10 +104,7 @@ export function ChallengesClient() {
         </div>
       )}
 
-      <ChallengeFormDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-      />
+      <ChallengeFormDialog open={createOpen} onOpenChange={setCreateOpen} />
       <ChallengeFormDialog
         key={editing?.id}
         open={!!editing}

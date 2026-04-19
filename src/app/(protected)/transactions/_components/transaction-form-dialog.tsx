@@ -37,10 +37,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/app/_components/select";
-import {
-  RadioGroup,
-  RadioGroupItem,
-} from "~/app/_components/radio-group";
+import { RadioGroup, RadioGroupItem } from "~/app/_components/radio-group";
+import posthog from "posthog-js";
 import { CategoryPicker } from "~/app/_components/category-picker";
 import { cn } from "~/app/_lib/utils";
 
@@ -125,7 +123,12 @@ export function TransactionFormDialog({
   const { data: categories = [] } = api.category.list.useQuery();
 
   const createTx = api.transaction.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      posthog.capture("transaction_created", {
+        type: variables.type,
+        amount_cents: variables.amount,
+        has_category: !!variables.categoryId,
+      });
       onOpenChange(false);
       form.reset();
       void utils.transaction.list.invalidate();
@@ -134,7 +137,12 @@ export function TransactionFormDialog({
   });
 
   const updateTx = api.transaction.update.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      posthog.capture("transaction_updated", {
+        type: variables.type,
+        amount_cents: variables.amount,
+        has_category: !!variables.categoryId,
+      });
       onOpenChange(false);
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
@@ -143,7 +151,8 @@ export function TransactionFormDialog({
 
   const form = useForm({
     defaultValues: {
-      type: (transaction?.type as "expense" | "income" | "transfer") ?? "expense",
+      type:
+        (transaction?.type as "expense" | "income" | "transfer") ?? "expense",
       accountId: transaction?.accountId ?? accounts[0]?.id ?? "",
       transferAccountId: transaction?.transferAccountId ?? "",
       amount: transaction ? String(transaction.amount / 100) : "",
@@ -159,9 +168,7 @@ export function TransactionFormDialog({
       const amountCents = Math.round(parseFloat(value.amount) * 100);
       const trimmedNote = value.note.trim();
       const categoryId =
-        value.type !== "transfer" && value.categoryId
-          ? value.categoryId
-          : null;
+        value.type !== "transfer" && value.categoryId ? value.categoryId : null;
       if (isEdit) {
         updateTx.mutate({
           id: transaction.id,
@@ -328,7 +335,10 @@ export function TransactionFormDialog({
                                   (a) => a.id !== form.state.values.accountId,
                                 )
                                 .map((account) => (
-                                  <SelectItem key={account.id} value={account.id}>
+                                  <SelectItem
+                                    key={account.id}
+                                    value={account.id}
+                                  >
                                     {account.name}
                                   </SelectItem>
                                 ))}
@@ -352,9 +362,7 @@ export function TransactionFormDialog({
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>
-                      {t("amount")}
-                    </FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t("amount")}</FieldLabel>
                     <Input
                       id={field.name}
                       type="number"
@@ -494,7 +502,7 @@ export function TransactionFormDialog({
           </FieldGroup>
 
           {mutation.error && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6">

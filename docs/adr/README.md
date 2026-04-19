@@ -43,7 +43,7 @@ YYYY-MM-DD
 | ADR | Title | Status |
 |-----|-------|--------|
 | 0001 | [Use T3 Stack](0001-use-t3-stack.md) | Accepted |
-| 0002 | [Use Sentry for Error Monitoring](0002-use-sentry-for-error-monitoring.md) | Accepted |
+| 0002 | [Use Sentry for Error Monitoring](0002-use-sentry-for-error-monitoring.md) | Superseded |
 | 0003 | [Use Drizzle ORM](0003-use-drizzle-orm.md) | Accepted |
 | 0004 | [Use BetterAuth](0004-use-betterauth.md) | Accepted |
 | 0005 | [Email OTP-Only Authentication](0005-email-otp-only-auth.md) | Accepted |
@@ -54,3 +54,4 @@ YYYY-MM-DD
 | 0010 | [Aurum Design System from Lovable Prototype](0010-aurum-design-system.md) | Accepted |
 | 0011 | [Use next-intl for Internationalization](0011-use-next-intl.md) | Proposed |
 | 0012 | [All User-Facing Text Must Use Translation Keys](0012-translatable-labels.md) | Proposed |
+| 0013 | [Use PostHog for Product Analytics and Error Monitoring](0013-use-posthog-for-analytics-and-error-monitoring.md) | Proposed |

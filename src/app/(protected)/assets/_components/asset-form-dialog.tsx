@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
 import { Home, Car, TrendingUp, Gem, Package } from "lucide-react";
+import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
@@ -59,7 +60,11 @@ export function AssetFormDialog({
   const isEdit = !!asset;
 
   const createAsset = api.asset.create.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      posthog.capture("asset_created", {
+        type: variables.type,
+        value_cents: variables.value,
+      });
       onOpenChange(false);
       form.reset();
       void utils.asset.list.invalidate();
@@ -212,9 +217,7 @@ export function AssetFormDialog({
               name="note"
               children={(field) => (
                 <Field>
-                  <FieldLabel htmlFor={field.name}>
-                    {t("noteLabel")}
-                  </FieldLabel>
+                  <FieldLabel htmlFor={field.name}>{t("noteLabel")}</FieldLabel>
                   <Input
                     id={field.name}
                     value={field.state.value}
@@ -228,7 +231,7 @@ export function AssetFormDialog({
           </FieldGroup>
 
           {mutation.error && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6">

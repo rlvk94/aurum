@@ -18,7 +18,7 @@ The app replaces a combination of a spend-tracking app (like Spiir) and a custom
 - **Styling:** Tailwind CSS v4 + shadcn/ui
 - **Language:** TypeScript (strict mode)
 - **i18n:** next-intl (Danish default, English)
-- **Error monitoring:** Sentry
+- **Product analytics & error monitoring:** PostHog (EU cloud)
 - **Testing:** Vitest
 
 ## Core Domain Model
@@ -163,7 +163,7 @@ Server code lives outside `src/app/`:
 ## ADR Index
 
 - `0001` — Use T3 Stack
-- `0002` — Use Sentry for error monitoring
+- `0002` — Use Sentry for error monitoring (superseded by 0013)
 - `0003` — Use Drizzle ORM
 - `0004` — Use BetterAuth
 - `0005` — Email OTP-only authentication
@@ -174,6 +174,7 @@ Server code lives outside `src/app/`:
 - `0010` — Aurum design system from Lovable prototype
 - `0011` — Use next-intl for internationalization
 - `0012` — All user-facing text must use translation keys
+- `0013` — Use PostHog for product analytics and error monitoring
 
 ## Testing
 
