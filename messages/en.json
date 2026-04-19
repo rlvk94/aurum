@@ -258,7 +258,8 @@
     "notePlaceholder": "Optional note",
     "pickDate": "Pick a date",
     "emptyState": "No transactions yet. Add your first transaction or import a CSV file.",
-    "loadMore": "Load more"
+    "loadMore": "Load more",
+    "importFailed": "Import failed. Please check the file and try again."
   },
   "budgets": {
     "title": "Budgets",

@@ -10,10 +10,29 @@ import {
   transaction,
   user,
 } from "~/server/db/schema";
+import { getPostHogClient } from "~/server/posthog";
 import {
   findMatchingCategoryId,
   loadCategoriesWithKeywords,
 } from "./category";
+
+// Postgres TEXT columns reject null bytes with
+// "unsupported Unicode escape sequence". CSV data from banks sometimes
+// contains stray \u0000, so strip them before insert.
+function stripNullBytes(value: string): string {
+  return value.replace(/\u0000/g, "");
+}
+
+function sanitizeMetadata(
+  meta: Record<string, string> | undefined,
+): Record<string, string> | null {
+  if (!meta) return null;
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(meta)) {
+    out[stripNullBytes(k)] = stripNullBytes(v);
+  }
+  return out;
+}
 
 const transactionTypeSchema = z.enum(["expense", "income", "transfer"]);
 
@@ -345,13 +364,16 @@ export const transactionRouter = createTRPCRouter({
 
       const now = new Date();
       const values = input.transactions.map((t) => {
+        const description = stripNullBytes(t.description);
+        const note = t.note ? stripNullBytes(t.note) : null;
+        const metadata = sanitizeMetadata(t.metadata);
         const categoryId =
           t.type !== "transfer"
             ? findMatchingCategoryId(
                 categoriesWithKeywords,
-                t.description,
-                t.note ?? null,
-                t.metadata ?? null,
+                description,
+                note,
+                metadata,
                 t.type,
               )
             : null;
@@ -362,29 +384,50 @@ export const transactionRouter = createTRPCRouter({
           type: t.type,
           amount: t.amount,
           date: t.date,
-          description: t.description,
-          note: t.note ?? null,
-          metadata: t.metadata ?? null,
+          description,
+          note,
+          metadata,
           categoryId,
-          externalId: t.externalId,
+          externalId: stripNullBytes(t.externalId),
           importedAt: now,
         };
       });
 
-      // Insert in chunks to avoid query size limits
+      // Insert atomically in chunks so a mid-loop failure can't leave
+      // partial data behind.
       const CHUNK = 500;
       let inserted = 0;
-      for (let i = 0; i < values.length; i += CHUNK) {
-        const chunk = values.slice(i, i + CHUNK);
-        const result = await ctx.db
-          .insert(transaction)
-          .values(chunk)
-          .onConflictDoNothing({
-            target: [transaction.accountId, transaction.externalId],
-            where: isNotNull(transaction.externalId),
-          })
-          .returning({ id: transaction.id });
-        inserted += result.length;
+      try {
+        await ctx.db.transaction(async (tx) => {
+          for (let i = 0; i < values.length; i += CHUNK) {
+            const chunk = values.slice(i, i + CHUNK);
+            const result = await tx
+              .insert(transaction)
+              .values(chunk)
+              .onConflictDoNothing({
+                target: [transaction.accountId, transaction.externalId],
+                where: isNotNull(transaction.externalId),
+              })
+              .returning({ id: transaction.id });
+            inserted += result.length;
+          }
+        });
+      } catch (err) {
+        const posthog = getPostHogClient();
+        posthog.captureException(
+          err instanceof Error ? err : new Error(String(err)),
+          ctx.session.user.id,
+          {
+            procedure: "transaction.bulkImport",
+            familyId,
+            rowCount: input.transactions.length,
+          },
+        );
+        await posthog.shutdown();
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Import failed",
+        });
       }
 
       return {

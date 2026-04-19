@@ -246,9 +246,7 @@ export function CsvImportDialog({
             )}
 
             {bulkImport.error && (
-              <p className="text-destructive text-sm">
-                {bulkImport.error.message || tCommon("error")}
-              </p>
+              <p className="text-destructive text-sm">{t("importFailed")}</p>
             )}
 
             {bulkImport.data && (

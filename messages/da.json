@@ -258,7 +258,8 @@
     "notePlaceholder": "Valgfri note",
     "pickDate": "Vælg dato",
     "emptyState": "Ingen transaktioner endnu. Tilføj din første transaktion eller importér en CSV-fil.",
-    "loadMore": "Indlæs flere"
+    "loadMore": "Indlæs flere",
+    "importFailed": "Import mislykkedes. Kontrollér filen og prøv igen."
   },
   "budgets": {
     "title": "Budgetter",
