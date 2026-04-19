@@ -2,6 +2,9 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
+
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 import {
   SidebarInset,
   SidebarProvider,
