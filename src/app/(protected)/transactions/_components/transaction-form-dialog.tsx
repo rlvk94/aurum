@@ -42,7 +42,7 @@ import posthog from "posthog-js";
 import { CategoryPicker } from "~/app/_components/category-picker";
 import { cn } from "~/app/_lib/utils";
 
-type Transaction = RouterOutputs["transaction"]["list"][number];
+type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
 type Account = RouterOutputs["financialAccount"]["list"][number];
 
 type TxType = "expense" | "income" | "transfer";

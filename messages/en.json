@@ -257,7 +257,8 @@
     "noteLabel": "Note",
     "notePlaceholder": "Optional note",
     "pickDate": "Pick a date",
-    "emptyState": "No transactions yet. Add your first transaction or import a CSV file."
+    "emptyState": "No transactions yet. Add your first transaction or import a CSV file.",
+    "loadMore": "Load more"
   },
   "budgets": {
     "title": "Budgets",

@@ -142,7 +142,14 @@ export const transactionRouter = createTRPCRouter({
           search: z.string().optional(),
           from: z.string().optional(), // ISO date YYYY-MM-DD
           to: z.string().optional(),
-          limit: z.number().int().min(1).max(500).default(100),
+          limit: z.number().int().min(1).max(500).default(50),
+          cursor: z
+            .object({
+              date: z.string(),
+              createdAt: z.string(),
+              id: z.string().uuid(),
+            })
+            .nullish(),
         })
         .optional(),
     )
@@ -154,7 +161,12 @@ export const transactionRouter = createTRPCRouter({
         ctx.session.user.id,
       );
 
-      if (accessibleIds.length === 0) return [];
+      if (accessibleIds.length === 0) {
+        return {
+          items: [] as (typeof transaction.$inferSelect)[],
+          nextCursor: null,
+        };
+      }
 
       const conditions = [
         eq(transaction.familyId, familyId),
@@ -193,13 +205,39 @@ export const transactionRouter = createTRPCRouter({
       if (input?.to) {
         conditions.push(lte(transaction.date, input.to));
       }
+      if (input?.cursor) {
+        // Keyset pagination on (date DESC, createdAt DESC, id DESC).
+        // Rows "after" the cursor are tuple-less-than in that ordering.
+        conditions.push(
+          sql`(${transaction.date}, ${transaction.createdAt}, ${transaction.id}) < (${input.cursor.date}, ${new Date(input.cursor.createdAt)}, ${input.cursor.id})`,
+        );
+      }
 
-      return ctx.db
+      const limit = input?.limit ?? 50;
+      const rows = await ctx.db
         .select()
         .from(transaction)
         .where(and(...conditions))
-        .orderBy(desc(transaction.date), desc(transaction.createdAt))
-        .limit(input?.limit ?? 100);
+        .orderBy(
+          desc(transaction.date),
+          desc(transaction.createdAt),
+          desc(transaction.id),
+        )
+        .limit(limit + 1);
+
+      const hasMore = rows.length > limit;
+      const items = hasMore ? rows.slice(0, limit) : rows;
+      const last = items[items.length - 1];
+      const nextCursor =
+        hasMore && last
+          ? {
+              date: last.date,
+              createdAt: last.createdAt.toISOString(),
+              id: last.id,
+            }
+          : null;
+
+      return { items, nextCursor };
     }),
 
   create: protectedProcedure

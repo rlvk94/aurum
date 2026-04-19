@@ -257,7 +257,8 @@
     "noteLabel": "Note",
     "notePlaceholder": "Valgfri note",
     "pickDate": "Vælg dato",
-    "emptyState": "Ingen transaktioner endnu. Tilføj din første transaktion eller importér en CSV-fil."
+    "emptyState": "Ingen transaktioner endnu. Tilføj din første transaktion eller importér en CSV-fil.",
+    "loadMore": "Indlæs flere"
   },
   "budgets": {
     "title": "Budgetter",

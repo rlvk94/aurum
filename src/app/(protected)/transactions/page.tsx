@@ -45,7 +45,7 @@ import { TransactionFormDialog } from "./_components/transaction-form-dialog";
 import { CsvImportDialog } from "./_components/csv-import-dialog";
 import { cn } from "~/app/_lib/utils";
 
-type Transaction = RouterOutputs["transaction"]["list"][number];
+type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
 
 const ALL = "__all__";
 const UNCATEGORIZED = "__uncategorized__";
@@ -79,20 +79,35 @@ export default function TransactionsPage() {
     return () => clearTimeout(timeout);
   }, [search]);
 
-  const { data: transactions, isLoading } = api.transaction.list.useQuery({
-    accountId: accountFilter === ALL ? undefined : accountFilter,
-    type:
-      typeFilter === ALL
-        ? undefined
-        : (typeFilter as "expense" | "income" | "transfer"),
-    categoryId:
-      categoryFilter === ALL
-        ? undefined
-        : categoryFilter === UNCATEGORIZED
-          ? null
-          : categoryFilter,
-    search: debouncedSearch || undefined,
-  });
+  const {
+    data: infiniteData,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = api.transaction.list.useInfiniteQuery(
+    {
+      accountId: accountFilter === ALL ? undefined : accountFilter,
+      type:
+        typeFilter === ALL
+          ? undefined
+          : (typeFilter as "expense" | "income" | "transfer"),
+      categoryId:
+        categoryFilter === ALL
+          ? undefined
+          : categoryFilter === UNCATEGORIZED
+            ? null
+            : categoryFilter,
+      search: debouncedSearch || undefined,
+    },
+    {
+      getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+    },
+  );
+  const transactions = useMemo(
+    () => infiniteData?.pages.flatMap((p) => p.items) ?? [],
+    [infiniteData],
+  );
 
   const accountMap = useMemo(
     () => new Map(accounts.map((a) => [a.id, a])),
@@ -235,7 +250,7 @@ export default function TransactionsPage() {
             </TableBody>
           </Table>
         </div>
-      ) : transactions?.length === 0 ? (
+      ) : transactions.length === 0 ? (
         <EmptyState icon={ArrowLeftRight} message={t("emptyState")} />
       ) : (
         <div className="border-border bg-card shadow-card rounded-lg border">
@@ -251,7 +266,7 @@ export default function TransactionsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {transactions?.map((tx) => {
+              {transactions.map((tx) => {
                 const account = accountMap.get(tx.accountId);
                 const transferAccount = tx.transferAccountId
                   ? accountMap.get(tx.transferAccountId)
@@ -339,6 +354,18 @@ export default function TransactionsPage() {
               })}
             </TableBody>
           </Table>
+        </div>
+      )}
+
+      {!isLoading && transactions.length > 0 && hasNextPage && (
+        <div className="flex justify-center">
+          <Button
+            variant="outline"
+            onClick={() => void fetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage ? tCommon("loading") : t("loadMore")}
+          </Button>
         </div>
       )}
 

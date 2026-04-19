@@ -47,7 +47,7 @@ import { EmptyState } from "~/app/_components/empty-state";
 import { cn } from "~/app/_lib/utils";
 import { TransactionFormDialog } from "~/app/(protected)/transactions/_components/transaction-form-dialog";
 
-type Transaction = RouterOutputs["transaction"]["list"][number];
+type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
 
 const ALL = "__all__";
 
@@ -80,7 +80,7 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
     return () => clearTimeout(timeout);
   }, [search]);
 
-  const { data: transactions, isLoading } = api.transaction.list.useQuery({
+  const { data, isLoading } = api.transaction.list.useQuery({
     accountId,
     type:
       typeFilter === ALL
@@ -88,6 +88,7 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
         : (typeFilter as "expense" | "income" | "transfer"),
     search: debouncedSearch || undefined,
   });
+  const transactions = data?.items;
 
   const accountMap = useMemo(
     () => new Map(accounts.map((a) => [a.id, a])),

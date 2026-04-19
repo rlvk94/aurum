@@ -144,8 +144,9 @@ export function DashboardClient() {
   const { data: debtSummary } = api.debt.summary.useQuery();
   const { data: weeklyExpense } = api.transaction.weeklyExpense.useQuery();
   const { data: accounts = [] } = api.financialAccount.list.useQuery();
-  const { data: recent, isLoading: recentLoading } =
+  const { data: recentData, isLoading: recentLoading } =
     api.transaction.list.useQuery({ limit: 5 });
+  const recent = recentData?.items;
   const { data: challenges } = api.challenge.list.useQuery();
   const activeChallenges = (challenges ?? []).slice(0, 4);
 
