@@ -51,6 +51,13 @@ export const userRouter = createTRPCRouter({
       .where(eq(user.id, ctx.session.user.id));
   }),
 
+  dismissTutorial: protectedProcedure.mutation(async ({ ctx }) => {
+    await ctx.db
+      .update(user)
+      .set({ tutorialCompletedAt: new Date(), updatedAt: new Date() })
+      .where(eq(user.id, ctx.session.user.id));
+  }),
+
   me: protectedProcedure.query(async ({ ctx }) => {
     const [row] = await ctx.db
       .select({
@@ -61,6 +68,8 @@ export const userRouter = createTRPCRouter({
         locale: user.locale,
         theme: user.theme,
         pendingEmail: user.pendingEmail,
+        onboardedAt: user.onboardedAt,
+        tutorialCompletedAt: user.tutorialCompletedAt,
       })
       .from(user)
       .where(eq(user.id, ctx.session.user.id));

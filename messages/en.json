@@ -735,5 +735,47 @@
       "linkFallback": "If the button doesn't work, copy and paste this link into your browser:",
       "expiresIn": "This invitation expires in {days} days."
     }
+  },
+  "tutorial": {
+    "stepCounter": "Step {current} of {total}",
+    "next": "Next",
+    "back": "Back",
+    "skip": "Skip tour",
+    "finish": "Finish",
+    "close": "Close tour",
+    "steps": {
+      "welcome": {
+        "title": "Welcome to Aurum",
+        "body": "Let's take a quick tour so you know your way around. You can skip or close this at any time."
+      },
+      "stats": {
+        "title": "Your finances at a glance",
+        "body": "These four cards show your weekly activity, total balance, debt, and net worth — all updated in real time."
+      },
+      "recentTransactions": {
+        "title": "Recent transactions",
+        "body": "Your latest activity lives here. Click the card to see the full ledger and add new transactions."
+      },
+      "challenges": {
+        "title": "Challenges keep you on track",
+        "body": "Set time-boxed goals like saving, paying down debt, or curbing a spending category. Progress shows up here."
+      },
+      "budgets": {
+        "title": "Annual budgets",
+        "body": "Plan the full year across 12 months. Compare planned vs actual spending and spot over- and underspending instantly."
+      },
+      "navigation": {
+        "title": "Explore the rest of the app",
+        "body": "Use the sidebar to jump to accounts, transactions, assets, debts, and income planning."
+      },
+      "familySwitcher": {
+        "title": "Switch between families",
+        "body": "Part of more than one family? Switch between them here — or create a new one."
+      },
+      "settings": {
+        "title": "Settings live here",
+        "body": "Click your name to change language and theme, or manage family members."
+      }
+    }
   }
 }

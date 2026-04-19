@@ -712,28 +712,70 @@
       "ignoreIfNotYou": "Hvis du ikke forventede denne e-mail, kan du roligt ignorere den."
     },
     "signInOtp": {
-      "subject": "Din Aurum-loginkode",
+      "subject": "Din loginkode til Aurum",
       "preview": "Din loginkode er {code}",
       "heading": "Log ind på Aurum",
-      "intro": "Brug koden nedenfor for at fuldføre dit login. Den udløber om {minutes} minutter.",
+      "intro": "Brug koden herunder for at logge ind. Den gælder de næste {minutes} minutter.",
       "codeLabel": "Din kode"
     },
     "emailChangeOtp": {
       "subject": "Bekræft din nye e-mailadresse",
       "preview": "Bekræftelseskode: {code}",
       "heading": "Bekræft din nye e-mailadresse",
-      "intro": "Du har bedt om at ændre din Aurum-e-mail til denne adresse. Indtast koden nedenfor i appen for at bekræfte. Den udløber om {minutes} minutter.",
+      "intro": "Du har bedt om at skifte din e-mail på Aurum til denne adresse. Indtast koden herunder i appen for at bekræfte. Koden gælder de næste {minutes} minutter.",
       "codeLabel": "Bekræftelseskode",
-      "didNotRequest": "Hvis du ikke har anmodet om denne ændring, så log ind på Aurum og annuller e-mailændringen."
+      "didNotRequest": "Har du ikke selv bedt om denne ændring, kan du logge ind på Aurum og annullere den."
     },
     "familyInvite": {
       "subject": "{inviterName} har inviteret dig til {familyName} på Aurum",
-      "preview": "Deltag i {familyName} på Aurum",
+      "preview": "Bliv en del af {familyName} på Aurum",
       "heading": "Du er inviteret til {familyName}",
-      "intro": "{inviterName} har inviteret dig til at dele familieøkonomien i {familyName} på Aurum. Log ind på Aurum med denne e-mailadresse, så bliver du automatisk tilføjet til familien.",
+      "intro": "{inviterName} har inviteret dig med i familien {familyName} på Aurum — så I kan styre familieøkonomien sammen. Log ind med denne e-mailadresse, så tilføjer vi dig automatisk til familien.",
       "cta": "Log ind på Aurum",
-      "linkFallback": "Hvis knappen ikke virker, så kopier og indsæt dette link i din browser:",
+      "linkFallback": "Virker knappen ikke, kan du kopiere linket herunder ind i din browser:",
       "expiresIn": "Invitationen udløber om {days} dage."
+    }
+  },
+  "tutorial": {
+    "stepCounter": "Trin {current} af {total}",
+    "next": "Næste",
+    "back": "Tilbage",
+    "skip": "Spring over",
+    "finish": "Afslut",
+    "close": "Luk rundvisningen",
+    "steps": {
+      "welcome": {
+        "title": "Velkommen til Aurum",
+        "body": "Lad os vise dig de vigtigste dele af appen. Du kan afslutte rundvisningen når som helst."
+      },
+      "stats": {
+        "title": "Dit økonomiske overblik",
+        "body": "De fire kort giver dig et hurtigt overblik — ugens forbrug, samlet saldo, gæld og formue. Altid opdateret."
+      },
+      "recentTransactions": {
+        "title": "Seneste transaktioner",
+        "body": "Her ser du de seneste bevægelser. Klik på kortet for at se hele historikken eller tilføje nye."
+      },
+      "challenges": {
+        "title": "Nå dine mål med udfordringer",
+        "body": "Sæt tidsbestemte mål — spar op, afdrag gæld eller hold forbruget nede i en kategori. Din fremgang vises her."
+      },
+      "budgets": {
+        "title": "Årlige budgetter",
+        "body": "Læg budgettet for hele året, måned for måned. Sammenlign det planlagte med det faktiske forbrug og se straks, hvor du ligger over eller under."
+      },
+      "navigation": {
+        "title": "Udforsk resten af appen",
+        "body": "Brug menuen til at hoppe til konti, transaktioner, aktiver, gæld og indkomstplanlæggeren."
+      },
+      "familySwitcher": {
+        "title": "Skift mellem familier",
+        "body": "Er du med i flere familier? Herfra kan du skifte mellem dem — eller oprette en ny."
+      },
+      "settings": {
+        "title": "Indstillingerne finder du her",
+        "body": "Klik på dit navn for at ændre sprog og tema eller administrere familiens medlemmer."
+      }
     }
   }
 }

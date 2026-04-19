@@ -38,7 +38,7 @@ export function UserMenu() {
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
+      <SidebarMenuItem data-tour-id="settings">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton

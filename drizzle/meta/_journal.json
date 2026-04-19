@@ -50,6 +50,13 @@
       "when": 1776536505446,
       "tag": "0006_early_strong_guy",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1776582548760,
+      "tag": "0007_fluffy_swarm",
+      "breakpoints": true
     }
   ]
 }

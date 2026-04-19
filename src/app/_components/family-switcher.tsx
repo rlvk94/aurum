@@ -66,7 +66,7 @@ export function FamilySwitcher() {
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
+      <SidebarMenuItem data-tour-id="family-switcher">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton

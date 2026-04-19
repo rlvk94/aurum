@@ -31,6 +31,9 @@ export const user = pgTable("user", {
   activeFamilyId: uuid("active_family_id"),
   onboardingStep: integer("onboarding_step").default(0).notNull(),
   onboardedAt: timestamp("onboarded_at", { withTimezone: true }),
+  tutorialCompletedAt: timestamp("tutorial_completed_at", {
+    withTimezone: true,
+  }),
   pendingEmail: text("pending_email"),
   pendingEmailToken: text("pending_email_token"),
   pendingEmailExpiresAt: timestamp("pending_email_expires_at", {

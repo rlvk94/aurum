@@ -44,7 +44,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
 
   return (
-    <Sidebar variant="inset" {...props}>
+    <Sidebar variant="inset" data-tour-id="navigation" {...props}>
       <SidebarHeader>
         <FamilySwitcher />
       </SidebarHeader>
@@ -105,7 +105,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 asChild
                 defaultOpen={pathname.startsWith("/budgets")}
               >
-                <SidebarMenuItem>
+                <SidebarMenuItem data-tour-id="budgets">
                   <CollapsibleTrigger asChild>
                     <SidebarMenuButton isActive={pathname.startsWith("/budgets")}>
                       <PieChart />

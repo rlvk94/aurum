@@ -160,7 +160,10 @@ export function DashboardClient() {
     <div className="space-y-6">
       <PageHeader title={t("title")} />
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div
+        data-tour-id="stats"
+        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+      >
         <StatCard
           title={t("weeklySpent")}
           value={weeklyExpense !== undefined ? formatAmount(weeklyExpense) : "–"}
@@ -189,7 +192,7 @@ export function DashboardClient() {
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+        <Card data-tour-id="recent-transactions">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg">{t("recentTransactions")}</CardTitle>
             <Link
@@ -257,7 +260,7 @@ export function DashboardClient() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-tour-id="challenges">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg">
               {tBudgets("challenges")}
