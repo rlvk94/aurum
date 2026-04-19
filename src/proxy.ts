@@ -1,4 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server";
+import { getSessionCookie } from "better-auth/cookies";
 
 const publicPaths = ["/login", "/api/auth", "/api/trpc"];
 const authRequiredPaths = ["/welcome"];
@@ -8,9 +9,7 @@ export function proxy(request: NextRequest) {
 
   const isPublic = publicPaths.some((path) => pathname.startsWith(path));
   const isAuthRequired = authRequiredPaths.some((path) => pathname.startsWith(path));
-  const hasSession =
-    request.cookies.has("better-auth.session_token") ||
-    request.cookies.has("__Secure-better-auth.session_token");
+  const hasSession = !!getSessionCookie(request);
 
   // Authenticated users visiting login → redirect to dashboard
   if (hasSession && pathname === "/login") {
