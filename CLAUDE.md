@@ -134,6 +134,16 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - Prefer simple, clear solutions over over-engineering
 - All financial data is manually entered or CSV-imported (no bank integrations in MVP)
 
+## Database Migrations
+
+Drizzle migrations live in `drizzle/` and are tracked via `drizzle/meta/`.
+
+- **Development (always do both, in this order):**
+  1. `npm run db:generate` — emits the migration SQL file from schema changes. The file **must** be committed so production can apply it.
+  2. `npm run db:push` — pushes the schema to the local dev DB directly. Faster than running migrations and fine for local iteration.
+- **Production:** Coolify runs `npm run db:migrate` automatically after each deploy. Never run `db:push` against production — it bypasses migration tracking.
+- **Never edit generated migration files** once they've shipped; create a new migration instead.
+
 ## Design System
 
 - Fonts: DM Serif Display (headings) + DM Sans (body) — `font-display` / `font-sans`
