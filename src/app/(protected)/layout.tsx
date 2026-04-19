@@ -45,7 +45,7 @@ export default async function ProtectedLayout({
           <KeyboardShortcutsProvider>
             <PageMetadataProvider>
               <ProtectedSidebar />
-              <SidebarInset>
+              <SidebarInset className="min-w-0">
                 <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80">
                   <SidebarTrigger className="-ml-1" />
                   <Separator
@@ -54,7 +54,7 @@ export default async function ProtectedLayout({
                   />
                   <TopNav />
                 </header>
-                <div className="flex flex-1 flex-col gap-6 p-6">
+                <div className="flex min-w-0 flex-1 flex-col gap-6 p-6">
                   {children}
                 </div>
               </SidebarInset>

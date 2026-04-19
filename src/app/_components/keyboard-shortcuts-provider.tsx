@@ -64,6 +64,9 @@ export function KeyboardShortcutsProvider({
 
     const handler = (event: KeyboardEvent) => {
       const isMod = event.metaKey || event.ctrlKey;
+      // `event.key` is undefined for some composed or IME-mediated keystrokes;
+      // skip them rather than crash.
+      if (typeof event.key !== "string") return;
       const key = event.key.toLowerCase();
 
       // ⌘K / Ctrl+K — open command palette (always, even in inputs)

@@ -118,7 +118,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <SidebarMenuSubItem>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={pathname === "/budgets/annual"}
+                          isActive={pathname.startsWith("/budgets/annual")}
                         >
                           <Link href="/budgets/annual">
                             {t("annualBudget")}
