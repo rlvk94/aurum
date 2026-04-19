@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { getSession } from "~/server/better-auth/server";
 import { api, HydrateClient } from "~/trpc/server";
 import {
@@ -19,7 +20,22 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const h = await headers();
+  const cookieHeader = h.get("cookie");
   const session = await getSession();
+  console.log("[auth-debug]", {
+    host: h.get("host"),
+    xForwardedProto: h.get("x-forwarded-proto"),
+    xForwardedHost: h.get("x-forwarded-host"),
+    cookiePresent: !!cookieHeader,
+    cookieLength: cookieHeader?.length ?? 0,
+    cookieNames: cookieHeader
+      ?.split(";")
+      .map((c) => c.trim().split("=")[0])
+      .filter(Boolean),
+    sessionPresent: !!session,
+    userId: session?.user?.id,
+  });
 
   if (!session) {
     redirect("/login");

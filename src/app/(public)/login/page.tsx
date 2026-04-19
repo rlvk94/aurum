@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
 import { authClient } from "~/app/_lib/auth-client";
 import { Button } from "~/app/_components/button";
@@ -25,7 +24,6 @@ type Step = "email" | "otp";
 export default function LoginPage() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
-  const router = useRouter();
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -72,7 +70,7 @@ export default function LoginPage() {
 
     posthog.identify(email, { email });
     posthog.capture("login_completed", { email });
-    router.push("/dashboard");
+    window.location.href = "/dashboard";
   };
 
   const handleResend = async () => {
