@@ -45,10 +45,6 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const theme = cookieStore.get("theme")?.value ?? "system";
   const isDark = theme === "dark";
-  console.log("[root-debug] render", {
-    cookieCount: cookieStore.getAll().length,
-    cookieNames: cookieStore.getAll().map((c) => c.name),
-  });
 
   return (
     <html
