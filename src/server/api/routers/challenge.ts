@@ -300,7 +300,9 @@ export const challengeRouter = createTRPCRouter({
 
         const current = await rotateChallenge(ctx.db, row);
         const progress = current
-          ? await computeProgress(ctx.db, row, current, asOf)
+          ? await computeProgress(ctx.db, row, current, asOf, {
+              viewerId: ctx.session.user.id,
+            })
           : 0;
         results.push({
           ...row,
@@ -348,7 +350,9 @@ export const challengeRouter = createTRPCRouter({
 
       const asOf = todayIso();
       const progress = current
-        ? await computeProgress(ctx.db, row, current, asOf)
+        ? await computeProgress(ctx.db, row, current, asOf, {
+            viewerId: ctx.session.user.id,
+          })
         : 0;
 
       return {

@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
+import { Check, Monitor, Moon, Sun } from "lucide-react";
 
 import { api } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
@@ -12,14 +13,24 @@ import {
   CardHeader,
   CardTitle,
 } from "~/app/_components/card";
-import { RadioGroup, RadioGroupItem } from "~/app/_components/radio-group";
-import { Label } from "~/app/_components/label";
+import { cn } from "~/app/_lib/utils";
 
 type Locale = "da" | "en";
 type Theme = "light" | "dark" | "system";
 
 const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+
+const languages = [
+  { code: "da" as const, label: "Dansk", flag: "🇩🇰" },
+  { code: "en" as const, label: "English", flag: "🇬🇧" },
+];
+
+const themes = [
+  { code: "light" as const, icon: Sun },
+  { code: "dark" as const, icon: Moon },
+  { code: "system" as const, icon: Monitor },
+] as const;
 
 function applyTheme(theme: Theme) {
   const prefersDark = window.matchMedia(
@@ -31,7 +42,6 @@ function applyTheme(theme: Theme) {
 
 export function AppearanceForm() {
   const t = useTranslations("settings.appearance");
-  const tSettings = useTranslations("settings");
   const router = useRouter();
   const utils = api.useUtils();
   const { data: me } = api.user.me.useQuery();
@@ -52,7 +62,7 @@ export function AppearanceForm() {
     updateProfile.mutate({ theme });
   };
 
-  const currentLocale = me?.locale ?? "da";
+  const currentLocale = (me?.locale as Locale | undefined) ?? "da";
   const currentTheme = (me?.theme as Theme | undefined) ?? "system";
 
   return (
@@ -64,25 +74,33 @@ export function AppearanceForm() {
           <CardTitle className="text-base">{t("languageTitle")}</CardTitle>
           <CardDescription>{t("languageDescription")}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <RadioGroup
-            value={currentLocale}
-            onValueChange={(v) => handleLocaleChange(v as Locale)}
-            className="gap-3"
-          >
-            <div className="flex items-center gap-3 rounded-md border border-border p-3">
-              <RadioGroupItem value="da" id="locale-da" />
-              <Label htmlFor="locale-da" className="flex-1 cursor-pointer">
-                {tSettings("languageDa")}
-              </Label>
-            </div>
-            <div className="flex items-center gap-3 rounded-md border border-border p-3">
-              <RadioGroupItem value="en" id="locale-en" />
-              <Label htmlFor="locale-en" className="flex-1 cursor-pointer">
-                {tSettings("languageEn")}
-              </Label>
-            </div>
-          </RadioGroup>
+        <CardContent className="space-y-3">
+          {languages.map((lang) => {
+            const isSelected = currentLocale === lang.code;
+            return (
+              <button
+                key={lang.code}
+                type="button"
+                onClick={() => handleLocaleChange(lang.code)}
+                className={cn(
+                  "flex w-full items-center gap-4 rounded-lg border px-4 py-4 text-left transition-all",
+                  isSelected
+                    ? "border-primary bg-accent"
+                    : "border-border bg-background hover:border-primary/30 hover:bg-accent/50",
+                )}
+              >
+                <span className="text-2xl">{lang.flag}</span>
+                <span className="flex-1 text-base font-medium text-foreground">
+                  {lang.label}
+                </span>
+                {isSelected && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                    <Check className="h-3 w-3 text-primary-foreground" />
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </CardContent>
       </Card>
 
@@ -91,34 +109,47 @@ export function AppearanceForm() {
           <CardTitle className="text-base">{t("themeTitle")}</CardTitle>
           <CardDescription>{t("themeDescription")}</CardDescription>
         </CardHeader>
-        <CardContent>
-          <RadioGroup
-            value={currentTheme}
-            onValueChange={(v) => handleThemeChange(v as Theme)}
-            className="gap-3"
-          >
-            <div className="flex items-center gap-3 rounded-md border border-border p-3">
-              <RadioGroupItem value="light" id="theme-light" />
-              <Label htmlFor="theme-light" className="flex-1 cursor-pointer">
-                {t("themeLight")}
-              </Label>
-            </div>
-            <div className="flex items-center gap-3 rounded-md border border-border p-3">
-              <RadioGroupItem value="dark" id="theme-dark" />
-              <Label htmlFor="theme-dark" className="flex-1 cursor-pointer">
-                {t("themeDark")}
-              </Label>
-            </div>
-            <div className="flex items-start gap-3 rounded-md border border-border p-3">
-              <RadioGroupItem value="system" id="theme-system" className="mt-0.5" />
-              <Label htmlFor="theme-system" className="flex-1 cursor-pointer">
-                <div className="font-medium">{t("themeSystem")}</div>
-                <div className="text-xs font-normal text-muted-foreground">
-                  {t("themeSystemDescription")}
+        <CardContent className="space-y-3">
+          {themes.map((option) => {
+            const Icon = option.icon;
+            const isSelected = currentTheme === option.code;
+            const labelKey =
+              option.code === "light"
+                ? "themeLight"
+                : option.code === "dark"
+                  ? "themeDark"
+                  : "themeSystem";
+            return (
+              <button
+                key={option.code}
+                type="button"
+                onClick={() => handleThemeChange(option.code)}
+                className={cn(
+                  "flex w-full items-center gap-4 rounded-lg border px-4 py-4 text-left transition-all",
+                  isSelected
+                    ? "border-primary bg-accent"
+                    : "border-border bg-background hover:border-primary/30 hover:bg-accent/50",
+                )}
+              >
+                <Icon className="size-5 text-foreground" />
+                <div className="flex-1">
+                  <div className="text-base font-medium text-foreground">
+                    {t(labelKey)}
+                  </div>
+                  {option.code === "system" && (
+                    <div className="text-xs text-muted-foreground">
+                      {t("themeSystemDescription")}
+                    </div>
+                  )}
                 </div>
-              </Label>
-            </div>
-          </RadioGroup>
+                {isSelected && (
+                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
+                    <Check className="h-3 w-3 text-primary-foreground" />
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </CardContent>
       </Card>
     </div>

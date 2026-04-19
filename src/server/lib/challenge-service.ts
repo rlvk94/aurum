@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, gte, inArray, isNull, lte, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 import type { db as dbInstance } from "~/server/db";
 import {
@@ -9,6 +9,7 @@ import {
   challengeInstance,
   debt,
   financialAccount,
+  financialAccountAccess,
   transaction,
 } from "~/server/db/schema";
 import {
@@ -125,27 +126,51 @@ async function accountBalanceDelta(
 }
 
 /**
- * Snapshot of the family's current net worth:
- *   sum(accounts.balance where includeInNetWorth) + sum(assets.value) − sum(debt outstanding)
- * Net-worth-goal challenges use this as "progress"; the period window is not
- * applied since net worth is a point-in-time value.
+ * Snapshot of a viewer's net worth view:
+ *   sum(accessible accounts.balance where includeInNetWorth) + sum(assets.value) − sum(debt outstanding)
+ *
+ * When `viewerId` is set, accounts are filtered to the viewer's accessible set
+ * (shared + any private accounts explicitly granted). This prevents a
+ * net_worth_goal challenge — which is visible to every family member — from
+ * leaking another member's private balances, while still letting a user with
+ * access to a private account count it toward their progress.
+ *
+ * When `viewerId` is omitted (cron rotation snapshot), every non-archived
+ * account counts — the stored `finalAmount` reflects the full family position.
  */
 async function computeFamilyNetWorth(
   db: typeof dbInstance,
   familyId: string,
   asOf: string,
+  viewerId?: string,
 ): Promise<number> {
+  const accountConditions = [
+    eq(financialAccount.familyId, familyId),
+    eq(financialAccount.archived, false),
+  ];
+
+  if (viewerId) {
+    const accessRows = await db
+      .select({ accountId: financialAccountAccess.accountId })
+      .from(financialAccountAccess)
+      .where(eq(financialAccountAccess.userId, viewerId));
+    const grantedIds = accessRows.map((r) => r.accountId);
+    accountConditions.push(
+      grantedIds.length > 0
+        ? or(
+            eq(financialAccount.visibility, "shared"),
+            inArray(financialAccount.id, grantedIds),
+          )!
+        : eq(financialAccount.visibility, "shared"),
+    );
+  }
+
   const [accountRow] = await db
     .select({
       balance: sql<number>`coalesce(sum(case when ${financialAccount.includeInNetWorth} then ${financialAccount.balance} else 0 end), 0)`,
     })
     .from(financialAccount)
-    .where(
-      and(
-        eq(financialAccount.familyId, familyId),
-        eq(financialAccount.archived, false),
-      ),
-    );
+    .where(and(...accountConditions));
 
   const [assetRow] = await db
     .select({
@@ -186,9 +211,10 @@ export async function computeProgress(
   row: ChallengeRow,
   instance: InstanceRow,
   asOf: string,
+  opts: { viewerId?: string } = {},
 ): Promise<number> {
   if (row.type === "net_worth_goal") {
-    return computeFamilyNetWorth(db, row.familyId, asOf);
+    return computeFamilyNetWorth(db, row.familyId, asOf, opts.viewerId);
   }
 
   const effectiveTo = instance.periodEnd < asOf ? instance.periodEnd : asOf;

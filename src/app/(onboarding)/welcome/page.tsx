@@ -84,7 +84,7 @@ export default function WelcomePage() {
   const needsFamily = !familiesLoading && families?.length === 0;
 
   const steps = useMemo<Step[]>(() => {
-    const s: Step[] = ["name", "language", "theme"];
+    const s: Step[] = ["language", "name", "theme"];
     if (needsFamily) s.push("family");
     return s;
   }, [needsFamily]);
