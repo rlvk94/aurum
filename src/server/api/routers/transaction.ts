@@ -227,8 +227,10 @@ export const transactionRouter = createTRPCRouter({
       if (input?.cursor) {
         // Keyset pagination on (date DESC, createdAt DESC, id DESC).
         // Rows "after" the cursor are tuple-less-than in that ordering.
+        // Cast the ISO strings so Postgres compares them as the right types
+        // — passing a JS Date into a tuple literal crashes postgres-js.
         conditions.push(
-          sql`(${transaction.date}, ${transaction.createdAt}, ${transaction.id}) < (${input.cursor.date}, ${new Date(input.cursor.createdAt)}, ${input.cursor.id})`,
+          sql`(${transaction.date}, ${transaction.createdAt}, ${transaction.id}) < (${input.cursor.date}::date, ${input.cursor.createdAt}::timestamptz, ${input.cursor.id}::uuid)`,
         );
       }
 
