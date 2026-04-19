@@ -12,6 +12,11 @@ export const env = createEnv({
     BETTER_AUTH_URL: z.string().url(),
     DATABASE_URL: z.string().url(),
     SENTRY_DSN: z.string().url().optional(),
+    RESEND_API_KEY:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().optional(),
+    EMAIL_FROM: z.string().min(1).default("Aurum <onboarding@resend.dev>"),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -37,6 +42,8 @@ export const env = createEnv({
     BETTER_AUTH_URL: process.env.BETTER_AUTH_URL,
     DATABASE_URL: process.env.DATABASE_URL,
     SENTRY_DSN: process.env.SENTRY_DSN,
+    RESEND_API_KEY: process.env.RESEND_API_KEY,
+    EMAIL_FROM: process.env.EMAIL_FROM,
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV,
     NODE_ENV: process.env.NODE_ENV,
   },

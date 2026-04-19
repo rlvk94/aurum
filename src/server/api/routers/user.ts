@@ -4,6 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { user } from "~/server/db/schema";
+import { sendEmailChangeOtpEmail } from "~/server/email";
 
 const OTP_LENGTH = 6;
 const OTP_EXPIRY_MS = 10 * 60 * 1000;
@@ -121,8 +122,11 @@ export const userRouter = createTRPCRouter({
         })
         .where(eq(user.id, ctx.session.user.id));
 
-      // TODO: send via transactional email provider
-      console.log(`[DEV] Email-change OTP for ${newEmail}: ${code}`);
+      await sendEmailChangeOtpEmail({
+        to: newEmail,
+        code,
+        userId: ctx.session.user.id,
+      });
     }),
 
   confirmEmailChange: protectedProcedure

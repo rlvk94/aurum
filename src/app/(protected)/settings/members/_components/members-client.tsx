@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { MoreHorizontal, UserRound } from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
@@ -186,7 +186,6 @@ function InviteForm({ familyName }: { familyName: string | undefined }) {
           </Button>
         </form>
         {error && <p className="text-sm text-destructive">{error}</p>}
-        <p className="text-xs text-muted-foreground">{t("stubNotice")}</p>
       </CardContent>
     </Card>
   );
@@ -195,39 +194,21 @@ function InviteForm({ familyName }: { familyName: string | undefined }) {
 function PendingInvitation({
   id,
   email,
-  token,
   createdAt,
   canRevoke,
 }: {
   id: string;
   email: string;
-  token: string;
   createdAt: Date;
   canRevoke: boolean;
 }) {
-  const t = useTranslations("settings.members.invite");
   const tPending = useTranslations("settings.members.pending");
+  const format = useFormatter();
   const utils = api.useUtils();
-  const [copied, setCopied] = useState(false);
 
   const revoke = api.invitation.revoke.useMutation({
     onSuccess: () => void utils.invitation.list.invalidate(),
   });
-
-  const inviteUrl =
-    typeof window === "undefined"
-      ? `/invite/${token}`
-      : `${window.location.origin}/invite/${token}`;
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(inviteUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // ignore
-    }
-  };
 
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3 sm:flex-row sm:items-center">
@@ -235,26 +216,24 @@ function PendingInvitation({
         <p className="truncate font-medium">{email}</p>
         <p className="text-xs text-muted-foreground">
           {tPending("sentAt", {
-            date: createdAt.toLocaleDateString(),
+            date: format.dateTime(createdAt, {
+              dateStyle: "medium",
+              timeStyle: "short",
+            }),
           })}
         </p>
       </div>
-      <div className="flex gap-2">
-        <Button variant="outline" size="sm" onClick={handleCopy}>
-          {copied ? t("linkCopied") : t("copyLink")}
+      {canRevoke && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => revoke.mutate({ id })}
+          disabled={revoke.isPending}
+          className="text-destructive hover:text-destructive"
+        >
+          {tPending("revoke")}
         </Button>
-        {canRevoke && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => revoke.mutate({ id })}
-            disabled={revoke.isPending}
-            className="text-destructive hover:text-destructive"
-          >
-            {tPending("revoke")}
-          </Button>
-        )}
-      </div>
+      )}
     </div>
   );
 }
@@ -344,7 +323,6 @@ export function MembersClient() {
                 key={inv.id}
                 id={inv.id}
                 email={inv.email}
-                token={inv.token}
                 createdAt={inv.createdAt}
                 canRevoke={isOwner}
               />

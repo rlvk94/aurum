@@ -30,7 +30,7 @@ The flow:
 
 Implementation (BetterAuth `emailOTP` plugin):
 
-- **Server:** `src/server/better-auth/config.ts` — `emailOTP({ otpLength: 6, expiresIn: 600 })` with a `sendVerificationOTP` callback (currently logs to console in development; must be wired to a transactional email provider before production)
+- **Server:** `src/server/better-auth/config.ts` — `emailOTP({ otpLength: 6, expiresIn: 600 })` with a `sendVerificationOTP` callback that delegates to the email module in `src/server/email/`
 - **Client:** `src/server/better-auth/client.ts` and `src/lib/auth-client.ts` — `emailOTPClient()` plugin added to `createAuthClient()`
 - **Schema:** `password` field removed from the `account` table; OTPs are stored in the existing `verification` table
 - **Env:** `BETTER_AUTH_GITHUB_CLIENT_ID` and `BETTER_AUTH_GITHUB_CLIENT_SECRET` removed; `@auth/drizzle-adapter` dependency removed
@@ -49,4 +49,7 @@ OTP behavior:
 - **Positive:** Simpler codebase — removes password hashing, password reset flows, and OAuth callback handling.
 - **Trade-off:** Requires a working email delivery service (SMTP or transactional email provider) for staging/production.
 - **Trade-off:** Users without email access cannot sign in — acceptable for this product's target audience.
-- **Follow-up:** Integrate a transactional email provider (e.g. Resend, Postmark) into the `sendVerificationOTP` callback before deploying to staging.
+
+## Follow-up (resolved)
+
+Transactional email is delivered via **Resend** (`resend` SDK + `@react-email/components` for templates). Configuration lives in `RESEND_API_KEY` and `EMAIL_FROM` env vars; when `RESEND_API_KEY` is unset the dispatcher logs a dev notice instead of sending, so local development continues to work without credentials. Templates are localized via `next-intl`'s `createTranslator` using the recipient's stored locale (or the inviter's locale for family invites, since the invitee has no account yet).

@@ -684,10 +684,7 @@
         "description": "Send an invitation by email",
         "emailLabel": "Email",
         "emailPlaceholder": "name@example.com",
-        "send": "Send invitation",
-        "stubNotice": "Emails aren't delivered yet — copy the invite link and share it manually.",
-        "copyLink": "Copy link",
-        "linkCopied": "Link copied"
+        "send": "Send invitation"
       },
       "pending": {
         "title": "Pending invitations",
@@ -707,6 +704,36 @@
       "themeDark": "Dark",
       "themeSystem": "System",
       "themeSystemDescription": "Match your device setting"
+    }
+  },
+  "emails": {
+    "common": {
+      "footer": "Aurum — your family's finances, in one place.",
+      "ignoreIfNotYou": "If you didn't expect this email, you can safely ignore it."
+    },
+    "signInOtp": {
+      "subject": "Your Aurum sign-in code",
+      "preview": "Your sign-in code is {code}",
+      "heading": "Sign in to Aurum",
+      "intro": "Use the code below to finish signing in. It expires in {minutes} minutes.",
+      "codeLabel": "Your code"
+    },
+    "emailChangeOtp": {
+      "subject": "Confirm your new email address",
+      "preview": "Verification code: {code}",
+      "heading": "Confirm your new email address",
+      "intro": "You requested to change your Aurum email to this address. Enter the code below in the app to confirm. It expires in {minutes} minutes.",
+      "codeLabel": "Verification code",
+      "didNotRequest": "If you didn't request this change, sign in to Aurum and cancel the email change."
+    },
+    "familyInvite": {
+      "subject": "{inviterName} invited you to {familyName} on Aurum",
+      "preview": "Join {familyName} on Aurum",
+      "heading": "You're invited to {familyName}",
+      "intro": "{inviterName} invited you to share the household finances for {familyName} on Aurum. Sign in to Aurum with this email address and you'll be added to the family automatically.",
+      "cta": "Sign in to Aurum",
+      "linkFallback": "If the button doesn't work, copy and paste this link into your browser:",
+      "expiresIn": "This invitation expires in {days} days."
     }
   }
 }

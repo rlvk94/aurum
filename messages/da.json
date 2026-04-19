@@ -684,10 +684,7 @@
         "description": "Send en invitation via e-mail",
         "emailLabel": "E-mail",
         "emailPlaceholder": "navn@eksempel.dk",
-        "send": "Send invitation",
-        "stubNotice": "E-mails sendes ikke automatisk endnu — kopiér invitationslinket og del det manuelt.",
-        "copyLink": "Kopiér link",
-        "linkCopied": "Link kopieret"
+        "send": "Send invitation"
       },
       "pending": {
         "title": "Afventende invitationer",
@@ -707,6 +704,36 @@
       "themeDark": "Mørkt",
       "themeSystem": "System",
       "themeSystemDescription": "Følg din enheds indstilling"
+    }
+  },
+  "emails": {
+    "common": {
+      "footer": "Aurum — din families økonomi, samlet ét sted.",
+      "ignoreIfNotYou": "Hvis du ikke forventede denne e-mail, kan du roligt ignorere den."
+    },
+    "signInOtp": {
+      "subject": "Din Aurum-loginkode",
+      "preview": "Din loginkode er {code}",
+      "heading": "Log ind på Aurum",
+      "intro": "Brug koden nedenfor for at fuldføre dit login. Den udløber om {minutes} minutter.",
+      "codeLabel": "Din kode"
+    },
+    "emailChangeOtp": {
+      "subject": "Bekræft din nye e-mailadresse",
+      "preview": "Bekræftelseskode: {code}",
+      "heading": "Bekræft din nye e-mailadresse",
+      "intro": "Du har bedt om at ændre din Aurum-e-mail til denne adresse. Indtast koden nedenfor i appen for at bekræfte. Den udløber om {minutes} minutter.",
+      "codeLabel": "Bekræftelseskode",
+      "didNotRequest": "Hvis du ikke har anmodet om denne ændring, så log ind på Aurum og annuller e-mailændringen."
+    },
+    "familyInvite": {
+      "subject": "{inviterName} har inviteret dig til {familyName} på Aurum",
+      "preview": "Deltag i {familyName} på Aurum",
+      "heading": "Du er inviteret til {familyName}",
+      "intro": "{inviterName} har inviteret dig til at dele familieøkonomien i {familyName} på Aurum. Log ind på Aurum med denne e-mailadresse, så bliver du automatisk tilføjet til familien.",
+      "cta": "Log ind på Aurum",
+      "linkFallback": "Hvis knappen ikke virker, så kopier og indsæt dette link i din browser:",
+      "expiresIn": "Invitationen udløber om {days} dage."
     }
   }
 }

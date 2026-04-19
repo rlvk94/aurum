@@ -12,6 +12,7 @@ import {
   usersToFamilies,
 } from "~/server/db/schema";
 import { getActiveFamilyMembership } from "~/server/api/routers/family";
+import { sendFamilyInviteEmail } from "~/server/email";
 
 const INVITE_EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -114,10 +115,17 @@ export const invitationRouter = createTRPCRouter({
         .from(family)
         .where(eq(family.id, familyId));
 
-      // TODO: send via transactional email provider
-      console.log(
-        `[DEV] Invitation for ${email} to "${fam?.name}": /invite/${token}`,
-      );
+      const [inviter] = await ctx.db
+        .select({ name: user.name, email: user.email })
+        .from(user)
+        .where(eq(user.id, ctx.session.user.id));
+
+      await sendFamilyInviteEmail({
+        to: email,
+        familyName: fam?.name ?? "",
+        inviterName: inviter?.name ?? inviter?.email ?? "",
+        inviterId: ctx.session.user.id,
+      });
 
       return created;
     }),
@@ -134,67 +142,5 @@ export const invitationRouter = createTRPCRouter({
             eq(invitation.familyId, familyId),
           ),
         );
-    }),
-
-  accept: protectedProcedure
-    .input(z.object({ token: z.string().min(1) }))
-    .mutation(async ({ ctx, input }) => {
-      const now = new Date();
-      const [invite] = await ctx.db
-        .select({
-          id: invitation.id,
-          familyId: invitation.familyId,
-          email: invitation.email,
-          expiresAt: invitation.expiresAt,
-        })
-        .from(invitation)
-        .where(eq(invitation.token, input.token));
-
-      if (!invite || invite.expiresAt < now) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-          message: "Invitation is invalid or has expired",
-        });
-      }
-
-      const [currentUser] = await ctx.db
-        .select({ email: user.email })
-        .from(user)
-        .where(eq(user.id, ctx.session.user.id));
-
-      if (currentUser?.email.toLowerCase() !== invite.email) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "This invitation was sent to a different email address",
-        });
-      }
-
-      // If already a member, just delete the invite and return
-      const [existing] = await ctx.db
-        .select({ userId: usersToFamilies.userId })
-        .from(usersToFamilies)
-        .where(
-          and(
-            eq(usersToFamilies.userId, ctx.session.user.id),
-            eq(usersToFamilies.familyId, invite.familyId),
-          ),
-        );
-
-      if (!existing) {
-        await ctx.db.insert(usersToFamilies).values({
-          userId: ctx.session.user.id,
-          familyId: invite.familyId,
-          role: "member",
-        });
-      }
-
-      await ctx.db.delete(invitation).where(eq(invitation.id, invite.id));
-
-      await ctx.db
-        .update(user)
-        .set({ activeFamilyId: invite.familyId, updatedAt: new Date() })
-        .where(eq(user.id, ctx.session.user.id));
-
-      return { familyId: invite.familyId };
     }),
 });
