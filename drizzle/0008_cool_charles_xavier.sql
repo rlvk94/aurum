@@ -1,0 +1,1 @@
+CREATE INDEX "transaction_family_date_idx" ON "transaction" USING btree ("family_id","date" DESC NULLS LAST,"created_at" DESC NULLS LAST,"id" DESC NULLS LAST);

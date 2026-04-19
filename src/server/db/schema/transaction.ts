@@ -1,6 +1,7 @@
 import { relations, sql } from "drizzle-orm";
 import {
   date,
+  index,
   integer,
   jsonb,
   pgEnum,
@@ -64,6 +65,15 @@ export const transaction = pgTable(
     uniqueIndex("transaction_account_external_idx")
       .on(table.accountId, table.externalId)
       .where(sql`${table.externalId} IS NOT NULL`),
+    // Supports the transaction list query: family-scoped, ordered by
+    // (date DESC, createdAt DESC, id DESC), with keyset pagination on
+    // the same tuple.
+    index("transaction_family_date_idx").on(
+      table.familyId,
+      table.date.desc(),
+      table.createdAt.desc(),
+      table.id.desc(),
+    ),
   ],
 );
 
