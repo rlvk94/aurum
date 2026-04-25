@@ -48,7 +48,7 @@ export default async function ProtectedLayout({
               <TutorialProvider>
                 <ProtectedSidebar />
                 <SidebarInset className="min-w-0">
-                  <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                  <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 rounded-t-xl border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80">
                     <SidebarTrigger className="-ml-1" />
                     <Separator
                       orientation="vertical"
