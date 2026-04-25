@@ -286,7 +286,6 @@ export const categoryRouter = createTRPCRouter({
         description: transaction.description,
         note: transaction.note,
         metadata: transaction.metadata,
-        type: transaction.type,
       })
       .from(transaction)
       .where(
@@ -297,16 +296,11 @@ export const categoryRouter = createTRPCRouter({
             accessibleAccounts.map((a) => a.id),
           ),
           isNull(transaction.categoryId),
-          or(
-            eq(transaction.type, "expense"),
-            eq(transaction.type, "income"),
-          ),
         ),
       );
 
     let updated = 0;
     for (const tx of uncategorized) {
-      if (tx.type === "transfer") continue;
       const matched = findMatchingCategoryId(
         cats,
         tx.description,

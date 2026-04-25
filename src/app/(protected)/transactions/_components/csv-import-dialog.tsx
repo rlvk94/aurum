@@ -105,10 +105,14 @@ export function CsvImportDialog({
     return resolveRows(parsed.rows, accountByCanonical);
   }, [parsed, accountByCanonical]);
 
-  const transferCount = useMemo(
-    () => resolved?.matched.filter((r) => r.type === "transfer").length ?? 0,
-    [resolved],
-  );
+  const linkedPairCount = useMemo(() => {
+    if (!resolved) return 0;
+    const groups = new Set<string>();
+    for (const row of resolved.matched) {
+      if (row.transferGroupId) groups.add(row.transferGroupId);
+    }
+    return groups.size;
+  }, [resolved]);
 
   const handleImport = () => {
     if (!resolved || resolved.matched.length === 0) return;
@@ -182,16 +186,9 @@ export function CsvImportDialog({
                   count: resolved.matchedAccountIds.size,
                 })}
               </p>
-              {transferCount > 0 && (
+              {linkedPairCount > 0 && (
                 <p className="text-muted-foreground">
-                  {t("importPreviewTransfers", { count: transferCount })}
-                </p>
-              )}
-              {resolved.mirroredSkipped > 0 && (
-                <p className="text-muted-foreground">
-                  {t("importMirrorSkipped", {
-                    count: resolved.mirroredSkipped,
-                  })}
+                  {t("importPreviewLinkedPairs", { count: linkedPairCount })}
                 </p>
               )}
               {resolved.skipped > 0 && (
@@ -218,15 +215,10 @@ export function CsvImportDialog({
                     <span className="flex-1 truncate">{row.description}</span>
                     <span
                       className={
-                        row.type === "expense"
-                          ? "text-expense"
-                          : row.type === "income"
-                            ? "text-income"
-                            : "text-savings"
+                        row.type === "expense" ? "text-expense" : "text-income"
                       }
                     >
-                      {row.type === "expense" && "-"}
-                      {row.type === "income" && "+"}
+                      {row.type === "expense" ? "-" : "+"}
                       {(row.amount / 100).toLocaleString("da-DK", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,

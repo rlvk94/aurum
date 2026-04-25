@@ -45,7 +45,6 @@ async function sumExpenseInWindow(
   if (categoryIds.length === 0) return 0;
   const conditions = [
     eq(transaction.familyId, familyId),
-    inArray(transaction.type, ["expense", "income"]),
     inArray(transaction.categoryId, categoryIds),
     gte(transaction.date, from),
     lte(transaction.date, to),
@@ -108,8 +107,6 @@ async function loadChallengeCategoryIds(
  * Net balance change on an account over a window. Computed from transactions:
  *   +income on this account
  *   -expense on this account
- *   -transfer with accountId = this account
- *   +transfer with transferAccountId = this account
  */
 async function accountBalanceDelta(
   db: typeof dbInstance,
@@ -124,8 +121,6 @@ async function accountBalanceDelta(
         case
           when ${transaction.type} = 'income' and ${transaction.accountId} = ${accountId} then ${transaction.amount}
           when ${transaction.type} = 'expense' and ${transaction.accountId} = ${accountId} then -${transaction.amount}
-          when ${transaction.type} = 'transfer' and ${transaction.accountId} = ${accountId} then -${transaction.amount}
-          when ${transaction.type} = 'transfer' and ${transaction.transferAccountId} = ${accountId} then ${transaction.amount}
           else 0
         end
       ), 0)`,

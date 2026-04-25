@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useForm } from "@tanstack/react-form";
 import { z } from "zod";
-import { CalendarIcon, Minus, Plus, ArrowLeftRight } from "lucide-react";
+import { CalendarIcon, Minus, Plus } from "lucide-react";
 import { format, parse } from "date-fns";
 import { da, enUS } from "date-fns/locale";
 import { useLocale } from "next-intl";
@@ -45,7 +45,7 @@ import { cn } from "~/app/_lib/utils";
 type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
 type Account = RouterOutputs["financialAccount"]["list"][number];
 
-type TxType = "expense" | "income" | "transfer";
+type TxType = "expense" | "income";
 
 const typeOptions: Array<{
   value: TxType;
@@ -62,42 +62,25 @@ const typeOptions: Array<{
     icon: Plus,
     selected: "border-income bg-income-muted text-income",
   },
-  {
-    value: "transfer",
-    icon: ArrowLeftRight,
-    selected: "border-savings bg-savings-muted text-savings",
-  },
 ];
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 
-const transactionFormSchema = z
-  .object({
-    type: z.enum(["expense", "income", "transfer"]),
-    accountId: z.string().uuid("Account required"),
-    transferAccountId: z.string(),
-    amount: z.string().refine(
-      (v) => {
-        const n = parseFloat(v);
-        return !isNaN(n) && n > 0;
-      },
-      { message: "Amount must be greater than 0" },
-    ),
-    date: z.string().regex(ISO_DATE, "Required"),
-    description: z.string().min(1, "Required").max(500),
-    note: z.string(),
-    categoryId: z.string(),
-  })
-  .refine(
-    (data) =>
-      data.type !== "transfer" ||
-      (data.transferAccountId.length > 0 &&
-        data.transferAccountId !== data.accountId),
-    {
-      message: "Transfer must have a different destination account",
-      path: ["transferAccountId"],
+const transactionFormSchema = z.object({
+  type: z.enum(["expense", "income"]),
+  accountId: z.string().uuid("Account required"),
+  amount: z.string().refine(
+    (v) => {
+      const n = parseFloat(v);
+      return !isNaN(n) && n > 0;
     },
-  );
+    { message: "Amount must be greater than 0" },
+  ),
+  date: z.string().regex(ISO_DATE, "Required"),
+  description: z.string().min(1, "Required").max(500),
+  note: z.string(),
+  categoryId: z.string(),
+});
 
 function today(): string {
   const d = new Date();
@@ -151,10 +134,8 @@ export function TransactionFormDialog({
 
   const form = useForm({
     defaultValues: {
-      type:
-        (transaction?.type as "expense" | "income" | "transfer") ?? "expense",
+      type: (transaction?.type as TxType) ?? "expense",
       accountId: transaction?.accountId ?? accounts[0]?.id ?? "",
-      transferAccountId: transaction?.transferAccountId ?? "",
       amount: transaction ? String(transaction.amount / 100) : "",
       date: transaction?.date ?? today(),
       description: transaction?.description ?? "",
@@ -167,8 +148,7 @@ export function TransactionFormDialog({
     onSubmit: async ({ value }) => {
       const amountCents = Math.round(parseFloat(value.amount) * 100);
       const trimmedNote = value.note.trim();
-      const categoryId =
-        value.type !== "transfer" && value.categoryId ? value.categoryId : null;
+      const categoryId = value.categoryId ? value.categoryId : null;
       if (isEdit) {
         updateTx.mutate({
           id: transaction.id,
@@ -177,10 +157,6 @@ export function TransactionFormDialog({
           date: value.date,
           description: value.description.trim(),
           note: trimmedNote || null,
-          transferAccountId:
-            value.type === "transfer" && value.transferAccountId
-              ? value.transferAccountId
-              : null,
           categoryId,
         });
       } else {
@@ -191,10 +167,6 @@ export function TransactionFormDialog({
           date: value.date,
           description: value.description.trim(),
           note: trimmedNote || undefined,
-          transferAccountId:
-            value.type === "transfer" && value.transferAccountId
-              ? value.transferAccountId
-              : undefined,
           categoryId: categoryId ?? undefined,
         });
       }
@@ -238,7 +210,7 @@ export function TransactionFormDialog({
                   <RadioGroup
                     value={field.state.value}
                     onValueChange={(v) => field.handleChange(v as TxType)}
-                    className="grid grid-cols-3 gap-2"
+                    className="grid grid-cols-2 gap-2"
                   >
                     {typeOptions.map((opt) => {
                       const Icon = opt.icon;
@@ -276,11 +248,7 @@ export function TransactionFormDialog({
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
                   <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>
-                      {form.state.values.type === "transfer"
-                        ? t("fromAccount")
-                        : t("account")}
-                    </FieldLabel>
+                    <FieldLabel htmlFor={field.name}>{t("account")}</FieldLabel>
                     <Select
                       value={field.state.value}
                       onValueChange={field.handleChange}
@@ -303,56 +271,6 @@ export function TransactionFormDialog({
                   </Field>
                 );
               }}
-            />
-
-            <form.Subscribe
-              selector={(state) => state.values.type}
-              children={(type) =>
-                type === "transfer" && (
-                  <form.Field
-                    name="transferAccountId"
-                    children={(field) => {
-                      const isInvalid =
-                        field.state.meta.isTouched && !field.state.meta.isValid;
-                      return (
-                        <Field data-invalid={isInvalid}>
-                          <FieldLabel htmlFor={field.name}>
-                            {t("toAccount")}
-                          </FieldLabel>
-                          <Select
-                            value={field.state.value}
-                            onValueChange={field.handleChange}
-                          >
-                            <SelectTrigger
-                              id={field.name}
-                              aria-invalid={isInvalid}
-                            >
-                              <SelectValue placeholder={t("toAccount")} />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {accounts
-                                .filter(
-                                  (a) => a.id !== form.state.values.accountId,
-                                )
-                                .map((account) => (
-                                  <SelectItem
-                                    key={account.id}
-                                    value={account.id}
-                                  >
-                                    {account.name}
-                                  </SelectItem>
-                                ))}
-                            </SelectContent>
-                          </Select>
-                          {isInvalid && (
-                            <FieldError errors={field.state.meta.errors} />
-                          )}
-                        </Field>
-                      );
-                    }}
-                  />
-                )
-              }
             />
 
             <form.Field
@@ -458,31 +376,24 @@ export function TransactionFormDialog({
               }}
             />
 
-            <form.Subscribe
-              selector={(state) => state.values.type}
-              children={(type) =>
-                type !== "transfer" && (
-                  <form.Field
-                    name="categoryId"
-                    children={(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>
-                          {tCommon("category")}
-                        </FieldLabel>
-                        <CategorySelect
-                          id={field.name}
-                          value={field.state.value || null}
-                          onChange={(v) => field.handleChange(v ?? "")}
-                          categories={categories}
-                          mode="leaf-only"
-                          emptyOption="none"
-                          placeholder={tCommon("category")}
-                        />
-                      </Field>
-                    )}
+            <form.Field
+              name="categoryId"
+              children={(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>
+                    {tCommon("category")}
+                  </FieldLabel>
+                  <CategorySelect
+                    id={field.name}
+                    value={field.state.value || null}
+                    onChange={(v) => field.handleChange(v ?? "")}
+                    categories={categories}
+                    mode="leaf-only"
+                    emptyOption="none"
+                    placeholder={tCommon("category")}
                   />
-                )
-              }
+                </Field>
+              )}
             />
 
             <form.Field

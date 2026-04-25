@@ -38,7 +38,7 @@ function sanitizeMetadata(
   return out;
 }
 
-const transactionTypeSchema = z.enum(["expense", "income", "transfer"]);
+const transactionTypeSchema = z.enum(["expense", "income"]);
 
 async function getActiveFamilyId(
   db: typeof dbInstance,
@@ -199,12 +199,7 @@ export const transactionRouter = createTRPCRouter({
       ];
 
       if (input?.accountId) {
-        // Include transactions where this account is either the source OR the transfer destination
-        const accountCondition = or(
-          eq(transaction.accountId, input.accountId),
-          eq(transaction.transferAccountId, input.accountId),
-        );
-        if (accountCondition) conditions.push(accountCondition);
+        conditions.push(eq(transaction.accountId, input.accountId));
       }
       if (input?.type) {
         conditions.push(eq(transaction.type, input.type));
@@ -296,35 +291,16 @@ export const transactionRouter = createTRPCRouter({
 
   create: protectedProcedure
     .input(
-      z
-        .object({
-          accountId: z.string().uuid(),
-          type: transactionTypeSchema,
-          amount: z.number().int().positive(),
-          date: z.string(), // YYYY-MM-DD
-          description: z.string().min(1).max(500),
-          note: z.string().max(1000).optional(),
-          transferAccountId: z.string().uuid().optional(),
-          categoryId: z.string().uuid().optional(),
-        })
-        .refine(
-          (data) => data.type !== "transfer" || !!data.transferAccountId,
-          {
-            message: "transferAccountId is required for transfers",
-            path: ["transferAccountId"],
-          },
-        )
-        .refine(
-          (data) => data.type === "transfer" || !data.transferAccountId,
-          {
-            message: "transferAccountId only applies to transfers",
-            path: ["transferAccountId"],
-          },
-        )
-        .refine((data) => data.type !== "transfer" || !data.categoryId, {
-          message: "categoryId does not apply to transfers",
-          path: ["categoryId"],
-        }),
+      z.object({
+        accountId: z.string().uuid(),
+        type: transactionTypeSchema,
+        amount: z.number().int().positive(),
+        date: z.string(), // YYYY-MM-DD
+        description: z.string().min(1).max(500),
+        note: z.string().max(1000).optional(),
+        transferGroupId: z.string().uuid().optional(),
+        categoryId: z.string().uuid().optional(),
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
@@ -332,7 +308,7 @@ export const transactionRouter = createTRPCRouter({
         ctx.db,
         familyId,
         ctx.session.user.id,
-        [input.accountId, ...(input.transferAccountId ? [input.transferAccountId] : [])],
+        [input.accountId],
       );
 
       if (input.categoryId) {
@@ -344,7 +320,7 @@ export const transactionRouter = createTRPCRouter({
         .values({
           familyId,
           accountId: input.accountId,
-          transferAccountId: input.transferAccountId ?? null,
+          transferGroupId: input.transferGroupId ?? null,
           type: input.type,
           amount: input.amount,
           date: input.date,
@@ -371,7 +347,7 @@ export const transactionRouter = createTRPCRouter({
               note: z.string().max(1000).optional(),
               metadata: z.record(z.string(), z.string()).optional(),
               externalId: z.string().min(1),
-              transferAccountId: z.string().uuid().optional(),
+              transferGroupId: z.string().uuid().optional(),
             }),
           )
           .min(1)
@@ -381,11 +357,9 @@ export const transactionRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
 
-      // Collect all unique account IDs referenced by the rows
       const allAccountIds = new Set<string>();
       for (const t of input.transactions) {
         allAccountIds.add(t.accountId);
-        if (t.transferAccountId) allAccountIds.add(t.transferAccountId);
       }
 
       await assertAccountAccess(
@@ -395,7 +369,6 @@ export const transactionRouter = createTRPCRouter({
         Array.from(allAccountIds),
       );
 
-      // Load categories with keywords once and apply to each row
       const categoriesWithKeywords = await loadCategoriesWithKeywords(
         ctx.db,
         familyId,
@@ -406,19 +379,16 @@ export const transactionRouter = createTRPCRouter({
         const description = stripNullBytes(t.description);
         const note = t.note ? stripNullBytes(t.note) : null;
         const metadata = sanitizeMetadata(t.metadata);
-        const categoryId =
-          t.type !== "transfer"
-            ? findMatchingCategoryId(
-                categoriesWithKeywords,
-                description,
-                note,
-                metadata,
-              )
-            : null;
+        const categoryId = findMatchingCategoryId(
+          categoriesWithKeywords,
+          description,
+          note,
+          metadata,
+        );
         return {
           familyId,
           accountId: t.accountId,
-          transferAccountId: t.transferAccountId ?? null,
+          transferGroupId: t.transferGroupId ?? null,
           type: t.type,
           amount: t.amount,
           date: t.date,
@@ -484,7 +454,7 @@ export const transactionRouter = createTRPCRouter({
         date: z.string().optional(),
         description: z.string().min(1).max(500).optional(),
         note: z.string().max(1000).nullable().optional(),
-        transferAccountId: z.string().uuid().nullable().optional(),
+        transferGroupId: z.string().uuid().nullable().optional(),
         categoryId: z.string().uuid().nullable().optional(),
       }),
     )
@@ -507,10 +477,7 @@ export const transactionRouter = createTRPCRouter({
         ctx.db,
         familyId,
         ctx.session.user.id,
-        [
-          existing.accountId,
-          ...(data.transferAccountId ? [data.transferAccountId] : []),
-        ],
+        [existing.accountId],
       );
 
       if (data.categoryId) {

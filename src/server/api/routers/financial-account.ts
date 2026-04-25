@@ -256,9 +256,6 @@ export const financialAccountRouter = createTRPCRouter({
         );
       }
 
-      // Monthly aggregation: expense + income only (transfers excluded, matching
-      // budget-actual semantics). Scoped to transactions *from* this account —
-      // transfers aren't counted either way.
       const monthlyRows = await ctx.db
         .select({
           month: sql<string>`to_char(${transaction.date}, 'YYYY-MM')`,
