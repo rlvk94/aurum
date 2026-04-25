@@ -38,6 +38,10 @@ import {
 } from "~/app/_components/collapsible";
 import { FamilySwitcher } from "~/app/_components/family-switcher";
 import { FavoritesNavGroup } from "~/app/_components/favorites-nav-group";
+import {
+  FamilyNavItem,
+  FamilySubNavItem,
+} from "~/app/_components/billing/family-nav-item";
 import { UserMenu } from "~/app/_components/user-menu";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -102,15 +106,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
+                <FamilyNavItem
+                  feature="projects"
+                  href="/projects"
                   isActive={pathname.startsWith("/projects")}
-                >
-                  <Link href="/projects">
-                    <FolderHeart />
-                    <span>{t("projects")}</span>
-                  </Link>
-                </SidebarMenuButton>
+                  icon={<FolderHeart />}
+                  label={t("projects")}
+                />
               </SidebarMenuItem>
 
               {/* Budgets with sub-items */}
@@ -139,14 +141,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                       <SidebarMenuSubItem>
-                        <SidebarMenuSubButton
-                          asChild
+                        <FamilySubNavItem
+                          feature="challenges"
+                          href="/budgets/challenges"
                           isActive={pathname === "/budgets/challenges"}
-                        >
-                          <Link href="/budgets/challenges">
-                            {t("challenges")}
-                          </Link>
-                        </SidebarMenuSubButton>
+                          label={t("challenges")}
+                        />
                       </SidebarMenuSubItem>
                     </SidebarMenuSub>
                   </CollapsibleContent>
@@ -162,26 +162,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
+                <FamilyNavItem
+                  feature="assets"
+                  href="/assets"
                   isActive={pathname === "/assets"}
-                >
-                  <Link href="/assets">
-                    <Landmark />
-                    <span>{t("assets")}</span>
-                  </Link>
-                </SidebarMenuButton>
+                  icon={<Landmark />}
+                  label={t("assets")}
+                />
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
+                <FamilyNavItem
+                  feature="debts"
+                  href="/debts"
                   isActive={pathname === "/debts"}
-                >
-                  <Link href="/debts">
-                    <CreditCard />
-                    <span>{t("debts")}</span>
-                  </Link>
-                </SidebarMenuButton>
+                  icon={<CreditCard />}
+                  label={t("debts")}
+                />
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>

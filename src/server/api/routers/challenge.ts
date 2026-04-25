@@ -3,6 +3,7 @@ import { and, asc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { requireFeature } from "~/server/billing/entitlements";
 import type { db as dbInstance } from "~/server/db";
 import {
   category,
@@ -407,6 +408,7 @@ export const challengeRouter = createTRPCRouter({
     .input(createSchema)
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      await requireFeature(ctx.db, familyId, "challenges");
       const categoryIds = Array.from(new Set(input.categoryIds ?? []));
       await assertCategoriesInFamily(ctx.db, familyId, categoryIds);
       await assertFamilyResource(ctx.db, familyId, ctx.session.user.id, {

@@ -1,10 +1,13 @@
 import "server-only";
 
+import { eq } from "drizzle-orm";
 import { render } from "@react-email/render";
 import { createTranslator } from "next-intl";
 
 import { env } from "~/env";
-import { type Locale } from "~/i18n/config";
+import { defaultLocale, type Locale } from "~/i18n/config";
+import { db } from "~/server/db";
+import { family, user, usersToFamilies } from "~/server/db/schema";
 
 import { getResendClient } from "./client";
 import {
@@ -12,12 +15,14 @@ import {
   getUserLocaleById,
   loadMessages,
 } from "./locale";
+import { BillingEventEmail } from "./templates/billing-event-email";
 import { InviteEmail } from "./templates/invite-email";
 import { OtpEmail } from "./templates/otp-email";
 
 const SIGN_IN_OTP_EXPIRY_MINUTES = 10;
 const EMAIL_CHANGE_OTP_EXPIRY_MINUTES = 10;
 const INVITE_EXPIRY_DAYS = 7;
+const GRACE_PERIOD_DAYS = 7;
 
 type DispatchArgs = {
   to: string;
@@ -153,6 +158,93 @@ export async function sendContactEmail(args: {
     subject,
     html,
     replyTo: args.email,
+  });
+}
+
+type BillingEventKind = "graceStarted" | "downgraded" | "recovered";
+
+async function listFamilyOwners(
+  familyId: string,
+): Promise<Array<{ email: string; locale: Locale; familyName: string }>> {
+  const rows = await db
+    .select({
+      email: user.email,
+      locale: user.locale,
+      familyName: family.name,
+    })
+    .from(usersToFamilies)
+    .innerJoin(user, eq(usersToFamilies.userId, user.id))
+    .innerJoin(family, eq(usersToFamilies.familyId, family.id))
+    .where(eq(usersToFamilies.familyId, familyId));
+
+  return rows
+    .filter((r): r is typeof r & { email: string } => Boolean(r.email))
+    .map((r) => ({
+      email: r.email,
+      locale: r.locale ?? defaultLocale,
+      familyName: r.familyName,
+    }));
+}
+
+async function sendBillingEvent(args: {
+  familyId: string;
+  kind: BillingEventKind;
+  ctaPath?: string;
+}) {
+  const owners = await listFamilyOwners(args.familyId);
+  if (owners.length === 0) return;
+
+  const ctaUrl = args.ctaPath
+    ? `${env.BETTER_AUTH_URL.replace(/\/$/, "")}${args.ctaPath}`
+    : undefined;
+
+  for (const owner of owners) {
+    const { common, makeT } = await buildTranslators(owner.locale);
+    const t = makeT(`emails.billing.${args.kind}`);
+
+    const html = await render(
+      <BillingEventEmail
+        preview={t("preview", { familyName: owner.familyName })}
+        heading={t("heading", { familyName: owner.familyName })}
+        intro={t("intro", {
+          familyName: owner.familyName,
+          graceDays: GRACE_PERIOD_DAYS,
+        })}
+        body={t("body", { graceDays: GRACE_PERIOD_DAYS })}
+        cta={ctaUrl ? t("cta") : undefined}
+        ctaUrl={ctaUrl}
+        footerText={common("footer")}
+      />,
+    );
+
+    await dispatch({
+      to: owner.email,
+      subject: t("subject", { familyName: owner.familyName }),
+      html,
+    });
+  }
+}
+
+export async function sendBillingGraceStartedEmail(args: { familyId: string }) {
+  await sendBillingEvent({
+    familyId: args.familyId,
+    kind: "graceStarted",
+    ctaPath: "/settings/billing",
+  });
+}
+
+export async function sendBillingDowngradedEmail(args: { familyId: string }) {
+  await sendBillingEvent({
+    familyId: args.familyId,
+    kind: "downgraded",
+    ctaPath: "/settings/billing",
+  });
+}
+
+export async function sendBillingRecoveredEmail(args: { familyId: string }) {
+  await sendBillingEvent({
+    familyId: args.familyId,
+    kind: "recovered",
   });
 }
 

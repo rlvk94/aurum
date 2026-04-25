@@ -1,9 +1,62 @@
 {
-  "id": "46866dce-553b-4bd1-8cb7-3e6cbc27e4da",
-  "prevId": "db5863c4-f6fc-4865-a32a-30474d12ae9e",
+  "id": "8870637a-2c48-4b1e-8ce6-10384c9a54da",
+  "prevId": "3c1edc38-1ae1-4590-a276-5c80e4432bb3",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.announcement_dismissal": {
+      "name": "announcement_dismissal",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "announcement_id": {
+          "name": "announcement_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "dismissed_at": {
+          "name": "dismissed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "announcement_dismissal_user_id_user_id_fk": {
+          "name": "announcement_dismissal_user_id_user_id_fk",
+          "tableFrom": "announcement_dismissal",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "tableTo": "user",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {
+        "announcement_dismissal_user_id_announcement_id_pk": {
+          "name": "announcement_dismissal_user_id_announcement_id_pk",
+          "columns": [
+            "user_id",
+            "announcement_id"
+          ]
+        }
+      },
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.asset": {
       "name": "asset",
       "schema": "",
@@ -72,15 +125,15 @@
         "asset_family_id_family_id_fk": {
           "name": "asset_family_id_family_id_fk",
           "tableFrom": "asset",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -171,15 +224,15 @@
         "account_user_id_user_id_fk": {
           "name": "account_user_id_user_id_fk",
           "tableFrom": "account",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -246,25 +299,25 @@
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "session_token_unique": {
           "name": "session_token_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -383,10 +436,10 @@
       "uniqueConstraints": {
         "user_email_unique": {
           "name": "user_email_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "email"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -432,6 +485,169 @@
           "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.family_subscription": {
+      "name": "family_subscription",
+      "schema": "",
+      "columns": {
+        "family_id": {
+          "name": "family_id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "plan": {
+          "name": "plan",
+          "type": "family_plan",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'free'"
+        },
+        "status": {
+          "name": "status",
+          "type": "subscription_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'none'"
+        },
+        "cadence": {
+          "name": "cadence",
+          "type": "billing_cadence",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_customer_id": {
+          "name": "stripe_customer_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_subscription_id": {
+          "name": "stripe_subscription_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "stripe_price_id": {
+          "name": "stripe_price_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "current_period_start": {
+          "name": "current_period_start",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "current_period_end": {
+          "name": "current_period_end",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cancel_at_period_end": {
+          "name": "cancel_at_period_end",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "grace_ends_at": {
+          "name": "grace_ends_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pending_checkout_at": {
+          "name": "pending_checkout_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "family_subscription_family_id_family_id_fk": {
+          "name": "family_subscription_family_id_family_id_fk",
+          "tableFrom": "family_subscription",
+          "columnsFrom": [
+            "family_id"
+          ],
+          "tableTo": "family",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "family_subscription_stripe_customer_id_unique": {
+          "name": "family_subscription_stripe_customer_id_unique",
+          "columns": [
+            "stripe_customer_id"
+          ],
+          "nullsNotDistinct": false
+        },
+        "family_subscription_stripe_subscription_id_unique": {
+          "name": "family_subscription_stripe_subscription_id_unique",
+          "columns": [
+            "stripe_subscription_id"
+          ],
+          "nullsNotDistinct": false
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.stripe_webhook_event": {
+      "name": "stripe_webhook_event",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "type": {
+          "name": "type",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "received_at": {
+          "name": "received_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
         }
       },
       "indexes": {},
@@ -508,24 +724,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "budget_family_id_family_id_fk": {
           "name": "budget_family_id_family_id_fk",
           "tableFrom": "budget",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -562,28 +778,28 @@
         "budget_account_budget_id_budget_id_fk": {
           "name": "budget_account_budget_id_budget_id_fk",
           "tableFrom": "budget_account",
-          "tableTo": "budget",
           "columnsFrom": [
             "budget_id"
           ],
+          "tableTo": "budget",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "budget_account_account_id_financial_account_id_fk": {
           "name": "budget_account_account_id_financial_account_id_fk",
           "tableFrom": "budget_account",
-          "tableTo": "financial_account",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "financial_account",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -681,37 +897,37 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "budget_line_budget_id_budget_id_fk": {
           "name": "budget_line_budget_id_budget_id_fk",
           "tableFrom": "budget_line",
-          "tableTo": "budget",
           "columnsFrom": [
             "budget_id"
           ],
+          "tableTo": "budget",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "budget_line_category_id_category_id_fk": {
           "name": "budget_line_category_id_category_id_fk",
           "tableFrom": "budget_line",
-          "tableTo": "category",
           "columnsFrom": [
             "category_id"
           ],
+          "tableTo": "category",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -806,37 +1022,37 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "category_family_id_family_id_fk": {
           "name": "category_family_id_family_id_fk",
           "tableFrom": "category",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "category_parent_id_category_id_fk": {
           "name": "category_parent_id_category_id_fk",
           "tableFrom": "category",
-          "tableTo": "category",
           "columnsFrom": [
             "parent_id"
           ],
+          "tableTo": "category",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -948,41 +1164,41 @@
         "challenge_family_id_family_id_fk": {
           "name": "challenge_family_id_family_id_fk",
           "tableFrom": "challenge",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "challenge_account_id_financial_account_id_fk": {
           "name": "challenge_account_id_financial_account_id_fk",
           "tableFrom": "challenge",
-          "tableTo": "financial_account",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "financial_account",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         },
         "challenge_debt_id_debt_id_fk": {
           "name": "challenge_debt_id_debt_id_fk",
           "tableFrom": "challenge",
-          "tableTo": "debt",
           "columnsFrom": [
             "debt_id"
           ],
+          "tableTo": "debt",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -1019,28 +1235,28 @@
         "challenge_account_challenge_id_challenge_id_fk": {
           "name": "challenge_account_challenge_id_challenge_id_fk",
           "tableFrom": "challenge_account",
-          "tableTo": "challenge",
           "columnsFrom": [
             "challenge_id"
           ],
+          "tableTo": "challenge",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "challenge_account_account_id_financial_account_id_fk": {
           "name": "challenge_account_account_id_financial_account_id_fk",
           "tableFrom": "challenge_account",
-          "tableTo": "financial_account",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "financial_account",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1085,28 +1301,28 @@
         "challenge_category_challenge_id_challenge_id_fk": {
           "name": "challenge_category_challenge_id_challenge_id_fk",
           "tableFrom": "challenge_category",
-          "tableTo": "challenge",
           "columnsFrom": [
             "challenge_id"
           ],
+          "tableTo": "challenge",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "challenge_category_category_id_category_id_fk": {
           "name": "challenge_category_category_id_category_id_fk",
           "tableFrom": "challenge_category",
-          "tableTo": "category",
           "columnsFrom": [
             "category_id"
           ],
+          "tableTo": "category",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1197,24 +1413,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "challenge_instance_challenge_id_challenge_id_fk": {
           "name": "challenge_instance_challenge_id_challenge_id_fk",
           "tableFrom": "challenge_instance",
-          "tableTo": "challenge",
           "columnsFrom": [
             "challenge_id"
           ],
+          "tableTo": "challenge",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1320,28 +1536,28 @@
         "debt_family_id_family_id_fk": {
           "name": "debt_family_id_family_id_fk",
           "tableFrom": "debt",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "debt_asset_id_asset_id_fk": {
           "name": "debt_asset_id_asset_id_fk",
           "tableFrom": "debt",
-          "tableTo": "asset",
           "columnsFrom": [
             "asset_id"
           ],
+          "tableTo": "asset",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -1447,38 +1663,38 @@
         "invitation_family_id_family_id_fk": {
           "name": "invitation_family_id_family_id_fk",
           "tableFrom": "invitation",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "invitation_invited_by_id_user_id_fk": {
           "name": "invitation_invited_by_id_user_id_fk",
           "tableFrom": "invitation",
-          "tableTo": "user",
           "columnsFrom": [
             "invited_by_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "invitation_token_unique": {
           "name": "invitation_token_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "token"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1527,28 +1743,28 @@
         "users_to_families_user_id_user_id_fk": {
           "name": "users_to_families_user_id_user_id_fk",
           "tableFrom": "users_to_families",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "users_to_families_family_id_family_id_fk": {
           "name": "users_to_families_family_id_family_id_fk",
           "tableFrom": "users_to_families",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1626,24 +1842,24 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "user_favorite_user_id_user_id_fk": {
           "name": "user_favorite_user_id_user_id_fk",
           "tableFrom": "user_favorite",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1735,25 +1951,25 @@
         "financial_account_family_id_family_id_fk": {
           "name": "financial_account_family_id_family_id_fk",
           "tableFrom": "financial_account",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
         "financial_account_identifier_unique": {
           "name": "financial_account_identifier_unique",
-          "nullsNotDistinct": false,
           "columns": [
             "identifier"
-          ]
+          ],
+          "nullsNotDistinct": false
         }
       },
       "policies": {},
@@ -1788,28 +2004,28 @@
         "financial_account_access_account_id_financial_account_id_fk": {
           "name": "financial_account_access_account_id_financial_account_id_fk",
           "tableFrom": "financial_account_access",
-          "tableTo": "financial_account",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "financial_account",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "financial_account_access_user_id_user_id_fk": {
           "name": "financial_account_access_user_id_user_id_fk",
           "tableFrom": "financial_account_access",
-          "tableTo": "user",
           "columnsFrom": [
             "user_id"
           ],
+          "tableTo": "user",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {
@@ -1894,24 +2110,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "income_plan_family_id_family_id_fk": {
           "name": "income_plan_family_id_family_id_fk",
           "tableFrom": "income_plan",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1982,24 +2198,24 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "income_plan_income_plan_id_income_plan_id_fk": {
           "name": "income_plan_income_plan_id_income_plan_id_fk",
           "tableFrom": "income_plan_income",
-          "tableTo": "income_plan",
           "columnsFrom": [
             "plan_id"
           ],
+          "tableTo": "income_plan",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2083,37 +2299,161 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "income_plan_line_plan_id_income_plan_id_fk": {
           "name": "income_plan_line_plan_id_income_plan_id_fk",
           "tableFrom": "income_plan_line",
-          "tableTo": "income_plan",
           "columnsFrom": [
             "plan_id"
           ],
+          "tableTo": "income_plan",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "income_plan_line_account_id_financial_account_id_fk": {
           "name": "income_plan_line_account_id_financial_account_id_fk",
           "tableFrom": "income_plan_line",
-          "tableTo": "financial_account",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "financial_account",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.project": {
+      "name": "project",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "family_id": {
+          "name": "family_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "emoji": {
+          "name": "emoji",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'📌'"
+        },
+        "cover_palette": {
+          "name": "cover_palette",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'gold'"
+        },
+        "spending_limit": {
+          "name": "spending_limit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start_date": {
+          "name": "start_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_date": {
+          "name": "end_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "archived_at": {
+          "name": "archived_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "project_family_idx": {
+          "name": "project_family_idx",
+          "columns": [
+            {
+              "expression": "family_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "archived_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
+      "foreignKeys": {
+        "project_family_id_family_id_fk": {
+          "name": "project_family_id_family_id_fk",
+          "tableFrom": "project",
+          "columnsFrom": [
+            "family_id"
+          ],
+          "tableTo": "family",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -2153,6 +2493,12 @@
         },
         "category_id": {
           "name": "category_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "project_id": {
+          "name": "project_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -2237,10 +2583,10 @@
             }
           ],
           "isUnique": true,
-          "where": "\"transaction\".\"external_id\" IS NOT NULL",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"transaction\".\"external_id\" IS NOT NULL",
+          "concurrently": false
         },
         "transaction_family_date_idx": {
           "name": "transaction_family_date_idx",
@@ -2271,9 +2617,9 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         },
         "transaction_transfer_group_idx": {
           "name": "transaction_transfer_group_idx",
@@ -2286,51 +2632,80 @@
             }
           ],
           "isUnique": false,
-          "where": "\"transaction\".\"transfer_group_id\" IS NOT NULL",
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "where": "\"transaction\".\"transfer_group_id\" IS NOT NULL",
+          "concurrently": false
+        },
+        "transaction_project_idx": {
+          "name": "transaction_project_idx",
+          "columns": [
+            {
+              "expression": "project_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "with": {},
+          "method": "btree",
+          "where": "\"transaction\".\"project_id\" IS NOT NULL",
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "transaction_family_id_family_id_fk": {
           "name": "transaction_family_id_family_id_fk",
           "tableFrom": "transaction",
-          "tableTo": "family",
           "columnsFrom": [
             "family_id"
           ],
+          "tableTo": "family",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "transaction_account_id_financial_account_id_fk": {
           "name": "transaction_account_id_financial_account_id_fk",
           "tableFrom": "transaction",
-          "tableTo": "financial_account",
           "columnsFrom": [
             "account_id"
           ],
+          "tableTo": "financial_account",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "transaction_category_id_category_id_fk": {
           "name": "transaction_category_id_category_id_fk",
           "tableFrom": "transaction",
-          "tableTo": "category",
           "columnsFrom": [
             "category_id"
           ],
+          "tableTo": "category",
           "columnsTo": [
             "id"
           ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "set null"
+        },
+        "transaction_project_id_project_id_fk": {
+          "name": "transaction_project_id_project_id_fk",
+          "tableFrom": "transaction",
+          "columnsFrom": [
+            "project_id"
+          ],
+          "tableTo": "project",
+          "columnsTo": [
+            "id"
+          ],
+          "onUpdate": "no action",
+          "onDelete": "set null"
         }
       },
       "compositePrimaryKeys": {},
@@ -2367,6 +2742,37 @@
         "light",
         "dark",
         "system"
+      ]
+    },
+    "public.billing_cadence": {
+      "name": "billing_cadence",
+      "schema": "public",
+      "values": [
+        "monthly",
+        "annual"
+      ]
+    },
+    "public.family_plan": {
+      "name": "family_plan",
+      "schema": "public",
+      "values": [
+        "free",
+        "pro"
+      ]
+    },
+    "public.subscription_status": {
+      "name": "subscription_status",
+      "schema": "public",
+      "values": [
+        "none",
+        "active",
+        "trialing",
+        "past_due",
+        "unpaid",
+        "canceled",
+        "incomplete",
+        "incomplete_expired",
+        "paused"
       ]
     },
     "public.budget_recurrence": {
@@ -2469,10 +2875,10 @@
     }
   },
   "schemas": {},
+  "views": {},
   "sequences": {},
   "roles": {},
   "policies": {},
-  "views": {},
   "_meta": {
     "columns": {},
     "schemas": {},

@@ -55,3 +55,10 @@ YYYY-MM-DD
 | 0011 | [Use next-intl for Internationalization](0011-use-next-intl.md) | Proposed |
 | 0012 | [All User-Facing Text Must Use Translation Keys](0012-translatable-labels.md) | Proposed |
 | 0013 | [Use PostHog for Product Analytics and Error Monitoring](0013-use-posthog-for-analytics-and-error-monitoring.md) | Proposed |
+| 0014 | [Projects as a Transaction Dimension](0014-projects-as-transaction-dimension.md) | Proposed |
+| 0015 | [In-App Announcements as Bundled Content](0015-in-app-announcements.md) | Proposed |
+| 0016 | [Family-Level Stripe Subscriptions](0016-family-level-stripe-subscriptions.md) | Proposed |
+| 0017 | [Custom Stripe Integration over BetterAuth Plugin](0017-custom-stripe-integration.md) | Proposed |
+| 0018 | [7-Day Grace Period and Downgrade Policy](0018-grace-period-downgrade-policy.md) | Proposed |
+| 0019 | [Centralized Plan-Entitlements Module](0019-plan-entitlements-module.md) | Proposed |
+| 0020 | [Stripe Price IDs via Environment Variables](0020-stripe-prices-via-env.md) | Proposed |

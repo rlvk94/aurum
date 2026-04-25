@@ -765,7 +765,8 @@
       "members": "Members",
       "categories": "Categories",
       "preferences": "Preferences",
-      "appearance": "Appearance"
+      "appearance": "Appearance",
+      "billing": "Subscription"
     },
     "profile": {
       "title": "Profile",
@@ -866,6 +867,31 @@
       "cta": "Sign in to Aurum",
       "linkFallback": "If the button doesn't work, copy and paste this link into your browser:",
       "expiresIn": "This invitation expires in {days} days."
+    },
+    "billing": {
+      "graceStarted": {
+        "subject": "{familyName}: payment failed",
+        "preview": "We could not charge {familyName}",
+        "heading": "Payment failed",
+        "intro": "We couldn't charge your latest payment for {familyName}. You keep Pro features for {graceDays} more days.",
+        "body": "Update your payment method before the grace period ends to avoid being downgraded.",
+        "cta": "Update payment"
+      },
+      "downgraded": {
+        "subject": "{familyName}: downgraded to free plan",
+        "preview": "{familyName} has moved to the free plan",
+        "heading": "Family downgraded",
+        "intro": "Your payment was not renewed in time. {familyName} is now on the free plan.",
+        "body": "Pro features like challenges, debts, assets and net worth are locked until you renew.",
+        "cta": "Reactivate Pro"
+      },
+      "recovered": {
+        "subject": "{familyName}: payment received",
+        "preview": "Thanks — {familyName} is back on Pro",
+        "heading": "Welcome back to Pro",
+        "intro": "We've received the payment for {familyName}. All Pro features are active again.",
+        "body": "Thanks for using Aurum."
+      }
     }
   },
   "tutorial": {
@@ -998,33 +1024,17 @@
       "cta": "Get started",
       "ctaAuthed": "Go to app",
       "plans": {
-        "free": {
-          "name": "Personal",
+        "individual": {
+          "name": "Individual",
           "tagline": "For yourself.",
           "price": "0",
-          "priceAnnual": "0",
-          "features": [
-            "1 member",
-            "2 accounts",
-            "Manual entry",
-            "CSV import",
-            "Monthly budget"
-          ]
+          "priceAnnual": "0"
         },
-        "pro": {
+        "family": {
           "name": "Family",
-          "tagline": "For when you live together.",
+          "tagline": "For people sharing a household.",
           "price": "49",
-          "priceAnnual": "39",
-          "features": [
-            "The whole family",
-            "Unlimited accounts",
-            "Annual budget with challenges",
-            "Debts and assets",
-            "Net worth tracking",
-            "Income planner",
-            "Auto-categorisation"
-          ]
+          "priceAnnual": "39"
         }
       }
     },
@@ -1089,6 +1099,198 @@
         "contact": "Contact"
       },
       "colophon": "Aurum · © 2026 · Denmark"
+    }
+  },
+  "billing": {
+    "plan": {
+      "individual": "Individual",
+      "family": "Family"
+    },
+    "cadence": {
+      "monthly": "Monthly",
+      "annual": "Annual"
+    },
+    "status": {
+      "none": "No plan selected",
+      "active": "Active",
+      "trialing": "Trialing",
+      "past_due": "Payment past due",
+      "unpaid": "Unpaid",
+      "canceled": "Canceled",
+      "incomplete": "Incomplete",
+      "incomplete_expired": "Expired",
+      "paused": "Paused"
+    },
+    "graceBanner": {
+      "title": "Payment failed",
+      "body": "We could not charge your card. The family keeps Pro features for {days} more days. Update payment to keep them.",
+      "cta": "Update payment"
+    },
+    "upgradeModal": {
+      "title": "Family feature",
+      "body": "This feature requires the Family plan. Upgrade to unlock it for the whole family.",
+      "cta": "See Family plan",
+      "cancel": "Maybe later"
+    },
+    "pendingBanner": {
+      "title": "Activation pending",
+      "body": "You started a payment but it did not complete. Try again to unlock Pro.",
+      "cta": "Try again"
+    },
+    "settings": {
+      "title": "Subscription",
+      "description": "Manage the family's plan and billing.",
+      "currentPlan": "Current plan",
+      "nextRenewal": "Next renewal",
+      "canceledAt": "Cancels {date}",
+      "manageInStripe": "Manage in Stripe",
+      "upgrade": "Upgrade to Family",
+      "chooseCadence": "Choose billing",
+      "monthly": "Monthly — {price} kr./mo.",
+      "annual": "Annual — {price} kr./mo. (save 20%)",
+      "memberView": "Ask the family owner to change the plan.",
+      "perMonth": "kr./mo.",
+      "onIndividualPlan": "Switch to Individual",
+      "individualPlanDescription": "Free plan — no charge.",
+      "familyPlanDescriptionActive": "Active — next renewal {date}",
+      "familyPlanDescriptionPastDue": "Payment past due — ends {date}",
+      "familyPlanDescriptionCanceled": "Cancels {date}",
+      "upgradeCard": {
+        "eyebrow": "Family",
+        "heading": "Get the most out of Aurum",
+        "body": "Upgrade to the Family plan and unlock everything for the whole household.",
+        "pricePrefix": "From",
+        "priceSuffix": "kr./mo.",
+        "cta": "Upgrade to Family"
+      }
+    },
+    "onboarding": {
+      "title": "Choose your plan",
+      "description": "You can change this any time.",
+      "individualCta": "Continue with Individual",
+      "familyCta": "Choose Family",
+      "activating": "Activating your subscription…",
+      "activatingHint": "This takes a few seconds. Stay on this page.",
+      "activationTimedOut": "It took longer than expected. Try again or check your email.",
+      "checkoutCanceled": "Payment was canceled. Try again or choose the Individual plan."
+    },
+    "errors": {
+      "upgradeRequired": "This feature requires the Family plan.",
+      "limitReached": "You have reached your plan limit."
+    },
+    "teaser": {
+      "genericTitle": "Unlock Family features",
+      "genericBody": "This feature is part of the Family plan. Upgrade to unlock it for the whole family.",
+      "cta": "Upgrade to Family"
+    },
+    "featureCopy": {
+      "projects": {
+        "title": "Projects",
+        "body": "Group expenses under time-boxed projects — vacations, renovations, weddings — and watch spending grow in real time.",
+        "bullets": [
+          "Assign transactions to a project",
+          "Set a spending cap per project",
+          "Track progress over time"
+        ]
+      },
+      "challenges": {
+        "title": "Challenges",
+        "body": "Create time-boxed goals to save more or cut spending in a category.",
+        "bullets": [
+          "Time-boxed goals",
+          "Save more or cut spend",
+          "Track progress live"
+        ]
+      },
+      "debts": {
+        "title": "Debts",
+        "body": "Track loans, payments, and outstanding balances.",
+        "bullets": [
+          "Track loans and payments",
+          "Outstanding balance over time",
+          "Link debts to assets"
+        ]
+      },
+      "assets": {
+        "title": "Assets",
+        "body": "Add manually-tracked assets to your net worth.",
+        "bullets": [
+          "Manually-tracked assets",
+          "Contribute to net worth",
+          "Link debts directly"
+        ]
+      },
+      "netWorth": {
+        "title": "Net worth",
+        "body": "See accounts, assets, and debts in a single overview.",
+        "bullets": [
+          "Accounts + assets - debts",
+          "Single overview",
+          "Trends over time"
+        ]
+      },
+      "incomePlanner": {
+        "title": "Income planner",
+        "body": "Allocate income by percentage or fixed amounts.",
+        "bullets": [
+          "Percentage or fixed amounts",
+          "Auto-distribute per account",
+          "Multiple plans"
+        ]
+      },
+      "annualBudgets": {
+        "title": "Annual budgets",
+        "body": "Plan a full-year budget with quarterly and annual patterns.",
+        "bullets": [
+          "Full-year budget",
+          "Quarterly + annual patterns",
+          "Plan vs actual per month"
+        ]
+      },
+      "autoCategorisationRules": {
+        "title": "Auto-categorisation",
+        "body": "Let rules categorise transactions automatically."
+      },
+      "maxAccounts": {
+        "title": "Unlimited accounts",
+        "body": "Individual plan allows 2 accounts. Upgrade for unlimited."
+      },
+      "maxMembers": {
+        "title": "Whole family",
+        "body": "Individual plan is single-user. Upgrade to invite the whole family."
+      }
+    },
+    "lockBadge": {
+      "label": "Locked"
+    },
+    "cadenceDialog": {
+      "title": "Choose billing",
+      "body": "You can change this any time.",
+      "monthlyHeading": "Monthly",
+      "monthlyPrice": "{price} kr./mo.",
+      "monthlySubtext": "Billed monthly",
+      "annualHeading": "Annual",
+      "annualPrice": "{price} kr./mo.",
+      "annualSubtext": "Billed annually — save 20%",
+      "cta": "Continue to payment",
+      "cancel": "Cancel"
+    },
+    "planFeatures": {
+      "members1": "1 member",
+      "accounts2": "2 accounts",
+      "manualEntry": "Manual entry",
+      "csvImport": "CSV import",
+      "monthlyBudget": "Monthly budget",
+      "annualBudget": "Annual budget",
+      "incomePlanner": "Income planner",
+      "wholeFamily": "Whole family",
+      "unlimitedAccounts": "Unlimited accounts",
+      "challenges": "Challenges",
+      "debts": "Debts",
+      "assets": "Assets",
+      "netWorth": "Net worth",
+      "projects": "Projects",
+      "autoCategorisation": "Auto-categorisation"
     }
   }
 }

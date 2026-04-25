@@ -3,6 +3,7 @@ import { and, asc, eq, gte, lte, or, inArray, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { requireWithinLimit } from "~/server/billing/entitlements";
 import { db as dbInstance } from "~/server/db";
 import {
   category,
@@ -441,6 +442,17 @@ export const financialAccountRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+
+      const [countRow] = await ctx.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(financialAccount)
+        .where(eq(financialAccount.familyId, familyId));
+      await requireWithinLimit(
+        ctx.db,
+        familyId,
+        "maxAccounts",
+        Number(countRow?.count ?? 0),
+      );
 
       const [created] = await ctx.db
         .insert(financialAccount)

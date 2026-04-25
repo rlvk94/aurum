@@ -6,6 +6,7 @@ import { MoreHorizontal, UserRound } from "lucide-react";
 
 import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
+import { useEntitlements } from "~/app/_hooks/use-entitlements";
 import { PageHeader } from "~/app/_components/page-header";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
@@ -133,8 +134,15 @@ function MemberRow({
   );
 }
 
-function InviteForm({ familyName }: { familyName: string | undefined }) {
+function InviteForm({
+  familyName,
+  atLimit,
+}: {
+  familyName: string | undefined;
+  atLimit: boolean;
+}) {
   const t = useTranslations("settings.members.invite");
+  const tBilling = useTranslations("billing.errors");
   const tCommon = useTranslations("common");
   const utils = api.useUtils();
   const [email, setEmail] = useState("");
@@ -160,6 +168,11 @@ function InviteForm({ familyName }: { familyName: string | undefined }) {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-3">
+        {atLimit && (
+          <p className="rounded-md border border-dashed bg-muted/30 p-3 text-sm text-muted-foreground">
+            {tBilling("limitReached")}
+          </p>
+        )}
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -174,9 +187,10 @@ function InviteForm({ familyName }: { familyName: string | undefined }) {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={atLimit}
             className="sm:flex-1"
           />
-          <Button type="submit" disabled={createInvite.isPending}>
+          <Button type="submit" disabled={createInvite.isPending || atLimit}>
             {createInvite.isPending ? tCommon("loading") : t("send")}
           </Button>
         </form>
@@ -242,10 +256,14 @@ export function MembersClient() {
   const { data: members } = api.family.listMembers.useQuery();
   const { data: invitations } = api.invitation.list.useQuery();
   const { data: me } = api.user.me.useQuery();
+  const { limit } = useEntitlements();
 
   const isOwner = current?.role === "owner";
 
   const ownerCount = members?.filter((m) => m.role === "owner").length ?? 0;
+  const memberCount = members?.length ?? 0;
+  const pendingCount = invitations?.length ?? 0;
+  const atMemberLimit = memberCount + pendingCount >= limit("maxMembers");
 
   const changeRole = api.family.updateMemberRole.useMutation({
     onSuccess: () => void utils.family.listMembers.invalidate(),
@@ -266,7 +284,9 @@ export function MembersClient() {
     <div className="mx-auto w-full max-w-2xl space-y-6">
       <PageHeader title={t("title")} description={t("description")} />
 
-      {isOwner && <InviteForm familyName={current?.name} />}
+      {isOwner && (
+        <InviteForm familyName={current?.name} atLimit={atMemberLimit} />
+      )}
 
       <Card>
         <CardHeader>

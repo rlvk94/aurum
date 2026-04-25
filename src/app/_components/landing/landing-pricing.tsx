@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "~/app/_components/button";
 import { cn } from "~/app/_lib/utils";
+import { PLAN_DISPLAY_BULLETS } from "~/server/billing/plans";
 import { SectionMarker } from "./section-marker";
 
 type Cadence = "monthly" | "annual";
@@ -14,8 +15,8 @@ export function LandingPricing({ isAuthed }: { isAuthed: boolean }) {
   const [cadence, setCadence] = useState<Cadence>("monthly");
 
   const plans = [
-    { key: "free", recommended: false },
-    { key: "pro", recommended: true },
+    { key: "individual", recommended: false },
+    { key: "family", recommended: true },
   ] as const;
 
   const ctaHref = isAuthed ? "/dashboard" : "/login";
@@ -84,7 +85,7 @@ function PricingPlan({
   ctaLabel,
   isLast,
 }: {
-  planKey: "free" | "pro";
+  planKey: "individual" | "family";
   recommended: boolean;
   cadence: Cadence;
   ctaHref: string;
@@ -93,7 +94,8 @@ function PricingPlan({
 }) {
   const t = useTranslations("landing.pricing");
   const tPlan = useTranslations(`landing.pricing.plans.${planKey}`);
-  const features = (tPlan.raw("features") as string[]) ?? [];
+  const tFeatures = useTranslations("billing.planFeatures");
+  const features = PLAN_DISPLAY_BULLETS[planKey].map((k) => tFeatures(k));
 
   const price = cadence === "annual" ? tPlan("priceAnnual") : tPlan("price");
   const billed =

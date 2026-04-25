@@ -40,7 +40,7 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - **Debt** — a liability tracked for the family
 - **Asset** — a manually tracked asset belonging to the family
 - **IncomePlan** / **IncomePlanLine** — templates for allocating income (by percentage or fixed amount)
-- **CategorizationRule** — keyword-to-category mapping for auto-categorization on import
+- **Category keywords** — each Category carries a `keywords` array used for auto-categorization on transaction create / CSV import. Implemented in `src/server/api/routers/category.ts` (`findMatchingCategoryId`, `loadCategoriesWithKeywords`); applied in `transaction.ts` on insert and via a bulk re-categorise mutation. Matches against leaf categories only, longest keyword wins.
 
 ### Financial semantics
 
@@ -187,6 +187,11 @@ Server code lives outside `src/app/`:
 - `0013` — Use PostHog for product analytics and error monitoring
 - `0014` — Projects as a transaction dimension
 - `0015` — In-app announcements as bundled content
+- `0016` — Family-level Stripe subscriptions (Stripe Customer = Family)
+- `0017` — Custom Stripe SDK integration over BetterAuth Stripe plugin
+- `0018` — 7-day grace period and downgrade policy for failed payments
+- `0019` — Centralized plan-entitlements module (`src/server/billing/plans.ts`)
+- `0020` — Stripe Price IDs configured via environment variables
 
 ## Testing
 

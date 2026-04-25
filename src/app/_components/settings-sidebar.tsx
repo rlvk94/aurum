@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowLeft,
+  CreditCard,
   Palette,
   Tag,
   User,
@@ -102,6 +103,17 @@ export function SettingsSidebar({
                   <Link href="/settings/categories">
                     <Tag />
                     <span>{t("categories")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname === "/settings/billing"}
+                >
+                  <Link href="/settings/billing">
+                    <CreditCard />
+                    <span>{t("billing")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

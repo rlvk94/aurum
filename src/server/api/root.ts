@@ -1,5 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "~/server/api/trpc";
 import { assetRouter } from "~/server/api/routers/asset";
+import { billingRouter } from "~/server/api/routers/billing";
 import { budgetRouter } from "~/server/api/routers/budget";
 import { categoryRouter } from "~/server/api/routers/category";
 import { challengeRouter } from "~/server/api/routers/challenge";
@@ -22,6 +23,7 @@ import { announcementRouter } from "~/server/api/routers/announcement";
  */
 export const appRouter = createTRPCRouter({
   asset: assetRouter,
+  billing: billingRouter,
   budget: budgetRouter,
   category: categoryRouter,
   challenge: challengeRouter,

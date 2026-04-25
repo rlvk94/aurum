@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
   ArrowLeft,
@@ -18,10 +18,16 @@ import { authClient } from "~/app/_lib/auth-client";
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
+import { PlanCard } from "~/app/_components/billing/plan-card";
 import { cn } from "~/app/_lib/utils";
 
-type Step = "name" | "language" | "theme" | "family";
+type Step = "name" | "language" | "theme" | "family" | "plan";
 type Theme = "light" | "dark" | "system";
+type Cadence = "monthly" | "annual";
+type SelectedPlan = "individual" | "family";
+
+const ACTIVATION_POLL_INTERVAL_MS = 2000;
+const ACTIVATION_TIMEOUT_MS = 30000;
 
 const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
@@ -67,7 +73,9 @@ const themes = [
 export default function WelcomePage() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
+  const tBilling = useTranslations("billing.onboarding");
   const router = useRouter();
+  const searchParams = useSearchParams();
   const currentLocale = useLocale();
   const [direction, setDirection] = useState(1);
   const [name, setName] = useState("");
@@ -76,6 +84,10 @@ export default function WelcomePage() {
   );
   const [theme, setTheme] = useState<Theme>("system");
   const [familyName, setFamilyName] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<SelectedPlan>("individual");
+  const [cadence, setCadence] = useState<Cadence>("monthly");
+  const [activating, setActivating] = useState(false);
+  const [activationError, setActivationError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
 
   const { data: onboardingState } = api.user.getOnboardingState.useQuery();
@@ -85,7 +97,7 @@ export default function WelcomePage() {
 
   const steps = useMemo<Step[]>(() => {
     const s: Step[] = ["language", "name", "theme"];
-    if (needsFamily) s.push("family");
+    if (needsFamily) s.push("family", "plan");
     return s;
   }, [needsFamily]);
 
@@ -100,11 +112,18 @@ export default function WelcomePage() {
         onboardingState.onboardingStep,
         steps.length - 1,
       );
-      setCurrentStepIndex(resumeIndex);
+      const checkoutParam = searchParams.get("checkout");
+      const planStepIndex = steps.indexOf("plan");
+      // Land directly on the plan step when returning from Stripe Checkout.
+      if (checkoutParam && planStepIndex >= 0) {
+        setCurrentStepIndex(planStepIndex);
+      } else {
+        setCurrentStepIndex(resumeIndex);
+      }
       setTheme(readThemeCookie());
       setReady(true);
     }
-  }, [onboardingState, steps.length, ready]);
+  }, [onboardingState, steps, ready, searchParams]);
 
   const updateProfile = api.user.updateProfile.useMutation();
   const completeOnboarding = api.user.completeOnboarding.useMutation({
@@ -114,23 +133,75 @@ export default function WelcomePage() {
   });
   const createFamily = api.family.create.useMutation({
     onSuccess: () => {
-      completeOnboarding.mutate();
+      // Advance to the plan step instead of completing onboarding directly.
+      setDirection(1);
+      setCurrentStepIndex((i) => Math.min(i + 1, steps.length - 1));
     },
   });
+  const selectIndividual = api.billing.selectIndividual.useMutation();
+  const createCheckoutSession = api.billing.createCheckoutSession.useMutation();
+  const billingCurrent = api.billing.current.useQuery(undefined, {
+    enabled: ready && currentStep === "plan",
+    refetchInterval: activating ? ACTIVATION_POLL_INTERVAL_MS : false,
+  });
+
+  const checkoutParam = searchParams.get("checkout");
+  const checkoutCanceled = checkoutParam === "cancel";
+
+  // Kick off polling on return from Stripe success.
+  useEffect(() => {
+    if (checkoutParam === "success" && currentStep === "plan" && !activating) {
+      setActivating(true);
+    }
+  }, [checkoutParam, currentStep, activating]);
+
+  // Once subscription is active, finish onboarding.
+  const finishedRef = useRef(false);
+  useEffect(() => {
+    if (
+      activating &&
+      billingCurrent.data?.status === "active" &&
+      !finishedRef.current
+    ) {
+      finishedRef.current = true;
+      setActivating(false);
+      completeOnboarding.mutate();
+    }
+  }, [activating, billingCurrent.data, completeOnboarding]);
+
+  // Activation timeout fallback.
+  useEffect(() => {
+    if (!activating) return;
+    const timer = setTimeout(() => {
+      if (!finishedRef.current) {
+        setActivating(false);
+        setActivationError(tBilling("activationTimedOut"));
+      }
+    }, ACTIVATION_TIMEOUT_MS);
+    return () => clearTimeout(timer);
+  }, [activating, tBilling]);
 
   const isPending =
     updateProfile.isPending ||
     completeOnboarding.isPending ||
-    createFamily.isPending;
+    createFamily.isPending ||
+    selectIndividual.isPending ||
+    createCheckoutSession.isPending ||
+    activating;
 
   const error =
-    updateProfile.error ?? completeOnboarding.error ?? createFamily.error;
+    updateProfile.error ??
+    completeOnboarding.error ??
+    createFamily.error ??
+    selectIndividual.error ??
+    createCheckoutSession.error;
 
   const canContinue =
     (currentStep === "name" && name.trim().length > 0) ||
     currentStep === "language" ||
     currentStep === "theme" ||
-    (currentStep === "family" && familyName.trim().length > 0);
+    (currentStep === "family" && familyName.trim().length > 0) ||
+    (currentStep === "plan" && !activating);
 
   const handleContinue = useCallback(() => {
     const nextIndex = currentStepIndex + 1;
@@ -182,6 +253,21 @@ export default function WelcomePage() {
       }
     } else if (currentStep === "family" && familyName.trim()) {
       createFamily.mutate({ name: familyName.trim() });
+    } else if (currentStep === "plan") {
+      if (selectedPlan === "individual") {
+        selectIndividual.mutate(undefined, {
+          onSuccess: () => completeOnboarding.mutate(),
+        });
+      } else {
+        createCheckoutSession.mutate(
+          { cadence },
+          {
+            onSuccess: ({ url }) => {
+              window.location.href = url;
+            },
+          },
+        );
+      }
     }
   }, [
     currentStep,
@@ -191,9 +277,13 @@ export default function WelcomePage() {
     locale,
     theme,
     familyName,
+    selectedPlan,
+    cadence,
     updateProfile,
     completeOnboarding,
     createFamily,
+    selectIndividual,
+    createCheckoutSession,
   ]);
 
   const handleBack = useCallback(() => {
@@ -483,6 +573,84 @@ export default function WelcomePage() {
                 </div>
               )}
 
+              {/* Step: Plan */}
+              {currentStep === "plan" && (
+                <div>
+                  <div className="mb-8 h-px w-12 bg-primary/40" />
+
+                  <h1 className="font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
+                    {tBilling("title")}
+                  </h1>
+                  <p className="mt-3 text-lg text-muted-foreground">
+                    {tBilling("description")}
+                  </p>
+
+                  {activating ? (
+                    <div className="mt-10 rounded-lg border border-primary/30 bg-primary/5 p-6 text-center">
+                      <Loader2 className="mx-auto mb-3 size-6 animate-spin text-primary" />
+                      <div className="font-medium text-foreground">
+                        {tBilling("activating")}
+                      </div>
+                      <div className="mt-1 text-sm text-muted-foreground">
+                        {tBilling("activatingHint")}
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {checkoutCanceled && (
+                        <p className="mt-6 text-sm text-warning-foreground">
+                          {tBilling("checkoutCanceled")}
+                        </p>
+                      )}
+                      {activationError && (
+                        <p className="mt-6 text-sm text-destructive">
+                          {activationError}
+                        </p>
+                      )}
+
+                      <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1 shadow-card">
+                        {(["monthly", "annual"] as const).map((c) => (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => setCadence(c)}
+                            className={cn(
+                              "almanac-smallcaps relative rounded-full px-4 py-1.5 text-[10px] tracking-[0.22em] transition-colors",
+                              cadence === c
+                                ? "bg-primary text-primary-foreground"
+                                : "text-muted-foreground hover:text-foreground",
+                            )}
+                          >
+                            {locale === "da"
+                              ? c === "monthly"
+                                ? "Månedlig"
+                                : "Årlig"
+                              : c === "monthly"
+                                ? "Monthly"
+                                : "Annual"}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <PlanCard
+                          planKey="individual"
+                          cadence={cadence}
+                          selected={selectedPlan === "individual"}
+                          onSelect={() => setSelectedPlan("individual")}
+                        />
+                        <PlanCard
+                          planKey="family"
+                          cadence={cadence}
+                          selected={selectedPlan === "family"}
+                          onSelect={() => setSelectedPlan("family")}
+                        />
+                      </div>
+                    </>
+                  )}
+                </div>
+              )}
+
               {/* Step: Family */}
               {currentStep === "family" && (
                 <div>
@@ -587,9 +755,13 @@ export default function WelcomePage() {
             </>
           ) : (
             <>
-              {currentStepIndex === totalSteps - 1
-                ? t("getStarted")
-                : t("continue")}
+              {currentStep === "plan"
+                ? selectedPlan === "individual"
+                  ? tBilling("individualCta")
+                  : tBilling("familyCta")
+                : currentStepIndex === totalSteps - 1
+                  ? t("getStarted")
+                  : t("continue")}
               <ArrowRight className="size-4" />
             </>
           )}

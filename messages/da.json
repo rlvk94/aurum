@@ -765,7 +765,8 @@
       "members": "Medlemmer",
       "categories": "Kategorier",
       "preferences": "Præferencer",
-      "appearance": "Udseende"
+      "appearance": "Udseende",
+      "billing": "Abonnement"
     },
     "profile": {
       "title": "Profil",
@@ -866,6 +867,31 @@
       "cta": "Log ind på Aurum",
       "linkFallback": "Virker knappen ikke, kan du kopiere linket herunder ind i din browser:",
       "expiresIn": "Invitationen udløber om {days} dage."
+    },
+    "billing": {
+      "graceStarted": {
+        "subject": "{familyName}: din betaling mislykkedes",
+        "preview": "Vi kunne ikke trække betalingen for {familyName}",
+        "heading": "Betaling mislykkedes",
+        "intro": "Vi kunne ikke trække jeres seneste betaling for {familyName}. I beholder Pro-funktioner i {graceDays} dage.",
+        "body": "Opdater betalingsmetoden, før perioden udløber, for at undgå nedgradering.",
+        "cta": "Opdater betaling"
+      },
+      "downgraded": {
+        "subject": "{familyName}: nedgraderet til gratis plan",
+        "preview": "{familyName} er flyttet til den gratis plan",
+        "heading": "Familien er nedgraderet",
+        "intro": "Betalingen blev ikke fornyet i tide. {familyName} kører nu på den gratis plan.",
+        "body": "Pro-funktioner som udfordringer, gæld, aktiver og formueopgørelse er låst, indtil I forny abonnementet.",
+        "cta": "Genaktiver Pro"
+      },
+      "recovered": {
+        "subject": "{familyName}: betalingen er gennemført",
+        "preview": "Tak — {familyName} er tilbage på Pro",
+        "heading": "Velkommen tilbage til Pro",
+        "intro": "Vi har modtaget betalingen for {familyName}. Alle Pro-funktioner er aktive igen.",
+        "body": "Tak fordi I bruger Aurum."
+      }
     }
   },
   "tutorial": {
@@ -998,33 +1024,17 @@
       "cta": "Kom i gang",
       "ctaAuthed": "Gå til appen",
       "plans": {
-        "free": {
+        "individual": {
           "name": "Personlig",
           "tagline": "For dig selv.",
           "price": "0",
-          "priceAnnual": "0",
-          "features": [
-            "1 medlem",
-            "2 konti",
-            "Manuel registrering",
-            "CSV-import",
-            "Månedsbudget"
-          ]
+          "priceAnnual": "0"
         },
-        "pro": {
+        "family": {
           "name": "Familie",
           "tagline": "For jer der bor sammen.",
           "price": "49",
-          "priceAnnual": "39",
-          "features": [
-            "Hele familien",
-            "Ubegrænsede konti",
-            "Årsbudget med udfordringer",
-            "Gæld og aktiver",
-            "Formueopgørelse",
-            "Indkomstplanlægger",
-            "Auto-kategorisering"
-          ]
+          "priceAnnual": "39"
         }
       }
     },
@@ -1089,6 +1099,198 @@
         "contact": "Kontakt"
       },
       "colophon": "Aurum · © 2026 · Danmark"
+    }
+  },
+  "billing": {
+    "plan": {
+      "individual": "Personlig",
+      "family": "Familie"
+    },
+    "cadence": {
+      "monthly": "Månedlig",
+      "annual": "Årlig"
+    },
+    "status": {
+      "none": "Ingen plan valgt",
+      "active": "Aktiv",
+      "trialing": "Prøveperiode",
+      "past_due": "Betaling forsinket",
+      "unpaid": "Ubetalt",
+      "canceled": "Opsagt",
+      "incomplete": "Ikke fuldført",
+      "incomplete_expired": "Udløbet",
+      "paused": "Pauset"
+    },
+    "graceBanner": {
+      "title": "Betaling mislykkedes",
+      "body": "Vi kunne ikke gennemføre opkrævningen. Familien beholder Pro-funktioner i {days} dage. Opdater betaling for at fortsætte.",
+      "cta": "Opdater betaling"
+    },
+    "upgradeModal": {
+      "title": "Familie-funktion",
+      "body": "Denne funktion kræver Familie-abonnement. Opgrader for at låse hele familien op.",
+      "cta": "Se Familie-plan",
+      "cancel": "Måske senere"
+    },
+    "pendingBanner": {
+      "title": "Aktivering afventer",
+      "body": "Du startede en betaling, men den blev ikke gennemført. Prøv igen for at låse Pro op.",
+      "cta": "Prøv igen"
+    },
+    "settings": {
+      "title": "Abonnement",
+      "description": "Administrér familiens plan og betaling.",
+      "currentPlan": "Nuværende plan",
+      "nextRenewal": "Næste fornyelse",
+      "canceledAt": "Opsiges {date}",
+      "manageInStripe": "Administrér i Stripe",
+      "upgrade": "Opgrader til Familie",
+      "chooseCadence": "Vælg fakturering",
+      "monthly": "Månedlig — {price} kr./md.",
+      "annual": "Årlig — {price} kr./md. (spar 20 %)",
+      "memberView": "Kontakt familieejeren for at ændre planen.",
+      "perMonth": "kr./md.",
+      "onIndividualPlan": "Skift til Personlig",
+      "individualPlanDescription": "Den gratis plan – du betaler ikke noget.",
+      "familyPlanDescriptionActive": "Aktiv – næste fornyelse {date}",
+      "familyPlanDescriptionPastDue": "Betaling forsinket – udløber {date}",
+      "familyPlanDescriptionCanceled": "Opsiges {date}",
+      "upgradeCard": {
+        "eyebrow": "Familie",
+        "heading": "Få mest muligt ud af Aurum",
+        "body": "Opgrader til Familie-planen og lås alt op for hele husstanden.",
+        "pricePrefix": "Fra",
+        "priceSuffix": "kr./md.",
+        "cta": "Opgrader til Familie"
+      }
+    },
+    "onboarding": {
+      "title": "Vælg din plan",
+      "description": "Du kan altid skifte senere.",
+      "individualCta": "Fortsæt med Personlig",
+      "familyCta": "Vælg Familie",
+      "activating": "Aktiverer dit abonnement…",
+      "activatingHint": "Det tager nogle få sekunder. Bliv på siden.",
+      "activationTimedOut": "Det tog længere end forventet. Prøv igen eller tjek din e-mail.",
+      "checkoutCanceled": "Betalingen blev annulleret. Prøv igen eller vælg den personlige plan."
+    },
+    "errors": {
+      "upgradeRequired": "Denne funktion kræver Familie-abonnement.",
+      "limitReached": "Du har nået grænsen for din plan."
+    },
+    "teaser": {
+      "genericTitle": "Lås op for Familie-funktioner",
+      "genericBody": "Denne funktion er en del af Familie-planen. Opgrader for at låse hele familien op.",
+      "cta": "Opgrader til Familie"
+    },
+    "featureCopy": {
+      "projects": {
+        "title": "Projekter",
+        "body": "Saml udgifter under tidsbegrænsede projekter — ferier, ombygninger, bryllup — og se forbruget vokse i realtid.",
+        "bullets": [
+          "Tildel transaktioner til et projekt",
+          "Sæt forbrugsloft pr. projekt",
+          "Følg fremdrift over tid"
+        ]
+      },
+      "challenges": {
+        "title": "Udfordringer",
+        "body": "Skab tidsbegrænsede mål for at spare op eller skære ned på forbrug.",
+        "bullets": [
+          "Tidsbegrænsede mål",
+          "Spar op eller skær ned",
+          "Følg fremdrift live"
+        ]
+      },
+      "debts": {
+        "title": "Gæld",
+        "body": "Spor lån, afdrag og restgæld.",
+        "bullets": [
+          "Spor lån og afdrag",
+          "Restgæld over tid",
+          "Knyt gæld til aktiver"
+        ]
+      },
+      "assets": {
+        "title": "Aktiver",
+        "body": "Tilføj manuelle aktiver i jeres formueopgørelse.",
+        "bullets": [
+          "Manuelle aktiver",
+          "Bidrager til formueopgørelse",
+          "Knyt gæld direkte"
+        ]
+      },
+      "netWorth": {
+        "title": "Formueopgørelse",
+        "body": "Saml konti, aktiver og gæld i ét overblik.",
+        "bullets": [
+          "Konti + aktiver - gæld",
+          "Ét samlet overblik",
+          "Trends over tid"
+        ]
+      },
+      "incomePlanner": {
+        "title": "Indkomstplanlægger",
+        "body": "Fordel indkomst automatisk efter procent eller faste beløb.",
+        "bullets": [
+          "Procent eller fast beløb",
+          "Auto-fordeling pr. konto",
+          "Flere planer"
+        ]
+      },
+      "annualBudgets": {
+        "title": "Årsbudget",
+        "body": "Planlæg helårsbudget med kvartals- og årsmønstre.",
+        "bullets": [
+          "Helårsbudget",
+          "Kvartals- og årsmønstre",
+          "Plan vs. faktisk pr. måned"
+        ]
+      },
+      "autoCategorisationRules": {
+        "title": "Auto-kategorisering",
+        "body": "Lad regler kategorisere transaktioner automatisk."
+      },
+      "maxAccounts": {
+        "title": "Ubegrænsede konti",
+        "body": "Den personlige plan tillader 2 konti. Opgrader for ubegrænset."
+      },
+      "maxMembers": {
+        "title": "Hele familien",
+        "body": "Den personlige plan er for én bruger. Opgrader for at invitere hele familien."
+      }
+    },
+    "lockBadge": {
+      "label": "Låst"
+    },
+    "cadenceDialog": {
+      "title": "Vælg fakturering",
+      "body": "Du kan altid skifte senere.",
+      "monthlyHeading": "Månedlig",
+      "monthlyPrice": "{price} kr./md.",
+      "monthlySubtext": "Faktureres månedligt",
+      "annualHeading": "Årlig",
+      "annualPrice": "{price} kr./md.",
+      "annualSubtext": "Faktureres årligt — spar 20 %",
+      "cta": "Fortsæt til betaling",
+      "cancel": "Annullér"
+    },
+    "planFeatures": {
+      "members1": "1 medlem",
+      "accounts2": "2 konti",
+      "manualEntry": "Manuel registrering",
+      "csvImport": "CSV-import",
+      "monthlyBudget": "Månedsbudget",
+      "annualBudget": "Årsbudget",
+      "incomePlanner": "Indkomstplanlægger",
+      "wholeFamily": "Hele familien",
+      "unlimitedAccounts": "Ubegrænsede konti",
+      "challenges": "Udfordringer",
+      "debts": "Gæld",
+      "assets": "Aktiver",
+      "netWorth": "Formueopgørelse",
+      "projects": "Projekter",
+      "autoCategorisation": "Auto-kategorisering"
     }
   }
 }
