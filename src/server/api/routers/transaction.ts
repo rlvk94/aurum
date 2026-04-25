@@ -163,6 +163,9 @@ export const transactionRouter = createTRPCRouter({
           categoryId: z.string().uuid().nullable().optional(),
           categoryIds: z.array(z.string().uuid()).optional(),
           includeUncategorized: z.boolean().optional(),
+          // Filter by project. `null` = transactions with no project assigned.
+          // Undefined = no filter applied.
+          projectId: z.string().uuid().nullable().optional(),
           type: transactionTypeSchema.optional(),
           search: z.string().optional(),
           from: z.string().optional(), // ISO date YYYY-MM-DD
@@ -238,6 +241,13 @@ export const transactionRouter = createTRPCRouter({
         const combined = branches.length === 1 ? branches[0]! : or(...branches);
         if (combined) conditions.push(combined);
       }
+      if (input?.projectId !== undefined) {
+        if (input.projectId === null) {
+          conditions.push(isNull(transaction.projectId));
+        } else {
+          conditions.push(eq(transaction.projectId, input.projectId));
+        }
+      }
       if (input?.search && input.search.trim()) {
         const pattern = `%${input.search.trim()}%`;
         const searchCondition = or(
@@ -300,6 +310,7 @@ export const transactionRouter = createTRPCRouter({
         note: z.string().max(1000).optional(),
         transferGroupId: z.string().uuid().optional(),
         categoryId: z.string().uuid().optional(),
+        projectId: z.string().uuid().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -327,6 +338,7 @@ export const transactionRouter = createTRPCRouter({
           description: input.description,
           note: input.note ?? null,
           categoryId: input.categoryId ?? null,
+          projectId: input.projectId ?? null,
         })
         .returning();
 
@@ -456,6 +468,7 @@ export const transactionRouter = createTRPCRouter({
         note: z.string().max(1000).nullable().optional(),
         transferGroupId: z.string().uuid().nullable().optional(),
         categoryId: z.string().uuid().nullable().optional(),
+        projectId: z.string().uuid().nullable().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

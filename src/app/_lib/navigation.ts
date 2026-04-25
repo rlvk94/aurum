@@ -2,6 +2,7 @@ import {
   ArrowLeftRight,
   Calculator,
   CreditCard,
+  FolderHeart,
   Home,
   Landmark,
   LayoutDashboard,
@@ -51,6 +52,13 @@ export const ROUTES: RouteEntry[] = [
     titleKey: "nav.accounts",
     icon: Wallet,
     shortcut: "G A",
+    parent: "/dashboard",
+  },
+  {
+    path: "/projects",
+    titleKey: "nav.projects",
+    icon: FolderHeart,
+    shortcut: "G P",
     parent: "/dashboard",
   },
   {

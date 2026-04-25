@@ -37,6 +37,7 @@ export default async function ProtectedLayout({
     api.user.getActiveFamily.prefetch(),
     api.user.me.prefetch(),
     api.favorite.list.prefetch(),
+    api.announcement.list.prefetch(),
   ]);
 
   return (

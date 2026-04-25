@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -70,6 +71,40 @@
   /* Shadows */
   --elevation-card: 0 1px 3px 0 hsl(220 20% 12% / 0.04), 0 1px 2px -1px hsl(220 20% 12% / 0.04);
   --elevation-elevated: 0 4px 12px -2px hsl(220 20% 12% / 0.08), 0 2px 6px -2px hsl(220 20% 12% / 0.04);
+
+  /* Project cover palettes — used by project-cover. Each palette defines a
+     two-stop gradient (from → to) plus a glyph color. */
+  --project-cover-gold-from: hsl(38 80% 60%);
+  --project-cover-gold-to: hsl(28 75% 48%);
+  --project-cover-gold-glyph: hsl(40 85% 96%);
+
+  --project-cover-sand-from: hsl(36 50% 80%);
+  --project-cover-sand-to: hsl(28 45% 62%);
+  --project-cover-sand-glyph: hsl(28 55% 22%);
+
+  --project-cover-sage-from: hsl(150 30% 70%);
+  --project-cover-sage-to: hsl(160 35% 42%);
+  --project-cover-sage-glyph: hsl(150 50% 96%);
+
+  --project-cover-ocean-from: hsl(200 70% 58%);
+  --project-cover-ocean-to: hsl(220 60% 38%);
+  --project-cover-ocean-glyph: hsl(210 70% 96%);
+
+  --project-cover-sky-from: hsl(195 80% 75%);
+  --project-cover-sky-to: hsl(220 70% 58%);
+  --project-cover-sky-glyph: hsl(220 60% 18%);
+
+  --project-cover-plum-from: hsl(310 50% 60%);
+  --project-cover-plum-to: hsl(280 50% 38%);
+  --project-cover-plum-glyph: hsl(300 60% 96%);
+
+  --project-cover-clay-from: hsl(15 65% 65%);
+  --project-cover-clay-to: hsl(0 55% 45%);
+  --project-cover-clay-glyph: hsl(15 70% 96%);
+
+  --project-cover-slate-from: hsl(220 18% 50%);
+  --project-cover-slate-to: hsl(220 22% 26%);
+  --project-cover-slate-glyph: hsl(220 25% 96%);
 }
 
 /* ── Tailwind v4 Theme Tokens ────────────────────────────────────────────── */
@@ -319,4 +354,122 @@
   /* Shadows — deeper, pure-black based so they read on dark surfaces */
   --elevation-card: 0 1px 3px 0 hsl(0 0% 0% / 0.4), 0 1px 2px -1px hsl(0 0% 0% / 0.3);
   --elevation-elevated: 0 4px 12px -2px hsl(0 0% 0% / 0.5), 0 2px 6px -2px hsl(0 0% 0% / 0.3);
+
+  /* Project cover palettes — slightly deeper hues for dark mode */
+  --project-cover-gold-from: hsl(38 75% 55%);
+  --project-cover-gold-to: hsl(24 70% 38%);
+  --project-cover-gold-glyph: hsl(40 90% 96%);
+
+  --project-cover-sand-from: hsl(36 35% 56%);
+  --project-cover-sand-to: hsl(28 30% 38%);
+  --project-cover-sand-glyph: hsl(40 90% 96%);
+
+  --project-cover-sage-from: hsl(150 30% 48%);
+  --project-cover-sage-to: hsl(160 35% 26%);
+  --project-cover-sage-glyph: hsl(150 60% 96%);
+
+  --project-cover-ocean-from: hsl(200 60% 48%);
+  --project-cover-ocean-to: hsl(220 55% 28%);
+  --project-cover-ocean-glyph: hsl(210 70% 96%);
+
+  --project-cover-sky-from: hsl(195 65% 58%);
+  --project-cover-sky-to: hsl(220 55% 36%);
+  --project-cover-sky-glyph: hsl(210 70% 96%);
+
+  --project-cover-plum-from: hsl(310 45% 50%);
+  --project-cover-plum-to: hsl(280 50% 28%);
+  --project-cover-plum-glyph: hsl(300 70% 96%);
+
+  --project-cover-clay-from: hsl(15 55% 52%);
+  --project-cover-clay-to: hsl(0 50% 32%);
+  --project-cover-clay-glyph: hsl(15 80% 96%);
+
+  --project-cover-slate-from: hsl(220 14% 38%);
+  --project-cover-slate-to: hsl(220 18% 18%);
+  --project-cover-slate-glyph: hsl(220 25% 96%);
+}
+
+/* ── Project cover palette utilities ─────────────────────────────────────── */
+
+[data-project-palette] {
+  background-image: linear-gradient(
+    135deg,
+    var(--cover-from),
+    var(--cover-to)
+  );
+  color: var(--cover-glyph);
+}
+
+[data-project-palette="gold"] {
+  --cover-from: var(--project-cover-gold-from);
+  --cover-to: var(--project-cover-gold-to);
+  --cover-glyph: var(--project-cover-gold-glyph);
+}
+[data-project-palette="sand"] {
+  --cover-from: var(--project-cover-sand-from);
+  --cover-to: var(--project-cover-sand-to);
+  --cover-glyph: var(--project-cover-sand-glyph);
+}
+[data-project-palette="sage"] {
+  --cover-from: var(--project-cover-sage-from);
+  --cover-to: var(--project-cover-sage-to);
+  --cover-glyph: var(--project-cover-sage-glyph);
+}
+[data-project-palette="ocean"] {
+  --cover-from: var(--project-cover-ocean-from);
+  --cover-to: var(--project-cover-ocean-to);
+  --cover-glyph: var(--project-cover-ocean-glyph);
+}
+[data-project-palette="sky"] {
+  --cover-from: var(--project-cover-sky-from);
+  --cover-to: var(--project-cover-sky-to);
+  --cover-glyph: var(--project-cover-sky-glyph);
+}
+[data-project-palette="plum"] {
+  --cover-from: var(--project-cover-plum-from);
+  --cover-to: var(--project-cover-plum-to);
+  --cover-glyph: var(--project-cover-plum-glyph);
+}
+[data-project-palette="clay"] {
+  --cover-from: var(--project-cover-clay-from);
+  --cover-to: var(--project-cover-clay-to);
+  --cover-glyph: var(--project-cover-clay-glyph);
+}
+[data-project-palette="slate"] {
+  --cover-from: var(--project-cover-slate-from);
+  --cover-to: var(--project-cover-slate-to);
+  --cover-glyph: var(--project-cover-slate-glyph);
+}
+
+.project-cover-shimmer {
+  background-image:
+    radial-gradient(
+      ellipse 60% 80% at 80% 20%,
+      hsl(0 0% 100% / 0.18),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse 70% 90% at 20% 110%,
+      hsl(0 0% 0% / 0.18),
+      transparent 60%
+    ),
+    linear-gradient(135deg, var(--cover-from), var(--cover-to));
+  color: var(--cover-glyph);
+}
+
+.project-cover-emoji {
+  filter: drop-shadow(0 1px 2px hsl(0 0% 0% / 0.25));
+}
+
+@keyframes whats-new-pulse-dot {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(38 60% 50% / 0.6);
+  }
+  50% {
+    box-shadow: 0 0 0 6px hsl(38 60% 50% / 0);
+  }
+}
+
+.whats-new-dot {
+  animation: whats-new-pulse-dot 2.4s ease-out infinite;
 }

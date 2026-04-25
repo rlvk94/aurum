@@ -14,6 +14,7 @@ import {
 import { category } from "./category";
 import { family } from "./family";
 import { financialAccount } from "./financial-account";
+import { project } from "./project";
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,9 @@ export const transaction = pgTable(
       .references(() => financialAccount.id, { onDelete: "cascade" }),
     transferGroupId: uuid("transfer_group_id"),
     categoryId: uuid("category_id").references(() => category.id, {
+      onDelete: "set null",
+    }),
+    projectId: uuid("project_id").references(() => project.id, {
       onDelete: "set null",
     }),
     type: transactionTypeEnum("type").notNull(),
@@ -73,6 +77,9 @@ export const transaction = pgTable(
     index("transaction_transfer_group_idx")
       .on(table.transferGroupId)
       .where(sql`${table.transferGroupId} IS NOT NULL`),
+    index("transaction_project_idx")
+      .on(table.projectId)
+      .where(sql`${table.projectId} IS NOT NULL`),
   ],
 );
 
@@ -91,5 +98,9 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
   category: one(category, {
     fields: [transaction.categoryId],
     references: [category.id],
+  }),
+  project: one(project, {
+    fields: [transaction.projectId],
+    references: [project.id],
   }),
 }));

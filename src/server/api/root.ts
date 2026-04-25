@@ -10,8 +10,10 @@ import { favoriteRouter } from "~/server/api/routers/favorite";
 import { financialAccountRouter } from "~/server/api/routers/financial-account";
 import { incomePlanRouter } from "~/server/api/routers/income-plan";
 import { invitationRouter } from "~/server/api/routers/invitation";
+import { projectRouter } from "~/server/api/routers/project";
 import { transactionRouter } from "~/server/api/routers/transaction";
 import { userRouter } from "~/server/api/routers/user";
+import { announcementRouter } from "~/server/api/routers/announcement";
 
 /**
  * This is the primary router for your server.
@@ -30,8 +32,10 @@ export const appRouter = createTRPCRouter({
   financialAccount: financialAccountRouter,
   incomePlan: incomePlanRouter,
   invitation: invitationRouter,
+  project: projectRouter,
   transaction: transactionRouter,
   user: userRouter,
+  announcement: announcementRouter,
 });
 
 // export type definition of API

@@ -39,6 +39,7 @@
     "finance": "Finance",
     "transactions": "Transactions",
     "accounts": "Accounts",
+    "projects": "Projects",
     "budgets": "Budgets",
     "annualBudget": "Annual",
     "challenges": "Challenges",
@@ -562,6 +563,122 @@
     "netWorthValue": "Net worth",
     "trend": "Trend",
     "emptyState": "Add accounts, assets, and debts to see your net worth."
+  },
+  "projects": {
+    "title": "Projects",
+    "subtitle": "Group transactions across categories and accounts to track endeavors like vacations, renovations, or weddings.",
+    "createProject": "New project",
+    "createProjectShort": "Create",
+    "editProject": "Edit project",
+    "createDescription": "Give your project a name, a cover, and an optional spending limit.",
+    "editDescription": "Update the details of this project.",
+    "emptyState": "No projects yet. Tag transactions with a project to track an endeavor end-to-end.",
+    "emptyStateTitle": "Start your first project",
+    "emptyStateBody": "Group transactions across categories and accounts to see how much you've spent on a vacation, renovation, or anything in between.",
+    "suggestionsLabel": "Try one of these to get started",
+    "suggestions": {
+      "vacation": "Vacation",
+      "renovation": "Renovation",
+      "wedding": "Wedding"
+    },
+    "form": {
+      "name": "Name",
+      "namePlaceholder": "e.g. Italy 2026, Kitchen remodel",
+      "description": "Description",
+      "descriptionPlaceholder": "Optional note",
+      "emoji": "Icon",
+      "emojiHint": "Pick an emoji that fits the vibe.",
+      "palette": "Color",
+      "spendingLimit": "Spending limit",
+      "spendingLimitHint": "Optional. Leave blank for no limit.",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "datesOptional": "Both dates are optional, but they unlock the on-track indicator.",
+      "preview": "Preview"
+    },
+    "filters": {
+      "all": "All",
+      "active": "Active",
+      "ended": "Ended"
+    },
+    "card": {
+      "noLimit": "No limit",
+      "openProject": "Open project",
+      "moreOptions": "More options"
+    },
+    "status": {
+      "notStarted": "Not started",
+      "active": "Active",
+      "ended": "Ended",
+      "met": "Within limit",
+      "over": "Over limit",
+      "noDates": "Open",
+      "archived": "Archived"
+    },
+    "labels": {
+      "spent": "Spent",
+      "received": "Received",
+      "net": "Net",
+      "remaining": "Remaining",
+      "overBy": "Over by {amount}",
+      "ofLimit": "of {limit}",
+      "transactions": "{count, plural, =0 {No transactions} =1 {1 transaction} other {# transactions}}",
+      "noTransactions": "No transactions linked yet",
+      "topCategories": "Top categories",
+      "byCategory": "By category",
+      "byAccount": "By account",
+      "uncategorized": "Uncategorized",
+      "untaggedAccount": "Account",
+      "recentTransactions": "Recent transactions",
+      "seeAll": "See all in transactions",
+      "addTransaction": "Add transaction",
+      "linkExisting": "Link existing transactions",
+      "daysLeft": "{count, plural, =0 {Ends today} =1 {1 day left} other {# days left}}",
+      "startsIn": "{count, plural, =0 {Starts today} =1 {Starts in 1 day} other {Starts in # days}}",
+      "endedDaysAgo": "{count, plural, =0 {Ended today} =1 {Ended yesterday} other {Ended # days ago}}",
+      "onTrack": "On track",
+      "offTrack": "Pacing high",
+      "burndownLegend": "Spend vs time elapsed",
+      "timeElapsed": "time"
+    },
+    "actions": {
+      "edit": "Edit",
+      "archive": "Archive",
+      "unarchive": "Unarchive",
+      "delete": "Delete",
+      "deleteConfirm": "Delete project \"{name}\"? Linked transactions remain but will be unlinked."
+    },
+    "archivedHeading": "Archived",
+    "transactionsHeading": "Transactions in this project",
+    "filterLabel": "Project",
+    "allProjects": "All projects",
+    "noProject": "No project",
+    "unassigned": "Unassigned",
+    "quickAssign": {
+      "title": "Assign to project",
+      "description": "Choose a project for this transaction, or remove it from the current one.",
+      "remove": "Remove from project",
+      "createNew": "+ New project"
+    },
+    "assignToProject": "Assign to project",
+    "removeFromProject": "Remove from project"
+  },
+  "whatsNew": {
+    "title": "What's new",
+    "subtitle": "Recent additions to Aurum.",
+    "openButtonLabel": "What's new",
+    "noUpdates": "Nothing new right now. Check back after the next release.",
+    "publishedOn": "Published {date}",
+    "tryIt": "Try it now",
+    "dismiss": "Got it",
+    "newBadge": "New",
+    "entries": {
+      "projects": {
+        "title": "Introducing Projects",
+        "body": "Track every kroner of a vacation, renovation, or any other big endeavor in one place. Tag transactions to a project — across categories and accounts — set an optional spending limit and a date range, and watch progress at a glance. Open the new Projects tab from the Finance group in the sidebar to get started.",
+        "cta": "Open Projects"
+      }
+    }
   },
   "incomePlanner": {
     "title": "Income Planner",

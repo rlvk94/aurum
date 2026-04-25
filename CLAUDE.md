@@ -185,6 +185,8 @@ Server code lives outside `src/app/`:
 - `0011` — Use next-intl for internationalization
 - `0012` — All user-facing text must use translation keys
 - `0013` — Use PostHog for product analytics and error monitoring
+- `0014` — Projects as a transaction dimension
+- `0015` — In-app announcements as bundled content
 
 ## Testing
 
