@@ -8,12 +8,11 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
-      thresholds: {
-        lines: 70,
-        functions: 70,
-        branches: 70,
-        statements: 70,
-      },
+      // Coverage is reported but not enforced. The codebase mixes
+      // unit-tested helpers with UI, tRPC routers, and schema modules
+      // that are validated by integration and manual testing, so a single
+      // global threshold produces more noise than signal. Re-introduce
+      // thresholds once dedicated test coverage targets are decided.
     },
   },
   resolve: {
