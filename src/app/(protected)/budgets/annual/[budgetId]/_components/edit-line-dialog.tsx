@@ -32,7 +32,7 @@ import {
 } from "~/app/_components/select";
 import { Checkbox } from "~/app/_components/checkbox";
 import { Label } from "~/app/_components/label";
-import { CategoryPicker } from "~/app/_components/category-picker";
+import { CategorySelect } from "~/app/_components/category-select";
 import {
   formatKronerInt,
   parseMoneyInput,
@@ -88,8 +88,8 @@ export function EditLineDialog({
   const months = useMemo(() => parseMonthsShort(t("monthsShort")), [t]);
 
   const { data: categories } = api.category.list.useQuery();
-  const expenseCategories = useMemo(
-    () => (categories ?? []).filter((c) => c.kind === "expense" && !c.archived),
+  const availableCategories = useMemo(
+    () => (categories ?? []).filter((c) => !c.archived),
     [categories],
   );
 
@@ -211,12 +211,12 @@ export function EditLineDialog({
                     <FieldLabel htmlFor={field.name}>
                       {t("lineCategory")}
                     </FieldLabel>
-                    <CategoryPicker
+                    <CategorySelect
                       id={field.name}
                       value={field.state.value || null}
                       onChange={(v) => field.handleChange(v ?? "")}
-                      categories={expenseCategories}
-                      kind="expense"
+                      categories={availableCategories}
+                      mode="leaf-only"
                       aria-invalid={isInvalid}
                     />
                     {isInvalid && (

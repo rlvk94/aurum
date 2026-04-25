@@ -39,7 +39,7 @@ import {
 } from "~/app/_components/select";
 import { RadioGroup, RadioGroupItem } from "~/app/_components/radio-group";
 import posthog from "posthog-js";
-import { CategoryPicker } from "~/app/_components/category-picker";
+import { CategorySelect } from "~/app/_components/category-select";
 import { cn } from "~/app/_lib/utils";
 
 type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
@@ -469,12 +469,13 @@ export function TransactionFormDialog({
                         <FieldLabel htmlFor={field.name}>
                           {tCommon("category")}
                         </FieldLabel>
-                        <CategoryPicker
+                        <CategorySelect
                           id={field.name}
                           value={field.state.value || null}
                           onChange={(v) => field.handleChange(v ?? "")}
                           categories={categories}
-                          kind={type}
+                          mode="leaf-only"
+                          emptyOption="none"
                           placeholder={tCommon("category")}
                         />
                       </Field>

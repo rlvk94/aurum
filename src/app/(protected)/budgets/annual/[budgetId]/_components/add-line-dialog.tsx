@@ -30,7 +30,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/app/_components/select";
-import { CategoryPicker } from "~/app/_components/category-picker";
+import { CategorySelect } from "~/app/_components/category-select";
 import { parseMoneyInput } from "~/app/(protected)/income-planner/_lib/format";
 import { parseMonthsShort } from "../../_lib/budget-format";
 
@@ -74,8 +74,8 @@ export function AddLineDialog({
   const currentMonth = new Date().getMonth();
 
   const { data: categories } = api.category.list.useQuery();
-  const expenseCategories = useMemo(
-    () => (categories ?? []).filter((c) => c.kind === "expense" && !c.archived),
+  const availableCategories = useMemo(
+    () => (categories ?? []).filter((c) => !c.archived),
     [categories],
   );
 
@@ -141,7 +141,7 @@ export function AddLineDialog({
           <DialogDescription>{t("addLineDescription")}</DialogDescription>
         </DialogHeader>
 
-        {expenseCategories.length === 0 ? (
+        {availableCategories.length === 0 ? (
           <p className="text-sm text-muted-foreground">{t("noCategoriesYet")}</p>
         ) : (
           <form
@@ -187,12 +187,12 @@ export function AddLineDialog({
                       <FieldLabel htmlFor={field.name}>
                         {t("lineCategory")}
                       </FieldLabel>
-                      <CategoryPicker
+                      <CategorySelect
                         id={field.name}
                         value={field.state.value || null}
                         onChange={(v) => field.handleChange(v ?? "")}
-                        categories={expenseCategories}
-                        kind="expense"
+                        categories={availableCategories}
+                        mode="leaf-only"
                         aria-invalid={isInvalid}
                       />
                       {isInvalid && (

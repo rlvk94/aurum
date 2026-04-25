@@ -61,9 +61,6 @@ export const challenge = pgTable("challenge", {
   endDate: date("end_date", { mode: "string" }),
   customDurationDays: integer("custom_duration_days"),
   targetAmount: integer("target_amount").notNull(),
-  categoryId: uuid("category_id").references(() => category.id, {
-    onDelete: "set null",
-  }),
   accountId: uuid("account_id").references(() => financialAccount.id, {
     onDelete: "set null",
   }),
@@ -78,6 +75,25 @@ export const challenge = pgTable("challenge", {
     .$defaultFn(() => new Date())
     .notNull(),
 });
+
+// Join table scoping a challenge to specific categories. A challenge may
+// target multiple categories (e.g. "spend less on Groceries + Cafés"). Empty
+// set is invalid for spend_less / pay_off_loan — at least one row required.
+export const challengeCategory = pgTable(
+  "challenge_category",
+  {
+    challengeId: uuid("challenge_id")
+      .notNull()
+      .references(() => challenge.id, { onDelete: "cascade" }),
+    categoryId: uuid("category_id")
+      .notNull()
+      .references(() => category.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .$defaultFn(() => new Date())
+      .notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.challengeId, table.categoryId] })],
+);
 
 // Join table scoping a challenge to specific financial accounts. Empty set
 // (no rows) means "all family accounts". Applies to spend_less and
@@ -127,10 +143,6 @@ export const challengeRelations = relations(challenge, ({ one, many }) => ({
     fields: [challenge.familyId],
     references: [family.id],
   }),
-  category: one(category, {
-    fields: [challenge.categoryId],
-    references: [category.id],
-  }),
   account: one(financialAccount, {
     fields: [challenge.accountId],
     references: [financialAccount.id],
@@ -141,7 +153,22 @@ export const challengeRelations = relations(challenge, ({ one, many }) => ({
   }),
   instances: many(challengeInstance),
   accounts: many(challengeAccount),
+  categories: many(challengeCategory),
 }));
+
+export const challengeCategoryRelations = relations(
+  challengeCategory,
+  ({ one }) => ({
+    challenge: one(challenge, {
+      fields: [challengeCategory.challengeId],
+      references: [challenge.id],
+    }),
+    category: one(category, {
+      fields: [challengeCategory.categoryId],
+      references: [category.id],
+    }),
+  }),
+);
 
 export const challengeAccountRelations = relations(
   challengeAccount,

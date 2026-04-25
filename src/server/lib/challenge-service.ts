@@ -6,6 +6,7 @@ import {
   asset,
   challenge,
   challengeAccount,
+  challengeCategory,
   challengeInstance,
   debt,
   financialAccount,
@@ -17,6 +18,7 @@ import {
   nextPeriodStart,
 } from "~/server/lib/challenge-period";
 import { summarize, type LoanParams } from "~/server/lib/amortization";
+import { expandCategoryIds } from "~/server/lib/category-helpers";
 
 export type ChallengeRow = typeof challenge.$inferSelect;
 export type InstanceRow = typeof challengeInstance.$inferSelect;
@@ -26,23 +28,25 @@ export function todayIso(): string {
 }
 
 /**
- * Sum of expense transactions for a category in a family across the window,
- * optionally scoped to a subset of accounts. Empty `accountIds` means
- * "all shared accounts" — private accounts are excluded so that challenges
- * without explicit scope never leak private-account activity to other members.
+ * Net spend (expenses minus income) for a set of category ids in a family
+ * across the window, optionally scoped to a subset of accounts. Empty
+ * `accountIds` means "all shared accounts" — private accounts are excluded so
+ * that challenges without explicit scope never leak private-account activity
+ * to other members.
  */
 async function sumExpenseInWindow(
   db: typeof dbInstance,
   familyId: string,
-  categoryId: string,
+  categoryIds: string[],
   from: string,
   to: string,
   accountIds: string[],
 ): Promise<number> {
+  if (categoryIds.length === 0) return 0;
   const conditions = [
     eq(transaction.familyId, familyId),
-    eq(transaction.type, "expense"),
-    eq(transaction.categoryId, categoryId),
+    inArray(transaction.type, ["expense", "income"]),
+    inArray(transaction.categoryId, categoryIds),
     gte(transaction.date, from),
     lte(transaction.date, to),
   ];
@@ -69,7 +73,7 @@ async function sumExpenseInWindow(
 
   const [row] = await db
     .select({
-      sum: sql<number>`coalesce(sum(${transaction.amount}), 0)`,
+      sum: sql<number>`coalesce(sum(case when ${transaction.type} = 'expense' then ${transaction.amount} when ${transaction.type} = 'income' then -${transaction.amount} else 0 end), 0)`,
     })
     .from(transaction)
     .where(and(...conditions));
@@ -86,6 +90,18 @@ async function loadChallengeAccountIds(
     .from(challengeAccount)
     .where(eq(challengeAccount.challengeId, challengeId));
   return rows.map((r) => r.accountId);
+}
+
+/** Fetch the set of category IDs this challenge targets. */
+async function loadChallengeCategoryIds(
+  db: typeof dbInstance,
+  challengeId: string,
+): Promise<string[]> {
+  const rows = await db
+    .select({ categoryId: challengeCategory.categoryId })
+    .from(challengeCategory)
+    .where(eq(challengeCategory.challengeId, challengeId));
+  return rows.map((r) => r.categoryId);
 }
 
 /**
@@ -223,12 +239,15 @@ export async function computeProgress(
   if (asOf < instance.periodStart) return 0;
 
   if (row.type === "spend_less" || row.type === "pay_off_loan") {
-    if (!row.categoryId) return 0;
+    const categoryIds = await loadChallengeCategoryIds(db, row.id);
+    if (categoryIds.length === 0) return 0;
     const accountIds = await loadChallengeAccountIds(db, row.id);
+    const expanded = await expandCategoryIds(db, row.familyId, categoryIds);
+    if (expanded.length === 0) return 0;
     return sumExpenseInWindow(
       db,
       row.familyId,
-      row.categoryId,
+      expanded,
       instance.periodStart,
       effectiveTo,
       accountIds,
