@@ -924,7 +924,8 @@
       },
       "navigation": {
         "title": "Explore the rest of the app",
-        "body": "Use the sidebar to jump to accounts, transactions, assets, debts, and income planning."
+        "body": "Use the sidebar to jump to accounts, transactions, assets, debts, and income planning.",
+        "mobileBody": "Tap the menu button to open navigation for accounts, transactions, assets, debts, and income planning."
       },
       "familySwitcher": {
         "title": "Switch between families",

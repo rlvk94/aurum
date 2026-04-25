@@ -924,7 +924,8 @@
       },
       "navigation": {
         "title": "Udforsk resten af appen",
-        "body": "Brug menuen til at hoppe til konti, transaktioner, aktiver, gæld og indkomstplanlæggeren."
+        "body": "Brug menuen til at hoppe til konti, transaktioner, aktiver, gæld og indkomstplanlæggeren.",
+        "mobileBody": "Tryk på menuknappen for at åbne navigationen til konti, transaktioner, aktiver, gæld og indkomstplanlæggeren."
       },
       "familySwitcher": {
         "title": "Skift mellem familier",

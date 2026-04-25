@@ -6,6 +6,10 @@ export type TutorialStep = {
   titleKey: string;
   bodyKey: string;
   placement?: TutorialPlacement;
+  mobileHidden?: boolean;
+  mobileTargetSelector?: string | null;
+  mobileBodyKey?: string;
+  mobilePlacement?: TutorialPlacement;
 };
 
 export const TUTORIAL_STEPS: readonly TutorialStep[] = [
@@ -42,6 +46,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     titleKey: "steps.budgets.title",
     bodyKey: "steps.budgets.body",
     placement: "right",
+    mobileHidden: true,
   },
   {
     id: "navigation",
@@ -49,6 +54,9 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     titleKey: "steps.navigation.title",
     bodyKey: "steps.navigation.body",
     placement: "right",
+    mobileTargetSelector: '[data-sidebar="trigger"]',
+    mobileBodyKey: "steps.navigation.mobileBody",
+    mobilePlacement: "bottom",
   },
   {
     id: "family-switcher",
@@ -56,6 +64,7 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     titleKey: "steps.familySwitcher.title",
     bodyKey: "steps.familySwitcher.body",
     placement: "right",
+    mobileHidden: true,
   },
   {
     id: "settings",
@@ -63,5 +72,6 @@ export const TUTORIAL_STEPS: readonly TutorialStep[] = [
     titleKey: "steps.settings.title",
     bodyKey: "steps.settings.body",
     placement: "right",
+    mobileHidden: true,
   },
 ] as const;
