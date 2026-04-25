@@ -80,6 +80,7 @@ const transactionFormSchema = z.object({
   description: z.string().min(1, "Required").max(500),
   note: z.string(),
   categoryId: z.string(),
+  projectId: z.string(),
 });
 
 function today(): string {
@@ -100,10 +101,14 @@ export function TransactionFormDialog({
 }) {
   const t = useTranslations("transactions");
   const tCommon = useTranslations("common");
+  const tProjects = useTranslations("projects");
   const locale = useLocale();
   const utils = api.useUtils();
   const isEdit = !!transaction;
   const { data: categories = [] } = api.category.list.useQuery();
+  const { data: projects = [] } = api.project.list.useQuery({
+    includeArchived: false,
+  });
 
   const createTx = api.transaction.create.useMutation({
     onSuccess: (_, variables) => {
@@ -141,6 +146,7 @@ export function TransactionFormDialog({
       description: transaction?.description ?? "",
       note: transaction?.note ?? "",
       categoryId: transaction?.categoryId ?? "",
+      projectId: transaction?.projectId ?? "",
     },
     validators: {
       onSubmit: transactionFormSchema,
@@ -149,6 +155,7 @@ export function TransactionFormDialog({
       const amountCents = Math.round(parseFloat(value.amount) * 100);
       const trimmedNote = value.note.trim();
       const categoryId = value.categoryId ? value.categoryId : null;
+      const projectId = value.projectId ? value.projectId : null;
       if (isEdit) {
         updateTx.mutate({
           id: transaction.id,
@@ -158,6 +165,7 @@ export function TransactionFormDialog({
           description: value.description.trim(),
           note: trimmedNote || null,
           categoryId,
+          projectId,
         });
       } else {
         createTx.mutate({
@@ -168,6 +176,7 @@ export function TransactionFormDialog({
           description: value.description.trim(),
           note: trimmedNote || undefined,
           categoryId: categoryId ?? undefined,
+          projectId,
         });
       }
     },
@@ -392,6 +401,38 @@ export function TransactionFormDialog({
                     emptyOption="none"
                     placeholder={tCommon("category")}
                   />
+                </Field>
+              )}
+            />
+
+            <form.Field
+              name="projectId"
+              children={(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>
+                    {tProjects("filterLabel")}
+                  </FieldLabel>
+                  <Select
+                    value={field.state.value || "__none__"}
+                    onValueChange={(v) =>
+                      field.handleChange(v === "__none__" ? "" : v)
+                    }
+                  >
+                    <SelectTrigger id={field.name}>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">
+                        {tProjects("noProject")}
+                      </SelectItem>
+                      {projects.map((p) => (
+                        <SelectItem key={p.id} value={p.id}>
+                          <span className="mr-1">{p.emoji}</span>
+                          {p.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
               )}
             />

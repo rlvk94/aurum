@@ -1,3 +1,4 @@
+export * from "./announcement";
 export * from "./asset";
 export * from "./auth";
 export * from "./budget";
@@ -8,4 +9,5 @@ export * from "./family";
 export * from "./favorite";
 export * from "./financial-account";
 export * from "./income-plan";
+export * from "./project";
 export * from "./transaction";

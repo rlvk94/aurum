@@ -12,6 +12,7 @@ import {
   Calculator,
   ChevronRight,
   Landmark,
+  FolderHeart,
 } from "lucide-react";
 
 import {
@@ -96,6 +97,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Link href="/accounts">
                     <Wallet />
                     <span>{t("accounts")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/projects")}
+                >
+                  <Link href="/projects">
+                    <FolderHeart />
+                    <span>{t("projects")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

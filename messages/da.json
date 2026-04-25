@@ -39,6 +39,7 @@
     "finance": "Økonomi",
     "transactions": "Transaktioner",
     "accounts": "Konti",
+    "projects": "Projekter",
     "budgets": "Budgetter",
     "annualBudget": "Årlige",
     "challenges": "Udfordringer",
@@ -562,6 +563,122 @@
     "netWorthValue": "Nettoformue",
     "trend": "Udvikling",
     "emptyState": "Tilføj konti, aktiver og gæld for at se din formue."
+  },
+  "projects": {
+    "title": "Projekter",
+    "subtitle": "Saml transaktioner på tværs af kategorier og konti for at følge større forløb som ferier, renoveringer eller bryllupper.",
+    "createProject": "Nyt projekt",
+    "createProjectShort": "Opret",
+    "editProject": "Rediger projekt",
+    "createDescription": "Giv dit projekt et navn, en farve og en valgfri grænse for forbrug.",
+    "editDescription": "Opdater detaljerne for projektet.",
+    "emptyState": "Ingen projekter endnu. Knyt transaktioner til et projekt for at følge et forløb fra start til slut.",
+    "emptyStateTitle": "Start dit første projekt",
+    "emptyStateBody": "Saml transaktioner på tværs af kategorier og konti for at se hvor meget du har brugt på en ferie, renovering eller noget helt tredje.",
+    "suggestionsLabel": "Prøv en af disse for at komme i gang",
+    "suggestions": {
+      "vacation": "Ferie",
+      "renovation": "Renovering",
+      "wedding": "Bryllup"
+    },
+    "form": {
+      "name": "Navn",
+      "namePlaceholder": "f.eks. Italien 2026, Køkkenrenovering",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Valgfri note",
+      "emoji": "Ikon",
+      "emojiHint": "Vælg en emoji der passer til stemningen.",
+      "palette": "Farve",
+      "spendingLimit": "Forbrugsgrænse",
+      "spendingLimitHint": "Valgfri. Lad stå tom for ingen grænse.",
+      "startDate": "Startdato",
+      "endDate": "Slutdato",
+      "datesOptional": "Begge datoer er valgfri, men de aktiverer på-sporet-indikatoren.",
+      "preview": "Forhåndsvisning"
+    },
+    "filters": {
+      "all": "Alle",
+      "active": "Aktive",
+      "ended": "Afsluttede"
+    },
+    "card": {
+      "noLimit": "Ingen grænse",
+      "openProject": "Åbn projekt",
+      "moreOptions": "Flere valg"
+    },
+    "status": {
+      "notStarted": "Ikke startet",
+      "active": "Aktiv",
+      "ended": "Afsluttet",
+      "met": "Inden for grænse",
+      "over": "Over grænse",
+      "noDates": "Åbent",
+      "archived": "Arkiveret"
+    },
+    "labels": {
+      "spent": "Brugt",
+      "received": "Modtaget",
+      "net": "Netto",
+      "remaining": "Tilbage",
+      "overBy": "Over med {amount}",
+      "ofLimit": "af {limit}",
+      "transactions": "{count, plural, =0 {Ingen transaktioner} =1 {1 transaktion} other {# transaktioner}}",
+      "noTransactions": "Ingen transaktioner tilknyttet endnu",
+      "topCategories": "Største kategorier",
+      "byCategory": "Efter kategori",
+      "byAccount": "Efter konto",
+      "uncategorized": "Ukategoriseret",
+      "untaggedAccount": "Konto",
+      "recentTransactions": "Seneste transaktioner",
+      "seeAll": "Se alle i transaktioner",
+      "addTransaction": "Tilføj transaktion",
+      "linkExisting": "Knyt eksisterende transaktioner",
+      "daysLeft": "{count, plural, =0 {Slutter i dag} =1 {1 dag tilbage} other {# dage tilbage}}",
+      "startsIn": "{count, plural, =0 {Starter i dag} =1 {Starter om 1 dag} other {Starter om # dage}}",
+      "endedDaysAgo": "{count, plural, =0 {Sluttede i dag} =1 {Sluttede i går} other {Sluttede for # dage siden}}",
+      "onTrack": "På sporet",
+      "offTrack": "Lidt højt tempo",
+      "burndownLegend": "Forbrug vs. forløbet tid",
+      "timeElapsed": "tid"
+    },
+    "actions": {
+      "edit": "Rediger",
+      "archive": "Arkiver",
+      "unarchive": "Genaktiver",
+      "delete": "Slet",
+      "deleteConfirm": "Slet projektet \"{name}\"? Tilknyttede transaktioner forbliver, men løsnes fra projektet."
+    },
+    "archivedHeading": "Arkiverede",
+    "transactionsHeading": "Transaktioner i dette projekt",
+    "filterLabel": "Projekt",
+    "allProjects": "Alle projekter",
+    "noProject": "Intet projekt",
+    "unassigned": "Ikke tilknyttet",
+    "quickAssign": {
+      "title": "Knyt til projekt",
+      "description": "Vælg et projekt for denne transaktion, eller fjern den fra det nuværende.",
+      "remove": "Fjern fra projekt",
+      "createNew": "+ Nyt projekt"
+    },
+    "assignToProject": "Knyt til projekt",
+    "removeFromProject": "Fjern fra projekt"
+  },
+  "whatsNew": {
+    "title": "Nyheder",
+    "subtitle": "Nye tilføjelser til Aurum.",
+    "openButtonLabel": "Nyheder",
+    "noUpdates": "Intet nyt lige nu. Kig tilbage efter næste udgivelse.",
+    "publishedOn": "Udgivet {date}",
+    "tryIt": "Prøv det nu",
+    "dismiss": "Forstået",
+    "newBadge": "Ny",
+    "entries": {
+      "projects": {
+        "title": "Velkommen til Projekter",
+        "body": "Hold styr på hver krone af en ferie, renovering eller andre store forløb ét sted. Knyt transaktioner til et projekt — på tværs af kategorier og konti — sæt en valgfri forbrugsgrænse og en periode, og se forløbet i ét blik. Åbn fanen Projekter under Økonomi i sidemenuen for at komme i gang.",
+        "cta": "Åbn projekter"
+      }
+    }
   },
   "incomePlanner": {
     "title": "Indkomstplanlægger",

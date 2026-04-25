@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { format, parse } from "date-fns";
 import { da, enUS } from "date-fns/locale";
 import {
   ArrowLeftRight,
+  FolderHeart,
   Link2,
   Plus,
   Upload,
@@ -44,7 +46,9 @@ import {
 import posthog from "posthog-js";
 import { TransactionFormDialog } from "./_components/transaction-form-dialog";
 import { TransactionCategoryDialog } from "./_components/transaction-category-dialog";
+import { TransactionProjectQuickAssign } from "./_components/transaction-project-quick-assign";
 import { CsvImportDialog } from "./_components/csv-import-dialog";
+import type { ProjectPalette } from "../projects/_lib/format";
 import {
   CategorySelect,
   UNCATEGORIZED_SENTINEL,
@@ -54,6 +58,7 @@ import { cn } from "~/app/_lib/utils";
 type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
 
 const ALL = "__all__";
+const UNASSIGNED = "unassigned";
 
 function formatAmount(cents: number): string {
   const value = cents / 100;
@@ -67,17 +72,39 @@ function formatAmount(cents: number): string {
 export default function TransactionsPage() {
   const t = useTranslations("transactions");
   const tCommon = useTranslations("common");
+  const tProjects = useTranslations("projects");
   const locale = useLocale();
   const utils = api.useUtils();
   const dateLocale = locale === "da" ? da : enUS;
 
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const projectQuery = searchParams.get("project");
+
   const { data: accounts = [] } = api.financialAccount.list.useQuery();
   const { data: categories = [] } = api.category.list.useQuery();
+  const { data: projects = [] } = api.project.list.useQuery({
+    includeArchived: true,
+  });
   const [accountFilter, setAccountFilter] = useState<string>(ALL);
   const [typeFilter, setTypeFilter] = useState<string>(ALL);
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Project filter is sourced from the URL; updates push a new URL.
+  const projectFilter = projectQuery ?? ALL;
+  const setProjectFilterAndUrl = (next: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (next === ALL) {
+      params.delete("project");
+    } else {
+      params.set("project", next);
+    }
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname);
+  };
 
   useEffect(() => {
     const timeout = setTimeout(() => setDebouncedSearch(search), 250);
@@ -101,6 +128,12 @@ export default function TransactionsPage() {
         .filter((v) => v !== UNCATEGORIZED_SENTINEL)
         .filter((v) => v.length > 0),
       includeUncategorized: categoryFilter.includes(UNCATEGORIZED_SENTINEL),
+      projectId:
+        projectFilter === ALL
+          ? undefined
+          : projectFilter === UNASSIGNED
+            ? null
+            : projectFilter,
       search: debouncedSearch || undefined,
     },
     {
@@ -120,11 +153,16 @@ export default function TransactionsPage() {
     () => new Map(categories.map((c) => [c.id, c])),
     [categories],
   );
+  const projectMap = useMemo(
+    () => new Map(projects.map((p) => [p.id, p])),
+    [projects],
+  );
 
   const [createOpen, setCreateOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [quickAssign, setQuickAssign] = useState<Transaction | null>(null);
+  const [projectAssign, setProjectAssign] = useState<Transaction | null>(null);
 
   const deleteTx = api.transaction.delete.useMutation({
     onSuccess: (_, variables) => {
@@ -206,6 +244,24 @@ export default function TransactionsPage() {
             placeholder={t("allCategories")}
           />
         </div>
+
+        <Select value={projectFilter} onValueChange={setProjectFilterAndUrl}>
+          <SelectTrigger className="w-auto min-w-[200px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ALL}>{tProjects("allProjects")}</SelectItem>
+            <SelectItem value={UNASSIGNED}>
+              {tProjects("unassigned")}
+            </SelectItem>
+            {projects.map((p) => (
+              <SelectItem key={p.id} value={p.id}>
+                <span className="mr-1">{p.emoji}</span>
+                {p.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {isLoading ? (
@@ -216,6 +272,7 @@ export default function TransactionsPage() {
                 <TableHead>{tCommon("date")}</TableHead>
                 <TableHead>{t("descriptionLabel")}</TableHead>
                 <TableHead>{tCommon("category")}</TableHead>
+                <TableHead>{tProjects("filterLabel")}</TableHead>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead className="text-right">{t("amount")}</TableHead>
                 <TableHead className="w-[48px]"></TableHead>
@@ -232,6 +289,9 @@ export default function TransactionsPage() {
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-6 w-24 rounded-full" />
+                  </TableCell>
+                  <TableCell>
+                    <Skeleton className="h-6 w-20 rounded-full" />
                   </TableCell>
                   <TableCell>
                     <Skeleton className="h-4 w-24" />
@@ -255,6 +315,7 @@ export default function TransactionsPage() {
                 <TableHead>{tCommon("date")}</TableHead>
                 <TableHead>{t("descriptionLabel")}</TableHead>
                 <TableHead>{tCommon("category")}</TableHead>
+                <TableHead>{tProjects("filterLabel")}</TableHead>
                 <TableHead>{t("account")}</TableHead>
                 <TableHead className="text-right">{t("amount")}</TableHead>
                 <TableHead className="w-[48px]"></TableHead>
@@ -265,6 +326,9 @@ export default function TransactionsPage() {
                 const account = accountMap.get(tx.accountId);
                 const category = tx.categoryId
                   ? categoryMap.get(tx.categoryId)
+                  : null;
+                const txProject = tx.projectId
+                  ? projectMap.get(tx.projectId)
                   : null;
                 const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
                 const sign = tx.type === "expense" ? -1 : 1;
@@ -311,6 +375,35 @@ export default function TransactionsPage() {
                         )}
                       </button>
                     </TableCell>
+                    <TableCell>
+                      <button
+                        type="button"
+                        onClick={() => setProjectAssign(tx)}
+                        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
+                      >
+                        {txProject ? (
+                          <span
+                            data-project-palette={
+                              txProject.coverPalette as ProjectPalette
+                            }
+                            className="project-cover-shimmer inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--cover-glyph)]"
+                          >
+                            <span>{txProject.emoji}</span>
+                            <span className="max-w-[8rem] truncate">
+                              {txProject.name}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
+                            +{" "}
+                            <FolderHeart
+                              className="h-3 w-3"
+                              aria-hidden
+                            />
+                          </span>
+                        )}
+                      </button>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {account?.name ?? "—"}
                     </TableCell>
@@ -339,6 +432,12 @@ export default function TransactionsPage() {
                           <DropdownMenuItem onClick={() => setEditing(tx)}>
                             <Pencil />
                             {tCommon("edit")}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() => setProjectAssign(tx)}
+                          >
+                            <FolderHeart />
+                            {tProjects("assignToProject")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive"
@@ -392,6 +491,12 @@ export default function TransactionsPage() {
         currentCategoryId={quickAssign?.categoryId ?? null}
         open={!!quickAssign}
         onOpenChange={(open) => !open && setQuickAssign(null)}
+      />
+      <TransactionProjectQuickAssign
+        transactionId={projectAssign?.id ?? null}
+        currentProjectId={projectAssign?.projectId ?? null}
+        open={!!projectAssign}
+        onOpenChange={(open) => !open && setProjectAssign(null)}
       />
     </div>
   );
