@@ -130,7 +130,16 @@
     "netWorth": "Net worth",
     "recentTransactions": "Recent transactions",
     "topCategories": "Top categories",
-    "budgetStatus": "Budget status"
+    "budgetStatus": "Budget status",
+    "annualBudgets": "Annual budgets",
+    "currentYearLabel": "{year}",
+    "annualBudgetsEmpty": "No annual budget for this year yet.",
+    "spentVsPlanned": "Spent vs planned",
+    "planned": "Planned",
+    "actual": "Actual",
+    "remaining": "Remaining",
+    "projects": "Projects",
+    "projectsEmpty": "No active projects yet."
   },
   "accounts": {
     "title": "Accounts",

@@ -130,7 +130,16 @@
     "netWorth": "Formue",
     "recentTransactions": "Seneste transaktioner",
     "topCategories": "Top kategorier",
-    "budgetStatus": "Budgetstatus"
+    "budgetStatus": "Budgetstatus",
+    "annualBudgets": "Årsbudgetter",
+    "currentYearLabel": "{year}",
+    "annualBudgetsEmpty": "Der er ikke oprettet et årsbudget for i år endnu.",
+    "spentVsPlanned": "Brugt vs. planlagt",
+    "planned": "Planlagt",
+    "actual": "Faktisk",
+    "remaining": "Tilbage",
+    "projects": "Projekter",
+    "projectsEmpty": "Ingen aktive projekter endnu."
   },
   "accounts": {
     "title": "Konti",

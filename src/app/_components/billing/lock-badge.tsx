@@ -20,11 +20,11 @@ export function LockBadge({ className }: Props) {
       aria-label={t("label")}
       title={t("label")}
       className={cn(
-        "inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-sm border border-primary/30 bg-primary/10 text-primary",
+        "border-primary/30 bg-primary/10 text-primary inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
         className,
       )}
     >
-      <Lock aria-hidden className="size-2.5" />
+      <Lock aria-hidden className="size-3" />
     </span>
   );
 }
