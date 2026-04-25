@@ -62,6 +62,7 @@ function useTargetRect(selector: string | null): Rect | null {
 function pickPlacement(
   preferred: TutorialPlacement | undefined,
   target: Rect,
+  cardWidth: number,
   cardHeight: number,
   vw: number,
   vh: number,
@@ -73,8 +74,8 @@ function pickPlacement(
     top: target.top >= cardHeight + CARD_MARGIN + VIEWPORT_PADDING,
     right:
       vw - (target.left + target.width) >=
-      CARD_WIDTH + CARD_MARGIN + VIEWPORT_PADDING,
-    left: target.left >= CARD_WIDTH + CARD_MARGIN + VIEWPORT_PADDING,
+      cardWidth + CARD_MARGIN + VIEWPORT_PADDING,
+    left: target.left >= cardWidth + CARD_MARGIN + VIEWPORT_PADDING,
   };
 
   const order: ("top" | "bottom" | "left" | "right")[] =
@@ -92,46 +93,48 @@ function computeCardPosition(
   target: Rect | null,
   placement: TutorialPlacement | undefined,
   cardHeight: number,
-): { top: number; left: number } {
+): { top: number; left: number; width: number } {
   const vw = typeof window !== "undefined" ? window.innerWidth : 1024;
   const vh = typeof window !== "undefined" ? window.innerHeight : 768;
+  const cardWidth = Math.min(CARD_WIDTH, vw - VIEWPORT_PADDING * 2);
 
   if (!target) {
     return {
       top: Math.max(VIEWPORT_PADDING, (vh - cardHeight) / 2),
-      left: Math.max(VIEWPORT_PADDING, (vw - CARD_WIDTH) / 2),
+      left: Math.max(VIEWPORT_PADDING, (vw - cardWidth) / 2),
+      width: cardWidth,
     };
   }
 
-  const actual = pickPlacement(placement, target, cardHeight, vw, vh);
+  const actual = pickPlacement(placement, target, cardWidth, cardHeight, vw, vh);
 
   let top = 0;
   let left = 0;
 
   if (actual === "bottom") {
     top = target.top + target.height + CARD_MARGIN;
-    left = target.left + target.width / 2 - CARD_WIDTH / 2;
+    left = target.left + target.width / 2 - cardWidth / 2;
   } else if (actual === "top") {
     top = target.top - cardHeight - CARD_MARGIN;
-    left = target.left + target.width / 2 - CARD_WIDTH / 2;
+    left = target.left + target.width / 2 - cardWidth / 2;
   } else if (actual === "right") {
     top = target.top + target.height / 2 - cardHeight / 2;
     left = target.left + target.width + CARD_MARGIN;
   } else {
     top = target.top + target.height / 2 - cardHeight / 2;
-    left = target.left - CARD_WIDTH - CARD_MARGIN;
+    left = target.left - cardWidth - CARD_MARGIN;
   }
 
   left = Math.max(
     VIEWPORT_PADDING,
-    Math.min(vw - CARD_WIDTH - VIEWPORT_PADDING, left),
+    Math.min(vw - cardWidth - VIEWPORT_PADDING, left),
   );
   top = Math.max(
     VIEWPORT_PADDING,
     Math.min(vh - cardHeight - VIEWPORT_PADDING, top),
   );
 
-  return { top, left };
+  return { top, left, width: cardWidth };
 }
 
 function Spotlight({ rect }: { rect: Rect }) {
@@ -214,7 +217,7 @@ function TutorialCard({
     return () => ro?.disconnect();
   }, [ref]);
 
-  const { top, left } = computeCardPosition(
+  const { top, left, width } = computeCardPosition(
     targetRect,
     step.placement,
     cardHeight || 180,
@@ -238,8 +241,7 @@ function TutorialCard({
         position: "fixed",
         top,
         left,
-        width: CARD_WIDTH,
-        maxWidth: `calc(100vw - ${VIEWPORT_PADDING * 2}px)`,
+        width,
         zIndex: 61,
       }}
     >

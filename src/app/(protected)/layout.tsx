@@ -56,7 +56,7 @@ export default async function ProtectedLayout({
               <TutorialProvider>
                 <ProtectedSidebar />
                 <SidebarInset className="min-w-0">
-                  <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center gap-2 rounded-t-xl border-b bg-background/95 px-6 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+                  <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center gap-2 rounded-t-xl border-b bg-background/95 px-3 backdrop-blur supports-[backdrop-filter]:bg-background/80 sm:h-16 sm:px-6">
                     <SidebarTrigger className="-ml-1" />
                     <Separator
                       orientation="vertical"
@@ -66,7 +66,7 @@ export default async function ProtectedLayout({
                   </header>
                   <GraceBanner />
                   <PendingBillingBanner />
-                  <div className="flex min-w-0 flex-1 flex-col gap-6 p-6">
+                  <div className="flex min-w-0 flex-1 flex-col gap-4 p-4 pb-[calc(env(safe-area-inset-bottom,0px)+1rem)] sm:gap-6 sm:p-6">
                     {children}
                   </div>
                 </SidebarInset>

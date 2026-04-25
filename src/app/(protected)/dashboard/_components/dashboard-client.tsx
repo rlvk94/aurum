@@ -125,7 +125,9 @@ function StatCard({
         <Icon className={`h-4 w-4 ${className ?? "text-muted-foreground"}`} />
       </CardHeader>
       <CardContent>
-        <div className="font-display text-2xl">{value}</div>
+        <div className="font-display text-xl sm:text-2xl break-words">
+          {value}
+        </div>
       </CardContent>
     </Card>
   );
@@ -163,7 +165,7 @@ export function DashboardClient() {
 
       <div
         data-tour-id="stats"
-        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4"
+        className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4"
       >
         <StatCard
           title={t("weeklySpent")}
@@ -192,7 +194,7 @@ export function DashboardClient() {
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
         <Card data-tour-id="recent-transactions">
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg">{t("recentTransactions")}</CardTitle>

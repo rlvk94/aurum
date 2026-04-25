@@ -17,6 +17,7 @@ import { CommandLauncherButton } from "~/app/_components/command-launcher-button
 import { FavoriteStarButton } from "~/app/_components/favorite-star-button";
 import { usePageMetadataValue } from "~/app/_components/page-metadata";
 import { buildBreadcrumb } from "~/app/_lib/navigation";
+import { cn } from "~/app/_lib/utils";
 
 type Crumb = {
   key: string;
@@ -61,30 +62,47 @@ export function TopNav() {
   }
 
   return (
-    <div className="flex flex-1 items-center gap-4">
+    <div className="flex flex-1 items-center gap-2 sm:gap-4">
       <Breadcrumb className="min-w-0 flex-1">
-        <BreadcrumbList>
+        <BreadcrumbList className="flex-nowrap">
           {crumbs.map((crumb, i) => {
             const isLast = i === crumbs.length - 1;
+            const isIntermediate = !isLast && i > 0;
             return (
               <React.Fragment key={crumb.key}>
-                <BreadcrumbItem>
+                <BreadcrumbItem
+                  className={cn(
+                    "min-w-0",
+                    isIntermediate && "hidden sm:inline-flex",
+                  )}
+                >
                   {isLast || !crumb.href ? (
-                    <BreadcrumbPage>{crumb.label}</BreadcrumbPage>
+                    <BreadcrumbPage className="block truncate">
+                      {crumb.label}
+                    </BreadcrumbPage>
                   ) : (
                     <BreadcrumbLink asChild>
-                      <Link href={crumb.href}>{crumb.label}</Link>
+                      <Link
+                        href={crumb.href}
+                        className="block max-w-[10rem] truncate sm:max-w-none"
+                      >
+                        {crumb.label}
+                      </Link>
                     </BreadcrumbLink>
                   )}
                 </BreadcrumbItem>
-                {!isLast && <BreadcrumbSeparator />}
+                {!isLast && (
+                  <BreadcrumbSeparator
+                    className={cn(isIntermediate && "hidden sm:inline-flex")}
+                  />
+                )}
               </React.Fragment>
             );
           })}
         </BreadcrumbList>
       </Breadcrumb>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
         <FavoriteStarButton />
         <CommandLauncherButton />
       </div>

@@ -333,7 +333,7 @@ export default function WelcomePage() {
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-        className="relative z-10 flex items-center justify-between px-8 pt-8 sm:px-12 sm:pt-10"
+        className="relative z-10 flex items-center justify-between gap-3 px-5 pt-6 sm:px-12 sm:pt-10"
       >
         <span className="font-display text-xl tracking-wide text-foreground">
           {tCommon("appName")}
@@ -369,12 +369,12 @@ export default function WelcomePage() {
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <LogOut className="size-3.5" />
-          {tCommon("logout")}
+          <span className="hidden sm:inline">{tCommon("logout")}</span>
         </button>
       </motion.header>
 
       {/* Main content — vertically centered */}
-      <main className="relative z-10 flex flex-1 items-center justify-center px-8 pb-24 sm:px-12">
+      <main className="relative z-10 flex flex-1 items-center justify-center px-5 pb-32 pt-8 sm:px-12 sm:pb-24">
         <div className="w-full max-w-md">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
@@ -403,10 +403,10 @@ export default function WelcomePage() {
                     className="mb-8 h-px bg-primary/40"
                   />
 
-                  <h1 className="font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
+                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
                     {t("welcomeTitle")}
                   </h1>
-                  <p className="mt-3 text-lg text-muted-foreground">
+                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
                     {t("welcomeDescription")}
                   </p>
 
@@ -445,10 +445,10 @@ export default function WelcomePage() {
                 <div>
                   <div className="mb-8 h-px w-12 bg-primary/40" />
 
-                  <h1 className="font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
+                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
                     {t("languageTitle")}
                   </h1>
-                  <p className="mt-3 text-lg text-muted-foreground">
+                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
                     {t("languageDescription")}
                   </p>
 
@@ -503,10 +503,10 @@ export default function WelcomePage() {
                 <div>
                   <div className="mb-8 h-px w-12 bg-primary/40" />
 
-                  <h1 className="font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
+                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
                     {t("themeTitle")}
                   </h1>
-                  <p className="mt-3 text-lg text-muted-foreground">
+                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
                     {t("themeDescription")}
                   </p>
 
@@ -578,10 +578,10 @@ export default function WelcomePage() {
                 <div>
                   <div className="mb-8 h-px w-12 bg-primary/40" />
 
-                  <h1 className="font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
+                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
                     {tBilling("title")}
                   </h1>
-                  <p className="mt-3 text-lg text-muted-foreground">
+                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
                     {tBilling("description")}
                   </p>
 
@@ -656,10 +656,10 @@ export default function WelcomePage() {
                 <div>
                   <div className="mb-8 h-px w-12 bg-primary/40" />
 
-                  <h1 className="font-display text-4xl leading-tight tracking-tight text-foreground sm:text-5xl">
+                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
                     {t("familyTitle")}
                   </h1>
-                  <p className="mt-3 text-lg text-muted-foreground">
+                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
                     {t("familyDescription")}
                   </p>
 
@@ -716,7 +716,7 @@ export default function WelcomePage() {
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -16 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-8 left-8 z-20 sm:bottom-10 sm:left-12"
+            className="fixed bottom-[max(env(safe-area-inset-bottom,0px),1.25rem)] left-4 z-20 sm:bottom-10 sm:left-12"
           >
             <Button
               variant="ghost"
@@ -740,7 +740,7 @@ export default function WelcomePage() {
           delay: 0.4,
           ease: [0.16, 1, 0.3, 1],
         }}
-        className="fixed bottom-8 right-8 z-20 sm:bottom-10 sm:right-12"
+        className="fixed bottom-[max(env(safe-area-inset-bottom,0px),1.25rem)] right-4 z-20 sm:bottom-10 sm:right-12"
       >
         <Button
           size="lg"

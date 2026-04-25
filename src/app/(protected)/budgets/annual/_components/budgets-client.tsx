@@ -70,9 +70,9 @@ export function BudgetsClient() {
   return (
     <div className="space-y-12">
       {/* HERO */}
-      <section className="almanac-grain relative overflow-hidden rounded-[18px] border border-border bg-card px-8 py-10 md:px-12 md:py-14">
+      <section className="almanac-grain relative overflow-hidden rounded-[18px] border border-border bg-card px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
         <HeroBackdrop />
-        <div className="relative grid gap-8 md:grid-cols-[1.2fr_1fr] md:items-end">
+        <div className="relative grid gap-6 sm:gap-8 md:grid-cols-[1.2fr_1fr] md:items-end">
           <div>
             <p className="almanac-smallcaps text-[11px] text-primary">
               {t("almanacLabel")}
@@ -140,22 +140,22 @@ export function BudgetsClient() {
             const isCurrentYear = year === currentYear;
             return (
               <section key={year} className="space-y-6">
-                <header className="flex items-baseline justify-between gap-6">
-                  <div className="flex items-baseline gap-4">
-                    <h2 className="font-display text-[clamp(3rem,6vw,5.5rem)] leading-none text-foreground almanac-numerals">
+                <header className="flex items-baseline justify-between gap-3 sm:gap-6">
+                  <div className="flex min-w-0 items-baseline gap-2 sm:gap-4">
+                    <h2 className="font-display text-[clamp(2.5rem,9vw,5.5rem)] leading-none text-foreground almanac-numerals">
                       {year}
                     </h2>
                     {isCurrentYear && (
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium text-primary almanac-smallcaps">
+                      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium text-primary almanac-smallcaps">
                         <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
                         {t("current")}
                       </span>
                     )}
                   </div>
-                  <div className="flex-1">
+                  <div className="hidden flex-1 sm:block">
                     <div className="almanac-rule" />
                   </div>
-                  <span className="almanac-smallcaps text-[10px] text-muted-foreground">
+                  <span className="almanac-smallcaps shrink-0 text-[10px] text-muted-foreground">
                     {t("lineCount", { count: items.length })}
                   </span>
                 </header>
@@ -227,7 +227,7 @@ function Metric({
 function EmptyChapter({ onCreate }: { onCreate: () => void }) {
   const t = useTranslations("budgets");
   return (
-    <div className="relative overflow-hidden rounded-[18px] border border-dashed border-border bg-card px-8 py-16">
+    <div className="relative overflow-hidden rounded-[18px] border border-dashed border-border bg-card px-5 py-12 sm:px-8 sm:py-16">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-50">
         <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-3xl" />
       </div>

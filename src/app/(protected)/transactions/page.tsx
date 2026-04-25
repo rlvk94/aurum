@@ -197,8 +197,8 @@ export default function TransactionsPage() {
       />
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-3">
-        <div className="relative w-full max-w-xs">
+      <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap sm:gap-3">
+        <div className="relative w-full sm:max-w-xs">
           <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             type="search"
@@ -208,222 +208,345 @@ export default function TransactionsPage() {
             className="pl-9"
           />
         </div>
-        <Select value={accountFilter} onValueChange={setAccountFilter}>
-          <SelectTrigger className="w-auto min-w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t("allAccounts")}</SelectItem>
-            {accounts.map((a) => (
-              <SelectItem key={a.id} value={a.id}>
-                {a.name}
+        <div className="grid grid-cols-2 gap-2 sm:contents">
+          <Select value={accountFilter} onValueChange={setAccountFilter}>
+            <SelectTrigger className="w-full sm:w-auto sm:min-w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>{t("allAccounts")}</SelectItem>
+              {accounts.map((a) => (
+                <SelectItem key={a.id} value={a.id}>
+                  {a.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Select value={typeFilter} onValueChange={setTypeFilter}>
+            <SelectTrigger className="w-full sm:w-auto sm:min-w-[160px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>{t("allTypes")}</SelectItem>
+              <SelectItem value="expense">{t("expense")}</SelectItem>
+              <SelectItem value="income">{t("income")}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <div className="w-full sm:w-[220px]">
+            <CategorySelect
+              multiple
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+              categories={categories}
+              mode="any"
+              uncategorizedOption
+              placeholder={t("allCategories")}
+            />
+          </div>
+
+          <Select value={projectFilter} onValueChange={setProjectFilterAndUrl}>
+            <SelectTrigger className="w-full sm:w-auto sm:min-w-[200px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>{tProjects("allProjects")}</SelectItem>
+              <SelectItem value={UNASSIGNED}>
+                {tProjects("unassigned")}
               </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select value={typeFilter} onValueChange={setTypeFilter}>
-          <SelectTrigger className="w-auto min-w-[160px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t("allTypes")}</SelectItem>
-            <SelectItem value="expense">{t("expense")}</SelectItem>
-            <SelectItem value="income">{t("income")}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <div className="w-[220px]">
-          <CategorySelect
-            multiple
-            value={categoryFilter}
-            onChange={setCategoryFilter}
-            categories={categories}
-            mode="any"
-            uncategorizedOption
-            placeholder={t("allCategories")}
-          />
+              {projects.map((p) => (
+                <SelectItem key={p.id} value={p.id}>
+                  <span className="mr-1">{p.emoji}</span>
+                  {p.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
-
-        <Select value={projectFilter} onValueChange={setProjectFilterAndUrl}>
-          <SelectTrigger className="w-auto min-w-[200px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{tProjects("allProjects")}</SelectItem>
-            <SelectItem value={UNASSIGNED}>
-              {tProjects("unassigned")}
-            </SelectItem>
-            {projects.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                <span className="mr-1">{p.emoji}</span>
-                {p.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       {isLoading ? (
-        <div className="border-border bg-card shadow-card rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{tCommon("date")}</TableHead>
-                <TableHead>{t("descriptionLabel")}</TableHead>
-                <TableHead>{tCommon("category")}</TableHead>
-                <TableHead>{tProjects("filterLabel")}</TableHead>
-                <TableHead>{t("account")}</TableHead>
-                <TableHead className="text-right">{t("amount")}</TableHead>
-                <TableHead className="w-[48px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {Array.from({ length: 25 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell>
-                    <Skeleton className="h-4 w-16" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-48" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-24 rounded-full" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-6 w-20 rounded-full" />
-                  </TableCell>
-                  <TableCell>
-                    <Skeleton className="h-4 w-24" />
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Skeleton className="ml-auto h-4 w-20" />
-                  </TableCell>
-                  <TableCell></TableCell>
+        <>
+          <div className="hidden border-border bg-card shadow-card rounded-lg border md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{tCommon("date")}</TableHead>
+                  <TableHead>{t("descriptionLabel")}</TableHead>
+                  <TableHead>{tCommon("category")}</TableHead>
+                  <TableHead>{tProjects("filterLabel")}</TableHead>
+                  <TableHead>{t("account")}</TableHead>
+                  <TableHead className="text-right">{t("amount")}</TableHead>
+                  <TableHead className="w-[48px]"></TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
+              </TableHeader>
+              <TableBody>
+                {Array.from({ length: 25 }).map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <Skeleton className="h-4 w-16" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-48" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-24 rounded-full" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-6 w-20 rounded-full" />
+                    </TableCell>
+                    <TableCell>
+                      <Skeleton className="h-4 w-24" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Skeleton className="ml-auto h-4 w-20" />
+                    </TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          <div className="space-y-2 md:hidden">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="rounded-lg border border-border bg-card p-3 shadow-card"
+              >
+                <Skeleton className="h-3 w-20" />
+                <Skeleton className="mt-2 h-4 w-3/4" />
+                <div className="mt-3 flex items-center justify-between">
+                  <Skeleton className="h-5 w-24 rounded-full" />
+                  <Skeleton className="h-4 w-20" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </>
       ) : transactions.length === 0 ? (
         <EmptyState icon={ArrowLeftRight} message={t("emptyState")} />
       ) : (
-        <div className="border-border bg-card shadow-card rounded-lg border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{tCommon("date")}</TableHead>
-                <TableHead>{t("descriptionLabel")}</TableHead>
-                <TableHead>{tCommon("category")}</TableHead>
-                <TableHead>{tProjects("filterLabel")}</TableHead>
-                <TableHead>{t("account")}</TableHead>
-                <TableHead className="text-right">{t("amount")}</TableHead>
-                <TableHead className="w-[48px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {transactions.map((tx) => {
-                const account = accountMap.get(tx.accountId);
-                const category = tx.categoryId
-                  ? categoryMap.get(tx.categoryId)
-                  : null;
-                const txProject = tx.projectId
-                  ? projectMap.get(tx.projectId)
-                  : null;
-                const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
-                const sign = tx.type === "expense" ? -1 : 1;
-                return (
-                  <TableRow key={tx.id}>
-                    <TableCell className="text-muted-foreground whitespace-nowrap">
-                      {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5">
+        <>
+          {/* Desktop table */}
+          <div className="hidden border-border bg-card shadow-card rounded-lg border md:block">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>{tCommon("date")}</TableHead>
+                  <TableHead>{t("descriptionLabel")}</TableHead>
+                  <TableHead>{tCommon("category")}</TableHead>
+                  <TableHead>{tProjects("filterLabel")}</TableHead>
+                  <TableHead>{t("account")}</TableHead>
+                  <TableHead className="text-right">{t("amount")}</TableHead>
+                  <TableHead className="w-[48px]"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {transactions.map((tx) => {
+                  const account = accountMap.get(tx.accountId);
+                  const category = tx.categoryId
+                    ? categoryMap.get(tx.categoryId)
+                    : null;
+                  const txProject = tx.projectId
+                    ? projectMap.get(tx.projectId)
+                    : null;
+                  const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
+                  const sign = tx.type === "expense" ? -1 : 1;
+                  return (
+                    <TableRow key={tx.id}>
+                      <TableCell className="text-muted-foreground whitespace-nowrap">
+                        {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1.5">
+                          {tx.transferGroupId && (
+                            <Link2
+                              className="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                              aria-label={t("linkedTransaction")}
+                            />
+                          )}
+                          <div>
+                            <p className="text-foreground font-medium">
+                              {tx.description}
+                            </p>
+                            {tx.note && (
+                              <p className="text-muted-foreground text-xs">
+                                {tx.note}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          type="button"
+                          onClick={() => setQuickAssign(tx)}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
+                        >
+                          {category ? (
+                            <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5">
+                              {category.icon && <span>{category.icon}</span>}
+                              {category.name}
+                            </span>
+                          ) : (
+                            <span className="border-dashed border-muted-foreground/40 text-muted-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
+                              + {t("uncategorizedFilter")}
+                            </span>
+                          )}
+                        </button>
+                      </TableCell>
+                      <TableCell>
+                        <button
+                          type="button"
+                          onClick={() => setProjectAssign(tx)}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
+                        >
+                          {txProject ? (
+                            <span
+                              data-project-palette={
+                                txProject.coverPalette as ProjectPalette
+                              }
+                              className="project-cover-shimmer inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--cover-glyph)]"
+                            >
+                              <span>{txProject.emoji}</span>
+                              <span className="max-w-[8rem] truncate">
+                                {txProject.name}
+                              </span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
+                              +{" "}
+                              <FolderHeart
+                                className="h-3 w-3"
+                                aria-hidden
+                              />
+                            </span>
+                          )}
+                        </button>
+                      </TableCell>
+                      <TableCell className="text-muted-foreground">
+                        {account?.name ?? "—"}
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "text-right font-medium whitespace-nowrap",
+                          tx.type === "expense" && "text-expense",
+                          tx.type === "income" && "text-income",
+                        )}
+                      >
+                        {sign === -1 ? "-" : "+"}
+                        {formatAmount(tx.amount)}
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setEditing(tx)}>
+                              <Pencil />
+                              {tCommon("edit")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => setProjectAssign(tx)}
+                            >
+                              <FolderHeart />
+                              {tProjects("assignToProject")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => deleteTx.mutate({ id: tx.id })}
+                            >
+                              <Trash2 />
+                              {tCommon("delete")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Mobile cards */}
+          <ul className="space-y-2 md:hidden">
+            {transactions.map((tx) => {
+              const account = accountMap.get(tx.accountId);
+              const category = tx.categoryId
+                ? categoryMap.get(tx.categoryId)
+                : null;
+              const txProject = tx.projectId
+                ? projectMap.get(tx.projectId)
+                : null;
+              const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
+              const sign = tx.type === "expense" ? -1 : 1;
+              return (
+                <li
+                  key={tx.id}
+                  className="rounded-lg border border-border bg-card p-3 shadow-card"
+                >
+                  <div className="flex items-start gap-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         {tx.transferGroupId && (
                           <Link2
-                            className="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                            className="h-3 w-3 shrink-0"
                             aria-label={t("linkedTransaction")}
                           />
                         )}
-                        <div>
-                          <p className="text-foreground font-medium">
-                            {tx.description}
-                          </p>
-                          {tx.note && (
-                            <p className="text-muted-foreground text-xs">
-                              {tx.note}
-                            </p>
-                          )}
-                        </div>
+                        <span className="whitespace-nowrap">
+                          {format(dateObj, "d. MMM yyyy", {
+                            locale: dateLocale,
+                          })}
+                        </span>
+                        {account && (
+                          <>
+                            <span aria-hidden>·</span>
+                            <span className="truncate">{account.name}</span>
+                          </>
+                        )}
                       </div>
-                    </TableCell>
-                    <TableCell>
                       <button
                         type="button"
-                        onClick={() => setQuickAssign(tx)}
-                        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
+                        onClick={() => setEditing(tx)}
+                        className="mt-0.5 block w-full text-left"
                       >
-                        {category ? (
-                          <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5">
-                            {category.icon && <span>{category.icon}</span>}
-                            {category.name}
-                          </span>
-                        ) : (
-                          <span className="border-dashed border-muted-foreground/40 text-muted-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
-                            + {t("uncategorizedFilter")}
-                          </span>
+                        <p className="truncate text-sm font-medium text-foreground">
+                          {tx.description}
+                        </p>
+                        {tx.note && (
+                          <p className="truncate text-xs text-muted-foreground">
+                            {tx.note}
+                          </p>
                         )}
                       </button>
-                    </TableCell>
-                    <TableCell>
-                      <button
-                        type="button"
-                        onClick={() => setProjectAssign(tx)}
-                        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
-                      >
-                        {txProject ? (
-                          <span
-                            data-project-palette={
-                              txProject.coverPalette as ProjectPalette
-                            }
-                            className="project-cover-shimmer inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--cover-glyph)]"
-                          >
-                            <span>{txProject.emoji}</span>
-                            <span className="max-w-[8rem] truncate">
-                              {txProject.name}
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
-                            +{" "}
-                            <FolderHeart
-                              className="h-3 w-3"
-                              aria-hidden
-                            />
-                          </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span
+                        className={cn(
+                          "whitespace-nowrap text-sm font-medium",
+                          tx.type === "expense" && "text-expense",
+                          tx.type === "income" && "text-income",
                         )}
-                      </button>
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {account?.name ?? "—"}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "text-right font-medium whitespace-nowrap",
-                        tx.type === "expense" && "text-expense",
-                        tx.type === "income" && "text-income",
-                      )}
-                    >
-                      {sign === -1 ? "-" : "+"}
-                      {formatAmount(tx.amount)}
-                    </TableCell>
-                    <TableCell>
+                      >
+                        {sign === -1 ? "-" : "+"}
+                        {formatAmount(tx.amount)}
+                      </span>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-8 w-8"
+                            className="-mr-1 h-8 w-8 shrink-0"
                           >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
@@ -448,13 +571,54 @@ export default function TransactionsPage() {
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-        </div>
+                    </div>
+                  </div>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setQuickAssign(tx)}
+                      className="inline-flex items-center gap-1 rounded-full text-xs transition hover:ring-2 hover:ring-primary/40"
+                    >
+                      {category ? (
+                        <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5">
+                          {category.icon && <span>{category.icon}</span>}
+                          {category.name}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
+                          + {t("uncategorizedFilter")}
+                        </span>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProjectAssign(tx)}
+                      className="inline-flex items-center gap-1 rounded-full text-xs transition hover:ring-2 hover:ring-primary/40"
+                    >
+                      {txProject ? (
+                        <span
+                          data-project-palette={
+                            txProject.coverPalette as ProjectPalette
+                          }
+                          className="project-cover-shimmer inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--cover-glyph)]"
+                        >
+                          <span>{txProject.emoji}</span>
+                          <span className="max-w-[8rem] truncate">
+                            {txProject.name}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
+                          + <FolderHeart className="h-3 w-3" aria-hidden />
+                        </span>
+                      )}
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
 
       {!isLoading && transactions.length > 0 && hasNextPage && (

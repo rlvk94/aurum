@@ -64,7 +64,7 @@ export function NetWorthClient() {
     <div className="space-y-6">
       <PageHeader title={t("title")} />
 
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -72,7 +72,7 @@ export function NetWorthClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-display text-2xl">
+            <div className="font-display text-xl break-words sm:text-2xl">
               {accounts ? formatAmount(accounts.netWorthBalance) : "–"}
             </div>
           </CardContent>
@@ -84,7 +84,7 @@ export function NetWorthClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-display text-2xl">
+            <div className="font-display text-xl break-words sm:text-2xl">
               {assets ? formatAmount(assets.total) : "–"}
             </div>
           </CardContent>
@@ -96,7 +96,7 @@ export function NetWorthClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-display text-2xl text-debt">
+            <div className="font-display text-xl break-words text-debt sm:text-2xl">
               {debts ? formatAmount(debts.totalOutstanding) : "–"}
             </div>
           </CardContent>
@@ -108,7 +108,7 @@ export function NetWorthClient() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-display text-2xl text-income">
+            <div className="font-display text-xl break-words text-income sm:text-2xl">
               {netWorth !== undefined ? formatAmount(netWorth) : "–"}
             </div>
           </CardContent>

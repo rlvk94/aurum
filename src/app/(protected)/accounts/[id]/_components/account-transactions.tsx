@@ -129,7 +129,7 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
             />
           </div>
           <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-auto min-w-[160px]">
+            <SelectTrigger className="w-full sm:w-auto sm:min-w-[160px]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -180,17 +180,108 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
             />
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>{tCommon("date")}</TableHead>
-                <TableHead>{t("descriptionLabel")}</TableHead>
-                <TableHead>{tCommon("category")}</TableHead>
-                <TableHead className="text-right">{t("amount")}</TableHead>
-                <TableHead className="w-[48px]"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
+          <>
+            <div className="hidden md:block">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>{tCommon("date")}</TableHead>
+                    <TableHead>{t("descriptionLabel")}</TableHead>
+                    <TableHead>{tCommon("category")}</TableHead>
+                    <TableHead className="text-right">{t("amount")}</TableHead>
+                    <TableHead className="w-[48px]"></TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions?.map((tx) => {
+                    const category = tx.categoryId
+                      ? categoryMap.get(tx.categoryId)
+                      : null;
+                    const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
+                    const sign = tx.type === "expense" ? -1 : 1;
+                    return (
+                      <TableRow key={tx.id}>
+                        <TableCell className="whitespace-nowrap text-muted-foreground">
+                          {format(dateObj, "d. MMM yyyy", {
+                            locale: dateLocale,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1.5">
+                            {tx.transferGroupId && (
+                              <Link2
+                                className="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                                aria-label={t("linkedTransaction")}
+                              />
+                            )}
+                            <div>
+                              <p className="font-medium text-foreground">
+                                {tx.description}
+                              </p>
+                              {tx.note && (
+                                <p className="text-xs text-muted-foreground">
+                                  {tx.note}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {category ? (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+                              {category.icon && <span>{category.icon}</span>}
+                              {category.name}
+                            </span>
+                          ) : (
+                            <span className="text-xs text-muted-foreground">
+                              —
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell
+                          className={cn(
+                            "whitespace-nowrap text-right font-medium",
+                            tx.type === "expense" && "text-expense",
+                            tx.type === "income" && "text-income",
+                          )}
+                        >
+                          {sign === -1 ? "-" : "+"}
+                          {formatAmount(tx.amount)}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => setEditing(tx)}>
+                                <Pencil />
+                                {tCommon("edit")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => deleteTx.mutate({ id: tx.id })}
+                              >
+                                <Trash2 />
+                                {tCommon("delete")}
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            <ul className="divide-y divide-border md:hidden">
               {transactions?.map((tx) => {
                 const category = tx.categoryId
                   ? categoryMap.get(tx.categoryId)
@@ -198,83 +289,81 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
                 const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
                 const sign = tx.type === "expense" ? -1 : 1;
                 return (
-                  <TableRow key={tx.id}>
-                    <TableCell className="whitespace-nowrap text-muted-foreground">
-                      {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1.5">
-                        {tx.transferGroupId && (
-                          <Link2
-                            className="text-muted-foreground h-3.5 w-3.5 shrink-0"
-                            aria-label={t("linkedTransaction")}
-                          />
-                        )}
-                        <div>
-                          <p className="font-medium text-foreground">
-                            {tx.description}
-                          </p>
-                          {tx.note && (
-                            <p className="text-xs text-muted-foreground">
-                              {tx.note}
-                            </p>
+                  <li key={tx.id} className="px-4 py-3">
+                    <div className="flex items-start gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          {tx.transferGroupId && (
+                            <Link2
+                              className="h-3 w-3 shrink-0"
+                              aria-label={t("linkedTransaction")}
+                            />
                           )}
+                          <span className="whitespace-nowrap">
+                            {format(dateObj, "d. MMM yyyy", {
+                              locale: dateLocale,
+                            })}
+                          </span>
                         </div>
+                        <p className="mt-0.5 truncate text-sm font-medium text-foreground">
+                          {tx.description}
+                        </p>
+                        {tx.note && (
+                          <p className="truncate text-xs text-muted-foreground">
+                            {tx.note}
+                          </p>
+                        )}
+                        {category && (
+                          <div className="mt-1.5">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+                              {category.icon && <span>{category.icon}</span>}
+                              {category.name}
+                            </span>
+                          </div>
+                        )}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      {category ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
-                          {category.icon && <span>{category.icon}</span>}
-                          {category.name}
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={cn(
+                            "whitespace-nowrap text-sm font-medium",
+                            tx.type === "expense" && "text-expense",
+                            tx.type === "income" && "text-income",
+                          )}
+                        >
+                          {sign === -1 ? "-" : "+"}
+                          {formatAmount(tx.amount)}
                         </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">
-                          —
-                        </span>
-                      )}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        "whitespace-nowrap text-right font-medium",
-                        tx.type === "expense" && "text-expense",
-                        tx.type === "income" && "text-income",
-                      )}
-                    >
-                      {sign === -1 ? "-" : "+"}
-                      {formatAmount(tx.amount)}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                          >
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => setEditing(tx)}>
-                            <Pencil />
-                            {tCommon("edit")}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => deleteTx.mutate({ id: tx.id })}
-                          >
-                            <Trash2 />
-                            {tCommon("delete")}
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="-mr-1 h-8 w-8"
+                            >
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setEditing(tx)}>
+                              <Pencil />
+                              {tCommon("edit")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => deleteTx.mutate({ id: tx.id })}
+                            >
+                              <Trash2 />
+                              {tCommon("delete")}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  </li>
                 );
               })}
-            </TableBody>
-          </Table>
+            </ul>
+          </>
         )}
       </CardContent>
 
