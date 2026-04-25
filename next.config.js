@@ -22,6 +22,15 @@ const config = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: "/settings",
+        destination: "/settings/profile",
+        permanent: false,
+      },
+    ];
+  },
   skipTrailingSlashRedirect: true,
 };
 
