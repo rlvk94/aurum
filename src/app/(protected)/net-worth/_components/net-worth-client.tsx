@@ -6,6 +6,8 @@ import { TrendingUp } from "lucide-react";
 import { api } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import { EmptyState } from "~/app/_components/empty-state";
+import { FamilyFeatureTeaser } from "~/app/_components/billing/family-feature-teaser";
+import { useEntitlements } from "~/app/_hooks/use-entitlements";
 import {
   Card,
   CardContent,
@@ -24,10 +26,28 @@ function formatAmount(cents: number): string {
 
 export function NetWorthClient() {
   const t = useTranslations("netWorth");
+  const tTeaser = useTranslations("billing.featureCopy.netWorth");
+  const { has } = useEntitlements();
 
-  const { data: accounts } = api.financialAccount.summary.useQuery();
-  const { data: assets } = api.asset.summary.useQuery();
-  const { data: debts } = api.debt.summary.useQuery();
+  const { data: accounts } = api.financialAccount.summary.useQuery(undefined, {
+    enabled: has("netWorth"),
+  });
+  const { data: assets } = api.asset.summary.useQuery(undefined, {
+    enabled: has("netWorth"),
+  });
+  const { data: debts } = api.debt.summary.useQuery(undefined, {
+    enabled: has("netWorth"),
+  });
+
+  if (!has("netWorth")) {
+    let bullets: string[] = [];
+    try {
+      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    } catch {
+      bullets = [];
+    }
+    return <FamilyFeatureTeaser feature="netWorth" bullets={bullets} />;
+  }
 
   const ready = accounts && assets && debts;
   const netWorth = ready

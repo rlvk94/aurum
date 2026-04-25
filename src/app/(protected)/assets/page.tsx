@@ -14,6 +14,8 @@ import { api, type RouterOutputs } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import { EmptyState } from "~/app/_components/empty-state";
 import { Button } from "~/app/_components/button";
+import { FamilyFeatureTeaser } from "~/app/_components/billing/family-feature-teaser";
+import { useEntitlements } from "~/app/_hooks/use-entitlements";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -140,9 +142,23 @@ function AssetCard({
 export default function AssetsPage() {
   const t = useTranslations("assets");
   const tAccounts = useTranslations("accounts");
+  const tTeaser = useTranslations("billing.featureCopy.assets");
   const utils = api.useUtils();
+  const { has } = useEntitlements();
 
-  const { data: assets, isLoading } = api.asset.list.useQuery();
+  const { data: assets, isLoading } = api.asset.list.useQuery(undefined, {
+    enabled: has("assets"),
+  });
+
+  if (!has("assets")) {
+    let bullets: string[] = [];
+    try {
+      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    } catch {
+      bullets = [];
+    }
+    return <FamilyFeatureTeaser feature="assets" bullets={bullets} />;
+  }
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Asset | null>(null);
 

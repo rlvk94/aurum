@@ -3,6 +3,7 @@ import { and, asc, eq, isNotNull, isNull, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { requireFeature } from "~/server/billing/entitlements";
 import type { db as dbInstance } from "~/server/db";
 import { asset, debt, user } from "~/server/db/schema";
 import { summarize } from "~/server/lib/amortization";
@@ -129,6 +130,7 @@ export const assetRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      await requireFeature(ctx.db, familyId, "assets");
 
       const [created] = await ctx.db
         .insert(asset)

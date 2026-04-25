@@ -22,6 +22,26 @@ export const env = createEnv({
       process.env.NODE_ENV === "production"
         ? z.string().email()
         : z.string().email().optional(),
+    STRIPE_SECRET_KEY:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().optional(),
+    STRIPE_WEBHOOK_SECRET:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().optional(),
+    STRIPE_PRICE_FAMILY_MONTHLY:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().optional(),
+    STRIPE_PRICE_FAMILY_ANNUAL:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(1)
+        : z.string().optional(),
+    CRON_SECRET:
+      process.env.NODE_ENV === "production"
+        ? z.string().min(16)
+        : z.string().optional(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -51,6 +71,11 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     CONTACT_TO_EMAIL: process.env.CONTACT_TO_EMAIL,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+    STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+    STRIPE_PRICE_FAMILY_MONTHLY: process.env.STRIPE_PRICE_FAMILY_MONTHLY,
+    STRIPE_PRICE_FAMILY_ANNUAL: process.env.STRIPE_PRICE_FAMILY_ANNUAL,
+    CRON_SECRET: process.env.CRON_SECRET,
     NEXT_PUBLIC_APP_ENV: process.env.NEXT_PUBLIC_APP_ENV,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

@@ -3,6 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { requireFeature } from "~/server/billing/entitlements";
 import type { db as dbInstance } from "~/server/db";
 import {
   financialAccount,
@@ -369,6 +370,7 @@ export const projectRouter = createTRPCRouter({
     .input(createSchema)
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      await requireFeature(ctx.db, familyId, "projects");
       const [created] = await ctx.db
         .insert(project)
         .values({
@@ -444,7 +446,10 @@ export const projectRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      // Allow unassign (projectId=null) so downgraded families can clean up
+      // legacy associations; gate only the assign-to-project path.
       if (input.projectId) {
+        await requireFeature(ctx.db, familyId, "projects");
         await loadProjectInFamily(ctx.db, input.projectId, familyId);
       }
 

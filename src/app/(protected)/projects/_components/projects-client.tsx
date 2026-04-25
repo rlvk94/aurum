@@ -8,6 +8,8 @@ import posthog from "posthog-js";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import { Button } from "~/app/_components/button";
+import { FamilyFeatureTeaser } from "~/app/_components/billing/family-feature-teaser";
+import { useEntitlements } from "~/app/_hooks/use-entitlements";
 import { cn } from "~/app/_lib/utils";
 
 import { ProjectCard } from "./project-card";
@@ -35,10 +37,22 @@ type Filter = "all" | "active" | "ended";
 
 export function ProjectsClient() {
   const t = useTranslations("projects");
+  const tTeaser = useTranslations("billing.featureCopy.projects");
   const utils = api.useUtils();
+  const { has } = useEntitlements();
 
-  const { data: projects } = api.project.list.useQuery({ includeArchived: true });
-  const { data: categories = [] } = api.category.list.useQuery();
+  const { data: projects } = api.project.list.useQuery(
+    { includeArchived: true },
+    { enabled: has("projects") },
+  );
+  const { data: categories = [] } = api.category.list.useQuery(undefined, {
+    enabled: has("projects"),
+  });
+
+  if (!has("projects")) {
+    const bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    return <FamilyFeatureTeaser feature="projects" bullets={bullets} />;
+  }
 
   const [filter, setFilter] = useState<Filter>("all");
   const [createOpen, setCreateOpen] = useState(false);

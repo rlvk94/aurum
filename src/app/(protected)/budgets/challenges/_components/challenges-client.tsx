@@ -9,6 +9,8 @@ import { api, type RouterOutputs } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import { EmptyState } from "~/app/_components/empty-state";
 import { Button } from "~/app/_components/button";
+import { FamilyFeatureTeaser } from "~/app/_components/billing/family-feature-teaser";
+import { useEntitlements } from "~/app/_hooks/use-entitlements";
 import { ChallengeCard } from "./challenge-card";
 import { ChallengeFormDialog } from "./challenge-form-dialog";
 
@@ -16,11 +18,24 @@ type Challenge = RouterOutputs["challenge"]["list"][number];
 
 export function ChallengesClient() {
   const t = useTranslations("budgets");
+  const tTeaser = useTranslations("billing.featureCopy.challenges");
   const utils = api.useUtils();
+  const { has } = useEntitlements();
 
-  const { data: challenges, isLoading } = api.challenge.list.useQuery({
-    includeArchived: true,
-  });
+  const { data: challenges, isLoading } = api.challenge.list.useQuery(
+    { includeArchived: true },
+    { enabled: has("challenges") },
+  );
+
+  if (!has("challenges")) {
+    let bullets: string[] = [];
+    try {
+      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    } catch {
+      bullets = [];
+    }
+    return <FamilyFeatureTeaser feature="challenges" bullets={bullets} />;
+  }
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Challenge | null>(null);

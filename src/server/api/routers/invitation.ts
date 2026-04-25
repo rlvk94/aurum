@@ -1,9 +1,10 @@
 import { z } from "zod";
-import { and, eq, gt } from "drizzle-orm";
+import { and, eq, gt, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 import { randomBytes } from "crypto";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { requireWithinLimit } from "~/server/billing/entitlements";
 import type { db as dbInstance } from "~/server/db";
 import {
   family,
@@ -97,6 +98,27 @@ export const invitationRouter = createTRPCRouter({
           message: "An invitation for that email is already pending",
         });
       }
+
+      // Plan limit: members already in family + non-expired pending invites.
+      // Reject if accepting this invite would push the family over its plan
+      // member cap (free=1 owner-only, pro=unlimited).
+      const [memberCountRow] = await ctx.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(usersToFamilies)
+        .where(eq(usersToFamilies.familyId, familyId));
+      const [pendingCountRow] = await ctx.db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(invitation)
+        .where(
+          and(
+            eq(invitation.familyId, familyId),
+            gt(invitation.expiresAt, now),
+          ),
+        );
+      const projected =
+        Number(memberCountRow?.count ?? 0) +
+        Number(pendingCountRow?.count ?? 0);
+      await requireWithinLimit(ctx.db, familyId, "maxMembers", projected);
 
       const token = randomBytes(24).toString("hex");
       const [created] = await ctx.db

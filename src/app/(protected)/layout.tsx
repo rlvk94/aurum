@@ -7,6 +7,11 @@ import {
   SidebarTrigger,
 } from "~/app/_components/sidebar";
 import { Separator } from "~/app/_components/separator";
+import {
+  GraceBanner,
+  PendingBillingBanner,
+} from "~/app/_components/billing/grace-banner";
+import { UpgradeModalProvider } from "~/app/_components/billing/upgrade-modal";
 import { CommandPaletteProvider } from "~/app/_components/command-palette";
 import { KeyboardShortcutsProvider } from "~/app/_components/keyboard-shortcuts-provider";
 import { PageMetadataProvider } from "~/app/_components/page-metadata";
@@ -38,11 +43,13 @@ export default async function ProtectedLayout({
     api.user.me.prefetch(),
     api.favorite.list.prefetch(),
     api.announcement.list.prefetch(),
+    api.billing.current.prefetch(),
   ]);
 
   return (
     <HydrateClient>
-      <SidebarProvider>
+      <UpgradeModalProvider>
+       <SidebarProvider>
         <CommandPaletteProvider>
           <KeyboardShortcutsProvider>
             <PageMetadataProvider>
@@ -57,6 +64,8 @@ export default async function ProtectedLayout({
                     />
                     <TopNav />
                   </header>
+                  <GraceBanner />
+                  <PendingBillingBanner />
                   <div className="flex min-w-0 flex-1 flex-col gap-6 p-6">
                     {children}
                   </div>
@@ -65,7 +74,8 @@ export default async function ProtectedLayout({
             </PageMetadataProvider>
           </KeyboardShortcutsProvider>
         </CommandPaletteProvider>
-      </SidebarProvider>
+       </SidebarProvider>
+      </UpgradeModalProvider>
     </HydrateClient>
   );
 }

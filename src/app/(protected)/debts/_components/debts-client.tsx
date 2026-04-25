@@ -15,6 +15,8 @@ import {
 import { api, type RouterOutputs } from "~/trpc/react";
 import { PERIOD_MONTHS } from "~/server/lib/amortization";
 import { PageHeader } from "~/app/_components/page-header";
+import { FamilyFeatureTeaser } from "~/app/_components/billing/family-feature-teaser";
+import { useEntitlements } from "~/app/_hooks/use-entitlements";
 import { EmptyState } from "~/app/_components/empty-state";
 import { Button } from "~/app/_components/button";
 import { Badge } from "~/app/_components/badge";
@@ -164,10 +166,26 @@ function DebtCard({
 
 export function DebtsClient() {
   const t = useTranslations("debts");
+  const tTeaser = useTranslations("billing.featureCopy.debts");
   const utils = api.useUtils();
+  const { has } = useEntitlements();
 
-  const { data: debts, isLoading } = api.debt.list.useQuery();
-  const { data: summary } = api.debt.summary.useQuery();
+  const { data: debts, isLoading } = api.debt.list.useQuery(undefined, {
+    enabled: has("debts"),
+  });
+  const { data: summary } = api.debt.summary.useQuery(undefined, {
+    enabled: has("debts"),
+  });
+
+  if (!has("debts")) {
+    let bullets: string[] = [];
+    try {
+      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    } catch {
+      bullets = [];
+    }
+    return <FamilyFeatureTeaser feature="debts" bullets={bullets} />;
+  }
 
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Debt | null>(null);
