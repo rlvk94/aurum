@@ -36,7 +36,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "~/app/_components/radio-group";
 import { Label } from "~/app/_components/label";
 import { Checkbox } from "~/app/_components/checkbox";
-import { CategoryPicker } from "~/app/_components/category-picker";
+import { CategorySelect } from "~/app/_components/category-select";
 
 type Challenge = RouterOutputs["challenge"]["list"][number];
 type ChallengeType = Challenge["type"];
@@ -77,24 +77,74 @@ export function ChallengeFormDialog({
 
   const schema = useMemo(() => {
     const required = tValidation("required");
-    return z.object({
-      name: z.string().min(1, required).max(100),
-      description: z.string(),
-      type: z.enum(["spend_less", "savings", "pay_off_loan", "net_worth_goal"]),
-      repetition: z.enum(["one_off", "weekly", "monthly", "yearly", "custom"]),
-      targetAmount: z
-        .string()
-        .refine((v) => parseFloat(v) > 0, tValidation("positiveNumber")),
-      startDate: z
-        .string()
-        .regex(/^\d{4}-\d{2}-\d{2}$/, tValidation("invalid")),
-      endDate: z.string(),
-      customDurationDays: z.string(),
-      categoryId: z.string(),
-      accountId: z.string(),
-      debtId: z.string(),
-      accountIds: z.array(z.string()),
-    });
+    return z
+      .object({
+        name: z.string().min(1, required).max(100),
+        description: z.string(),
+        type: z.enum([
+          "spend_less",
+          "savings",
+          "pay_off_loan",
+          "net_worth_goal",
+        ]),
+        repetition: z.enum([
+          "one_off",
+          "weekly",
+          "monthly",
+          "yearly",
+          "custom",
+        ]),
+        targetAmount: z
+          .string()
+          .refine((v) => parseFloat(v) > 0, tValidation("positiveNumber")),
+        startDate: z
+          .string()
+          .regex(/^\d{4}-\d{2}-\d{2}$/, tValidation("invalid")),
+        endDate: z.string(),
+        customDurationDays: z.string(),
+        categoryIds: z.array(z.string()),
+        accountId: z.string(),
+        debtId: z.string(),
+        accountIds: z.array(z.string()),
+      })
+      .superRefine((data, ctx) => {
+        if (data.repetition === "one_off" || data.type === "net_worth_goal") {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(data.endDate)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: required,
+              path: ["endDate"],
+            });
+          }
+        }
+        if (data.repetition === "custom") {
+          const n = parseInt(data.customDurationDays, 10);
+          if (!Number.isFinite(n) || n < 1) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              message: required,
+              path: ["customDurationDays"],
+            });
+          }
+        }
+        if (
+          (data.type === "spend_less" || data.type === "pay_off_loan") &&
+          data.categoryIds.length === 0
+        ) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: required,
+            path: ["categoryIds"],
+          });
+        }
+        if (data.type === "savings" && !data.accountId) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: required,
+            path: ["accountId"],
+          });
+        }
+      });
   }, [tValidation]);
 
   const createChallenge = api.challenge.create.useMutation({
@@ -129,7 +179,7 @@ export function ChallengeFormDialog({
       customDurationDays: challenge?.customDurationDays
         ? String(challenge.customDurationDays)
         : "",
-      categoryId: challenge?.categoryId ?? "",
+      categoryIds: challenge?.categoryIds ?? [],
       accountId: challenge?.accountId ?? "",
       debtId: challenge?.debtId ?? "",
       accountIds: challenge?.accountIds ?? [],
@@ -145,17 +195,17 @@ export function ChallengeFormDialog({
           ? parseInt(value.customDurationDays, 10)
           : null;
 
-      let categoryId: string | null = null;
+      let categoryIds: string[] = [];
       let accountId: string | null = null;
       let debtId: string | null = null;
       let scopedAccountIds: string[] = [];
       if (value.type === "spend_less") {
-        categoryId = value.categoryId || null;
+        categoryIds = value.categoryIds;
         scopedAccountIds = value.accountIds;
       } else if (value.type === "savings") {
         accountId = value.accountId || null;
       } else if (value.type === "pay_off_loan") {
-        categoryId = value.categoryId || null;
+        categoryIds = value.categoryIds;
         debtId = value.debtId || null;
         scopedAccountIds = value.accountIds;
       }
@@ -166,7 +216,7 @@ export function ChallengeFormDialog({
           name: value.name.trim(),
           description: description ?? null,
           targetAmount: targetCents,
-          categoryId,
+          categoryIds,
           accountId,
           debtId,
           accountIds: scopedAccountIds,
@@ -181,7 +231,7 @@ export function ChallengeFormDialog({
           startDate: value.startDate,
           endDate,
           customDurationDays,
-          categoryId,
+          categoryIds,
           accountId,
           debtId,
           accountIds: scopedAccountIds,
@@ -191,9 +241,7 @@ export function ChallengeFormDialog({
   });
 
   const mutation = isEdit ? updateChallenge : createChallenge;
-  const expenseCategories = (categories ?? []).filter(
-    (c) => c.kind === "expense" && !c.archived,
-  );
+  const availableCategories = (categories ?? []).filter((c) => !c.archived);
   const activeAccounts = (accounts ?? []).filter((a) => !a.archived);
   const activeDebts = (debts ?? []).filter((d) => !d.archivedAt);
 
@@ -388,46 +436,63 @@ export function ChallengeFormDialog({
                   if (repetition === "one_off") {
                     return (
                       <form.Field name="endDate">
-                        {(field) => (
-                          <Field>
-                            <FieldLabel htmlFor={field.name}>
-                              {t("challengeEndDate")}
-                            </FieldLabel>
-                            <DatePicker
-                              id={field.name}
-                              value={field.state.value}
-                              onChange={field.handleChange}
-                              onBlur={field.handleBlur}
-                            />
-                          </Field>
-                        )}
+                        {(field) => {
+                          const isInvalid =
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid;
+                          return (
+                            <Field data-invalid={isInvalid}>
+                              <FieldLabel htmlFor={field.name}>
+                                {t("challengeEndDate")}
+                              </FieldLabel>
+                              <DatePicker
+                                id={field.name}
+                                value={field.state.value}
+                                onChange={field.handleChange}
+                                onBlur={field.handleBlur}
+                              />
+                              {isInvalid && (
+                                <FieldError errors={field.state.meta.errors} />
+                              )}
+                            </Field>
+                          );
+                        }}
                       </form.Field>
                     );
                   }
                   if (repetition === "custom") {
                     return (
                       <form.Field name="customDurationDays">
-                        {(field) => (
-                          <Field>
-                            <FieldLabel htmlFor={field.name}>
-                              {t("challengeCustomDurationDays")}
-                            </FieldLabel>
-                            <Input
-                              id={field.name}
-                              type="number"
-                              step="1"
-                              min="1"
-                              placeholder={t(
-                                "challengeCustomDurationDaysPlaceholder",
+                        {(field) => {
+                          const isInvalid =
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid;
+                          return (
+                            <Field data-invalid={isInvalid}>
+                              <FieldLabel htmlFor={field.name}>
+                                {t("challengeCustomDurationDays")}
+                              </FieldLabel>
+                              <Input
+                                id={field.name}
+                                type="number"
+                                step="1"
+                                min="1"
+                                placeholder={t(
+                                  "challengeCustomDurationDaysPlaceholder",
+                                )}
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) =>
+                                  field.handleChange(e.target.value)
+                                }
+                                aria-invalid={isInvalid}
+                              />
+                              {isInvalid && (
+                                <FieldError errors={field.state.meta.errors} />
                               )}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) =>
-                                field.handleChange(e.target.value)
-                              }
-                            />
-                          </Field>
-                        )}
+                            </Field>
+                          );
+                        }}
                       </form.Field>
                     );
                   }
@@ -441,21 +506,31 @@ export function ChallengeFormDialog({
                 <>
                   {(type === "spend_less" || type === "pay_off_loan") && (
                     <>
-                      <form.Field name="categoryId">
-                        {(field) => (
-                          <Field>
-                            <FieldLabel htmlFor={field.name}>
-                              {t("challengeCategory")}
-                            </FieldLabel>
-                            <CategoryPicker
-                              id={field.name}
-                              value={field.state.value || null}
-                              onChange={(v) => field.handleChange(v ?? "")}
-                              categories={expenseCategories}
-                              kind="expense"
-                            />
-                          </Field>
-                        )}
+                      <form.Field name="categoryIds">
+                        {(field) => {
+                          const isInvalid =
+                            field.state.meta.isTouched &&
+                            !field.state.meta.isValid;
+                          return (
+                            <Field data-invalid={isInvalid}>
+                              <FieldLabel htmlFor={field.name}>
+                                {t("challengeCategory")}
+                              </FieldLabel>
+                              <CategorySelect
+                                multiple
+                                id={field.name}
+                                value={field.state.value}
+                                onChange={(v) => field.handleChange(v)}
+                                categories={availableCategories}
+                                mode="any"
+                                aria-invalid={isInvalid}
+                              />
+                              {isInvalid && (
+                                <FieldError errors={field.state.meta.errors} />
+                              )}
+                            </Field>
+                          );
+                        }}
                       </form.Field>
 
                       <form.Field name="accountIds">

@@ -10,13 +10,9 @@ export type SeedCategoryParent = SeedCategoryLeaf & {
   children?: SeedCategoryLeaf[];
 };
 
-export type DefaultCategorySeed = {
-  expense: SeedCategoryParent[];
-  income: SeedCategoryParent[];
-};
+export type DefaultCategorySeed = SeedCategoryParent[];
 
-export const defaultCategories: DefaultCategorySeed = {
-  expense: [
+export const defaultCategories: DefaultCategorySeed = [
     {
       name: { da: "Bolig", en: "Home" },
       icon: "🏠",
@@ -467,8 +463,6 @@ export const defaultCategories: DefaultCategorySeed = {
         },
       ],
     },
-  ],
-  income: [
     {
       name: { da: "Indkomst", en: "Income" },
       icon: "💰",
@@ -530,5 +524,4 @@ export const defaultCategories: DefaultCategorySeed = {
         },
       ],
     },
-  ],
-};
+];

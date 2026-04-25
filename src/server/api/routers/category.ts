@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { and, asc, eq, inArray, isNull, or, sql } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, notExists, or, sql } from "drizzle-orm";
+import { alias } from "drizzle-orm/pg-core";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -12,12 +13,10 @@ import {
   user,
 } from "~/server/db/schema";
 
-const kindSchema = z.enum(["expense", "income"]);
 const keywordsSchema = z.array(z.string().min(1).max(100)).max(50);
 
 type CategoryWithKeywords = {
   id: string;
-  kind: "expense" | "income";
   keywords: string[];
 };
 
@@ -31,16 +30,13 @@ export function findMatchingCategoryId(
   description: string,
   note: string | null,
   metadata: Record<string, string> | null,
-  txType: "expense" | "income",
 ): string | null {
   const parts = [description, note ?? ""];
   if (metadata) parts.push(...Object.values(metadata));
   const haystack = parts.join("\n").toLowerCase();
 
-  // Build pairs sorted by keyword length desc — longest match wins
   const pairs: Array<{ keyword: string; categoryId: string }> = [];
   for (const cat of categories) {
-    if (cat.kind !== txType) continue;
     for (const kw of cat.keywords) {
       pairs.push({ keyword: kw.toLowerCase(), categoryId: cat.id });
     }
@@ -56,20 +52,30 @@ export function findMatchingCategoryId(
 }
 
 /**
- * Load all non-archived categories with keywords for a family.
+ * Load all non-archived leaf categories with keywords for a family. Parents
+ * are excluded so auto-categorization can never assign a transaction to a
+ * top-level category.
  */
 export async function loadCategoriesWithKeywords(
   db: typeof dbInstance,
   familyId: string,
 ): Promise<CategoryWithKeywords[]> {
+  const child = alias(category, "child_cat");
   const rows = await db
     .select({
       id: category.id,
-      kind: category.kind,
       keywords: category.keywords,
     })
     .from(category)
-    .where(and(eq(category.familyId, familyId), eq(category.archived, false)));
+    .where(
+      and(
+        eq(category.familyId, familyId),
+        eq(category.archived, false),
+        notExists(
+          db.select({ one: sql`1` }).from(child).where(eq(child.parentId, category.id)),
+        ),
+      ),
+    );
 
   return rows.filter((r) => r.keywords.length > 0);
 }
@@ -106,7 +112,6 @@ export const categoryRouter = createTRPCRouter({
     .input(
       z.object({
         name: z.string().min(1).max(100),
-        kind: kindSchema,
         parentId: z.string().uuid().nullable().optional(),
         icon: z.string().max(16).nullable().optional(),
         keywords: keywordsSchema.optional(),
@@ -115,14 +120,12 @@ export const categoryRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
 
-      // If parentId is set, enforce: parent must exist in the family,
-      // be top-level (no parent of its own), and have the same kind.
+      // If parentId is set, parent must exist in the family and be top-level.
       if (input.parentId) {
         const [parent] = await ctx.db
           .select({
             id: category.id,
             parentId: category.parentId,
-            kind: category.kind,
           })
           .from(category)
           .where(
@@ -143,12 +146,6 @@ export const categoryRouter = createTRPCRouter({
             message: "Only two levels of hierarchy are allowed",
           });
         }
-        if (parent.kind !== input.kind) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Child must have the same kind as parent",
-          });
-        }
       }
 
       const [created] = await ctx.db
@@ -156,7 +153,6 @@ export const categoryRouter = createTRPCRouter({
         .values({
           familyId,
           name: input.name.trim(),
-          kind: input.kind,
           parentId: input.parentId ?? null,
           icon: input.icon ?? null,
           keywords: input.keywords ?? [],
@@ -184,7 +180,6 @@ export const categoryRouter = createTRPCRouter({
         .select({
           id: category.id,
           parentId: category.parentId,
-          kind: category.kind,
         })
         .from(category)
         .where(
@@ -195,8 +190,8 @@ export const categoryRouter = createTRPCRouter({
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      // If assigning a parent: ensure parent exists in the family, is top-level,
-      // matches kind, and this category itself has no children.
+      // If assigning a parent: ensure parent exists, is top-level, and this
+      // category doesn't already have children.
       if (input.parentId) {
         if (input.parentId === input.id) {
           throw new TRPCError({
@@ -208,7 +203,6 @@ export const categoryRouter = createTRPCRouter({
         const [parent] = await ctx.db
           .select({
             parentId: category.parentId,
-            kind: category.kind,
           })
           .from(category)
           .where(
@@ -229,14 +223,7 @@ export const categoryRouter = createTRPCRouter({
             message: "Only two levels of hierarchy are allowed",
           });
         }
-        if (parent.kind !== existing.kind) {
-          throw new TRPCError({
-            code: "BAD_REQUEST",
-            message: "Child must have the same kind as parent",
-          });
-        }
 
-        // Ensure this category has no children (can't become a child if it's already a parent)
         const [childCount] = await ctx.db
           .select({ count: sql<number>`count(*)` })
           .from(category)
@@ -272,8 +259,6 @@ export const categoryRouter = createTRPCRouter({
     const cats = await loadCategoriesWithKeywords(ctx.db, familyId);
     if (cats.length === 0) return { updated: 0 };
 
-    // Only re-categorize transactions on accounts this user can access, so
-    // a bulk categorize never reaches into another member's private account.
     const accessRows = await ctx.db
       .select({ accountId: financialAccountAccess.accountId })
       .from(financialAccountAccess)
@@ -327,7 +312,6 @@ export const categoryRouter = createTRPCRouter({
         tx.description,
         tx.note,
         tx.metadata,
-        tx.type,
       );
       if (matched) {
         await ctx.db

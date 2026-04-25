@@ -1,7 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
-  pgEnum,
   pgTable,
   text,
   timestamp,
@@ -10,10 +9,6 @@ import {
   type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { family } from "./family";
-
-// ── Enums ───────────────────────────────────────────────────────────────────
-
-export const categoryKindEnum = pgEnum("category_kind", ["expense", "income"]);
 
 // ── Tables ──────────────────────────────────────────────────────────────────
 
@@ -28,7 +23,6 @@ export const category = pgTable(
       onDelete: "set null",
     }),
     name: text("name").notNull(),
-    kind: categoryKindEnum("kind").notNull(),
     icon: text("icon"),
     keywords: text("keywords").array().default([]).notNull(),
     archived: boolean("archived").default(false).notNull(),

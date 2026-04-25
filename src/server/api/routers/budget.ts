@@ -17,6 +17,11 @@ import {
   defaultStartMonth,
   distributeByPeriod,
 } from "~/server/lib/budget-distribute";
+import {
+  assertCategoryIsLeaf,
+  expandCategoryIdsMap,
+  rollupActuals,
+} from "~/server/lib/category-helpers";
 
 // ── Validation ──────────────────────────────────────────────────────────────
 
@@ -96,17 +101,11 @@ async function assertCategoryBelongsToFamily(
   familyId: string,
 ) {
   const [row] = await db
-    .select({ id: category.id, kind: category.kind })
+    .select({ id: category.id })
     .from(category)
     .where(and(eq(category.id, categoryId), eq(category.familyId, familyId)));
   if (!row) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Category not found" });
-  }
-  if (row.kind !== "expense") {
-    throw new TRPCError({
-      code: "BAD_REQUEST",
-      message: "Budget lines must use expense categories",
-    });
   }
 }
 
@@ -131,19 +130,26 @@ async function fetchActualsByCategory(
   db: DbOrTx,
   familyId: string,
   year: number,
-  categoryIds: string[],
+  lineCategoryIds: string[],
   accountIds: string[] | null,
 ): Promise<Map<string, number[]>> {
-  const result = new Map<string, number[]>();
-  if (categoryIds.length === 0) return result;
+  if (lineCategoryIds.length === 0) return new Map();
   // accountIds === null → no filter (all family accounts). An empty array
   // would mean "no accounts" (nothing to count) — return empty.
-  if (accountIds?.length === 0) return result;
+  if (accountIds?.length === 0) return new Map();
+
+  // Expand each line categoryId to itself + its child ids so a line on a
+  // top-level parent aggregates spend across all its children.
+  const expansionMap = await expandCategoryIdsMap(db, familyId, lineCategoryIds);
+  if (expansionMap.size === 0) return new Map();
+  const allTxCategoryIds = Array.from(
+    new Set([...expansionMap.values()].flat()),
+  );
 
   const filters = [
     eq(transaction.familyId, familyId),
-    eq(transaction.type, "expense"),
-    inArray(transaction.categoryId, categoryIds),
+    inArray(transaction.type, ["expense", "income"]),
+    inArray(transaction.categoryId, allTxCategoryIds),
     gte(transaction.date, `${year}-01-01`),
     lt(transaction.date, `${year + 1}-01-01`),
   ];
@@ -155,7 +161,8 @@ async function fetchActualsByCategory(
     .select({
       categoryId: transaction.categoryId,
       month: sql<number>`extract(month from ${transaction.date})::int`,
-      total: sql<number>`coalesce(sum(${transaction.amount}), 0)::int`,
+      // Net spend: expenses count positive, income subtracts.
+      total: sql<number>`coalesce(sum(case when ${transaction.type} = 'expense' then ${transaction.amount} when ${transaction.type} = 'income' then -${transaction.amount} else 0 end), 0)::int`,
     })
     .from(transaction)
     .where(and(...filters))
@@ -164,16 +171,18 @@ async function fetchActualsByCategory(
       sql`extract(month from ${transaction.date})`,
     );
 
+  const txTotals = new Map<string, number[]>();
   for (const row of rows) {
     if (!row.categoryId) continue;
-    const arr = result.get(row.categoryId) ?? [...EMPTY_AMOUNTS];
+    const arr = txTotals.get(row.categoryId) ?? [...EMPTY_AMOUNTS];
     const slot = Number(row.month) - 1;
     if (slot >= 0 && slot < 12) {
       arr[slot] = Number(row.total);
     }
-    result.set(row.categoryId, arr);
+    txTotals.set(row.categoryId, arr);
   }
-  return result;
+
+  return rollupActuals(expansionMap, txTotals);
 }
 
 // Load all accountIds currently attached to each budget in the given set.
@@ -503,6 +512,7 @@ export const budgetRouter = createTRPCRouter({
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
       await loadBudgetInFamily(ctx.db, input.budgetId, familyId);
       await assertCategoryBelongsToFamily(ctx.db, input.categoryId, familyId);
+      await assertCategoryIsLeaf(ctx.db, familyId, input.categoryId);
 
       const [orderRow] = await ctx.db
         .select({
@@ -555,6 +565,7 @@ export const budgetRouter = createTRPCRouter({
 
       if (input.categoryId) {
         await assertCategoryBelongsToFamily(ctx.db, input.categoryId, familyId);
+        await assertCategoryIsLeaf(ctx.db, familyId, input.categoryId);
       }
 
       const nextRecurrence = input.recurrence ?? existing.recurrence;

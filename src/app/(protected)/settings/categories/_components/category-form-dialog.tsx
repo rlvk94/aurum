@@ -31,7 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/app/_components/select";
-import { cn } from "~/app/_lib/utils";
 
 type Category = RouterOutputs["category"]["list"][number];
 
@@ -95,7 +94,6 @@ function KeywordsField({
 
 const categoryFormSchema = z.object({
   name: z.string().min(1, "Required").max(100),
-  kind: z.enum(["expense", "income"]),
   parentId: z.string(),
   icon: z.string(),
   keywords: z.array(z.string()),
@@ -106,17 +104,16 @@ export function CategoryFormDialog({
   onOpenChange,
   category,
   allCategories,
-  defaultKind,
+  defaultParentId,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   category?: Category;
   allCategories: Category[];
-  defaultKind?: "expense" | "income";
+  defaultParentId?: string;
 }) {
   const t = useTranslations("categories");
   const tCommon = useTranslations("common");
-  const tTx = useTranslations("transactions");
   const utils = api.useUtils();
   const isEdit = !!category;
 
@@ -138,8 +135,7 @@ export function CategoryFormDialog({
   const form = useForm({
     defaultValues: {
       name: category?.name ?? "",
-      kind: (category?.kind as "expense" | "income") ?? defaultKind ?? "expense",
-      parentId: category?.parentId ?? "",
+      parentId: category?.parentId ?? defaultParentId ?? "",
       icon: category?.icon ?? "",
       keywords: category?.keywords ?? [],
     },
@@ -158,7 +154,6 @@ export function CategoryFormDialog({
       } else {
         createCategory.mutate({
           name: value.name.trim(),
-          kind: value.kind,
           parentId: value.parentId || null,
           icon: value.icon.trim() || null,
           keywords: value.keywords,
@@ -168,6 +163,10 @@ export function CategoryFormDialog({
   });
 
   const mutation = isEdit ? updateCategory : createCategory;
+
+  const possibleParents = allCategories.filter(
+    (c) => !c.parentId && !c.archived && c.id !== category?.id,
+  );
 
   return (
     <Dialog
@@ -240,98 +239,56 @@ export function CategoryFormDialog({
               )}
             />
 
-            <form.Field
-              name="keywords"
-              children={(field) => (
-                <KeywordsField
-                  value={field.state.value}
-                  onChange={field.handleChange}
-                  label={t("keywords")}
-                  placeholder={t("keywordsPlaceholder")}
-                  help={t("keywordsHelp")}
-                />
-              )}
+            <form.Subscribe
+              selector={(state) => state.values.parentId}
+              children={(parentId) =>
+                parentId ? (
+                  <form.Field
+                    name="keywords"
+                    children={(field) => (
+                      <KeywordsField
+                        value={field.state.value}
+                        onChange={field.handleChange}
+                        label={t("keywords")}
+                        placeholder={t("keywordsPlaceholder")}
+                        help={t("keywordsHelp")}
+                      />
+                    )}
+                  />
+                ) : null
+              }
             />
 
-            {!isEdit && (
+            {isEdit && category?.parentId && (
               <form.Field
-                name="kind"
+                name="parentId"
                 children={(field) => (
                   <Field>
-                    <FieldLabel>{t("categoryKind")}</FieldLabel>
-                    <div className="grid grid-cols-2 gap-2">
-                      {(["expense", "income"] as const).map((kind) => (
-                        <button
-                          key={kind}
-                          type="button"
-                          onClick={() => {
-                            field.handleChange(kind);
-                            // Reset parent when kind changes
-                            form.setFieldValue("parentId", "");
-                          }}
-                          className={cn(
-                            "rounded-lg border p-3 text-sm transition-all",
-                            field.state.value === kind
-                              ? kind === "expense"
-                                ? "border-expense bg-expense-muted text-expense"
-                                : "border-income bg-income-muted text-income"
-                              : "border-border bg-card text-muted-foreground hover:border-primary/30",
-                          )}
-                        >
-                          {tTx(kind)}
-                        </button>
-                      ))}
-                    </div>
+                    <FieldLabel htmlFor={field.name}>{t("parent")}</FieldLabel>
+                    <Select
+                      value={field.state.value || NO_PARENT}
+                      onValueChange={(v) =>
+                        field.handleChange(v === NO_PARENT ? "" : v)
+                      }
+                    >
+                      <SelectTrigger id={field.name}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {possibleParents.map((c) => (
+                          <SelectItem key={c.id} value={c.id}>
+                            {c.icon && (
+                              <span className="mr-1.5">{c.icon}</span>
+                            )}
+                            {c.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </Field>
                 )}
               />
             )}
-
-            <form.Subscribe
-              selector={(state) => state.values.kind}
-              children={(kind) => {
-                const possibleParents = allCategories.filter(
-                  (c) =>
-                    c.kind === kind &&
-                    !c.parentId &&
-                    !c.archived &&
-                    c.id !== category?.id,
-                );
-                return (
-                  <form.Field
-                    name="parentId"
-                    children={(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>
-                          {t("parent")}
-                        </FieldLabel>
-                        <Select
-                          value={field.state.value || NO_PARENT}
-                          onValueChange={(v) =>
-                            field.handleChange(v === NO_PARENT ? "" : v)
-                          }
-                        >
-                          <SelectTrigger id={field.name}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value={NO_PARENT}>
-                              {t("noParent")}
-                            </SelectItem>
-                            {possibleParents.map((c) => (
-                              <SelectItem key={c.id} value={c.id}>
-                                {c.icon && <span className="mr-1.5">{c.icon}</span>}
-                                {c.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </Field>
-                    )}
-                  />
-                );
-              }}
-            />
           </FieldGroup>
 
           {mutation.error && (

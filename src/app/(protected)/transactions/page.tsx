@@ -42,13 +42,17 @@ import {
 } from "~/app/_components/table";
 import posthog from "posthog-js";
 import { TransactionFormDialog } from "./_components/transaction-form-dialog";
+import { TransactionCategoryDialog } from "./_components/transaction-category-dialog";
 import { CsvImportDialog } from "./_components/csv-import-dialog";
+import {
+  CategorySelect,
+  UNCATEGORIZED_SENTINEL,
+} from "~/app/_components/category-select";
 import { cn } from "~/app/_lib/utils";
 
 type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
 
 const ALL = "__all__";
-const UNCATEGORIZED = "__uncategorized__";
 
 function formatAmount(cents: number): string {
   const value = cents / 100;
@@ -70,7 +74,7 @@ export default function TransactionsPage() {
   const { data: categories = [] } = api.category.list.useQuery();
   const [accountFilter, setAccountFilter] = useState<string>(ALL);
   const [typeFilter, setTypeFilter] = useState<string>(ALL);
-  const [categoryFilter, setCategoryFilter] = useState<string>(ALL);
+  const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
 
@@ -92,12 +96,10 @@ export default function TransactionsPage() {
         typeFilter === ALL
           ? undefined
           : (typeFilter as "expense" | "income" | "transfer"),
-      categoryId:
-        categoryFilter === ALL
-          ? undefined
-          : categoryFilter === UNCATEGORIZED
-            ? null
-            : categoryFilter,
+      categoryIds: categoryFilter
+        .filter((v) => v !== UNCATEGORIZED_SENTINEL)
+        .filter((v) => v.length > 0),
+      includeUncategorized: categoryFilter.includes(UNCATEGORIZED_SENTINEL),
       search: debouncedSearch || undefined,
     },
     {
@@ -121,6 +123,7 @@ export default function TransactionsPage() {
   const [createOpen, setCreateOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [editing, setEditing] = useState<Transaction | null>(null);
+  const [quickAssign, setQuickAssign] = useState<Transaction | null>(null);
 
   const deleteTx = api.transaction.delete.useMutation({
     onSuccess: (_, variables) => {
@@ -192,25 +195,17 @@ export default function TransactionsPage() {
           </SelectContent>
         </Select>
 
-        <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-          <SelectTrigger className="w-auto min-w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>{t("allCategories")}</SelectItem>
-            <SelectItem value={UNCATEGORIZED}>
-              {t("uncategorizedFilter")}
-            </SelectItem>
-            {categories
-              .filter((c) => !c.archived)
-              .map((c) => (
-                <SelectItem key={c.id} value={c.id}>
-                  {c.icon && <span className="mr-1.5">{c.icon}</span>}
-                  {c.name}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
+        <div className="w-[220px]">
+          <CategorySelect
+            multiple
+            value={categoryFilter}
+            onChange={setCategoryFilter}
+            categories={categories}
+            mode="any"
+            uncategorizedOption
+            placeholder={t("allCategories")}
+          />
+        </div>
       </div>
 
       {isLoading ? (
@@ -293,13 +288,25 @@ export default function TransactionsPage() {
                       )}
                     </TableCell>
                     <TableCell>
-                      {category ? (
-                        <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
-                          {category.icon && <span>{category.icon}</span>}
-                          {category.name}
-                        </span>
-                      ) : (
+                      {tx.type === "transfer" ? (
                         <span className="text-muted-foreground text-xs">—</span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setQuickAssign(tx)}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
+                        >
+                          {category ? (
+                            <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5">
+                              {category.icon && <span>{category.icon}</span>}
+                              {category.name}
+                            </span>
+                          ) : (
+                            <span className="border-dashed border-muted-foreground/40 text-muted-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
+                              + {t("uncategorizedFilter")}
+                            </span>
+                          )}
+                        </button>
                       )}
                     </TableCell>
                     <TableCell className="text-muted-foreground">
@@ -385,6 +392,12 @@ export default function TransactionsPage() {
         onOpenChange={(open) => !open && setEditing(null)}
         transaction={editing ?? undefined}
         accounts={accounts}
+      />
+      <TransactionCategoryDialog
+        transactionId={quickAssign?.id ?? null}
+        currentCategoryId={quickAssign?.categoryId ?? null}
+        open={!!quickAssign}
+        onOpenChange={(open) => !open && setQuickAssign(null)}
       />
     </div>
   );
