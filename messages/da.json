@@ -1137,10 +1137,16 @@
       "cta": "Opdater betaling"
     },
     "upgradeModal": {
-      "title": "Familie-funktion",
-      "body": "Denne funktion kræver Familie-abonnement. Opgrader for at låse hele familien op.",
-      "cta": "Se Familie-plan",
-      "cancel": "Måske senere"
+      "title": "Låst funktion",
+      "body": "Denne funktion er på Familie-planen.",
+      "cta": "Gå til abonnement",
+      "cancel": "Luk",
+      "hero": {
+        "eyebrow": "Låst",
+        "title": "Familie funktion",
+        "subtitle": "Denne funktion er ikke tilgængelig på din nuværende plan, opgrader til familie for at låse den op for hele husstanden."
+      },
+      "memberNote": "Kun familieejeren kan ændre planen. Kontakt dem for at opgradere til Familie-planen."
     },
     "pendingBanner": {
       "title": "Aktivering afventer",

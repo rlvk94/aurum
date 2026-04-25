@@ -27,12 +27,15 @@ import {
   SidebarRail,
 } from "~/app/_components/sidebar";
 import { UserMenu } from "~/app/_components/user-menu";
+import { api } from "~/trpc/react";
 
 export function SettingsSidebar({
   ...props
 }: React.ComponentProps<typeof Sidebar>) {
   const t = useTranslations("settings.nav");
   const pathname = usePathname();
+  const { data: family } = api.family.current.useQuery();
+  const isOwner = family?.role === "owner";
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -106,17 +109,19 @@ export function SettingsSidebar({
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/settings/billing"}
-                >
-                  <Link href="/settings/billing">
-                    <CreditCard />
-                    <span>{t("billing")}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {isOwner && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={pathname === "/settings/billing"}
+                  >
+                    <Link href="/settings/billing">
+                      <CreditCard />
+                      <span>{t("billing")}</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

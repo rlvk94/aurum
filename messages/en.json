@@ -1137,10 +1137,16 @@
       "cta": "Update payment"
     },
     "upgradeModal": {
-      "title": "Family feature",
-      "body": "This feature requires the Family plan. Upgrade to unlock it for the whole family.",
-      "cta": "See Family plan",
-      "cancel": "Maybe later"
+      "title": "Locked feature",
+      "body": "This feature is on the Family plan.",
+      "cta": "Go to subscription",
+      "cancel": "Close",
+      "hero": {
+        "eyebrow": "Locked",
+        "title": "Family feature",
+        "subtitle": "This feature is not available on your current plan. Upgrade to Family to unlock it for the whole household."
+      },
+      "memberNote": "Only the family owner can change the plan. Contact them to upgrade to the Family plan."
     },
     "pendingBanner": {
       "title": "Activation pending",

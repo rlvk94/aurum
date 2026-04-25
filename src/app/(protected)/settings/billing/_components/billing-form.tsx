@@ -37,9 +37,7 @@ export function BillingForm() {
   const locale = useLocale();
   const utils = api.useUtils();
 
-  const { data: family } = api.family.current.useQuery();
   const { data: billing, isLoading } = api.billing.current.useQuery();
-  const isOwner = family?.role === "owner";
 
   const [cadenceOpen, setCadenceOpen] = useState(false);
 
@@ -90,12 +88,6 @@ export function BillingForm() {
     <div className="mx-auto w-full max-w-2xl space-y-6">
       <PageHeader title={t("title")} description={t("description")} />
 
-      {!isOwner && (
-        <p className="rounded-md border border-dashed bg-muted/30 p-3 text-sm text-muted-foreground">
-          {t("memberView")}
-        </p>
-      )}
-
       <Card>
         <CardHeader>
           <CardTitle className="text-base">{t("currentPlan")}</CardTitle>
@@ -105,7 +97,7 @@ export function BillingForm() {
           <div className="flex items-baseline justify-between gap-3">
             <div className="font-display text-2xl">{planLabel}</div>
             {billing?.cadence && billing.plan === "family" && (
-              <div className="text-xs text-muted-foreground">
+              <div className="text-muted-foreground text-xs">
                 {billing.cadence === "annual"
                   ? tPricing("billedAnnually")
                   : tPricing("billedMonthly")}
@@ -115,23 +107,20 @@ export function BillingForm() {
         </CardContent>
       </Card>
 
-      {isOwner && billing?.plan === "family" && (
+      {billing?.plan === "family" && (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">{t("manageInStripe")}</CardTitle>
           </CardHeader>
           <CardContent>
-            <Button
-              onClick={() => portal.mutate()}
-              disabled={portal.isPending}
-            >
+            <Button onClick={() => portal.mutate()} disabled={portal.isPending}>
               {portal.isPending ? tCommon("loading") : t("manageInStripe")}
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {isOwner && billing?.plan === "individual" && (
+      {billing?.plan === "individual" && (
         <UpgradeCard
           features={features}
           onUpgrade={() => setCadenceOpen(true)}
@@ -184,48 +173,48 @@ function UpgradeCard({
   resetLabel: string;
 }) {
   return (
-    <div className="relative overflow-hidden rounded-xl border border-border bg-card p-8 shadow-card sm:p-10">
+    <div className="border-border bg-card shadow-card relative overflow-hidden rounded-xl border p-8 sm:p-10">
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-16 -top-16 h-48 w-48 rounded-full bg-primary/10 blur-3xl"
+        className="bg-primary/10 pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full blur-3xl"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -left-12 bottom-0 h-32 w-32 rounded-full bg-accent blur-3xl opacity-60"
+        className="bg-accent pointer-events-none absolute bottom-0 -left-12 h-32 w-32 rounded-full opacity-60 blur-3xl"
       />
 
       <div className="relative space-y-6">
         <div className="flex items-center gap-2">
-          <Sparkles className="size-4 text-primary" />
-          <span className="almanac-smallcaps rounded-sm border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] tracking-[0.22em] text-primary">
+          <Sparkles className="text-primary size-4" />
+          <span className="almanac-smallcaps border-primary/30 bg-primary/10 text-primary rounded-sm border px-2 py-0.5 text-[10px] tracking-[0.22em]">
             {eyebrow}
           </span>
         </div>
 
         <div>
-          <h2 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl">
+          <h2 className="font-display text-foreground text-3xl leading-tight tracking-tight sm:text-4xl">
             {heading}
           </h2>
-          <p className="mt-3 text-base text-muted-foreground">{body}</p>
+          <p className="text-muted-foreground mt-3 text-base">{body}</p>
         </div>
 
         <div className="flex items-baseline gap-1.5">
-          <span className="text-xs uppercase tracking-wider text-muted-foreground">
+          <span className="text-muted-foreground text-xs tracking-wider uppercase">
             {pricePrefix}
           </span>
-          <span className="font-display text-3xl text-foreground">
+          <span className="font-display text-foreground text-3xl">
             {priceAnnual}
           </span>
-          <span className="text-sm text-muted-foreground">{priceSuffix}</span>
+          <span className="text-muted-foreground text-sm">{priceSuffix}</span>
         </div>
 
         {features.length > 0 && (
           <ul className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
             {features.map((f, i) => (
-              <li key={i} className="flex items-start gap-2 text-foreground/90">
+              <li key={i} className="text-foreground/90 flex items-start gap-2">
                 <span
                   aria-hidden
-                  className="mt-2 block h-px w-3 shrink-0 bg-primary"
+                  className="bg-primary mt-2 block h-px w-3 shrink-0"
                 />
                 <span>{f}</span>
               </li>
