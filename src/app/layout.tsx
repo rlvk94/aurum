@@ -11,7 +11,6 @@ import { TRPCReactProvider } from "~/trpc/react";
 export const metadata: Metadata = {
   title: "Aurum",
   description: "Family finance management",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
 const dmSans = DM_Sans({
