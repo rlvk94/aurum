@@ -1,4 +1,5 @@
 export {
+  sendContactEmail,
   sendEmailChangeOtpEmail,
   sendFamilyInviteEmail,
   sendSignInOtpEmail,

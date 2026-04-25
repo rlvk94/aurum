@@ -8,6 +8,7 @@ import {
   category,
   challenge,
   challengeAccount,
+  challengeCategory,
   challengeInstance,
   debt,
   financialAccount,
@@ -56,7 +57,7 @@ const createSchema = z
     endDate: isoDate.nullable().optional(),
     customDurationDays: z.number().int().min(1).max(3650).nullable().optional(),
     targetAmount: z.number().int().positive(),
-    categoryId: z.string().uuid().nullable().optional(),
+    categoryIds: z.array(z.string().uuid()).optional(),
     accountId: z.string().uuid().nullable().optional(),
     debtId: z.string().uuid().nullable().optional(),
     accountIds: z.array(z.string().uuid()).optional(),
@@ -78,11 +79,14 @@ const createSchema = z
         path: ["customDurationDays"],
       });
     }
-    if (data.type === "spend_less" && !data.categoryId) {
+    if (
+      data.type === "spend_less" &&
+      (!data.categoryIds || data.categoryIds.length === 0)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "categoryId is required for spend-less challenges",
-        path: ["categoryId"],
+        message: "At least one categoryId is required for spend-less challenges",
+        path: ["categoryIds"],
       });
     }
     if (data.type === "savings" && !data.accountId) {
@@ -92,11 +96,15 @@ const createSchema = z
         path: ["accountId"],
       });
     }
-    if (data.type === "pay_off_loan" && !data.categoryId) {
+    if (
+      data.type === "pay_off_loan" &&
+      (!data.categoryIds || data.categoryIds.length === 0)
+    ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "categoryId is required for pay-off-loan challenges",
-        path: ["categoryId"],
+        message:
+          "At least one categoryId is required for pay-off-loan challenges",
+        path: ["categoryIds"],
       });
     }
     if (data.type === "net_worth_goal") {
@@ -134,10 +142,6 @@ async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   return dbUser.activeFamilyId;
 }
 
-/**
- * Returns the set of account IDs in the family that the given user can access
- * (shared accounts + private accounts explicitly granted to them).
- */
 async function getAccessibleAccountIds(
   db: typeof dbInstance,
   familyId: string,
@@ -184,30 +188,38 @@ async function assertAccountsAccessible(
   }
 }
 
+async function assertCategoriesInFamily(
+  db: typeof dbInstance,
+  familyId: string,
+  categoryIds: string[],
+) {
+  if (categoryIds.length === 0) return;
+  const rows = await db
+    .select({ id: category.id })
+    .from(category)
+    .where(
+      and(
+        inArray(category.id, categoryIds),
+        eq(category.familyId, familyId),
+      ),
+    );
+  if (rows.length !== new Set(categoryIds).size) {
+    throw new TRPCError({
+      code: "BAD_REQUEST",
+      message: "One or more categories not found in this family",
+    });
+  }
+}
+
 async function assertFamilyResource(
   db: typeof dbInstance,
   familyId: string,
   userId: string,
   opts: {
-    categoryId?: string | null;
     accountId?: string | null;
     debtId?: string | null;
   },
 ) {
-  if (opts.categoryId) {
-    const [row] = await db
-      .select({ id: category.id })
-      .from(category)
-      .where(
-        and(eq(category.id, opts.categoryId), eq(category.familyId, familyId)),
-      );
-    if (!row) {
-      throw new TRPCError({
-        code: "BAD_REQUEST",
-        message: "Category not found in this family",
-      });
-    }
-  }
   if (opts.accountId) {
     await assertAccountsAccessible(db, familyId, userId, [opts.accountId]);
   }
@@ -225,12 +237,6 @@ async function assertFamilyResource(
   }
 }
 
-/**
- * A challenge is visible to a user only if every account it references is
- * accessible. For savings challenges that's `row.accountId`; for spend-less
- * and pay-off-loan challenges it's any scoped accountIds (an empty scoped
- * list means "all family accounts", which imposes no additional restriction).
- */
 function isChallengeVisible(
   row: typeof challenge.$inferSelect,
   scopedAccountIds: string[],
@@ -243,6 +249,27 @@ function isChallengeVisible(
     if (!accessible.has(accountId)) return false;
   }
   return true;
+}
+
+async function loadCategoriesByChallenge(
+  db: typeof dbInstance,
+  challengeIds: string[],
+): Promise<Map<string, string[]>> {
+  const map = new Map<string, string[]>();
+  if (challengeIds.length === 0) return map;
+  const rows = await db
+    .select({
+      challengeId: challengeCategory.challengeId,
+      categoryId: challengeCategory.categoryId,
+    })
+    .from(challengeCategory)
+    .where(inArray(challengeCategory.challengeId, challengeIds));
+  for (const row of rows) {
+    const list = map.get(row.challengeId) ?? [];
+    list.push(row.categoryId);
+    map.set(row.challengeId, list);
+  }
+  return map;
 }
 
 // ── Router ──────────────────────────────────────────────────────────────────
@@ -292,6 +319,11 @@ export const challengeRouter = createTRPCRouter({
         accountsByChallenge.set(link.challengeId, list);
       }
 
+      const categoriesByChallenge = await loadCategoriesByChallenge(
+        ctx.db,
+        ids,
+      );
+
       const asOf = todayIso();
       const results = [];
       for (const row of rows) {
@@ -309,6 +341,7 @@ export const challengeRouter = createTRPCRouter({
           currentInstance: current,
           progress,
           accountIds: scoped,
+          categoryIds: categoriesByChallenge.get(row.id) ?? [],
         });
       }
       return results;
@@ -348,6 +381,11 @@ export const challengeRouter = createTRPCRouter({
         .where(eq(challengeInstance.challengeId, row.id))
         .orderBy(sql`${challengeInstance.periodStart} desc`);
 
+      const categoryLinks = await ctx.db
+        .select({ categoryId: challengeCategory.categoryId })
+        .from(challengeCategory)
+        .where(eq(challengeCategory.challengeId, row.id));
+
       const asOf = todayIso();
       const progress = current
         ? await computeProgress(ctx.db, row, current, asOf, {
@@ -361,6 +399,7 @@ export const challengeRouter = createTRPCRouter({
         instances,
         progress,
         accountIds: scoped,
+        categoryIds: categoryLinks.map((l) => l.categoryId),
       };
     }),
 
@@ -368,8 +407,9 @@ export const challengeRouter = createTRPCRouter({
     .input(createSchema)
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const categoryIds = Array.from(new Set(input.categoryIds ?? []));
+      await assertCategoriesInFamily(ctx.db, familyId, categoryIds);
       await assertFamilyResource(ctx.db, familyId, ctx.session.user.id, {
-        categoryId: input.categoryId,
         accountId: input.accountId,
         debtId: input.debtId,
       });
@@ -393,13 +433,20 @@ export const challengeRouter = createTRPCRouter({
           endDate: input.endDate ?? null,
           customDurationDays: input.customDurationDays ?? null,
           targetAmount: input.targetAmount,
-          categoryId: input.categoryId ?? null,
           accountId: input.accountId ?? null,
           debtId: input.debtId ?? null,
         })
         .returning();
 
       if (created) {
+        if (categoryIds.length > 0) {
+          await ctx.db.insert(challengeCategory).values(
+            categoryIds.map((cid) => ({
+              challengeId: created.id,
+              categoryId: cid,
+            })),
+          );
+        }
         if (scopedAccountIds.length > 0) {
           await ctx.db.insert(challengeAccount).values(
             scopedAccountIds.map((id) => ({
@@ -420,7 +467,7 @@ export const challengeRouter = createTRPCRouter({
         name: z.string().min(1).max(100).optional(),
         description: z.string().max(1000).nullable().optional(),
         targetAmount: z.number().int().positive().optional(),
-        categoryId: z.string().uuid().nullable().optional(),
+        categoryIds: z.array(z.string().uuid()).optional(),
         accountId: z.string().uuid().nullable().optional(),
         debtId: z.string().uuid().nullable().optional(),
         accountIds: z.array(z.string().uuid()).optional(),
@@ -438,16 +485,31 @@ export const challengeRouter = createTRPCRouter({
       if (!existing) throw new TRPCError({ code: "NOT_FOUND" });
 
       await assertFamilyResource(ctx.db, familyId, ctx.session.user.id, {
-        categoryId: input.categoryId,
         accountId: input.accountId,
         debtId: input.debtId,
       });
 
-      const { id, accountIds, ...data } = input;
+      const { id, accountIds, categoryIds, ...data } = input;
       await ctx.db
         .update(challenge)
         .set({ ...data, updatedAt: new Date() })
         .where(and(eq(challenge.id, id), eq(challenge.familyId, familyId)));
+
+      if (categoryIds !== undefined) {
+        const deduped = Array.from(new Set(categoryIds));
+        await assertCategoriesInFamily(ctx.db, familyId, deduped);
+        await ctx.db
+          .delete(challengeCategory)
+          .where(eq(challengeCategory.challengeId, id));
+        if (deduped.length > 0) {
+          await ctx.db.insert(challengeCategory).values(
+            deduped.map((cid) => ({
+              challengeId: id,
+              categoryId: cid,
+            })),
+          );
+        }
+      }
 
       if (accountIds !== undefined) {
         const deduped = Array.from(new Set(accountIds));

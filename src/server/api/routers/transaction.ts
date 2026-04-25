@@ -15,6 +15,10 @@ import {
   findMatchingCategoryId,
   loadCategoriesWithKeywords,
 } from "./category";
+import {
+  assertCategoryIsLeaf,
+  expandCategoryIds,
+} from "~/server/lib/category-helpers";
 
 // Postgres TEXT columns reject null bytes with
 // "unsupported Unicode escape sequence". CSV data from banks sometimes
@@ -157,6 +161,8 @@ export const transactionRouter = createTRPCRouter({
         .object({
           accountId: z.string().uuid().optional(),
           categoryId: z.string().uuid().nullable().optional(),
+          categoryIds: z.array(z.string().uuid()).optional(),
+          includeUncategorized: z.boolean().optional(),
           type: transactionTypeSchema.optional(),
           search: z.string().optional(),
           from: z.string().optional(), // ISO date YYYY-MM-DD
@@ -204,11 +210,38 @@ export const transactionRouter = createTRPCRouter({
         conditions.push(eq(transaction.type, input.type));
       }
       if (input?.categoryId !== undefined) {
-        conditions.push(
-          input.categoryId === null
-            ? isNull(transaction.categoryId)
-            : eq(transaction.categoryId, input.categoryId),
-        );
+        if (input.categoryId === null) {
+          conditions.push(isNull(transaction.categoryId));
+        } else {
+          const expanded = await expandCategoryIds(ctx.db, familyId, [
+            input.categoryId,
+          ]);
+          if (expanded.length === 0) {
+            return { items: [], nextCursor: null };
+          }
+          conditions.push(inArray(transaction.categoryId, expanded));
+        }
+      } else if (
+        (input?.categoryIds && input.categoryIds.length > 0) ||
+        input?.includeUncategorized
+      ) {
+        const ids = input?.categoryIds ?? [];
+        const expanded =
+          ids.length > 0
+            ? await expandCategoryIds(ctx.db, familyId, ids)
+            : [];
+        const branches = [];
+        if (expanded.length > 0) {
+          branches.push(inArray(transaction.categoryId, expanded));
+        }
+        if (input?.includeUncategorized) {
+          branches.push(isNull(transaction.categoryId));
+        }
+        if (branches.length === 0) {
+          return { items: [], nextCursor: null };
+        }
+        const combined = branches.length === 1 ? branches[0]! : or(...branches);
+        if (combined) conditions.push(combined);
       }
       if (input?.search && input.search.trim()) {
         const pattern = `%${input.search.trim()}%`;
@@ -302,6 +335,10 @@ export const transactionRouter = createTRPCRouter({
         [input.accountId, ...(input.transferAccountId ? [input.transferAccountId] : [])],
       );
 
+      if (input.categoryId) {
+        await assertCategoryIsLeaf(ctx.db, familyId, input.categoryId);
+      }
+
       const [created] = await ctx.db
         .insert(transaction)
         .values({
@@ -376,7 +413,6 @@ export const transactionRouter = createTRPCRouter({
                 description,
                 note,
                 metadata,
-                t.type,
               )
             : null;
         return {
@@ -476,6 +512,10 @@ export const transactionRouter = createTRPCRouter({
           ...(data.transferAccountId ? [data.transferAccountId] : []),
         ],
       );
+
+      if (data.categoryId) {
+        await assertCategoryIsLeaf(ctx.db, familyId, data.categoryId);
+      }
 
       await ctx.db
         .update(transaction)

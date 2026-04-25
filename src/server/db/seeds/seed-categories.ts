@@ -12,31 +12,27 @@ export async function seedDefaultCategories(
   familyId: string,
   locale: Locale,
 ) {
-  for (const kind of ["expense", "income"] as const) {
-    for (const parent of defaultCategories[kind]) {
-      const [parentRow] = await tx
-        .insert(category)
-        .values({
-          familyId,
-          kind,
-          name: parent.name[locale],
-          icon: parent.icon,
-          keywords: parent.keywords ?? [],
-        })
-        .returning({ id: category.id });
+  for (const parent of defaultCategories) {
+    const [parentRow] = await tx
+      .insert(category)
+      .values({
+        familyId,
+        name: parent.name[locale],
+        icon: parent.icon,
+        keywords: parent.keywords ?? [],
+      })
+      .returning({ id: category.id });
 
-      if (!parentRow || !parent.children?.length) continue;
+    if (!parentRow || !parent.children?.length) continue;
 
-      await tx.insert(category).values(
-        parent.children.map((child) => ({
-          familyId,
-          parentId: parentRow.id,
-          kind,
-          name: child.name[locale],
-          icon: child.icon,
-          keywords: child.keywords ?? [],
-        })),
-      );
-    }
+    await tx.insert(category).values(
+      parent.children.map((child) => ({
+        familyId,
+        parentId: parentRow.id,
+        name: child.name[locale],
+        icon: child.icon,
+        keywords: child.keywords ?? [],
+      })),
+    );
   }
 }
