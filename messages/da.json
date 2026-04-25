@@ -795,5 +795,186 @@
         "body": "Klik på dit navn for at ændre sprog og tema eller administrere familiens medlemmer."
       }
     }
+  },
+  "landing": {
+    "meta": {
+      "title": "Aurum — Familiens økonomi, samlet ét sted",
+      "description": "Aurum samler familiens økonomi ét sted. Konti, budget, opsparing og formue — på dansk."
+    },
+    "nav": {
+      "features": "Funktioner",
+      "pricing": "Priser",
+      "faq": "Spørgsmål",
+      "contact": "Kontakt",
+      "login": "Log ind",
+      "getStarted": "Kom i gang",
+      "goToApp": "Gå til appen"
+    },
+    "hero": {
+      "headlineLead": "Familiens økonomi,",
+      "headlineEm": "samlet",
+      "headlineTrail": " ét sted.",
+      "subhead": "Aurum gør det nemt at holde styr på husholdningen sammen. Konti, budget, opsparing og formue — uden bankforbindelser eller bøvl.",
+      "ctaPrimary": "Kom i gang",
+      "ctaSecondary": "Log ind",
+      "ctaAuthed": "Gå til appen",
+      "scroll": "Rul ned",
+      "demo": {
+        "backDate": "24. apr. 2026",
+        "budgetTitle": "Budget · April 2026",
+        "budgetCategory": "Dagligvarer",
+        "budgetSpent": "6.320 kr.",
+        "budgetPlanned": "af 8.000 kr.",
+        "budgetDelta": "−1.680 kr.",
+        "budgetCaption": "79 % brugt · 5 dage tilbage",
+        "txnTitle": "Seneste",
+        "txnRow1Name": "REMA 1000 · Frederiksberg",
+        "txnRow1Cat": "Dagligvarer",
+        "txnRow1Amount": "−486 kr.",
+        "txnRow2Name": "Løn — april",
+        "txnRow2Cat": "Indkomst",
+        "txnRow2Amount": "+21.793 kr."
+      }
+    },
+    "features": {
+      "marker": "§ Funktioner",
+      "heading": "Sådan bruger I Aurum.",
+      "lead": "Fem værktøjer der arbejder sammen — alt det I har brug for, samlet ét sted.",
+      "items": {
+        "budget": {
+          "eyebrow": "§ Årsbudget",
+          "headline": "Et helt år, fordelt over tolv måneder.",
+          "body": "Læg budgettet for hele året. Aurum fordeler det ud på månederne — månedligt, kvartalsvis, halvårligt eller årligt. Den aktuelle måned står altid i fokus."
+        },
+        "family": {
+          "eyebrow": "§ Familie",
+          "headline": "Hele familien, samme tal.",
+          "body": "Inviter din partner eller resten af husstanden. I ser alle de samme tal og kan tage beslutninger sammen."
+        },
+        "transactions": {
+          "eyebrow": "§ Transaktioner",
+          "headline": "Hold styr på posteringer.",
+          "body": "Importér via CSV eller indtast manuelt. Aurum foreslår kategorier ud fra dine tidligere posteringer."
+        },
+        "challenges": {
+          "eyebrow": "§ Udfordringer",
+          "headline": "Sæt små mål undervejs.",
+          "body": "Sæt en grænse for en uge eller en måned. Aurum holder øje med, hvor langt I er, og giver besked, hvis I nærmer jer grænsen."
+        },
+        "networth": {
+          "eyebrow": "§ Formue",
+          "headline": "Få overblik over formuen.",
+          "body": "Konti plus aktiver minus gæld. Aurum samler tallene og viser udviklingen måned for måned."
+        }
+      }
+    },
+    "pricing": {
+      "marker": "§ Priser",
+      "heading": "Priser der er til at forstå.",
+      "lead": "Vælg den plan, der passer jer. Skift når som helst.",
+      "toggle": {
+        "monthly": "Månedlig",
+        "annual": "Årlig",
+        "savings": "Spar 20 %"
+      },
+      "perMonth": "kr./md.",
+      "billedAnnually": "Faktureres årligt",
+      "billedMonthly": "Faktureres månedligt",
+      "recommended": "Anbefalet",
+      "cta": "Kom i gang",
+      "ctaAuthed": "Gå til appen",
+      "plans": {
+        "free": {
+          "name": "Personlig",
+          "tagline": "For dig selv.",
+          "price": "0",
+          "priceAnnual": "0",
+          "features": [
+            "1 medlem",
+            "2 konti",
+            "Manuel registrering",
+            "CSV-import",
+            "Månedsbudget"
+          ]
+        },
+        "pro": {
+          "name": "Familie",
+          "tagline": "For jer der bor sammen.",
+          "price": "49",
+          "priceAnnual": "39",
+          "features": [
+            "Hele familien",
+            "Ubegrænsede konti",
+            "Årsbudget med udfordringer",
+            "Gæld og aktiver",
+            "Formueopgørelse",
+            "Indkomstplanlægger",
+            "Auto-kategorisering"
+          ]
+        }
+      }
+    },
+    "faq": {
+      "marker": "§ Spørgsmål",
+      "heading": "Ofte stillede spørgsmål.",
+      "items": [
+        {
+          "q": "Hvordan beskytter I mine data?",
+          "a": "Aurum hostes i EU og bruger kun værktøjer, der overholder GDPR. Dine oplysninger forlader aldrig kontinentet."
+        },
+        {
+          "q": "Hvilke valutaer understøttes?",
+          "a": "Danske kroner i denne udgave. Flere valutaer er på vej."
+        },
+        {
+          "q": "Er der en gratis prøveperiode?",
+          "a": "Personlig-planen er gratis for altid. Familie kan prøves uden binding."
+        },
+        {
+          "q": "Hvor mange familiemedlemmer kan jeg invitere?",
+          "a": "På Familie-planen er der ingen grænse. Personlig er kun til dig selv."
+        },
+        {
+          "q": "Hvordan logger jeg ind?",
+          "a": "Med en engangskode på e-mail. Ingen adgangskoder at huske eller miste."
+        },
+        {
+          "q": "Kan jeg opsige når som helst?",
+          "a": "Ja. Månedlig fakturering. Sig op i indstillingerne, og dine data bliver hos dig."
+        },
+        {
+          "q": "Hvilke sprog understøttes?",
+          "a": "Dansk og engelsk. Sproget følger din profil — ikke din browser."
+        }
+      ]
+    },
+    "contact": {
+      "marker": "§ Kontakt",
+      "heading": "Har du et spørgsmål?",
+      "lead": "Skriv til os — vi læser med og svarer som regel inden for et par dage.",
+      "fields": {
+        "name": "Navn",
+        "email": "E-mail",
+        "message": "Besked",
+        "namePlaceholder": "Dit navn",
+        "emailPlaceholder": "din@email.dk",
+        "messagePlaceholder": "Hvad har du på hjerte?"
+      },
+      "submit": "Send besked",
+      "submitting": "Sender …",
+      "success": "Tak — vi har modtaget din besked og vender tilbage hurtigst muligt.",
+      "error": "Noget gik galt. Prøv igen om lidt."
+    },
+    "footer": {
+      "tagline": "Familiens økonomi, samlet ét sted.",
+      "mapTitle": "§ Sider",
+      "links": {
+        "features": "Funktioner",
+        "pricing": "Priser",
+        "faq": "Spørgsmål",
+        "contact": "Kontakt"
+      },
+      "colophon": "Aurum · © 2026 · Danmark"
+    }
   }
 }

@@ -7,7 +7,9 @@ const authRequiredPaths = ["/welcome"];
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const isPublic = publicPaths.some((path) => pathname.startsWith(path));
+  const isPublic =
+    pathname === "/" ||
+    publicPaths.some((path) => pathname.startsWith(path));
   const isAuthRequired = authRequiredPaths.some((path) => pathname.startsWith(path));
   const hasSession = !!getSessionCookie(request);
 
