@@ -79,9 +79,6 @@ export const financialAccountRelations = relations(
     }),
     accessList: many(financialAccountAccess),
     transactions: many(transaction, { relationName: "accountTransactions" }),
-    transferTransactions: many(transaction, {
-      relationName: "transferTransactions",
-    }),
   }),
 );
 

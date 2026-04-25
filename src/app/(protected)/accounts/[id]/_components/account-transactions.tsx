@@ -6,6 +6,7 @@ import { format, parse } from "date-fns";
 import { da, enUS } from "date-fns/locale";
 import {
   ArrowLeftRight,
+  Link2,
   MoreHorizontal,
   Pencil,
   Trash2,
@@ -85,7 +86,7 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
     type:
       typeFilter === ALL
         ? undefined
-        : (typeFilter as "expense" | "income" | "transfer"),
+        : (typeFilter as "expense" | "income"),
     search: debouncedSearch || undefined,
   });
   const transactions = data?.items;
@@ -135,7 +136,6 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
               <SelectItem value={ALL}>{t("allTypes")}</SelectItem>
               <SelectItem value="expense">{t("expense")}</SelectItem>
               <SelectItem value="income">{t("income")}</SelectItem>
-              <SelectItem value="transfer">{t("transfer")}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -196,43 +196,31 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
                   ? categoryMap.get(tx.categoryId)
                   : null;
                 const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
-                // A transfer showing up here is either outgoing (accountId === this)
-                // or incoming (transferAccountId === this). Flip the sign accordingly.
-                const isIncomingTransfer =
-                  tx.type === "transfer" && tx.transferAccountId === accountId;
-                const transferAccount = tx.transferAccountId
-                  ? accountMap.get(
-                      isIncomingTransfer ? tx.accountId : tx.transferAccountId,
-                    )
-                  : null;
-                const sign =
-                  tx.type === "expense"
-                    ? -1
-                    : tx.type === "income"
-                      ? 1
-                      : isIncomingTransfer
-                        ? 1
-                        : -1;
+                const sign = tx.type === "expense" ? -1 : 1;
                 return (
                   <TableRow key={tx.id}>
                     <TableCell className="whitespace-nowrap text-muted-foreground">
                       {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
                     </TableCell>
                     <TableCell>
-                      <p className="font-medium text-foreground">
-                        {tx.description}
-                      </p>
-                      {tx.note && (
-                        <p className="text-xs text-muted-foreground">
-                          {tx.note}
-                        </p>
-                      )}
-                      {tx.type === "transfer" && transferAccount && (
-                        <p className="text-xs text-muted-foreground">
-                          {isIncomingTransfer ? "← " : "→ "}
-                          {transferAccount.name}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        {tx.transferGroupId && (
+                          <Link2
+                            className="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                            aria-label={t("linkedTransaction")}
+                          />
+                        )}
+                        <div>
+                          <p className="font-medium text-foreground">
+                            {tx.description}
+                          </p>
+                          {tx.note && (
+                            <p className="text-xs text-muted-foreground">
+                              {tx.note}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {category ? (
@@ -251,11 +239,9 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
                         "whitespace-nowrap text-right font-medium",
                         tx.type === "expense" && "text-expense",
                         tx.type === "income" && "text-income",
-                        tx.type === "transfer" && "text-savings",
                       )}
                     >
-                      {sign === -1 && "-"}
-                      {sign === 1 && "+"}
+                      {sign === -1 ? "-" : "+"}
                       {formatAmount(tx.amount)}
                     </TableCell>
                     <TableCell>

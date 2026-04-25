@@ -37,10 +37,9 @@ describe("resolveRows", () => {
     );
     expect(result.matched).toHaveLength(0);
     expect(result.skipped).toBe(1);
-    expect(result.mirroredSkipped).toBe(0);
   });
 
-  it("classifies outgoing to an internal account as a transfer", () => {
+  it("classifies outgoing rows as expense regardless of counter account", () => {
     const result = resolveRows(
       [
         makeRow({
@@ -55,13 +54,14 @@ describe("resolveRows", () => {
     expect(result.matched).toHaveLength(1);
     expect(result.matched[0]).toMatchObject({
       accountId: "acct-salary",
-      type: "transfer",
-      transferAccountId: "acct-joint",
+      type: "expense",
       amount: 58000,
     });
+    // No mirror in batch — left unlinked.
+    expect(result.matched[0]?.transferGroupId).toBeUndefined();
   });
 
-  it("classifies outgoing to an external counter as an expense", () => {
+  it("classifies outgoing to an external counter as expense without a group", () => {
     const result = resolveRows(
       [
         makeRow({
@@ -74,10 +74,10 @@ describe("resolveRows", () => {
       accountIds,
     );
     expect(result.matched[0]?.type).toBe("expense");
-    expect(result.matched[0]?.transferAccountId).toBeUndefined();
+    expect(result.matched[0]?.transferGroupId).toBeUndefined();
   });
 
-  it("classifies incoming with empty counter as income when no matching transfer exists", () => {
+  it("classifies incoming rows as income, unlinked when no mirror is present", () => {
     const result = resolveRows(
       [
         makeRow({
@@ -91,10 +91,10 @@ describe("resolveRows", () => {
       accountIds,
     );
     expect(result.matched[0]?.type).toBe("income");
-    expect(result.mirroredSkipped).toBe(0);
+    expect(result.matched[0]?.transferGroupId).toBeUndefined();
   });
 
-  it("drops the incoming mirror of an internal transfer in the same batch", () => {
+  it("links the outgoing and incoming halves of an internal transfer with a shared group id", () => {
     const result = resolveRows(
       [
         makeRow({
@@ -116,13 +116,16 @@ describe("resolveRows", () => {
       ],
       accountIds,
     );
-    expect(result.matched).toHaveLength(1);
-    expect(result.matched[0]?.type).toBe("transfer");
-    expect(result.matched[0]?.transferAccountId).toBe("acct-salary");
-    expect(result.mirroredSkipped).toBe(1);
+    expect(result.matched).toHaveLength(2);
+    const out = result.matched.find((r) => r.type === "expense")!;
+    const inc = result.matched.find((r) => r.type === "income")!;
+    expect(out.accountId).toBe("acct-joint");
+    expect(inc.accountId).toBe("acct-salary");
+    expect(out.transferGroupId).toBeDefined();
+    expect(out.transferGroupId).toBe(inc.transferGroupId);
   });
 
-  it("handles mirror detection regardless of row order", () => {
+  it("links transfers regardless of row order", () => {
     const result = resolveRows(
       [
         makeRow({
@@ -142,12 +145,13 @@ describe("resolveRows", () => {
       ],
       accountIds,
     );
-    expect(result.matched).toHaveLength(1);
-    expect(result.matched[0]?.type).toBe("transfer");
-    expect(result.mirroredSkipped).toBe(1);
+    expect(result.matched).toHaveLength(2);
+    const groupIds = new Set(result.matched.map((r) => r.transferGroupId));
+    expect(groupIds.size).toBe(1);
+    expect([...groupIds][0]).toBeDefined();
   });
 
-  it("consumes each outgoing transfer at most once", () => {
+  it("pairs each outgoing transfer with at most one incoming row", () => {
     const result = resolveRows(
       [
         makeRow({
@@ -174,14 +178,23 @@ describe("resolveRows", () => {
       ],
       accountIds,
     );
-    const transfers = result.matched.filter((r) => r.type === "transfer");
-    const incomes = result.matched.filter((r) => r.type === "income");
-    expect(transfers).toHaveLength(1);
-    expect(incomes).toHaveLength(1);
-    expect(result.mirroredSkipped).toBe(1);
+    expect(result.matched).toHaveLength(3);
+    const expenseRows = result.matched.filter((r) => r.type === "expense");
+    const linkedIncomeRows = result.matched.filter(
+      (r) => r.type === "income" && r.transferGroupId,
+    );
+    const unlinkedIncomeRows = result.matched.filter(
+      (r) => r.type === "income" && !r.transferGroupId,
+    );
+    expect(expenseRows).toHaveLength(1);
+    expect(linkedIncomeRows).toHaveLength(1);
+    expect(unlinkedIncomeRows).toHaveLength(1);
+    expect(expenseRows[0]?.transferGroupId).toBe(
+      linkedIncomeRows[0]?.transferGroupId,
+    );
   });
 
-  it("does not treat an incoming row with a populated external counter as a mirror", () => {
+  it("does not link an incoming row whose counter is external", () => {
     const result = resolveRows(
       [
         makeRow({
@@ -200,10 +213,15 @@ describe("resolveRows", () => {
       accountIds,
     );
     expect(result.matched).toHaveLength(2);
-    expect(result.mirroredSkipped).toBe(0);
+    // Outgoing partner exists on acct-salary so the link still forms — the
+    // incoming row's external counter doesn't disqualify it from being a
+    // mirror because the outgoing side already names the destination.
+    const groupIds = new Set(result.matched.map((r) => r.transferGroupId));
+    expect(groupIds.size).toBe(1);
+    expect([...groupIds][0]).toBeDefined();
   });
 
-  it("does not mirror-match when date or amount differ", () => {
+  it("does not link when date or amount differ", () => {
     const result = resolveRows(
       [
         makeRow({
@@ -224,6 +242,8 @@ describe("resolveRows", () => {
       accountIds,
     );
     expect(result.matched).toHaveLength(2);
-    expect(result.mirroredSkipped).toBe(0);
+    for (const row of result.matched) {
+      expect(row.transferGroupId).toBeUndefined();
+    }
   });
 });

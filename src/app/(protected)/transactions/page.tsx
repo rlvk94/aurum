@@ -6,6 +6,7 @@ import { format, parse } from "date-fns";
 import { da, enUS } from "date-fns/locale";
 import {
   ArrowLeftRight,
+  Link2,
   Plus,
   Upload,
   MoreHorizontal,
@@ -95,7 +96,7 @@ export default function TransactionsPage() {
       type:
         typeFilter === ALL
           ? undefined
-          : (typeFilter as "expense" | "income" | "transfer"),
+          : (typeFilter as "expense" | "income"),
       categoryIds: categoryFilter
         .filter((v) => v !== UNCATEGORIZED_SENTINEL)
         .filter((v) => v.length > 0),
@@ -191,7 +192,6 @@ export default function TransactionsPage() {
             <SelectItem value={ALL}>{t("allTypes")}</SelectItem>
             <SelectItem value="expense">{t("expense")}</SelectItem>
             <SelectItem value="income">{t("income")}</SelectItem>
-            <SelectItem value="transfer">{t("transfer")}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -263,71 +263,65 @@ export default function TransactionsPage() {
             <TableBody>
               {transactions.map((tx) => {
                 const account = accountMap.get(tx.accountId);
-                const transferAccount = tx.transferAccountId
-                  ? accountMap.get(tx.transferAccountId)
-                  : null;
                 const category = tx.categoryId
                   ? categoryMap.get(tx.categoryId)
                   : null;
                 const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
-                const sign =
-                  tx.type === "expense" ? -1 : tx.type === "income" ? 1 : 0;
+                const sign = tx.type === "expense" ? -1 : 1;
                 return (
                   <TableRow key={tx.id}>
                     <TableCell className="text-muted-foreground whitespace-nowrap">
                       {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
                     </TableCell>
                     <TableCell>
-                      <p className="text-foreground font-medium">
-                        {tx.description}
-                      </p>
-                      {tx.note && (
-                        <p className="text-muted-foreground text-xs">
-                          {tx.note}
-                        </p>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        {tx.transferGroupId && (
+                          <Link2
+                            className="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                            aria-label={t("linkedTransaction")}
+                          />
+                        )}
+                        <div>
+                          <p className="text-foreground font-medium">
+                            {tx.description}
+                          </p>
+                          {tx.note && (
+                            <p className="text-muted-foreground text-xs">
+                              {tx.note}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell>
-                      {tx.type === "transfer" ? (
-                        <span className="text-muted-foreground text-xs">—</span>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={() => setQuickAssign(tx)}
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
-                        >
-                          {category ? (
-                            <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5">
-                              {category.icon && <span>{category.icon}</span>}
-                              {category.name}
-                            </span>
-                          ) : (
-                            <span className="border-dashed border-muted-foreground/40 text-muted-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
-                              + {t("uncategorizedFilter")}
-                            </span>
-                          )}
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => setQuickAssign(tx)}
+                        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
+                      >
+                        {category ? (
+                          <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5">
+                            {category.icon && <span>{category.icon}</span>}
+                            {category.name}
+                          </span>
+                        ) : (
+                          <span className="border-dashed border-muted-foreground/40 text-muted-foreground inline-flex items-center gap-1 rounded-full border px-2 py-0.5">
+                            + {t("uncategorizedFilter")}
+                          </span>
+                        )}
+                      </button>
                     </TableCell>
                     <TableCell className="text-muted-foreground">
                       {account?.name ?? "—"}
-                      {transferAccount && (
-                        <span className="text-xs">
-                          {" → "}
-                          {transferAccount.name}
-                        </span>
-                      )}
                     </TableCell>
                     <TableCell
                       className={cn(
                         "text-right font-medium whitespace-nowrap",
                         tx.type === "expense" && "text-expense",
                         tx.type === "income" && "text-income",
-                        tx.type === "transfer" && "text-savings",
                       )}
                     >
-                      {sign === -1 && "-"}
-                      {sign === 1 && "+"}
+                      {sign === -1 ? "-" : "+"}
                       {formatAmount(tx.amount)}
                     </TableCell>
                     <TableCell>

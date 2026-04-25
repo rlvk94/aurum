@@ -242,11 +242,9 @@ export function DashboardClient() {
                           "whitespace-nowrap font-medium",
                           tx.type === "expense" && "text-expense",
                           tx.type === "income" && "text-income",
-                          tx.type === "transfer" && "text-savings",
                         )}
                       >
-                        {tx.type === "expense" && "-"}
-                        {tx.type === "income" && "+"}
+                        {tx.type === "expense" ? "-" : "+"}
                         {formatAmount(tx.amount)}
                       </span>
                     </div>

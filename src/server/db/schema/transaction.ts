@@ -20,7 +20,6 @@ import { financialAccount } from "./financial-account";
 export const transactionTypeEnum = pgEnum("transaction_type", [
   "expense",
   "income",
-  "transfer",
 ]);
 
 // ── Tables ──────────────────────────────────────────────────────────────────
@@ -35,10 +34,7 @@ export const transaction = pgTable(
     accountId: uuid("account_id")
       .notNull()
       .references(() => financialAccount.id, { onDelete: "cascade" }),
-    transferAccountId: uuid("transfer_account_id").references(
-      () => financialAccount.id,
-      { onDelete: "set null" },
-    ),
+    transferGroupId: uuid("transfer_group_id"),
     categoryId: uuid("category_id").references(() => category.id, {
       onDelete: "set null",
     }),
@@ -74,6 +70,9 @@ export const transaction = pgTable(
       table.createdAt.desc(),
       table.id.desc(),
     ),
+    index("transaction_transfer_group_idx")
+      .on(table.transferGroupId)
+      .where(sql`${table.transferGroupId} IS NOT NULL`),
   ],
 );
 
@@ -88,11 +87,6 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
     fields: [transaction.accountId],
     references: [financialAccount.id],
     relationName: "accountTransactions",
-  }),
-  transferAccount: one(financialAccount, {
-    fields: [transaction.transferAccountId],
-    references: [financialAccount.id],
-    relationName: "transferTransactions",
   }),
   category: one(category, {
     fields: [transaction.categoryId],
