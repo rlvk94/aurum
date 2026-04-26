@@ -163,6 +163,7 @@ async function aggregateProjects(
       and(
         inArray(transaction.projectId, projectIds),
         inArray(transaction.accountId, accessibleAccountIds),
+        eq(transaction.excludedFromCalculations, false),
       ),
     )
     .groupBy(transaction.projectId, transaction.type);
@@ -196,6 +197,7 @@ async function aggregateProjects(
         inArray(transaction.projectId, projectIds),
         inArray(transaction.accountId, accessibleAccountIds),
         eq(transaction.type, "expense"),
+        eq(transaction.excludedFromCalculations, false),
       ),
     )
     .groupBy(transaction.projectId, transaction.categoryId);
@@ -293,6 +295,7 @@ export const projectRouter = createTRPCRouter({
                 and(
                   eq(transaction.projectId, row.id),
                   inArray(transaction.accountId, accessible),
+                  eq(transaction.excludedFromCalculations, false),
                 ),
               )
               .groupBy(transaction.categoryId);
@@ -312,6 +315,7 @@ export const projectRouter = createTRPCRouter({
                 and(
                   eq(transaction.projectId, row.id),
                   inArray(transaction.accountId, accessible),
+                  eq(transaction.excludedFromCalculations, false),
                 ),
               )
               .groupBy(transaction.accountId);
@@ -326,6 +330,7 @@ export const projectRouter = createTRPCRouter({
                 and(
                   eq(transaction.projectId, row.id),
                   inArray(transaction.accountId, accessible),
+                  eq(transaction.excludedFromCalculations, false),
                 ),
               )
               .orderBy(

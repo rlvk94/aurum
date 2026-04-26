@@ -38,6 +38,7 @@ import {
   SelectValue,
 } from "~/app/_components/select";
 import { RadioGroup, RadioGroupItem } from "~/app/_components/radio-group";
+import { Checkbox } from "~/app/_components/checkbox";
 import posthog from "posthog-js";
 import { CategorySelect } from "~/app/_components/category-select";
 import { cn } from "~/app/_lib/utils";
@@ -82,6 +83,7 @@ const transactionFormSchema = z.object({
   note: z.string(),
   categoryId: z.string(),
   projectId: z.string(),
+  excludedFromCalculations: z.boolean(),
 });
 
 function today(): string {
@@ -151,6 +153,7 @@ export function TransactionFormDialog({
       note: transaction?.note ?? "",
       categoryId: transaction?.categoryId ?? "",
       projectId: transaction?.projectId ?? "",
+      excludedFromCalculations: transaction?.excludedFromCalculations ?? false,
     },
     validators: {
       onSubmit: transactionFormSchema,
@@ -170,6 +173,7 @@ export function TransactionFormDialog({
           note: trimmedNote || null,
           categoryId,
           projectId,
+          excludedFromCalculations: value.excludedFromCalculations,
         });
       } else {
         createTx.mutate({
@@ -181,6 +185,7 @@ export function TransactionFormDialog({
           note: trimmedNote || undefined,
           categoryId: categoryId ?? undefined,
           projectId,
+          excludedFromCalculations: value.excludedFromCalculations,
         });
       }
     },
@@ -455,6 +460,30 @@ export function TransactionFormDialog({
                     onChange={(e) => field.handleChange(e.target.value)}
                     placeholder={t("notePlaceholder")}
                   />
+                </Field>
+              )}
+            />
+
+            <form.Field
+              name="excludedFromCalculations"
+              children={(field) => (
+                <Field>
+                  <div className="flex items-start gap-3">
+                    <Checkbox
+                      id={field.name}
+                      checked={field.state.value}
+                      onCheckedChange={(v) => field.handleChange(v === true)}
+                      className="mt-0.5"
+                    />
+                    <div className="space-y-0.5">
+                      <FieldLabel htmlFor={field.name}>
+                        {t("excludedFromCalculationsLabel")}
+                      </FieldLabel>
+                      <p className="text-muted-foreground text-xs">
+                        {t("excludedFromCalculationsHelp")}
+                      </p>
+                    </div>
+                  </div>
                 </Field>
               )}
             />

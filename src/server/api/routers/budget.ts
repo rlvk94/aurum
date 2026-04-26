@@ -149,6 +149,7 @@ async function fetchActualsByCategory(
   const filters = [
     eq(transaction.familyId, familyId),
     inArray(transaction.categoryId, allTxCategoryIds),
+    eq(transaction.excludedFromCalculations, false),
     gte(transaction.date, `${year}-01-01`),
     lt(transaction.date, `${year + 1}-01-01`),
   ];

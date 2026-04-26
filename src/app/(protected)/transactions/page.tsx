@@ -3,10 +3,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
+import { useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { format, parse } from "date-fns";
 import { da, enUS } from "date-fns/locale";
 import {
   ArrowLeftRight,
+  Eye,
+  EyeOff,
   FolderHeart,
   Link2,
   Plus,
@@ -16,6 +19,12 @@ import {
   Trash2,
   Search,
 } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "~/app/_components/tooltip";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
 import { EmptyState } from "~/app/_components/empty-state";
@@ -176,9 +185,57 @@ export default function TransactionsPage() {
     },
   });
 
+  const queryClient = useQueryClient();
+  type ListPage = { items: Transaction[]; nextCursor: unknown };
+  type InfiniteData = { pages: ListPage[]; pageParams: unknown[] };
+  const transactionListKey: QueryKey = [["transaction", "list"]];
+
+  const toggleExclusion = api.transaction.update.useMutation({
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: transactionListKey });
+      const snapshot = queryClient.getQueriesData<InfiniteData>({
+        queryKey: transactionListKey,
+      });
+      queryClient.setQueriesData<InfiniteData>(
+        { queryKey: transactionListKey },
+        (old) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((item) =>
+                item.id === variables.id
+                  ? {
+                      ...item,
+                      excludedFromCalculations:
+                        variables.excludedFromCalculations ?? false,
+                    }
+                  : item,
+              ),
+            })),
+          };
+        },
+      );
+      return { snapshot };
+    },
+    onError: (_err, _vars, ctx) => {
+      if (!ctx?.snapshot) return;
+      for (const [key, data] of ctx.snapshot) {
+        queryClient.setQueryData(key, data);
+      }
+    },
+    onSettled: () => {
+      void utils.transaction.list.invalidate();
+      void utils.budget.list.invalidate();
+      void utils.project.list.invalidate();
+    },
+  });
+
   const hasAccounts = accounts.length > 0;
 
   return (
+    <TooltipProvider delayDuration={200}>
     <div className="space-y-6">
       <PageHeader
         title={t("title")}
@@ -366,7 +423,12 @@ export default function TransactionsPage() {
                   const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
                   const sign = tx.type === "expense" ? -1 : 1;
                   return (
-                    <TableRow key={tx.id}>
+                    <TableRow
+                      key={tx.id}
+                      className={cn(
+                        tx.excludedFromCalculations && "opacity-60",
+                      )}
+                    >
                       <TableCell className="text-muted-foreground whitespace-nowrap">
                         {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
                       </TableCell>
@@ -388,6 +450,19 @@ export default function TransactionsPage() {
                               </p>
                             )}
                           </div>
+                          {tx.excludedFromCalculations && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span className="border-border text-muted-foreground inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                                  <EyeOff className="h-3 w-3" aria-hidden />
+                                  {t("excludedBadge")}
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent className="max-w-xs">
+                                {t("excludedTooltip")}
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -477,6 +552,24 @@ export default function TransactionsPage() {
                               </DropdownMenuItem>
                             )}
                             <DropdownMenuItem
+                              onClick={() =>
+                                toggleExclusion.mutate({
+                                  id: tx.id,
+                                  excludedFromCalculations:
+                                    !tx.excludedFromCalculations,
+                                })
+                              }
+                            >
+                              {tx.excludedFromCalculations ? (
+                                <Eye />
+                              ) : (
+                                <EyeOff />
+                              )}
+                              {tx.excludedFromCalculations
+                                ? t("includeAction")
+                                : t("excludeAction")}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => deleteTx.mutate({ id: tx.id })}
                             >
@@ -508,7 +601,10 @@ export default function TransactionsPage() {
               return (
                 <li
                   key={tx.id}
-                  className="rounded-lg border border-border bg-card p-3 shadow-card"
+                  className={cn(
+                    "rounded-lg border border-border bg-card p-3 shadow-card",
+                    tx.excludedFromCalculations && "opacity-60",
+                  )}
                 >
                   <div className="flex items-start gap-2">
                     <div className="min-w-0 flex-1">
@@ -592,6 +688,19 @@ export default function TransactionsPage() {
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {tx.excludedFromCalculations && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="border-border text-muted-foreground inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                            <EyeOff className="h-3 w-3" aria-hidden />
+                            {t("excludedBadge")}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent className="max-w-xs">
+                          {t("excludedTooltip")}
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                     <button
                       type="button"
                       onClick={() => setQuickAssign(tx)}
@@ -685,5 +794,6 @@ export default function TransactionsPage() {
         />
       )}
     </div>
+    </TooltipProvider>
   );
 }
