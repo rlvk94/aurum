@@ -282,7 +282,13 @@
     "pickDate": "Vælg dato",
     "emptyState": "Ingen transaktioner endnu. Tilføj din første transaktion eller importér en CSV-fil.",
     "loadMore": "Indlæs flere",
-    "importFailed": "Import mislykkedes. Kontrollér filen og prøv igen."
+    "importFailed": "Import mislykkedes. Kontrollér filen og prøv igen.",
+    "excludedBadge": "Ekskluderet",
+    "excludedTooltip": "Denne transaktion tæller ikke med i budgetter, udfordringer, projekter eller andre beregninger. Den vises stadig på din kontosaldo.",
+    "excludedFromCalculationsLabel": "Ekskludér fra beregninger",
+    "excludedFromCalculationsHelp": "Skjul fra budgetter, udfordringer, projekter og rapporter. Påvirker ikke kontosaldoen.",
+    "excludeAction": "Ekskludér fra beregninger",
+    "includeAction": "Medregn igen"
   },
   "budgets": {
     "title": "Budgetter",

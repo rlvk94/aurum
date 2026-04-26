@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   date,
   index,
   integer,
@@ -47,6 +48,9 @@ export const transaction = pgTable(
     date: date("date", { mode: "string" }).notNull(),
     description: text("description").notNull(),
     note: text("note"),
+    excludedFromCalculations: boolean("excluded_from_calculations")
+      .default(false)
+      .notNull(),
     /**
      * Extra fields from source data (e.g. CSV payer, supplementary text).
      * Used for rule matching but not displayed in the UI.

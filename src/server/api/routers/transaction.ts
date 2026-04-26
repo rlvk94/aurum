@@ -147,6 +147,7 @@ export const transactionRouter = createTRPCRouter({
           eq(transaction.familyId, familyId),
           inArray(transaction.accountId, accessibleIds),
           eq(transaction.type, "expense"),
+          eq(transaction.excludedFromCalculations, false),
           gte(transaction.date, from),
           lte(transaction.date, to),
         ),
@@ -311,6 +312,7 @@ export const transactionRouter = createTRPCRouter({
         transferGroupId: z.string().uuid().optional(),
         categoryId: z.string().uuid().optional(),
         projectId: z.string().uuid().nullable().optional(),
+        excludedFromCalculations: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -339,6 +341,7 @@ export const transactionRouter = createTRPCRouter({
           note: input.note ?? null,
           categoryId: input.categoryId ?? null,
           projectId: input.projectId ?? null,
+          excludedFromCalculations: input.excludedFromCalculations ?? false,
         })
         .returning();
 
@@ -469,6 +472,7 @@ export const transactionRouter = createTRPCRouter({
         transferGroupId: z.string().uuid().nullable().optional(),
         categoryId: z.string().uuid().nullable().optional(),
         projectId: z.string().uuid().nullable().optional(),
+        excludedFromCalculations: z.boolean().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {

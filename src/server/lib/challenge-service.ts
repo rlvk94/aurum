@@ -46,6 +46,7 @@ async function sumExpenseInWindow(
   const conditions = [
     eq(transaction.familyId, familyId),
     inArray(transaction.categoryId, categoryIds),
+    eq(transaction.excludedFromCalculations, false),
     gte(transaction.date, from),
     lte(transaction.date, to),
   ];
@@ -129,6 +130,7 @@ async function accountBalanceDelta(
     .where(
       and(
         eq(transaction.familyId, familyId),
+        eq(transaction.excludedFromCalculations, false),
         gte(transaction.date, from),
         lte(transaction.date, to),
       ),

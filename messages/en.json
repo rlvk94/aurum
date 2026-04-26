@@ -282,7 +282,13 @@
     "pickDate": "Pick a date",
     "emptyState": "No transactions yet. Add your first transaction or import a CSV file.",
     "loadMore": "Load more",
-    "importFailed": "Import failed. Please check the file and try again."
+    "importFailed": "Import failed. Please check the file and try again.",
+    "excludedBadge": "Excluded",
+    "excludedTooltip": "This transaction is not counted in budgets, challenges, projects or any other calculations. It still affects your account balance.",
+    "excludedFromCalculationsLabel": "Exclude from calculations",
+    "excludedFromCalculationsHelp": "Hide from budgets, challenges, projects and reports. Does not affect account balance.",
+    "excludeAction": "Exclude from calculations",
+    "includeAction": "Include in calculations"
   },
   "budgets": {
     "title": "Budgets",
