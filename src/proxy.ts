@@ -1,7 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 
-const publicPaths = ["/login", "/api/auth", "/api/trpc"];
+const publicPaths = [
+  "/login",
+  "/api/auth",
+  "/api/trpc",
+  "/api/stripe",
+  "/api/cron",
+];
 const authRequiredPaths = ["/welcome"];
 
 export function proxy(request: NextRequest) {

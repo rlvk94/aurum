@@ -1160,6 +1160,7 @@
       "nextRenewal": "Next renewal",
       "canceledAt": "Cancels {date}",
       "manageInStripe": "Manage in Stripe",
+      "managePayment": "Manage billing",
       "upgrade": "Upgrade to Family",
       "chooseCadence": "Choose billing",
       "monthly": "Monthly — {price} kr./mo.",
@@ -1171,6 +1172,25 @@
       "familyPlanDescriptionActive": "Active — next renewal {date}",
       "familyPlanDescriptionPastDue": "Payment past due — ends {date}",
       "familyPlanDescriptionCanceled": "Cancels {date}",
+      "cancelSubscription": "Cancel subscription",
+      "resumeSubscription": "Resume subscription",
+      "switchToAnnual": "Switch to annual — save 20%",
+      "switchToMonthly": "Switch to monthly",
+      "switchDialog": {
+        "titleAnnual": "Switch to annual billing",
+        "titleMonthly": "Switch to monthly billing",
+        "bodyAnnual": "You'll be invoiced annually right away. Any remaining value from the current period is prorated automatically.",
+        "bodyMonthly": "You'll be invoiced monthly starting next renewal. Any remaining value is prorated automatically.",
+        "confirm": "Confirm switch",
+        "dismiss": "Cancel"
+      },
+      "cancelDialog": {
+        "title": "Cancel subscription",
+        "body": "You'll keep Family access until {date}. After that, your family reverts to Individual. You can resume any time before then.",
+        "bodyNoDate": "You'll keep Family access until the end of the current period. After that, your family reverts to Individual.",
+        "confirm": "Confirm cancellation",
+        "dismiss": "Keep subscription"
+      },
       "upgradeCard": {
         "eyebrow": "Family",
         "heading": "Get the most out of Aurum",
@@ -1289,7 +1309,18 @@
       "annualPrice": "{price} kr./mo.",
       "annualSubtext": "Billed annually — save 20%",
       "cta": "Continue to payment",
-      "cancel": "Cancel"
+      "back": "Back",
+      "cancel": "Cancel",
+      "paymentTitle": "Payment details",
+      "paymentBody": "Enter your card to activate the Family plan.",
+      "activatingTitle": "Activating subscription…",
+      "activatingBody": "Stay on this page — it takes a few seconds.",
+      "activationTimedOut": "This is taking longer than expected. Try again or contact support."
+    },
+    "paymentForm": {
+      "pay": "Pay and activate",
+      "processing": "Processing…",
+      "genericError": "Payment could not be completed. Please try again."
     },
     "planFeatures": {
       "members1": "1 member",

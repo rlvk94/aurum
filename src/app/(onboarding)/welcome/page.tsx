@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   ArrowRight,
   ArrowLeft,
@@ -19,6 +19,7 @@ import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
 import { PlanCard } from "~/app/_components/billing/plan-card";
+import { PaymentForm } from "~/app/_components/billing/payment-form";
 import { cn } from "~/app/_lib/utils";
 
 type Step = "name" | "language" | "theme" | "family" | "plan";
@@ -75,7 +76,6 @@ export default function WelcomePage() {
   const tCommon = useTranslations("common");
   const tBilling = useTranslations("billing.onboarding");
   const router = useRouter();
-  const searchParams = useSearchParams();
   const currentLocale = useLocale();
   const [direction, setDirection] = useState(1);
   const [name, setName] = useState("");
@@ -89,6 +89,10 @@ export default function WelcomePage() {
   const [activating, setActivating] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
+  const [paymentInfo, setPaymentInfo] = useState<{
+    clientSecret: string;
+    publishableKey: string;
+  } | null>(null);
 
   const { data: onboardingState } = api.user.getOnboardingState.useQuery();
   const { data: families, isLoading: familiesLoading } =
@@ -112,18 +116,11 @@ export default function WelcomePage() {
         onboardingState.onboardingStep,
         steps.length - 1,
       );
-      const checkoutParam = searchParams.get("checkout");
-      const planStepIndex = steps.indexOf("plan");
-      // Land directly on the plan step when returning from Stripe Checkout.
-      if (checkoutParam && planStepIndex >= 0) {
-        setCurrentStepIndex(planStepIndex);
-      } else {
-        setCurrentStepIndex(resumeIndex);
-      }
+      setCurrentStepIndex(resumeIndex);
       setTheme(readThemeCookie());
       setReady(true);
     }
-  }, [onboardingState, steps, ready, searchParams]);
+  }, [onboardingState, steps, ready]);
 
   const updateProfile = api.user.updateProfile.useMutation();
   const completeOnboarding = api.user.completeOnboarding.useMutation({
@@ -139,27 +136,23 @@ export default function WelcomePage() {
     },
   });
   const selectIndividual = api.billing.selectIndividual.useMutation();
-  const createCheckoutSession = api.billing.createCheckoutSession.useMutation();
+  const createSubscription = api.billing.createSubscription.useMutation({
+    onSuccess: ({ clientSecret, publishableKey }) => {
+      setPaymentInfo({ clientSecret, publishableKey });
+    },
+  });
   const billingCurrent = api.billing.current.useQuery(undefined, {
     enabled: ready && currentStep === "plan",
     refetchInterval: activating ? ACTIVATION_POLL_INTERVAL_MS : false,
   });
 
-  const checkoutParam = searchParams.get("checkout");
-  const checkoutCanceled = checkoutParam === "cancel";
-
-  // Kick off polling on return from Stripe success.
-  useEffect(() => {
-    if (checkoutParam === "success" && currentStep === "plan" && !activating) {
-      setActivating(true);
-    }
-  }, [checkoutParam, currentStep, activating]);
-
-  // Once subscription is active, finish onboarding.
+  // Once subscription is active, finish onboarding. Also catches the case
+  // where the user reloads after paying — the polling never started, but the
+  // status is already active.
   const finishedRef = useRef(false);
   useEffect(() => {
     if (
-      activating &&
+      currentStep === "plan" &&
       billingCurrent.data?.status === "active" &&
       !finishedRef.current
     ) {
@@ -167,7 +160,7 @@ export default function WelcomePage() {
       setActivating(false);
       completeOnboarding.mutate();
     }
-  }, [activating, billingCurrent.data, completeOnboarding]);
+  }, [currentStep, billingCurrent.data, completeOnboarding]);
 
   // Activation timeout fallback.
   useEffect(() => {
@@ -186,7 +179,7 @@ export default function WelcomePage() {
     completeOnboarding.isPending ||
     createFamily.isPending ||
     selectIndividual.isPending ||
-    createCheckoutSession.isPending ||
+    createSubscription.isPending ||
     activating;
 
   const error =
@@ -194,14 +187,17 @@ export default function WelcomePage() {
     completeOnboarding.error ??
     createFamily.error ??
     selectIndividual.error ??
-    createCheckoutSession.error;
+    createSubscription.error;
+
+  const showPaymentForm = currentStep === "plan" && paymentInfo !== null;
 
   const canContinue =
-    (currentStep === "name" && name.trim().length > 0) ||
-    currentStep === "language" ||
-    currentStep === "theme" ||
-    (currentStep === "family" && familyName.trim().length > 0) ||
-    (currentStep === "plan" && !activating);
+    !showPaymentForm &&
+    ((currentStep === "name" && name.trim().length > 0) ||
+      currentStep === "language" ||
+      currentStep === "theme" ||
+      (currentStep === "family" && familyName.trim().length > 0) ||
+      (currentStep === "plan" && !activating));
 
   const handleContinue = useCallback(() => {
     const nextIndex = currentStepIndex + 1;
@@ -259,14 +255,7 @@ export default function WelcomePage() {
           onSuccess: () => completeOnboarding.mutate(),
         });
       } else {
-        createCheckoutSession.mutate(
-          { cadence },
-          {
-            onSuccess: ({ url }) => {
-              window.location.href = url;
-            },
-          },
-        );
+        createSubscription.mutate({ cadence });
       }
     }
   }, [
@@ -283,10 +272,14 @@ export default function WelcomePage() {
     completeOnboarding,
     createFamily,
     selectIndividual,
-    createCheckoutSession,
+    createSubscription,
   ]);
 
   const handleBack = useCallback(() => {
+    if (showPaymentForm) {
+      setPaymentInfo(null);
+      return;
+    }
     const prevIndex = Math.max(0, currentStepIndex - 1);
     updateProfile.mutate(
       { onboardingStep: prevIndex },
@@ -297,7 +290,7 @@ export default function WelcomePage() {
         },
       },
     );
-  }, [currentStepIndex, updateProfile]);
+  }, [currentStepIndex, updateProfile, showPaymentForm]);
 
   const handleLocaleChange = useCallback(
     (newLocale: "da" | "en") => {
@@ -323,6 +316,20 @@ export default function WelcomePage() {
     },
     [canContinue, isPending, handleContinue],
   );
+
+  const handlePaymentSuccess = useCallback(() => {
+    setActivating(true);
+    setPaymentInfo(null);
+  }, []);
+
+  const isDark = useMemo(() => {
+    if (typeof document === "undefined") return false;
+    return (
+      theme === "dark" ||
+      (theme === "system" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches)
+    );
+  }, [theme]);
 
   if (!ready) return null;
 
@@ -595,13 +602,27 @@ export default function WelcomePage() {
                         {tBilling("activatingHint")}
                       </div>
                     </div>
-                  ) : (
-                    <>
-                      {checkoutCanceled && (
-                        <p className="mt-6 text-sm text-warning-foreground">
-                          {tBilling("checkoutCanceled")}
+                  ) : showPaymentForm && paymentInfo ? (
+                    <div className="mt-8">
+                      <PaymentForm
+                        clientSecret={paymentInfo.clientSecret}
+                        publishableKey={paymentInfo.publishableKey}
+                        returnUrl={
+                          typeof window !== "undefined"
+                            ? `${window.location.origin}/welcome`
+                            : "/welcome"
+                        }
+                        onSuccess={handlePaymentSuccess}
+                        isDark={isDark}
+                      />
+                      {activationError && (
+                        <p className="mt-4 text-sm text-destructive">
+                          {activationError}
                         </p>
                       )}
+                    </div>
+                  ) : (
+                    <>
                       {activationError && (
                         <p className="mt-6 text-sm text-destructive">
                           {activationError}
@@ -710,7 +731,7 @@ export default function WelcomePage() {
 
       {/* Floating back button — bottom left */}
       <AnimatePresence>
-        {currentStepIndex > 0 && (
+        {(currentStepIndex > 0 || showPaymentForm) && (
           <motion.div
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
@@ -732,41 +753,43 @@ export default function WelcomePage() {
       </AnimatePresence>
 
       {/* Floating continue button — bottom right */}
-      <motion.div
-        initial={{ opacity: 0, y: 16, scale: 0.95 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{
-          duration: 0.5,
-          delay: 0.4,
-          ease: [0.16, 1, 0.3, 1],
-        }}
-        className="fixed bottom-[max(env(safe-area-inset-bottom,0px),1.25rem)] right-4 z-20 sm:bottom-10 sm:right-12"
-      >
-        <Button
-          size="lg"
-          disabled={!canContinue || isPending}
-          onClick={handleContinue}
-          className="h-12 gap-2 rounded-full px-6 shadow-elevated transition-all duration-200 hover:shadow-lg disabled:opacity-40"
+      {!showPaymentForm && (
+        <motion.div
+          initial={{ opacity: 0, y: 16, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{
+            duration: 0.5,
+            delay: 0.4,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+          className="fixed bottom-[max(env(safe-area-inset-bottom,0px),1.25rem)] right-4 z-20 sm:bottom-10 sm:right-12"
         >
-          {isPending ? (
-            <>
-              <Loader2 className="animate-spin" />
-              {tCommon("loading")}
-            </>
-          ) : (
-            <>
-              {currentStep === "plan"
-                ? selectedPlan === "individual"
-                  ? tBilling("individualCta")
-                  : tBilling("familyCta")
-                : currentStepIndex === totalSteps - 1
-                  ? t("getStarted")
-                  : t("continue")}
-              <ArrowRight className="size-4" />
-            </>
-          )}
-        </Button>
-      </motion.div>
+          <Button
+            size="lg"
+            disabled={!canContinue || isPending}
+            onClick={handleContinue}
+            className="h-12 gap-2 rounded-full px-6 shadow-elevated transition-all duration-200 hover:shadow-lg disabled:opacity-40"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="animate-spin" />
+                {tCommon("loading")}
+              </>
+            ) : (
+              <>
+                {currentStep === "plan"
+                  ? selectedPlan === "individual"
+                    ? tBilling("individualCta")
+                    : tBilling("familyCta")
+                  : currentStepIndex === totalSteps - 1
+                    ? t("getStarted")
+                    : t("continue")}
+                <ArrowRight className="size-4" />
+              </>
+            )}
+          </Button>
+        </motion.div>
+      )}
     </>
   );
 }

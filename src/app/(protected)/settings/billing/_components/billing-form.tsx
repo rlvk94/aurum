@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Sparkles } from "lucide-react";
+import { ExternalLink, Sparkles } from "lucide-react";
 
 import { api } from "~/trpc/react";
 import { PageHeader } from "~/app/_components/page-header";
@@ -14,6 +14,14 @@ import {
   CardHeader,
   CardTitle,
 } from "~/app/_components/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/app/_components/dialog";
 import { CadenceDialog } from "~/app/_components/billing/cadence-dialog";
 import { PLAN_DISPLAY_BULLETS } from "~/server/billing/plans";
 
@@ -40,6 +48,8 @@ export function BillingForm() {
   const { data: billing, isLoading } = api.billing.current.useQuery();
 
   const [cadenceOpen, setCadenceOpen] = useState(false);
+  const [cancelOpen, setCancelOpen] = useState(false);
+  const [switchCadenceOpen, setSwitchCadenceOpen] = useState(false);
 
   const portal = api.billing.createPortalSession.useMutation({
     onSuccess: ({ url }) => {
@@ -51,6 +61,26 @@ export function BillingForm() {
       void utils.billing.current.invalidate();
     },
   });
+  const cancelSubscription = api.billing.cancelSubscription.useMutation({
+    onSuccess: () => {
+      setCancelOpen(false);
+      void utils.billing.current.invalidate();
+    },
+  });
+  const resumeSubscription = api.billing.resumeSubscription.useMutation({
+    onSuccess: () => {
+      void utils.billing.current.invalidate();
+    },
+  });
+  const changeCadence = api.billing.changeCadence.useMutation({
+    onSuccess: () => {
+      setSwitchCadenceOpen(false);
+      void utils.billing.current.invalidate();
+    },
+  });
+
+  const targetCadence: "monthly" | "annual" =
+    billing?.cadence === "annual" ? "monthly" : "annual";
 
   const planLabel =
     billing?.plan === "family"
@@ -104,21 +134,133 @@ export function BillingForm() {
               </div>
             )}
           </div>
+
+          {billing?.plan === "family" &&
+            billing.cadence &&
+            billing.status === "active" &&
+            !billing.cancelAtPeriodEnd && (
+              <button
+                type="button"
+                onClick={() => setSwitchCadenceOpen(true)}
+                className="text-xs text-primary underline-offset-4 hover:underline"
+              >
+                {targetCadence === "annual"
+                  ? t("switchToAnnual")
+                  : t("switchToMonthly")}
+              </button>
+            )}
         </CardContent>
       </Card>
 
-      {billing?.plan === "family" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">{t("manageInStripe")}</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => portal.mutate()} disabled={portal.isPending}>
-              {portal.isPending ? tCommon("loading") : t("manageInStripe")}
+      {billing?.plan === "family" && billing.stripeSubscriptionId && (
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {billing.cancelAtPeriodEnd ? (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => resumeSubscription.mutate()}
+              disabled={resumeSubscription.isPending}
+            >
+              {resumeSubscription.isPending
+                ? tCommon("loading")
+                : t("resumeSubscription")}
             </Button>
-          </CardContent>
-        </Card>
+          ) : (
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => setCancelOpen(true)}
+            >
+              {t("cancelSubscription")}
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            className="flex-1"
+            onClick={() => portal.mutate()}
+            disabled={portal.isPending}
+          >
+            {portal.isPending ? tCommon("loading") : t("managePayment")}
+            <ExternalLink className="ml-1" />
+          </Button>
+        </div>
       )}
+
+      <Dialog open={switchCadenceOpen} onOpenChange={setSwitchCadenceOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>
+              {targetCadence === "annual"
+                ? t("switchDialog.titleAnnual")
+                : t("switchDialog.titleMonthly")}
+            </DialogTitle>
+            <DialogDescription>
+              {targetCadence === "annual"
+                ? t("switchDialog.bodyAnnual")
+                : t("switchDialog.bodyMonthly")}
+            </DialogDescription>
+          </DialogHeader>
+
+          {changeCadence.error && (
+            <p className="text-sm text-destructive" role="alert">
+              {changeCadence.error.message}
+            </p>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="ghost"
+              onClick={() => setSwitchCadenceOpen(false)}
+            >
+              {t("switchDialog.dismiss")}
+            </Button>
+            <Button
+              onClick={() => changeCadence.mutate({ cadence: targetCadence })}
+              disabled={changeCadence.isPending}
+            >
+              {changeCadence.isPending
+                ? tCommon("loading")
+                : t("switchDialog.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={cancelOpen} onOpenChange={setCancelOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("cancelDialog.title")}</DialogTitle>
+            <DialogDescription>
+              {billing?.currentPeriodEnd
+                ? t("cancelDialog.body", {
+                    date: formatDate(billing.currentPeriodEnd, locale),
+                  })
+                : t("cancelDialog.bodyNoDate")}
+            </DialogDescription>
+          </DialogHeader>
+
+          {cancelSubscription.error && (
+            <p className="text-sm text-destructive" role="alert">
+              {cancelSubscription.error.message}
+            </p>
+          )}
+
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setCancelOpen(false)}>
+              {t("cancelDialog.dismiss")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => cancelSubscription.mutate()}
+              disabled={cancelSubscription.isPending}
+            >
+              {cancelSubscription.isPending
+                ? tCommon("loading")
+                : t("cancelDialog.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {billing?.plan === "individual" && (
         <UpgradeCard

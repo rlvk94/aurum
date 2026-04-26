@@ -4,7 +4,12 @@ import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import type { db as dbInstance } from "~/server/db";
-import { family, user, usersToFamilies } from "~/server/db/schema";
+import {
+  family,
+  familySubscription,
+  user,
+  usersToFamilies,
+} from "~/server/db/schema";
 import { seedDefaultCategories } from "~/server/db/seeds/seed-categories";
 
 export async function getActiveFamilyId(
@@ -122,6 +127,10 @@ export const familyRouter = createTRPCRouter({
           userId: ctx.session.user.id,
           familyId: newFamily!.id,
           role: "owner",
+        });
+
+        await tx.insert(familySubscription).values({
+          familyId: newFamily!.id,
         });
 
         const [dbUser] = await tx

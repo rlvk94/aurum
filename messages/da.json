@@ -1160,6 +1160,7 @@
       "nextRenewal": "Næste fornyelse",
       "canceledAt": "Opsiges {date}",
       "manageInStripe": "Administrér i Stripe",
+      "managePayment": "Administrér betaling",
       "upgrade": "Opgrader til Familie",
       "chooseCadence": "Vælg fakturering",
       "monthly": "Månedlig — {price} kr./md.",
@@ -1171,6 +1172,25 @@
       "familyPlanDescriptionActive": "Aktiv – næste fornyelse {date}",
       "familyPlanDescriptionPastDue": "Betaling forsinket – udløber {date}",
       "familyPlanDescriptionCanceled": "Opsiges {date}",
+      "cancelSubscription": "Opsig abonnement",
+      "resumeSubscription": "Fortryd opsigelse",
+      "switchToAnnual": "Skift til årlig — spar 20 %",
+      "switchToMonthly": "Skift til månedlig",
+      "switchDialog": {
+        "titleAnnual": "Skift til årlig fakturering",
+        "titleMonthly": "Skift til månedlig fakturering",
+        "bodyAnnual": "Du faktureres årligt med det samme. Eventuel resterende værdi af din nuværende periode modregnes automatisk.",
+        "bodyMonthly": "Du faktureres månedligt fra næste fornyelse. Eventuel resterende værdi modregnes automatisk.",
+        "confirm": "Bekræft skift",
+        "dismiss": "Annullér"
+      },
+      "cancelDialog": {
+        "title": "Opsig abonnement",
+        "body": "Du beholder Familie-adgang indtil {date}. Derefter skifter familien tilbage til Personlig. Du kan fortryde indtil udløb.",
+        "bodyNoDate": "Du beholder Familie-adgang indtil periodens udløb. Derefter skifter familien tilbage til Personlig.",
+        "confirm": "Bekræft opsigelse",
+        "dismiss": "Behold abonnementet"
+      },
       "upgradeCard": {
         "eyebrow": "Familie",
         "heading": "Få mest muligt ud af Aurum",
@@ -1289,7 +1309,18 @@
       "annualPrice": "{price} kr./md.",
       "annualSubtext": "Faktureres årligt — spar 20 %",
       "cta": "Fortsæt til betaling",
-      "cancel": "Annullér"
+      "back": "Tilbage",
+      "cancel": "Annullér",
+      "paymentTitle": "Betalingsoplysninger",
+      "paymentBody": "Indtast dit kort for at aktivere Familie-abonnementet.",
+      "activatingTitle": "Aktiverer abonnement…",
+      "activatingBody": "Bliv på siden — det tager nogle få sekunder.",
+      "activationTimedOut": "Det tog længere end forventet. Prøv igen eller kontakt support."
+    },
+    "paymentForm": {
+      "pay": "Betal og aktiver",
+      "processing": "Behandler…",
+      "genericError": "Betalingen kunne ikke gennemføres. Prøv igen."
     },
     "planFeatures": {
       "members1": "1 medlem",
