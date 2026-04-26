@@ -41,6 +41,7 @@ import { RadioGroup, RadioGroupItem } from "~/app/_components/radio-group";
 import posthog from "posthog-js";
 import { CategorySelect } from "~/app/_components/category-select";
 import { cn } from "~/app/_lib/utils";
+import { useEntitlements } from "~/app/_hooks/use-entitlements";
 
 type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
 type Account = RouterOutputs["financialAccount"]["list"][number];
@@ -105,10 +106,13 @@ export function TransactionFormDialog({
   const locale = useLocale();
   const utils = api.useUtils();
   const isEdit = !!transaction;
+  const { has: hasFeature } = useEntitlements();
+  const hasProjects = hasFeature("projects");
   const { data: categories = [] } = api.category.list.useQuery();
-  const { data: projects = [] } = api.project.list.useQuery({
-    includeArchived: false,
-  });
+  const { data: projects = [] } = api.project.list.useQuery(
+    { includeArchived: false },
+    { enabled: hasProjects },
+  );
 
   const createTx = api.transaction.create.useMutation({
     onSuccess: (_, variables) => {
@@ -405,37 +409,39 @@ export function TransactionFormDialog({
               )}
             />
 
-            <form.Field
-              name="projectId"
-              children={(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>
-                    {tProjects("filterLabel")}
-                  </FieldLabel>
-                  <Select
-                    value={field.state.value || "__none__"}
-                    onValueChange={(v) =>
-                      field.handleChange(v === "__none__" ? "" : v)
-                    }
-                  >
-                    <SelectTrigger id={field.name}>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="__none__">
-                        {tProjects("noProject")}
-                      </SelectItem>
-                      {projects.map((p) => (
-                        <SelectItem key={p.id} value={p.id}>
-                          <span className="mr-1">{p.emoji}</span>
-                          {p.name}
+            {hasProjects && (
+              <form.Field
+                name="projectId"
+                children={(field) => (
+                  <Field>
+                    <FieldLabel htmlFor={field.name}>
+                      {tProjects("filterLabel")}
+                    </FieldLabel>
+                    <Select
+                      value={field.state.value || "__none__"}
+                      onValueChange={(v) =>
+                        field.handleChange(v === "__none__" ? "" : v)
+                      }
+                    >
+                      <SelectTrigger id={field.name}>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__none__">
+                          {tProjects("noProject")}
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </Field>
-              )}
-            />
+                        {projects.map((p) => (
+                          <SelectItem key={p.id} value={p.id}>
+                            <span className="mr-1">{p.emoji}</span>
+                            {p.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </Field>
+                )}
+              />
+            )}
 
             <form.Field
               name="note"

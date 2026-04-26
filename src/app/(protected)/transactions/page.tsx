@@ -54,6 +54,7 @@ import {
   UNCATEGORIZED_SENTINEL,
 } from "~/app/_components/category-select";
 import { cn } from "~/app/_lib/utils";
+import { useEntitlements } from "~/app/_hooks/use-entitlements";
 
 type Transaction = RouterOutputs["transaction"]["list"]["items"][number];
 
@@ -80,13 +81,16 @@ export default function TransactionsPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const projectQuery = searchParams.get("project");
+  const { has: hasFeature } = useEntitlements();
+  const hasProjects = hasFeature("projects");
+  const projectQuery = hasProjects ? searchParams.get("project") : null;
 
   const { data: accounts = [] } = api.financialAccount.list.useQuery();
   const { data: categories = [] } = api.category.list.useQuery();
-  const { data: projects = [] } = api.project.list.useQuery({
-    includeArchived: true,
-  });
+  const { data: projects = [] } = api.project.list.useQuery(
+    { includeArchived: true },
+    { enabled: hasProjects },
+  );
   const [accountFilter, setAccountFilter] = useState<string>(ALL);
   const [typeFilter, setTypeFilter] = useState<string>(ALL);
   const [categoryFilter, setCategoryFilter] = useState<string[]>([]);
@@ -246,23 +250,25 @@ export default function TransactionsPage() {
             />
           </div>
 
-          <Select value={projectFilter} onValueChange={setProjectFilterAndUrl}>
-            <SelectTrigger className="w-full sm:w-auto sm:min-w-[200px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>{tProjects("allProjects")}</SelectItem>
-              <SelectItem value={UNASSIGNED}>
-                {tProjects("unassigned")}
-              </SelectItem>
-              {projects.map((p) => (
-                <SelectItem key={p.id} value={p.id}>
-                  <span className="mr-1">{p.emoji}</span>
-                  {p.name}
+          {hasProjects && (
+            <Select value={projectFilter} onValueChange={setProjectFilterAndUrl}>
+              <SelectTrigger className="w-full sm:w-auto sm:min-w-[200px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{tProjects("allProjects")}</SelectItem>
+                <SelectItem value={UNASSIGNED}>
+                  {tProjects("unassigned")}
                 </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                {projects.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    <span className="mr-1">{p.emoji}</span>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
       </div>
 
@@ -275,7 +281,9 @@ export default function TransactionsPage() {
                   <TableHead>{tCommon("date")}</TableHead>
                   <TableHead>{t("descriptionLabel")}</TableHead>
                   <TableHead>{tCommon("category")}</TableHead>
-                  <TableHead>{tProjects("filterLabel")}</TableHead>
+                  {hasProjects && (
+                    <TableHead>{tProjects("filterLabel")}</TableHead>
+                  )}
                   <TableHead>{t("account")}</TableHead>
                   <TableHead className="text-right">{t("amount")}</TableHead>
                   <TableHead className="w-[48px]"></TableHead>
@@ -293,9 +301,11 @@ export default function TransactionsPage() {
                     <TableCell>
                       <Skeleton className="h-6 w-24 rounded-full" />
                     </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-20 rounded-full" />
-                    </TableCell>
+                    {hasProjects && (
+                      <TableCell>
+                        <Skeleton className="h-6 w-20 rounded-full" />
+                      </TableCell>
+                    )}
                     <TableCell>
                       <Skeleton className="h-4 w-24" />
                     </TableCell>
@@ -336,7 +346,9 @@ export default function TransactionsPage() {
                   <TableHead>{tCommon("date")}</TableHead>
                   <TableHead>{t("descriptionLabel")}</TableHead>
                   <TableHead>{tCommon("category")}</TableHead>
-                  <TableHead>{tProjects("filterLabel")}</TableHead>
+                  {hasProjects && (
+                    <TableHead>{tProjects("filterLabel")}</TableHead>
+                  )}
                   <TableHead>{t("account")}</TableHead>
                   <TableHead className="text-right">{t("amount")}</TableHead>
                   <TableHead className="w-[48px]"></TableHead>
@@ -396,35 +408,37 @@ export default function TransactionsPage() {
                           )}
                         </button>
                       </TableCell>
-                      <TableCell>
-                        <button
-                          type="button"
-                          onClick={() => setProjectAssign(tx)}
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
-                        >
-                          {txProject ? (
-                            <span
-                              data-project-palette={
-                                txProject.coverPalette as ProjectPalette
-                              }
-                              className="project-cover-shimmer inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--cover-glyph)]"
-                            >
-                              <span>{txProject.emoji}</span>
-                              <span className="max-w-[8rem] truncate">
-                                {txProject.name}
+                      {hasProjects && (
+                        <TableCell>
+                          <button
+                            type="button"
+                            onClick={() => setProjectAssign(tx)}
+                            className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs transition hover:ring-2 hover:ring-primary/40"
+                          >
+                            {txProject ? (
+                              <span
+                                data-project-palette={
+                                  txProject.coverPalette as ProjectPalette
+                                }
+                                className="project-cover-shimmer inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--cover-glyph)]"
+                              >
+                                <span>{txProject.emoji}</span>
+                                <span className="max-w-[8rem] truncate">
+                                  {txProject.name}
+                                </span>
                               </span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
-                              +{" "}
-                              <FolderHeart
-                                className="h-3 w-3"
-                                aria-hidden
-                              />
-                            </span>
-                          )}
-                        </button>
-                      </TableCell>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
+                                +{" "}
+                                <FolderHeart
+                                  className="h-3 w-3"
+                                  aria-hidden
+                                />
+                              </span>
+                            )}
+                          </button>
+                        </TableCell>
+                      )}
                       <TableCell className="text-muted-foreground">
                         {account?.name ?? "—"}
                       </TableCell>
@@ -454,12 +468,14 @@ export default function TransactionsPage() {
                               <Pencil />
                               {tCommon("edit")}
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => setProjectAssign(tx)}
-                            >
-                              <FolderHeart />
-                              {tProjects("assignToProject")}
-                            </DropdownMenuItem>
+                            {hasProjects && (
+                              <DropdownMenuItem
+                                onClick={() => setProjectAssign(tx)}
+                              >
+                                <FolderHeart />
+                                {tProjects("assignToProject")}
+                              </DropdownMenuItem>
+                            )}
                             <DropdownMenuItem
                               className="text-destructive"
                               onClick={() => deleteTx.mutate({ id: tx.id })}
@@ -556,12 +572,14 @@ export default function TransactionsPage() {
                             <Pencil />
                             {tCommon("edit")}
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => setProjectAssign(tx)}
-                          >
-                            <FolderHeart />
-                            {tProjects("assignToProject")}
-                          </DropdownMenuItem>
+                          {hasProjects && (
+                            <DropdownMenuItem
+                              onClick={() => setProjectAssign(tx)}
+                            >
+                              <FolderHeart />
+                              {tProjects("assignToProject")}
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => deleteTx.mutate({ id: tx.id })}
@@ -590,29 +608,31 @@ export default function TransactionsPage() {
                         </span>
                       )}
                     </button>
-                    <button
-                      type="button"
-                      onClick={() => setProjectAssign(tx)}
-                      className="inline-flex items-center gap-1 rounded-full text-xs transition hover:ring-2 hover:ring-primary/40"
-                    >
-                      {txProject ? (
-                        <span
-                          data-project-palette={
-                            txProject.coverPalette as ProjectPalette
-                          }
-                          className="project-cover-shimmer inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--cover-glyph)]"
-                        >
-                          <span>{txProject.emoji}</span>
-                          <span className="max-w-[8rem] truncate">
-                            {txProject.name}
+                    {hasProjects && (
+                      <button
+                        type="button"
+                        onClick={() => setProjectAssign(tx)}
+                        className="inline-flex items-center gap-1 rounded-full text-xs transition hover:ring-2 hover:ring-primary/40"
+                      >
+                        {txProject ? (
+                          <span
+                            data-project-palette={
+                              txProject.coverPalette as ProjectPalette
+                            }
+                            className="project-cover-shimmer inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[var(--cover-glyph)]"
+                          >
+                            <span>{txProject.emoji}</span>
+                            <span className="max-w-[8rem] truncate">
+                              {txProject.name}
+                            </span>
                           </span>
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
-                          + <FolderHeart className="h-3 w-3" aria-hidden />
-                        </span>
-                      )}
-                    </button>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
+                            + <FolderHeart className="h-3 w-3" aria-hidden />
+                          </span>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </li>
               );
@@ -656,12 +676,14 @@ export default function TransactionsPage() {
         open={!!quickAssign}
         onOpenChange={(open) => !open && setQuickAssign(null)}
       />
-      <TransactionProjectQuickAssign
-        transactionId={projectAssign?.id ?? null}
-        currentProjectId={projectAssign?.projectId ?? null}
-        open={!!projectAssign}
-        onOpenChange={(open) => !open && setProjectAssign(null)}
-      />
+      {hasProjects && (
+        <TransactionProjectQuickAssign
+          transactionId={projectAssign?.id ?? null}
+          currentProjectId={projectAssign?.projectId ?? null}
+          open={!!projectAssign}
+          onOpenChange={(open) => !open && setProjectAssign(null)}
+        />
+      )}
     </div>
   );
 }
