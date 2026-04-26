@@ -1,7 +1,8 @@
 /**
- * Parses one CSV line with semicolon separators, handling quoted fields.
+ * Parses one CSV line, handling quoted fields with escaped quotes.
+ * Default delimiter is ";" to preserve existing Danish bank parser behavior.
  */
-export function parseLine(line: string): string[] {
+export function parseLine(line: string, delimiter = ";"): string[] {
   const fields: string[] = [];
   let current = "";
   let inQuotes = false;
@@ -15,7 +16,7 @@ export function parseLine(line: string): string[] {
       } else {
         inQuotes = !inQuotes;
       }
-    } else if (ch === ";" && !inQuotes) {
+    } else if (ch === delimiter && !inQuotes) {
       fields.push(current);
       current = "";
     } else {

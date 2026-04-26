@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { format, parse } from "date-fns";
 import { da, enUS } from "date-fns/locale";
@@ -17,17 +17,28 @@ import {
 } from "~/app/_components/dialog";
 import posthog from "posthog-js";
 import {
+  buildDefaultMapping,
+  decodeFile,
+  detectDelimiter,
   detectParser,
   normalizeAccountNumber,
+  parseWithMapping,
   resolveRows,
+  splitRows,
+  validateMapping,
+  type ColumnMapping,
   type CsvParser,
   type ParsedTransaction,
+  type ParseDiagnostics,
 } from "./csv-parsers";
+import { CsvImportMappingStep } from "./csv-import-mapping-step";
 
 type Account = RouterOutputs["financialAccount"]["list"][number];
 
+type Step = "select" | "mapping" | "preview";
+
 type Parsed = {
-  parser: CsvParser;
+  source: { kind: "auto"; parser: CsvParser } | { kind: "manual" };
   rows: ParsedTransaction[];
 };
 
@@ -46,16 +57,23 @@ export function CsvImportDialog({
   const dateLocale = locale === "da" ? da : enUS;
   const utils = api.useUtils();
 
+  const [step, setStep] = useState<Step>("select");
+  const [file, setFile] = useState<File | null>(null);
+  const [rawTable, setRawTable] = useState<string[][]>([]);
+  const [mapping, setMapping] = useState<ColumnMapping | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
   const [parsed, setParsed] = useState<Parsed | null>(null);
   const [isParsing, setIsParsing] = useState(false);
+  const [mappingDiagnostics, setMappingDiagnostics] =
+    useState<ParseDiagnostics | null>(null);
 
   const bulkImport = api.transaction.bulkImport.useMutation({
-    onSuccess: (data, variables) => {
+    onSuccess: (data) => {
       posthog.capture("csv_import_completed", {
         total_count: data.total,
         inserted_count: data.inserted,
         skipped_count: data.skipped,
+        source: parsed?.source.kind ?? "unknown",
       });
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
@@ -73,24 +91,66 @@ export function CsvImportDialog({
   }, [accounts]);
 
   const reset = () => {
+    setStep("select");
+    setFile(null);
+    setRawTable([]);
+    setMapping(null);
     setParseError(null);
     setParsed(null);
     setIsParsing(false);
+    setMappingDiagnostics(null);
   };
 
-  const handleFile = async (file: File) => {
+  // Re-decode whenever the user changes encoding or delimiter on the
+  // mapping step. Keeping this in an effect avoids the user having to click
+  // a refresh button after each switch.
+  useEffect(() => {
+    if (step !== "mapping" || !file || !mapping) return;
+    let cancelled = false;
+    void (async () => {
+      const text = await decodeFile(file, mapping.encoding);
+      const next = splitRows(text, mapping.delimiter);
+      if (!cancelled) setRawTable(next);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [step, file, mapping?.encoding, mapping?.delimiter]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleFile = async (picked: File) => {
     reset();
     setIsParsing(true);
+    setFile(picked);
     try {
-      const parser = await detectParser(file);
-      const rows = await parser.parse(file);
-
-      if (rows.length === 0) {
-        setParseError(t("importUnsupportedFormat"));
+      const parser = await detectParser(picked);
+      if (parser) {
+        const rows = await parser.parse(picked);
+        if (rows.length === 0) {
+          setParseError(t("importUnsupportedFormat"));
+          return;
+        }
+        setParsed({ source: { kind: "auto", parser }, rows });
+        setStep("preview");
         return;
       }
 
-      setParsed({ parser, rows });
+      // No registered parser matched — fall into the manual mapping flow.
+      const text = await decodeFile(picked, "utf-8");
+      const firstLine =
+        text.split(/\r\n|\n|\r/).find((l) => l.length > 0) ?? "";
+      const delimiter = detectDelimiter(firstLine);
+      const table = splitRows(text, delimiter);
+      if (table.length === 0) {
+        setParseError(t("importUnsupportedFormat"));
+        return;
+      }
+      const defaultMapping = buildDefaultMapping(table, {
+        encoding: "utf-8",
+        delimiter,
+      });
+      setRawTable(table);
+      setMapping(defaultMapping);
+      setStep("mapping");
     } catch (e) {
       setParseError(
         e instanceof Error ? e.message : t("importUnsupportedFormat"),
@@ -98,6 +158,21 @@ export function CsvImportDialog({
     } finally {
       setIsParsing(false);
     }
+  };
+
+  const handleConfirmMapping = () => {
+    if (!mapping) return;
+    const errors = validateMapping(mapping);
+    if (errors.length > 0) return;
+    const { rows, diagnostics } = parseWithMapping(rawTable, mapping);
+    setMappingDiagnostics(diagnostics);
+    if (rows.length === 0) {
+      // Stay on the mapping step so the user can adjust based on the
+      // diagnostic block we render below the form.
+      return;
+    }
+    setParsed({ source: { kind: "manual" }, rows });
+    setStep("preview");
   };
 
   const resolved = useMemo(() => {
@@ -121,6 +196,11 @@ export function CsvImportDialog({
     });
   };
 
+  const mappingErrors = useMemo(
+    () => (mapping ? validateMapping(mapping) : []),
+    [mapping],
+  );
+
   return (
     <Dialog
       open={open}
@@ -129,13 +209,13 @@ export function CsvImportDialog({
         if (!next) reset();
       }}
     >
-      <DialogContent>
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t("importDialogTitle")}</DialogTitle>
           <DialogDescription>{t("importDialogDescription")}</DialogDescription>
         </DialogHeader>
 
-        {!parsed && !isParsing && (
+        {step === "select" && !isParsing && (
           <label className="border-border bg-card hover:border-primary/40 flex cursor-pointer flex-col items-center gap-3 rounded-lg border border-dashed px-6 py-10 text-sm transition-colors">
             <Upload className="text-muted-foreground size-6" />
             <span className="text-foreground font-medium">
@@ -146,8 +226,8 @@ export function CsvImportDialog({
               accept=".csv,text/csv"
               className="hidden"
               onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) void handleFile(file);
+                const picked = e.target.files?.[0];
+                if (picked) void handleFile(picked);
                 e.target.value = "";
               }}
             />
@@ -163,7 +243,28 @@ export function CsvImportDialog({
 
         {parseError && <p className="text-destructive text-sm">{parseError}</p>}
 
-        {parsed && resolved && (
+        {step === "mapping" && mapping && (
+          <CsvImportMappingStep
+            table={rawTable}
+            mapping={mapping}
+            onChange={(next) => {
+              setMapping(next);
+              setMappingDiagnostics(null);
+            }}
+            onConfirm={handleConfirmMapping}
+            onBack={() => {
+              setStep("select");
+              setFile(null);
+              setRawTable([]);
+              setMapping(null);
+              setMappingDiagnostics(null);
+            }}
+            errors={mappingErrors}
+            diagnostics={mappingDiagnostics}
+          />
+        )}
+
+        {step === "preview" && parsed && resolved && (
           <div className="space-y-4">
             <div className="border-border bg-card flex items-start gap-2 rounded-lg border p-3 text-sm">
               <CheckCircle2 className="text-income size-4 shrink-0" />
@@ -172,7 +273,9 @@ export function CsvImportDialog({
                   {t("importFileReady")}
                 </p>
                 <p className="text-muted-foreground text-xs">
-                  {parsed.parser.label}
+                  {parsed.source.kind === "auto"
+                    ? parsed.source.parser.label
+                    : t("importManualMappingLabel")}
                 </p>
               </div>
             </div>
@@ -250,20 +353,31 @@ export function CsvImportDialog({
         )}
 
         <DialogFooter>
-          {parsed && resolved && (
-            <Button
-              onClick={handleImport}
-              disabled={resolved.matched.length === 0 || bulkImport.isPending}
-            >
-              {bulkImport.isPending ? (
-                <>
-                  <Loader2 className="animate-spin" />
-                  {tCommon("loading")}
-                </>
-              ) : (
-                t("importConfirm")
+          {step === "preview" && parsed && resolved && (
+            <>
+              {parsed.source.kind === "manual" && (
+                <Button
+                  variant="outline"
+                  onClick={() => setStep("mapping")}
+                  disabled={bulkImport.isPending}
+                >
+                  {t("mappingBack")}
+                </Button>
               )}
-            </Button>
+              <Button
+                onClick={handleImport}
+                disabled={resolved.matched.length === 0 || bulkImport.isPending}
+              >
+                {bulkImport.isPending ? (
+                  <>
+                    <Loader2 className="animate-spin" />
+                    {tCommon("loading")}
+                  </>
+                ) : (
+                  t("importConfirm")
+                )}
+              </Button>
+            </>
           )}
         </DialogFooter>
       </DialogContent>

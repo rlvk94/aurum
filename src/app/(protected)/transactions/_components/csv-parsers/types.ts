@@ -25,6 +25,13 @@ export type ParsedTransaction = {
    * Used to widen the search text for categorization rules.
    */
   metadata: Record<string, string>;
+  /**
+   * Optional pre-computed dedup key. The generic mapping flow uses this when
+   * a CSV has no balance column, falling back to a row-index-based key so
+   * re-importing the same file dedups. When omitted, resolveRows computes
+   * `${date}:${amount}:${balance}` itself.
+   */
+  externalId?: string;
 };
 
 export type CsvParser = {
@@ -41,4 +48,48 @@ export type CsvParser = {
    * Decodes and parses the file into transactions.
    */
   parse: (file: File) => Promise<ParsedTransaction[]>;
+};
+
+/** Date formats the generic mapping flow knows how to parse. */
+export type DateFormat =
+  | "yyyy-MM-dd"
+  | "dd-MM-yyyy"
+  | "dd/MM/yyyy"
+  | "MM/dd/yyyy"
+  | "yyyy/MM/dd"
+  | "dd.MM.yyyy"
+  | "yyyy.MM.dd";
+
+/** Encodings offered to the user in the mapping flow. */
+export type CsvEncoding = "utf-8" | "iso-8859-1" | "windows-1252";
+
+/** CSV delimiters offered to the user in the mapping flow. */
+export type CsvDelimiter = ";" | "," | "\t" | "|";
+
+export type NumberFormat = "comma-decimal" | "dot-decimal";
+
+/**
+ * User-supplied mapping for a generic CSV. The mapping step in the import
+ * dialog builds one of these from the file's headers and column previews;
+ * `parseWithMapping` then turns it into ParsedTransaction[].
+ */
+export type ColumnMapping = {
+  encoding: CsvEncoding;
+  delimiter: CsvDelimiter;
+  hasHeader: boolean;
+  dateColumn: number;
+  dateFormat: DateFormat;
+  descriptionColumn: number;
+  amountMode: "signed" | "split";
+  /** Required when amountMode === "signed". */
+  amountColumn?: number;
+  /** Required when amountMode === "split". */
+  debitColumn?: number;
+  /** Required when amountMode === "split". */
+  creditColumn?: number;
+  numberFormat: NumberFormat;
+  exportAccountColumn: number;
+  counterAccountColumn?: number;
+  noteColumn?: number;
+  balanceColumn?: number;
 };
