@@ -2,11 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Pencil, Sparkles } from "lucide-react";
+import { MoreHorizontal, Pencil, Sparkles } from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Badge } from "~/app/_components/badge";
 import { Button } from "~/app/_components/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "~/app/_components/dropdown-menu";
 import { usePageMetadata } from "~/app/_components/page-metadata";
 
 import { AllocationBar } from "./allocation-bar";
@@ -19,6 +25,7 @@ type PlanFromList = RouterOutputs["incomePlan"]["list"][number];
 
 export function PlanDetailClient({ planId }: { planId: string }) {
   const t = useTranslations("incomePlanner");
+  const tCommon = useTranslations("common");
   const utils = api.useUtils();
 
   const { data: plan } = api.incomePlan.get.useQuery({ id: planId });
@@ -72,26 +79,9 @@ export function PlanDetailClient({ planId }: { planId: string }) {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-end gap-2">
-        {!plan.isActive && !plan.archived && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setActive.mutate({ id: planId })}
-          >
-            <Sparkles />
-            {t("setActive")}
-          </Button>
-        )}
-        <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-          <Pencil />
-          {t("editPlan")}
-        </Button>
-      </div>
-
+    <div className="space-y-4 sm:space-y-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card px-6 py-8 shadow-elevated sm:px-10 sm:py-12">
+      <section className="relative overflow-hidden rounded-2xl border border-border bg-card px-5 py-6 shadow-elevated sm:px-10 sm:py-12">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -100,7 +90,38 @@ export function PlanDetailClient({ planId }: { planId: string }) {
               "radial-gradient(ellipse at 15% 0%, hsl(38 60% 50% / 0.12), transparent 60%), radial-gradient(ellipse at 100% 100%, hsl(210 55% 50% / 0.06), transparent 55%)",
           }}
         />
-        <div className="relative flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+
+        {/* Action menu */}
+        <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full bg-background/70 backdrop-blur hover:bg-background"
+                aria-label={tCommon("actions")}
+              >
+                <MoreHorizontal />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setEditOpen(true)}>
+                <Pencil />
+                {t("editPlan")}
+              </DropdownMenuItem>
+              {!plan.isActive && !plan.archived && (
+                <DropdownMenuItem
+                  onClick={() => setActive.mutate({ id: planId })}
+                >
+                  <Sparkles />
+                  {t("setActive")}
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+
+        <div className="relative flex flex-col gap-6 pr-12 lg:flex-row lg:items-end lg:justify-between lg:gap-8 lg:pr-14">
           <div className="min-w-0">
             {plan.isActive && !plan.archived && (
               <Badge className="mb-3 gap-1 rounded-full border-0 bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-primary">
@@ -108,7 +129,7 @@ export function PlanDetailClient({ planId }: { planId: string }) {
                 {t("activeBadge")}
               </Badge>
             )}
-            <h1 className="font-display text-4xl leading-[1.05] text-foreground sm:text-5xl">
+            <h1 className="font-display text-3xl leading-[1.05] text-foreground sm:text-4xl lg:text-5xl">
               {plan.name}
             </h1>
             {plan.description && (
@@ -117,17 +138,17 @@ export function PlanDetailClient({ planId }: { planId: string }) {
               </p>
             )}
           </div>
-          <div className="text-right">
+          <div className="text-left lg:text-right">
             <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
               {t("monthlyIncomeTotal")}
             </p>
-            <p className="mt-1 font-display text-5xl tabular-nums text-foreground sm:text-6xl">
+            <p className="mt-1 font-display text-4xl tabular-nums text-foreground sm:text-5xl lg:text-6xl">
               {formatMoney(totalIncome)}
             </p>
           </div>
         </div>
 
-        <div className="relative mt-10">
+        <div className="relative mt-8 sm:mt-10">
           <AllocationBar
             totalIncome={totalIncome}
             lines={plan.lines}
@@ -138,7 +159,7 @@ export function PlanDetailClient({ planId }: { planId: string }) {
       </section>
 
       {/* Two-column editor */}
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+      <div className="grid gap-4 sm:gap-6 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         <IncomeEditor planId={planId} incomes={plan.incomes} />
         <AllocationsEditor
           planId={planId}

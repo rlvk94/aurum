@@ -793,7 +793,10 @@
     "confirmDeleteIncome": "Delete this income?",
     "confirmDeleteAllocation": "Delete this allocation?",
     "emptyState": "No income plans yet. Create a plan to allocate your income.",
-    "backToPlans": "Back to plans"
+    "backToPlans": "Back to plans",
+    "perSourceTitle": "By income source",
+    "copyAmount": "Copy amount",
+    "copied": "Copied"
   },
   "import": {
     "title": "Import Data",

@@ -793,7 +793,10 @@
     "confirmDeleteIncome": "Slet denne indkomst?",
     "confirmDeleteAllocation": "Slet denne fordeling?",
     "emptyState": "Ingen indkomstplaner endnu. Opret en plan for at fordele din indkomst.",
-    "backToPlans": "Tilbage til planer"
+    "backToPlans": "Tilbage til planer",
+    "perSourceTitle": "Pr. indkomstkilde",
+    "copyAmount": "Kopiér beløb",
+    "copied": "Kopieret"
   },
   "import": {
     "title": "Importér data",

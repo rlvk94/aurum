@@ -3,7 +3,15 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertCircle, CheckCircle2, Plus, Trash2, Wallet } from "lucide-react";
+import {
+  AlertCircle,
+  Check,
+  CheckCircle2,
+  Copy,
+  Plus,
+  Trash2,
+  Wallet,
+} from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
@@ -169,8 +177,8 @@ export function AllocationsEditor({
   const showPerSource = incomes.length >= 2 && totalIncome > 0;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
-      <header className="mb-5 flex items-start justify-between gap-4">
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
+      <header className="mb-5 flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {t("allocations")}
@@ -430,126 +438,173 @@ function AllocationRow({
   return (
     <div className="group relative rounded-xl border border-border bg-background p-3 transition-colors hover:border-foreground/20">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        {/* Color stripe */}
-        <div
-          aria-hidden
-          className="h-1 w-8 shrink-0 rounded-full sm:h-10 sm:w-1"
-          style={{ backgroundColor: color.bg }}
-        />
-
-        {/* Account picker */}
-        <Select
-          value={line.accountId ?? ""}
-          onValueChange={(v) => onUpdate({ accountId: v || null })}
-        >
-          <SelectTrigger className="h-9 min-w-0 flex-1 border-transparent bg-transparent shadow-none hover:bg-muted data-[state=open]:bg-muted">
-            <SelectValue placeholder={t("pickAccount")}>
-              <span className="flex items-center gap-2 truncate">
-                {Icon ? (
-                  <Icon className="h-4 w-4 shrink-0" style={{ color: color.bg }} />
-                ) : (
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-muted-foreground/30" />
-                )}
-                <span className="truncate">
-                  {line.accountName ?? t("accountDeleted")}
-                </span>
-              </span>
-            </SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {accounts.map((a) => {
-              const AIcon = ACCOUNT_TYPE_ICONS[a.type as AccountType];
-              const aColor = colorForAccountType(a.type as AccountType);
-              return (
-                <SelectItem key={a.id} value={a.id}>
-                  <span className="flex items-center gap-2">
-                    <AIcon className="h-4 w-4" style={{ color: aColor.bg }} />
-                    <span>{a.name}</span>
-                  </span>
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-
-        {/* Segmented type toggle */}
-        <div className="inline-flex h-9 shrink-0 items-center rounded-md border border-border bg-muted/60 p-0.5">
-          <button
-            type="button"
-            onClick={() => setType("percentage")}
-            className={cn(
-              "inline-flex h-full items-center justify-center rounded-[5px] px-2.5 text-xs font-medium tabular-nums transition-colors",
-              isPercentage
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-            aria-pressed={isPercentage}
-          >
-            %
-          </button>
-          <button
-            type="button"
-            onClick={() => setType("fixed")}
-            className={cn(
-              "inline-flex h-full items-center justify-center rounded-[5px] px-2.5 text-xs font-medium transition-colors",
-              !isPercentage
-                ? "bg-card text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-            aria-pressed={!isPercentage}
-          >
-            kr.
-          </button>
-        </div>
-
-        {/* Value input */}
-        <div className="flex items-center gap-2">
-          <Input
-            value={valueText}
-            onChange={(e) => setValueText(e.target.value)}
-            onBlur={commitValue}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") e.currentTarget.blur();
-              if (e.key === "Escape") {
-                setValueText(initialValueText(line));
-                e.currentTarget.blur();
-              }
-            }}
-            inputMode="decimal"
-            placeholder="0"
-            className="h-9 w-24 border-transparent bg-muted px-2 text-right font-display tabular-nums shadow-none focus-visible:bg-background"
+        {/* Row 1 (mobile) / inline (desktop): color stripe + account picker */}
+        <div className="flex min-w-0 flex-1 items-center gap-2 sm:contents">
+          <div
+            aria-hidden
+            className="h-9 w-1 shrink-0 rounded-full sm:h-10"
+            style={{ backgroundColor: color.bg }}
           />
-          <span className="min-w-[4.5rem] text-right text-xs text-muted-foreground tabular-nums">
-            {counterpart}
-          </span>
+          <Select
+            value={line.accountId ?? ""}
+            onValueChange={(v) => onUpdate({ accountId: v || null })}
+          >
+            <SelectTrigger className="h-9 min-w-0 flex-1 border-transparent bg-transparent shadow-none hover:bg-muted data-[state=open]:bg-muted">
+              <SelectValue placeholder={t("pickAccount")}>
+                <span className="flex items-center gap-2 truncate">
+                  {Icon ? (
+                    <Icon className="h-4 w-4 shrink-0" style={{ color: color.bg }} />
+                  ) : (
+                    <span className="h-2 w-2 shrink-0 rounded-full bg-muted-foreground/30" />
+                  )}
+                  <span className="truncate">
+                    {line.accountName ?? t("accountDeleted")}
+                  </span>
+                </span>
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {accounts.map((a) => {
+                const AIcon = ACCOUNT_TYPE_ICONS[a.type as AccountType];
+                const aColor = colorForAccountType(a.type as AccountType);
+                return (
+                  <SelectItem key={a.id} value={a.id}>
+                    <span className="flex items-center gap-2">
+                      <AIcon className="h-4 w-4" style={{ color: aColor.bg }} />
+                      <span>{a.name}</span>
+                    </span>
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
         </div>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onDelete}
-          className="h-8 w-8 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
-          aria-label={t("remove")}
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
+        {/* Row 2 (mobile) / inline (desktop): type toggle + value + delete */}
+        <div className="flex items-center gap-2 sm:contents">
+          {/* Segmented type toggle */}
+          <div className="inline-flex h-9 shrink-0 items-center rounded-md border border-border bg-muted/60 p-0.5">
+            <button
+              type="button"
+              onClick={() => setType("percentage")}
+              className={cn(
+                "inline-flex h-full items-center justify-center rounded-[5px] px-2.5 text-xs font-medium tabular-nums transition-colors",
+                isPercentage
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+              aria-pressed={isPercentage}
+            >
+              %
+            </button>
+            <button
+              type="button"
+              onClick={() => setType("fixed")}
+              className={cn(
+                "inline-flex h-full items-center justify-center rounded-[5px] px-2.5 text-xs font-medium transition-colors",
+                !isPercentage
+                  ? "bg-card text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground",
+              )}
+              aria-pressed={!isPercentage}
+            >
+              kr.
+            </button>
+          </div>
+
+          {/* Value input + counterpart */}
+          <div className="flex min-w-0 flex-1 items-center justify-end gap-2 sm:flex-none">
+            <Input
+              value={valueText}
+              onChange={(e) => setValueText(e.target.value)}
+              onBlur={commitValue}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") e.currentTarget.blur();
+                if (e.key === "Escape") {
+                  setValueText(initialValueText(line));
+                  e.currentTarget.blur();
+                }
+              }}
+              inputMode="decimal"
+              placeholder="0"
+              className="h-9 w-20 shrink-0 border-transparent bg-muted px-2 text-right font-display tabular-nums shadow-none focus-visible:bg-background sm:w-24"
+            />
+            <span className="min-w-[4rem] text-right text-xs text-muted-foreground tabular-nums sm:min-w-[4.5rem]">
+              {counterpart}
+            </span>
+          </div>
+
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onDelete}
+            className="h-8 w-8 shrink-0 text-muted-foreground transition-opacity hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 sm:group-focus-within:opacity-100"
+            aria-label={t("remove")}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
       </div>
 
-      {/* Per-source breakdown */}
+      {/* Per-source breakdown — shown when there are multiple income sources
+          so the user can see (and copy) the exact amount drawn from each one. */}
       {showPerSource && perSource.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1.5 pl-5 sm:pl-5">
-          {perSource.map((ps) => (
-            <span
-              key={ps.id}
-              className="inline-flex items-center gap-1.5 rounded-md bg-muted/70 px-2 py-0.5 text-[11px] text-muted-foreground"
-            >
-              <span className="font-medium text-foreground">{ps.name}</span>
-              <span className="tabular-nums">{formatMoney(ps.cents)}</span>
-            </span>
-          ))}
+        <div className="mt-3 rounded-lg border border-border/60 bg-muted/30 p-2 sm:ml-5">
+          <p className="px-2 pb-1.5 pt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+            {t("perSourceTitle")}
+          </p>
+          <ul className="grid gap-1 sm:grid-cols-2">
+            {perSource.map((ps) => (
+              <li
+                key={ps.id}
+                className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-background"
+              >
+                <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+                  {ps.name}
+                </span>
+                <span className="shrink-0 font-display text-sm tabular-nums text-foreground">
+                  {formatMoney(ps.cents)}
+                </span>
+                <CopyAmountButton cents={ps.cents} />
+              </li>
+            ))}
+          </ul>
         </div>
       )}
     </div>
+  );
+}
+
+function CopyAmountButton({ cents }: { cents: number }) {
+  const t = useTranslations("incomePlanner");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    const value = cents / 100;
+    const text = Number.isInteger(value)
+      ? String(value)
+      : value.toFixed(2).replace(".", ",");
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard write can fail (HTTP context, permissions). No-op for now.
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      className={cn(
+        "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground",
+        copied && "text-income hover:text-income",
+      )}
+      aria-label={copied ? t("copied") : t("copyAmount")}
+    >
+      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+    </button>
   );
 }
 

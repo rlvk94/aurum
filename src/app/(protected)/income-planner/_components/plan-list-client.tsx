@@ -54,7 +54,7 @@ export function PlanListClient() {
   const archived = (plans ?? []).filter((p) => p.archived);
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-4 sm:space-y-6">
       <PageHeader
         title={t("title")}
         description={t("subtitle")}
@@ -69,7 +69,7 @@ export function PlanListClient() {
       {!plans || plans.length === 0 ? (
         <EditorialEmptyState onCreate={() => setCreateOpen(true)} />
       ) : (
-        <div className="space-y-10">
+        <div className="space-y-4 sm:space-y-6">
           {active && (
             <section>
               <SectionHeading

@@ -119,8 +119,8 @@ export function IncomeEditor({
   const total = incomes.reduce((s, i) => s + i.amount, 0);
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
-      <header className="mb-5 flex items-start justify-between gap-4">
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
+      <header className="mb-5 flex items-start justify-between gap-3">
         <div>
           <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
             {t("incomeSources")}
@@ -219,7 +219,7 @@ function IncomeRow({
   };
 
   return (
-    <li className="group flex items-center gap-3 py-3">
+    <li className="group flex items-center gap-2 py-3 sm:gap-3">
       <Input
         value={name}
         onChange={(e) => setName(e.target.value)}
@@ -231,7 +231,7 @@ function IncomeRow({
             e.currentTarget.blur();
           }
         }}
-        className="h-9 flex-1 border-transparent bg-transparent px-2 font-medium shadow-none hover:bg-muted focus-visible:bg-background"
+        className="h-9 min-w-0 flex-1 border-transparent bg-transparent px-2 font-medium shadow-none hover:bg-muted focus-visible:bg-background"
       />
       <Input
         value={amountText}
@@ -258,13 +258,13 @@ function IncomeRow({
           }
         }}
         inputMode="decimal"
-        className="h-9 w-32 border-transparent bg-transparent px-2 text-right font-display tabular-nums shadow-none hover:bg-muted focus-visible:bg-background"
+        className="h-9 w-24 shrink-0 border-transparent bg-transparent px-2 text-right font-display tabular-nums shadow-none hover:bg-muted focus-visible:bg-background sm:w-32"
       />
-      <span className="w-6 text-xs text-muted-foreground">kr.</span>
+      <span className="shrink-0 text-xs text-muted-foreground">kr.</span>
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
+        className="h-8 w-8 text-muted-foreground transition-opacity hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 sm:group-focus-within:opacity-100"
         onClick={onDelete}
         aria-label={t("deleteIncome")}
       >
@@ -300,7 +300,7 @@ function AddIncomeRow({
     (parseMoneyInput(amountText) ?? 0) > 0;
 
   return (
-    <div className="mt-3 flex items-center gap-3 rounded-xl border border-dashed border-border bg-muted/40 p-2.5 transition-colors focus-within:border-primary focus-within:bg-background">
+    <div className="mt-3 flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/40 p-2.5 transition-colors focus-within:border-primary focus-within:bg-background sm:gap-3">
       <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
         <Plus className="h-3.5 w-3.5" />
       </div>
@@ -312,7 +312,7 @@ function AddIncomeRow({
           if (e.key === "Enter") commit();
         }}
         placeholder={t("incomeNamePlaceholder")}
-        className="h-8 flex-1 border-transparent bg-transparent px-2 shadow-none focus-visible:bg-background"
+        className="h-8 min-w-0 flex-1 border-transparent bg-transparent px-2 shadow-none focus-visible:bg-background"
       />
       <Input
         value={amountText}
@@ -322,9 +322,9 @@ function AddIncomeRow({
         }}
         inputMode="decimal"
         placeholder="0"
-        className="h-8 w-32 border-transparent bg-transparent px-2 text-right font-display tabular-nums shadow-none focus-visible:bg-background"
+        className="h-8 w-24 shrink-0 border-transparent bg-transparent px-2 text-right font-display tabular-nums shadow-none focus-visible:bg-background sm:w-32"
       />
-      <span className="w-6 text-xs text-muted-foreground">kr.</span>
+      <span className="shrink-0 text-xs text-muted-foreground">kr.</span>
       <Button
         size="icon"
         className={cn("h-8 w-8", !canSubmit && "opacity-40")}

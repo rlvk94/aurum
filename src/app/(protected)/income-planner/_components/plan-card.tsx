@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 import { type RouterOutputs } from "~/trpc/react";
 import { Badge } from "~/app/_components/badge";
@@ -77,9 +77,6 @@ export function PlanCard({
             </p>
           )}
         </div>
-        {isHero && (
-          <ArrowUpRight className="h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-foreground" />
-        )}
       </div>
 
       <div className={cn("relative mt-6", isHero && "sm:mt-10")}>
