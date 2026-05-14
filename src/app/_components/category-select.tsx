@@ -228,12 +228,12 @@ export function CategorySelect(props: CategorySelectProps) {
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0"
+        className="flex max-h-[min(var(--radix-popover-content-available-height),28rem)] w-[var(--radix-popover-trigger-width)] min-w-[280px] flex-col p-0"
         align="start"
       >
         <Command>
           <CommandInput placeholder={t("searchPlaceholder")} />
-          <CommandList>
+          <CommandList className="max-h-none flex-1 overscroll-contain">
             <CommandEmpty>{t("noCategoriesMatch")}</CommandEmpty>
 
             {(((!isMulti && sentinelLabel) || uncategorizedOption) && (
@@ -273,12 +273,16 @@ export function CategorySelect(props: CategorySelectProps) {
             {groups.map(({ parent, children }) => (
               <CommandGroup
                 key={parent.id}
+                className={cn(
+                  mode === "leaf-only" &&
+                    "[&_[cmdk-group-heading]]:sticky [&_[cmdk-group-heading]]:top-0 [&_[cmdk-group-heading]]:z-10 [&_[cmdk-group-heading]]:flex [&_[cmdk-group-heading]]:items-center [&_[cmdk-group-heading]]:gap-1.5 [&_[cmdk-group-heading]]:rounded-sm [&_[cmdk-group-heading]]:bg-muted/60 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-foreground",
+                )}
                 heading={
                   mode === "leaf-only" ? (
-                    <span className="flex items-center gap-1.5 text-xs uppercase tracking-wide text-muted-foreground">
+                    <>
                       {parent.icon && <span>{parent.icon}</span>}
                       <span>{parent.name}</span>
-                    </span>
+                    </>
                   ) : undefined
                 }
               >
@@ -310,11 +314,18 @@ export function CategorySelect(props: CategorySelectProps) {
                     ].join(" ")}
                     keywords={child.keywords ?? []}
                     onSelect={() => toggleId(child.id)}
-                    className={cn(mode === "any" && "pl-7")}
+                    className={mode === "leaf-only" ? "pl-3" : "pl-7"}
                   >
-                    {child.icon && (
+                    {child.icon ? (
                       <span className="text-base leading-none">
                         {child.icon}
+                      </span>
+                    ) : (
+                      <span
+                        className="text-base leading-none opacity-40"
+                        aria-hidden
+                      >
+                        •
                       </span>
                     )}
                     <span>{child.name}</span>

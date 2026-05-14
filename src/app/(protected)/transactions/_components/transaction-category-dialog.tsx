@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowLeft, MinusCircle } from "lucide-react";
+import { ArrowLeft, MinusCircle, Search, X } from "lucide-react";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { useQueryClient, type QueryKey } from "@tanstack/react-query";
@@ -45,7 +45,7 @@ export function TransactionCategoryDialog({
   if (!isMobile) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md gap-0 p-0 [&>button.absolute]:top-5">
+        <DialogContent className="max-w-lg gap-0 p-0 [&>button.absolute]:top-5">
           <DialogHeader className="sr-only">
             <DialogTitle>{t("assignCategoryTitle")}</DialogTitle>
             <DialogDescription>
@@ -183,12 +183,33 @@ function CategoryGridFlow({
   const [selectedParentId, setSelectedParentId] = useState<string | null>(
     initialParent,
   );
+  const [search, setSearch] = useState("");
+  const searchQuery = search.trim().toLowerCase();
+  const isSearching = searchQuery.length > 0;
 
   const selectedParent = groups.find(
     (g) => g.parent.id === selectedParentId,
   )?.parent;
   const selectedChildren =
     groups.find((g) => g.parent.id === selectedParentId)?.children ?? [];
+
+  const searchMatches = useMemo(() => {
+    if (!searchQuery) return [];
+    const out: Array<{ parent: Category; child: Category }> = [];
+    for (const { parent, children } of groups) {
+      for (const child of children) {
+        const hay = [
+          child.name,
+          parent.name,
+          ...(child.keywords ?? []),
+        ]
+          .join(" ")
+          .toLowerCase();
+        if (hay.includes(searchQuery)) out.push({ parent, child });
+      }
+    }
+    return out;
+  }, [groups, searchQuery]);
 
   function pickParent(id: string) {
     setSelectedParentId(id);
@@ -203,7 +224,7 @@ function CategoryGridFlow({
   return (
     <div className="flex h-[min(560px,80dvh)] flex-col">
       <div className="flex min-h-14 items-center gap-2 border-b px-4 py-2">
-        {step === "child" ? (
+        {step === "child" && !isSearching ? (
           <button
             type="button"
             onClick={() => setStep("parent")}
@@ -216,7 +237,7 @@ function CategoryGridFlow({
           <span className="w-8" aria-hidden />
         )}
         <div className="flex-1 text-center font-display text-base">
-          {step === "parent" ? (
+          {isSearching || step === "parent" ? (
             t("assignCategoryTitle")
           ) : (
             <span className="inline-flex items-center gap-1.5">
@@ -228,67 +249,133 @@ function CategoryGridFlow({
         <span className="w-8" aria-hidden />
       </div>
 
-      <div className="relative flex-1 overflow-hidden">
-        <div
-          className="flex h-full w-[200%] transition-transform duration-300 ease-out"
-          style={{
-            transform: step === "parent" ? "translateX(0)" : "translateX(-50%)",
-          }}
-        >
-          <section
-            className="h-full w-1/2 shrink-0 overflow-y-auto"
-            aria-hidden={step !== "parent"}
+      <div className="flex items-center gap-2 border-b px-3 py-2">
+        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={tCategories("searchCategoriesPlaceholder")}
+          className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          autoFocus={!mobile}
+        />
+        {search && (
+          <button
+            type="button"
+            onClick={() => setSearch("")}
+            aria-label={tCommon("clear")}
+            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-foreground"
           >
-            <div className="flex flex-col gap-3 p-4">
-              <div className="grid grid-cols-3 gap-3">
-                {groups.map(({ parent }) => (
-                  <Tile
-                    key={parent.id}
-                    icon={parent.icon}
-                    label={parent.name}
-                    mobile={mobile}
-                    onClick={() => pickParent(parent.id)}
-                  />
-                ))}
-              </div>
-              <button
-                type="button"
-                onClick={() => pickLeaf(null)}
-                className={cn(
-                  "mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed bg-card px-3 py-3 text-muted-foreground transition hover:border-primary/40 hover:bg-accent/50 hover:text-foreground active:scale-[0.99]",
-                  mobile ? "text-base" : "text-sm",
-                )}
-              >
-                <MinusCircle className="h-4 w-4 opacity-60" />
-                {tCategories("noCategoryOption")}
-              </button>
-            </div>
-          </section>
-          <section
-            className="h-full w-1/2 shrink-0 overflow-y-auto"
-            aria-hidden={step !== "child"}
-          >
-            {selectedChildren.length === 0 ? (
-              <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
-                {tCategories("noSubcategoriesYet")}
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-3 p-4">
-                {selectedChildren.map((child) => (
-                  <Tile
-                    key={child.id}
-                    icon={child.icon}
-                    label={child.name}
-                    mobile={mobile}
-                    selected={child.id === currentCategoryId}
-                    onClick={() => pickLeaf(child.id)}
-                  />
-                ))}
-              </div>
-            )}
-          </section>
-        </div>
+            <X className="h-4 w-4" />
+          </button>
+        )}
       </div>
+
+      {isSearching ? (
+        <div className="flex-1 overflow-y-auto px-3 pb-3 pt-2">
+          {searchMatches.length === 0 ? (
+            <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
+              {tCategories("noCategoriesMatch")}
+            </div>
+          ) : (
+            <ul className="flex flex-col gap-1">
+              {searchMatches.map(({ parent, child }) => (
+                <li key={child.id}>
+                  <button
+                    type="button"
+                    onClick={() => pickLeaf(child.id)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-lg border bg-card px-3 py-2.5 text-left transition hover:border-primary/40 hover:bg-accent/50 active:scale-[0.99]",
+                      child.id === currentCategoryId &&
+                        "border-primary bg-primary/5",
+                    )}
+                  >
+                    <span className="text-xl leading-none">
+                      {child.icon ?? parent.icon ?? "📁"}
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col">
+                      <span
+                        className={cn(
+                          "truncate font-medium",
+                          mobile ? "text-base" : "text-sm",
+                        )}
+                      >
+                        {child.name}
+                      </span>
+                      <span className="truncate text-xs text-muted-foreground">
+                        {parent.name}
+                      </span>
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <div className="relative flex-1 overflow-hidden">
+          <div
+            className="flex h-full w-[200%] transition-transform duration-300 ease-out"
+            style={{
+              transform:
+                step === "parent" ? "translateX(0)" : "translateX(-50%)",
+            }}
+          >
+            <section
+              className="h-full w-1/2 shrink-0 overflow-y-auto"
+              aria-hidden={step !== "parent"}
+            >
+              <div className="flex flex-col gap-3 px-3 pb-3 pt-3">
+                <div className="grid grid-cols-3 gap-3">
+                  {groups.map(({ parent }) => (
+                    <Tile
+                      key={parent.id}
+                      icon={parent.icon}
+                      label={parent.name}
+                      mobile={mobile}
+                      onClick={() => pickParent(parent.id)}
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => pickLeaf(null)}
+                  className={cn(
+                    "mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed bg-card px-3 py-3 text-muted-foreground transition hover:border-primary/40 hover:bg-accent/50 hover:text-foreground active:scale-[0.99]",
+                    mobile ? "text-base" : "text-sm",
+                  )}
+                >
+                  <MinusCircle className="h-4 w-4 opacity-60" />
+                  {tCategories("noCategoryOption")}
+                </button>
+              </div>
+            </section>
+            <section
+              className="h-full w-1/2 shrink-0 overflow-y-auto"
+              aria-hidden={step !== "child"}
+            >
+              {selectedChildren.length === 0 ? (
+                <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
+                  {tCategories("noSubcategoriesYet")}
+                </div>
+              ) : (
+                <div className="grid grid-cols-3 gap-3 px-3 pb-3 pt-3">
+                  {selectedChildren.map((child) => (
+                    <Tile
+                      key={child.id}
+                      icon={child.icon}
+                      label={child.name}
+                      mobile={mobile}
+                      selected={child.id === currentCategoryId}
+                      onClick={() => pickLeaf(child.id)}
+                    />
+                  ))}
+                </div>
+              )}
+            </section>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
