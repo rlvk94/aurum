@@ -7,6 +7,13 @@ const publicPaths = [
   "/api/trpc",
   "/api/stripe",
   "/api/cron",
+  // PWA install assets — must be reachable without a session so the OS can
+  // fetch the manifest, app icons, and iOS launch images.
+  "/manifest.webmanifest",
+  "/api/icons",
+  "/api/splash",
+  "/icon.svg",
+  "/apple-icon",
 ];
 const authRequiredPaths = ["/welcome"];
 

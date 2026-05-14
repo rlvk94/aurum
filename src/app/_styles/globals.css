@@ -291,6 +291,17 @@
   }
 }
 
+/* ── Standalone (installed PWA) ──────────────────────────────────────────── */
+/* Hide tap-highlight + suppress overscroll bounce so it feels native. */
+
+@media (display-mode: standalone) {
+  html,
+  body {
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
 .dark {
   --background: hsl(30 8% 8%);
   --foreground: hsl(40 15% 94%);
