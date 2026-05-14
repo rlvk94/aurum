@@ -9,11 +9,23 @@ const Popover = PopoverPrimitive.Root
 
 const PopoverTrigger = PopoverPrimitive.Trigger
 
+type PopoverContentProps = React.ComponentPropsWithoutRef<
+  typeof PopoverPrimitive.Content
+> & {
+  /**
+   * When false, skip Radix Portal so the popover renders inline. Needed when
+   * the trigger sits inside a modal Dialog: the Dialog's react-remove-scroll
+   * blocks wheel events on portaled siblings, but content rendered inline
+   * stays inside the Dialog's allowed scroll region.
+   */
+  usePortal?: boolean
+}
+
 const PopoverContent = React.forwardRef<
   React.ElementRef<typeof PopoverPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof PopoverPrimitive.Content>
->(({ className, align = "center", sideOffset = 4, ...props }, ref) => (
-  <PopoverPrimitive.Portal>
+  PopoverContentProps
+>(({ className, align = "center", sideOffset = 4, usePortal = true, ...props }, ref) => {
+  const content = (
     <PopoverPrimitive.Content
       ref={ref}
       align={align}
@@ -24,8 +36,13 @@ const PopoverContent = React.forwardRef<
       )}
       {...props}
     />
-  </PopoverPrimitive.Portal>
-))
+  )
+  return usePortal ? (
+    <PopoverPrimitive.Portal>{content}</PopoverPrimitive.Portal>
+  ) : (
+    content
+  )
+})
 PopoverContent.displayName = PopoverPrimitive.Content.displayName
 
 export { Popover, PopoverTrigger, PopoverContent }

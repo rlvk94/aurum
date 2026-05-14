@@ -228,12 +228,31 @@ export function CategorySelect(props: CategorySelectProps) {
         </button>
       </PopoverTrigger>
       <PopoverContent
-        className="flex max-h-[min(var(--radix-popover-content-available-height),28rem)] w-[var(--radix-popover-trigger-width)] min-w-[280px] flex-col p-0"
+        className="w-[var(--radix-popover-trigger-width)] min-w-[280px] p-0"
         align="start"
+        collisionPadding={8}
       >
         <Command>
           <CommandInput placeholder={t("searchPlaceholder")} />
-          <CommandList className="max-h-none flex-1 overscroll-contain">
+          <CommandList
+            className="max-h-[min(var(--radix-popover-content-available-height,320px),320px)] overscroll-contain"
+            onWheel={(e) => {
+              // Radix Dialog's react-remove-scroll blocks wheel events on
+              // portaled siblings. Scroll the list manually so wheel keeps
+              // working inside a Dialog.
+              const el = e.currentTarget;
+              const canScrollDown =
+                el.scrollTop + el.clientHeight < el.scrollHeight - 0.5;
+              const canScrollUp = el.scrollTop > 0;
+              if (
+                (e.deltaY > 0 && canScrollDown) ||
+                (e.deltaY < 0 && canScrollUp)
+              ) {
+                e.preventDefault();
+                el.scrollTop += e.deltaY;
+              }
+            }}
+          >
             <CommandEmpty>{t("noCategoriesMatch")}</CommandEmpty>
 
             {(((!isMulti && sentinelLabel) || uncategorizedOption) && (
@@ -271,22 +290,17 @@ export function CategorySelect(props: CategorySelectProps) {
               null}
 
             {groups.map(({ parent, children }) => (
-              <CommandGroup
-                key={parent.id}
-                className={cn(
-                  mode === "leaf-only" &&
-                    "[&_[cmdk-group-heading]]:sticky [&_[cmdk-group-heading]]:top-0 [&_[cmdk-group-heading]]:z-10 [&_[cmdk-group-heading]]:flex [&_[cmdk-group-heading]]:items-center [&_[cmdk-group-heading]]:gap-1.5 [&_[cmdk-group-heading]]:rounded-sm [&_[cmdk-group-heading]]:bg-muted/60 [&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:py-1.5 [&_[cmdk-group-heading]]:text-[11px] [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-foreground",
-                )}
-                heading={
-                  mode === "leaf-only" ? (
-                    <>
-                      {parent.icon && <span>{parent.icon}</span>}
-                      <span>{parent.name}</span>
-                    </>
-                  ) : undefined
-                }
-              >
-                {mode === "any" && (
+              <CommandGroup key={parent.id}>
+                {mode === "leaf-only" ? (
+                  <div className="relative flex select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium">
+                    {parent.icon && (
+                      <span className="text-base leading-none">
+                        {parent.icon}
+                      </span>
+                    )}
+                    <span>{parent.name}</span>
+                  </div>
+                ) : (
                   <CommandItem
                     value={[parent.name, ...(parent.keywords ?? [])].join(" ")}
                     keywords={parent.keywords ?? []}
@@ -314,18 +328,11 @@ export function CategorySelect(props: CategorySelectProps) {
                     ].join(" ")}
                     keywords={child.keywords ?? []}
                     onSelect={() => toggleId(child.id)}
-                    className={mode === "leaf-only" ? "pl-3" : "pl-7"}
+                    className="pl-7"
                   >
-                    {child.icon ? (
+                    {child.icon && (
                       <span className="text-base leading-none">
                         {child.icon}
-                      </span>
-                    ) : (
-                      <span
-                        className="text-base leading-none opacity-40"
-                        aria-hidden
-                      >
-                        •
                       </span>
                     )}
                     <span>{child.name}</span>
