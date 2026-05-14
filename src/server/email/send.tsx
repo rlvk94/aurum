@@ -18,6 +18,7 @@ import {
 import { BillingEventEmail } from "./templates/billing-event-email";
 import { InviteEmail } from "./templates/invite-email";
 import { OtpEmail } from "./templates/otp-email";
+import { SignupNotificationEmail } from "./templates/signup-notification-email";
 
 const SIGN_IN_OTP_EXPIRY_MINUTES = 10;
 const EMAIL_CHANGE_OTP_EXPIRY_MINUTES = 10;
@@ -158,6 +159,41 @@ export async function sendContactEmail(args: {
     subject,
     html,
     replyTo: args.email,
+  });
+}
+
+export async function sendSignupNotificationEmail(args: {
+  email: string;
+  name?: string | null;
+}) {
+  if (!env.SIGNUP_NOTIFY_EMAIL) {
+    console.log(
+      `[DEV-EMAIL] signup notification: ${args.name ?? "(no name)"} <${args.email}> (SIGNUP_NOTIFY_EMAIL not set, skipping send)`,
+    );
+    return;
+  }
+
+  const displayName = args.name?.trim() ? args.name : "(no name)";
+  const subject = `Aurum — ny bruger tilmeldt: ${displayName}`;
+
+  const { common } = await buildTranslators(defaultLocale);
+
+  const html = await render(
+    <SignupNotificationEmail
+      preview={`Ny bruger tilmeldt: ${displayName}`}
+      heading="Ny bruger tilmeldt"
+      rows={[
+        { label: "Navn", value: displayName },
+        { label: "E-mail", value: args.email },
+      ]}
+      footerText={common("footer")}
+    />,
+  );
+
+  await dispatch({
+    to: env.SIGNUP_NOTIFY_EMAIL,
+    subject,
+    html,
   });
 }
 

@@ -6,4 +6,5 @@ export {
   sendEmailChangeOtpEmail,
   sendFamilyInviteEmail,
   sendSignInOtpEmail,
+  sendSignupNotificationEmail,
 } from "./send";

@@ -22,6 +22,7 @@ export const env = createEnv({
       process.env.NODE_ENV === "production"
         ? z.string().email()
         : z.string().email().optional(),
+    SIGNUP_NOTIFY_EMAIL: z.string().email().optional(),
     STRIPE_SECRET_KEY:
       process.env.NODE_ENV === "production"
         ? z.string().min(1)
@@ -75,6 +76,7 @@ export const env = createEnv({
     RESEND_API_KEY: process.env.RESEND_API_KEY,
     EMAIL_FROM: process.env.EMAIL_FROM,
     CONTACT_TO_EMAIL: process.env.CONTACT_TO_EMAIL,
+    SIGNUP_NOTIFY_EMAIL: process.env.SIGNUP_NOTIFY_EMAIL,
     STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
     STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
     STRIPE_PRICE_FAMILY_MONTHLY: process.env.STRIPE_PRICE_FAMILY_MONTHLY,
