@@ -240,7 +240,7 @@ export default function AssetsPage() {
       <AssetFormDialog open={createOpen} onOpenChange={setCreateOpen} />
       <AssetFormDialog
         key={editing?.id}
-        open={!!editing}
+        open={Boolean(editing)}
         onOpenChange={(open) => !open && setEditing(null)}
         asset={editing ?? undefined}
       />

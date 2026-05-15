@@ -78,7 +78,7 @@ export function ProjectFormDialog({
   const utils = api.useUtils();
   const locale = useLocale();
   const dateLocale = locale === "da" ? da : enUS;
-  const isEdit = !!project;
+  const isEdit = Boolean(project);
 
   const schema = useMemo(() => {
     const required = tValidation("required");
@@ -117,7 +117,7 @@ export function ProjectFormDialog({
     onSuccess: (created, vars) => {
       posthog.capture("project_created", {
         has_limit: vars.spendingLimit != null,
-        has_dates: !!(vars.startDate || vars.endDate),
+        has_dates: Boolean(vars.startDate || vars.endDate),
       });
       onOpenChange(false);
       form.reset();

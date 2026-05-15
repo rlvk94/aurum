@@ -82,8 +82,8 @@ export function BudgetTransactionsSheet({
 
   const enabled =
     open &&
-    !!target &&
-    (target.categoryIds.length > 0 || !!target.includeUncategorized);
+    target !== null &&
+    (target.categoryIds.length > 0 || target.includeUncategorized === true);
 
   const query = api.transaction.list.useInfiniteQuery(
     {

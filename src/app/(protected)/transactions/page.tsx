@@ -870,7 +870,7 @@ export default function TransactionsPage() {
       />
       <TransactionFormDialog
         key={editing?.id}
-        open={!!editing}
+        open={Boolean(editing)}
         onOpenChange={(open) => !open && setEditing(null)}
         transaction={editing ?? undefined}
         accounts={accounts}
@@ -878,14 +878,14 @@ export default function TransactionsPage() {
       <TransactionCategoryDialog
         transactionId={quickAssign?.id ?? null}
         currentCategoryId={quickAssign?.categoryId ?? null}
-        open={!!quickAssign}
+        open={Boolean(quickAssign)}
         onOpenChange={(open) => !open && setQuickAssign(null)}
       />
       {hasProjects && (
         <TransactionProjectQuickAssign
           transactionId={projectAssign?.id ?? null}
           currentProjectId={projectAssign?.projectId ?? null}
-          open={!!projectAssign}
+          open={Boolean(projectAssign)}
           onOpenChange={(open) => !open && setProjectAssign(null)}
         />
       )}

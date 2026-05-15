@@ -71,7 +71,7 @@ export function DebtFormDialog({
   const tCommon = useTranslations("common");
   const tValidation = useTranslations("validation");
   const utils = api.useUtils();
-  const isEdit = !!debt;
+  const isEdit = debt !== undefined;
 
   const schema = useMemo(() => {
     const required = tValidation("required");
@@ -106,7 +106,7 @@ export function DebtFormDialog({
         principal_cents: variables.principal,
         term_months: variables.termMonths,
         payment_frequency: variables.paymentFrequency,
-        has_linked_asset: !!variables.assetId,
+        has_linked_asset: Boolean(variables.assetId),
       });
       onOpenChange(false);
       form.reset();

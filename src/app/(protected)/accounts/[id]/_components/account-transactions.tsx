@@ -485,7 +485,7 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
 
       <TransactionFormDialog
         key={editing?.id}
-        open={!!editing}
+        open={Boolean(editing)}
         onOpenChange={(open) => !open && setEditing(null)}
         transaction={editing ?? undefined}
         accounts={accounts}

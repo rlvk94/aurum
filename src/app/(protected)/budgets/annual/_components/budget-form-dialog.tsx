@@ -40,7 +40,7 @@ export function BudgetFormDialog({
   const tCommon = useTranslations("common");
   const tValidation = useTranslations("validation");
   const utils = api.useUtils();
-  const isEdit = !!budget;
+  const isEdit = Boolean(budget);
 
   const { data: accounts } = api.financialAccount.list.useQuery();
   const activeAccounts = useMemo(

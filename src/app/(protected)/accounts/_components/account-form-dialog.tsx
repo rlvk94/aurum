@@ -96,7 +96,7 @@ export function AccountFormDialog({
   const tCommon = useTranslations("common");
   const tFamily = useTranslations("family");
   const utils = api.useUtils();
-  const isEdit = !!account;
+  const isEdit = account !== undefined;
 
   const { data: session } = api.user.me.useQuery();
   const { data: members = [] } = api.family.listMembers.useQuery();

@@ -57,7 +57,7 @@ export function ProjectCard({
   const locale = useLocale();
   const dateLocale = locale === "da" ? da : enUS;
 
-  const archived = !!project.archivedAt;
+  const archived = Boolean(project.archivedAt);
   const palette = project.coverPalette as ProjectPalette;
   const progress = deriveProgress({
     startDate: project.startDate,

@@ -36,7 +36,8 @@ export function TopNav() {
   // declared parent — otherwise we're seeing stale state from a previous
   // detail page (React renders the new page before the old one unmounts).
   const metadataApplies =
-    !!metadata?.title &&
+    metadata !== null &&
+    metadata.title !== undefined &&
     (!metadata.parentPath ||
       pathname.startsWith(`${metadata.parentPath}/`));
 

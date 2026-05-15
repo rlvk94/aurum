@@ -38,7 +38,7 @@ export function FamilyForm() {
 
   const isOwner = current?.role === "owner";
   const dirty = nameDraft !== null && nameDraft.trim() !== current?.name;
-  const canSave = !!isOwner && dirty && name.trim().length > 0;
+  const canSave = Boolean(isOwner) && dirty && name.trim().length > 0;
 
   return (
     <div className="mx-auto w-full max-w-2xl space-y-6">

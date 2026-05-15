@@ -301,7 +301,7 @@ export function MembersClient() {
                 key={m.userId}
                 member={m}
                 isSelf={isSelf}
-                isOwnerViewer={!!isOwner}
+                isOwnerViewer={Boolean(isOwner)}
                 isLastOwner={isLastOwner}
                 onChangeRole={(role) =>
                   changeRole.mutate({ userId: m.userId, role })

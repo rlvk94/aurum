@@ -39,7 +39,7 @@ export function CreatePlanDialog({
   const tCommon = useTranslations("common");
   const tValidation = useTranslations("validation");
   const utils = api.useUtils();
-  const isEdit = !!plan;
+  const isEdit = Boolean(plan);
 
   const schema = useMemo(() => {
     const required = tValidation("required");

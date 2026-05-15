@@ -19,7 +19,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default async function Home() {
   const session = await getSession();
-  const isAuthed = !!session?.user;
+  const isAuthed = Boolean(session?.user);
 
   return (
     <div className="min-h-screen bg-background text-foreground">

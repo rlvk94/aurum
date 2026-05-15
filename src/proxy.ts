@@ -24,7 +24,7 @@ export function proxy(request: NextRequest) {
     pathname === "/" ||
     publicPaths.some((path) => pathname.startsWith(path));
   const isAuthRequired = authRequiredPaths.some((path) => pathname.startsWith(path));
-  const hasSession = !!getSessionCookie(request);
+  const hasSession = Boolean(getSessionCookie(request));
 
   // Authenticated users visiting login → redirect to dashboard
   if (hasSession && pathname === "/login") {

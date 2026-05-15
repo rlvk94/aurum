@@ -376,7 +376,7 @@ export const budgetRouter = createTRPCRouter({
 
       const categoryIds = lines
         .map((l) => l.categoryId)
-        .filter((c): c is string => !!c);
+        .filter((c): c is string => Boolean(c));
       const accountIds = (await loadAccountIdsByBudget(ctx.db, [b.id])).get(
         b.id,
       ) ?? [];

@@ -122,7 +122,7 @@ export function ChallengesClient() {
       <ChallengeFormDialog open={createOpen} onOpenChange={setCreateOpen} />
       <ChallengeFormDialog
         key={editing?.id}
-        open={!!editing}
+        open={Boolean(editing)}
         onOpenChange={(open) => !open && setEditing(null)}
         challenge={editing ?? undefined}
       />

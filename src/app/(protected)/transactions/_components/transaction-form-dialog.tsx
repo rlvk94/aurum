@@ -107,7 +107,7 @@ export function TransactionFormDialog({
   const tProjects = useTranslations("projects");
   const locale = useLocale();
   const utils = api.useUtils();
-  const isEdit = !!transaction;
+  const isEdit = transaction !== undefined;
   const { has: hasFeature } = useEntitlements();
   const hasProjects = hasFeature("projects");
   const { data: categories = [] } = api.category.list.useQuery();
@@ -121,7 +121,7 @@ export function TransactionFormDialog({
       posthog.capture("transaction_created", {
         type: variables.type,
         amount_cents: variables.amount,
-        has_category: !!variables.categoryId,
+        has_category: Boolean(variables.categoryId),
       });
       onOpenChange(false);
       form.reset();
@@ -135,7 +135,7 @@ export function TransactionFormDialog({
       posthog.capture("transaction_updated", {
         type: variables.type,
         amount_cents: variables.amount,
-        has_category: !!variables.categoryId,
+        has_category: Boolean(variables.categoryId),
       });
       onOpenChange(false);
       void utils.transaction.list.invalidate();

@@ -32,7 +32,7 @@ export function TutorialProvider({ children }: { children: React.ReactNode }) {
     },
   });
 
-  const eligible = !!me?.onboardedAt && me.tutorialCompletedAt === null;
+  const eligible = me?.onboardedAt != null && me.tutorialCompletedAt === null;
   const isActive = eligible && !closedByUser && pathname === DASHBOARD_PATH;
 
   const dismiss = useCallback(() => {

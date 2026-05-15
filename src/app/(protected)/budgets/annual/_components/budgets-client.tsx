@@ -181,7 +181,7 @@ export function BudgetsClient() {
       <BudgetFormDialog open={createOpen} onOpenChange={setCreateOpen} />
       <BudgetFormDialog
         key={editing?.id}
-        open={!!editing}
+        open={Boolean(editing)}
         onOpenChange={(open) => !open && setEditing(null)}
         budget={editing ?? undefined}
       />

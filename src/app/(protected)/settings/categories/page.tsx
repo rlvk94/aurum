@@ -143,7 +143,7 @@ export default function CategoriesPage() {
   }, [groups, search]);
 
   const isExpanded = (parentId: string) =>
-    !!search.trim() || !collapsed.has(parentId);
+    Boolean(search.trim()) || !collapsed.has(parentId);
 
   const toggle = (parentId: string) => {
     setCollapsed((prev) => {
@@ -218,7 +218,7 @@ export default function CategoriesPage() {
               variant="ghost"
               size="sm"
               onClick={allCollapsed ? expandAll : collapseAll}
-              disabled={!!search.trim()}
+              disabled={Boolean(search.trim())}
             >
               {allCollapsed ? <Maximize2 /> : <Minimize2 />}
               {allCollapsed ? t("expandAll") : t("collapseAll")}

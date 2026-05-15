@@ -60,7 +60,7 @@ function DebtCard({
   const tCommon = useTranslations("common");
 
   const { summary } = debt;
-  const archived = !!debt.archivedAt;
+  const archived = Boolean(debt.archivedAt);
   const paidOff = summary.outstandingBalance === 0;
   const progressPct = Math.round(summary.progress * 100);
   const periodsRemaining = Math.max(
@@ -296,7 +296,7 @@ export function DebtsClient() {
       <DebtFormDialog open={createOpen} onOpenChange={setCreateOpen} />
       <DebtFormDialog
         key={editing?.id}
-        open={!!editing}
+        open={Boolean(editing)}
         onOpenChange={(open) => !open && setEditing(null)}
         debt={editing ?? undefined}
       />

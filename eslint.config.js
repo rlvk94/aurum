@@ -65,6 +65,12 @@ export default tseslint.config(
         "error",
         { drizzleObjectName: ["db", "ctx.db"] },
       ],
+      // Forbid `!!x`; require explicit `Boolean(x)` for boolean coercion.
+      // Number/string coercion left untouched to avoid churn elsewhere.
+      "no-implicit-coercion": [
+        "error",
+        { boolean: true, number: false, string: false },
+      ],
     },
   },
   {

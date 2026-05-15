@@ -158,7 +158,7 @@ export function PlanListClient() {
       />
       <CreatePlanDialog
         key={editingPlan?.id}
-        open={!!editingPlan}
+        open={Boolean(editingPlan)}
         plan={editingPlan ?? undefined}
         onOpenChange={(open) => !open && setEditingPlan(null)}
       />

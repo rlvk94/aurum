@@ -269,12 +269,12 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
         key={editing?.id}
         budgetId={budgetId}
         line={editing}
-        open={!!editing}
+        open={Boolean(editing)}
         onOpenChange={(open) => !open && setEditing(null)}
       />
       <BudgetTransactionsSheet
         target={drillTarget}
-        open={!!drillTarget}
+        open={Boolean(drillTarget)}
         onOpenChange={(open) => !open && setDrillTarget(null)}
       />
     </div>
@@ -290,7 +290,7 @@ function ScopeLine({ accountIds }: { accountIds: string[] }) {
     const byId = new Map(accounts.map((a) => [a.id, a.name]));
     return accountIds
       .map((id) => byId.get(id))
-      .filter((n): n is string => !!n);
+      .filter((n): n is string => Boolean(n));
   }, [accountIds, accounts]);
 
   return (

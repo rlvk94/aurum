@@ -69,7 +69,7 @@ export function ChallengeFormDialog({
   const tCommon = useTranslations("common");
   const tValidation = useTranslations("validation");
   const utils = api.useUtils();
-  const isEdit = !!challenge;
+  const isEdit = Boolean(challenge);
 
   const { data: categories } = api.category.list.useQuery();
   const { data: accounts } = api.financialAccount.list.useQuery();

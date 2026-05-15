@@ -57,7 +57,7 @@ export function AssetFormDialog({
   const t = useTranslations("assets");
   const tCommon = useTranslations("common");
   const utils = api.useUtils();
-  const isEdit = !!asset;
+  const isEdit = asset !== undefined;
 
   const createAsset = api.asset.create.useMutation({
     onSuccess: (_, variables) => {

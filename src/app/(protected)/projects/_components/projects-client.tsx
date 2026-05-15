@@ -208,7 +208,7 @@ export function ProjectsClient() {
       />
       <ProjectFormDialog
         key={editing?.id ?? "edit"}
-        open={!!editing}
+        open={Boolean(editing)}
         onOpenChange={(o) => !o && setEditing(null)}
         project={editing ?? undefined}
       />

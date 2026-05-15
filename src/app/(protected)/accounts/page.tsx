@@ -223,7 +223,7 @@ export default function AccountsPage() {
       <AccountFormDialog open={createOpen} onOpenChange={setCreateOpen} />
       <AccountFormDialog
         key={editingAccount?.id}
-        open={!!editingAccount}
+        open={Boolean(editingAccount)}
         onOpenChange={(open) => !open && setEditingAccount(null)}
         account={editingAccount ?? undefined}
       />

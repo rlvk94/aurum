@@ -115,7 +115,7 @@ export function CategoryFormDialog({
   const t = useTranslations("categories");
   const tCommon = useTranslations("common");
   const utils = api.useUtils();
-  const isEdit = !!category;
+  const isEdit = category !== undefined;
 
   const createCategory = api.category.create.useMutation({
     onSuccess: () => {

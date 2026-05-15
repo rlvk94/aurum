@@ -62,7 +62,7 @@ export function ChallengeCard({
   const tCommon = useTranslations("common");
 
   const { currentInstance, progress, targetAmount } = challenge;
-  const archived = !!challenge.archivedAt;
+  const archived = Boolean(challenge.archivedAt);
 
   const Icon = typeIcon[challenge.type];
 
