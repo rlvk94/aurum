@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
+import { cn } from "~/app/_lib/utils";
 import { Button } from "~/app/_components/button";
 import {
   DropdownMenu,
@@ -36,6 +37,41 @@ import {
 } from "../../_lib/budget-format";
 import { buildBudgetTree, type CategoryGroup } from "../../_lib/budget-tree";
 import { LineCell } from "./line-cell";
+import type { DrillDownTarget } from "./budget-transactions-sheet";
+
+function collectGroupCategoryIds(group: CategoryGroup): {
+  ids: string[];
+  includeUncategorized?: boolean;
+} {
+  if (group.id === "__orphan") return { ids: [], includeUncategorized: true };
+  const ids = new Set<string>();
+  if (group.category) ids.add(group.category.id);
+  for (const sub of group.subgroups) {
+    if (sub.category) ids.add(sub.category.id);
+    for (const ln of sub.lines)
+      if (ln.line.categoryId) ids.add(ln.line.categoryId);
+  }
+  for (const ln of group.lines)
+    if (ln.line.categoryId) ids.add(ln.line.categoryId);
+  return { ids: Array.from(ids) };
+}
+
+function collectAllCategoryIds(tree: CategoryGroup[]): {
+  ids: string[];
+  includeUncategorized?: boolean;
+} {
+  const ids = new Set<string>();
+  let includeOrphan = false;
+  for (const g of tree) {
+    const part = collectGroupCategoryIds(g);
+    part.ids.forEach((i) => ids.add(i));
+    if (part.includeUncategorized) includeOrphan = true;
+  }
+  return {
+    ids: Array.from(ids),
+    includeUncategorized: includeOrphan || undefined,
+  };
+}
 
 type BudgetDetail = RouterOutputs["budget"]["get"];
 type Line = BudgetDetail["lines"][number];
@@ -52,12 +88,14 @@ function SummaryCell({
   size = "sm",
   align = "start",
   tooltip,
+  onClick,
 }: {
   planned: number;
   actual: number;
   size?: "sm" | "lg";
   align?: "start" | "end";
   tooltip?: { title: string; subtitle?: string };
+  onClick?: () => void;
 }) {
   const state = cellState(planned, actual);
   const ratio = planned > 0 ? actual / planned : actual > 0 ? 1 : 0;
@@ -77,12 +115,8 @@ function SummaryCell({
   const barHeight = size === "lg" ? "h-[5px]" : "h-[4px]";
   const barWidth = align === "end" ? "w-20 self-end" : "";
 
-  const body = (
-    <div
-      className={`flex flex-col gap-1 text-right ${
-        tooltip ? "cursor-default" : ""
-      }`}
-    >
+  const inner = (
+    <>
       <span
         className={`almanac-numerals truncate ${plannedSize} ${
           planned > 0 ? "text-foreground" : "text-muted-foreground/60"
@@ -123,6 +157,30 @@ function SummaryCell({
           {formatMoney(Math.abs(variance))}
         </span>
       )}
+    </>
+  );
+
+  const body = onClick ? (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "flex flex-col gap-1 text-right",
+        "-m-1 w-full cursor-pointer rounded-md p-1 transition-colors",
+        "hover:bg-muted/60",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+      )}
+    >
+      {inner}
+    </button>
+  ) : (
+    <div
+      className={cn(
+        "flex flex-col gap-1 text-right",
+        tooltip && "cursor-default",
+      )}
+    >
+      {inner}
     </div>
   );
 
@@ -264,6 +322,7 @@ export function BudgetGrid({
   onDeleteLine,
   onUpdateCell,
   onAddLine,
+  onDrillDown,
   currentMonthIndex,
 }: {
   budget: BudgetDetail;
@@ -271,6 +330,7 @@ export function BudgetGrid({
   onDeleteLine: (line: Line) => void;
   onUpdateCell: (lineId: string, monthIndex: number, amount: number) => void;
   onAddLine: () => void;
+  onDrillDown: (target: DrillDownTarget) => void;
   currentMonthIndex: number | null;
 }) {
   const t = useTranslations("budgets");
@@ -314,6 +374,34 @@ export function BudgetGrid({
       return next;
     });
 
+  const totalsTarget = useMemo(
+    () => collectAllCategoryIds(tree),
+    [tree],
+  );
+
+  const groupTarget = (
+    group: CategoryGroup | null,
+    monthIndex: number | null,
+    label: string,
+    planned: number,
+    actual: number,
+  ): DrillDownTarget => {
+    const part =
+      group === null ? totalsTarget : collectGroupCategoryIds(group);
+    return {
+      key: `${group?.id ?? "__totals"}::${monthIndex ?? "year"}`,
+      label,
+      icon: group?.icon ?? null,
+      categoryIds: part.ids,
+      includeUncategorized: part.includeUncategorized,
+      monthIndex,
+      year: budget.year,
+      accountIds: budget.accountIds,
+      planned,
+      actual,
+    };
+  };
+
   if (budget.lines.length === 0) {
     return (
       <div className="relative overflow-hidden rounded-[14px] border border-dashed border-border bg-card px-6 py-16 text-center">
@@ -355,6 +443,8 @@ export function BudgetGrid({
         onEditLine={onEditLine}
         onDeleteLine={onDeleteLine}
         onUpdateCell={onUpdateCell}
+        makeTarget={groupTarget}
+        onDrillDown={onDrillDown}
       />
       <div className="relative hidden w-full min-w-0 max-w-full overflow-hidden rounded-[14px] border border-border bg-card shadow-card md:block">
       <div
@@ -440,6 +530,8 @@ export function BudgetGrid({
                 onEditLine={onEditLine}
                 onDeleteLine={onDeleteLine}
                 onUpdateCell={onUpdateCell}
+                makeTarget={groupTarget}
+                onDrillDown={onDrillDown}
               />
             ))}
           </tbody>
@@ -464,6 +556,17 @@ export function BudgetGrid({
                     planned={totals.plannedByMonth[i] ?? 0}
                     actual={totals.actualByMonth[i] ?? 0}
                     tooltip={{ title: monthsLong[i]!, subtitle: t("totals") }}
+                    onClick={() =>
+                      onDrillDown(
+                        groupTarget(
+                          null,
+                          i,
+                          t("totals"),
+                          totals.plannedByMonth[i] ?? 0,
+                          totals.actualByMonth[i] ?? 0,
+                        ),
+                      )
+                    }
                   />
                 </td>
               ))}
@@ -474,6 +577,17 @@ export function BudgetGrid({
                   size="lg"
                   align="end"
                   tooltip={{ title: t("yearTotal"), subtitle: t("totals") }}
+                  onClick={() =>
+                    onDrillDown(
+                      groupTarget(
+                        null,
+                        null,
+                        t("totals"),
+                        totals.plannedYear,
+                        totals.actualYear,
+                      ),
+                    )
+                  }
                 />
               </td>
               <td />
@@ -497,6 +611,8 @@ function GroupRows({
   onEditLine,
   onDeleteLine,
   onUpdateCell,
+  makeTarget,
+  onDrillDown,
 }: {
   group: CategoryGroup;
   depth: 0 | 1;
@@ -508,6 +624,14 @@ function GroupRows({
   onEditLine: (line: Line) => void;
   onDeleteLine: (line: Line) => void;
   onUpdateCell: (lineId: string, monthIndex: number, amount: number) => void;
+  makeTarget: (
+    group: CategoryGroup | null,
+    monthIndex: number | null,
+    label: string,
+    planned: number,
+    actual: number,
+  ) => DrillDownTarget;
+  onDrillDown: (target: DrillDownTarget) => void;
 }) {
   const t = useTranslations("budgets");
   const isExpanded = expanded.has(group.id);
@@ -589,14 +713,26 @@ function GroupRows({
         {group.plannedByMonth.map((planned, i) => (
           <td
             key={i}
-            className={`px-2 py-2 align-middle ${
-              currentMonthIndex === i ? "bg-primary/[0.02]" : ""
-            }`}
+            className={cn(
+              "px-2 py-2 align-middle",
+              currentMonthIndex === i && "bg-primary/[0.02]",
+            )}
           >
             <SummaryCell
               planned={planned}
               actual={group.actualByMonth[i] ?? 0}
               tooltip={{ title: monthsLong[i]!, subtitle: group.label }}
+              onClick={() =>
+                onDrillDown(
+                  makeTarget(
+                    group,
+                    i,
+                    group.label,
+                    planned,
+                    group.actualByMonth[i] ?? 0,
+                  ),
+                )
+              }
             />
           </td>
         ))}
@@ -606,6 +742,11 @@ function GroupRows({
             actual={rowActual}
             align="end"
             tooltip={{ title: t("yearTotal"), subtitle: group.label }}
+            onClick={() =>
+              onDrillDown(
+                makeTarget(group, null, group.label, rowPlanned, rowActual),
+              )
+            }
           />
         </td>
         <td aria-hidden className="px-1 py-3" />
@@ -638,6 +779,8 @@ function GroupRows({
             onEditLine={onEditLine}
             onDeleteLine={onDeleteLine}
             onUpdateCell={onUpdateCell}
+            makeTarget={makeTarget}
+            onDrillDown={onDrillDown}
           />
         ))}
     </>
@@ -759,6 +902,8 @@ function MobileBudget({
   onEditLine,
   onDeleteLine,
   onUpdateCell,
+  makeTarget,
+  onDrillDown,
 }: {
   tree: CategoryGroup[];
   totals: {
@@ -775,6 +920,14 @@ function MobileBudget({
   onEditLine: (line: Line) => void;
   onDeleteLine: (line: Line) => void;
   onUpdateCell: (lineId: string, monthIndex: number, amount: number) => void;
+  makeTarget: (
+    group: CategoryGroup | null,
+    monthIndex: number | null,
+    label: string,
+    planned: number,
+    actual: number,
+  ) => DrillDownTarget;
+  onDrillDown: (target: DrillDownTarget) => void;
 }) {
   const t = useTranslations("budgets");
   const initialMonth = currentMonthIndex ?? 0;
@@ -826,6 +979,17 @@ function MobileBudget({
             actual={totals.actualByMonth[selectedMonth] ?? 0}
             size="lg"
             align="end"
+            onClick={() =>
+              onDrillDown(
+                makeTarget(
+                  null,
+                  selectedMonth,
+                  t("totals"),
+                  totals.plannedByMonth[selectedMonth] ?? 0,
+                  totals.actualByMonth[selectedMonth] ?? 0,
+                ),
+              )
+            }
           />
         </div>
         <div className="almanac-rule my-3" />
@@ -837,6 +1001,17 @@ function MobileBudget({
             planned={totals.plannedYear}
             actual={totals.actualYear}
             align="end"
+            onClick={() =>
+              onDrillDown(
+                makeTarget(
+                  null,
+                  null,
+                  t("totals"),
+                  totals.plannedYear,
+                  totals.actualYear,
+                ),
+              )
+            }
           />
         </div>
       </div>
@@ -854,6 +1029,8 @@ function MobileBudget({
           onEditLine={onEditLine}
           onDeleteLine={onDeleteLine}
           onUpdateCell={onUpdateCell}
+          makeTarget={makeTarget}
+          onDrillDown={onDrillDown}
         />
       ))}
     </div>
@@ -871,6 +1048,8 @@ function MobileGroupCard({
   onEditLine,
   onDeleteLine,
   onUpdateCell,
+  makeTarget,
+  onDrillDown,
 }: {
   group: CategoryGroup;
   depth: 0 | 1;
@@ -882,6 +1061,14 @@ function MobileGroupCard({
   onEditLine: (line: Line) => void;
   onDeleteLine: (line: Line) => void;
   onUpdateCell: (lineId: string, monthIndex: number, amount: number) => void;
+  makeTarget: (
+    group: CategoryGroup | null,
+    monthIndex: number | null,
+    label: string,
+    planned: number,
+    actual: number,
+  ) => DrillDownTarget;
+  onDrillDown: (target: DrillDownTarget) => void;
 }) {
   const t = useTranslations("budgets");
   const isExpanded = expanded.has(group.id);
@@ -892,61 +1079,77 @@ function MobileGroupCard({
   const planned = group.plannedByMonth[selectedMonth] ?? 0;
   const actual = group.actualByMonth[selectedMonth] ?? 0;
 
-  const wrapperClass =
-    depth === 0
-      ? "rounded-[12px] border border-border bg-card shadow-card"
-      : "rounded-[10px] border border-border/60 bg-muted/[0.25]";
-
   return (
-    <div className={wrapperClass}>
-      <button
-        type="button"
-        onClick={() => hasChildren && onToggle(group.id)}
-        aria-expanded={isExpanded}
-        className={`flex w-full items-center gap-3 px-3 py-3 text-left ${
-          hasChildren ? "cursor-pointer" : "cursor-default"
-        }`}
-      >
-        <span
-          className={`flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground transition-transform ${
-            isExpanded ? "rotate-90" : ""
-          }`}
+    <div
+      className={cn(
+        depth === 0
+          ? "rounded-[12px] border border-border bg-card shadow-card"
+          : "rounded-[10px] border border-border/60 bg-muted/[0.25]",
+      )}
+    >
+      <div className="flex items-stretch gap-2 px-3 py-3">
+        <button
+          type="button"
+          onClick={() => hasChildren && onToggle(group.id)}
+          aria-expanded={isExpanded}
+          className={cn(
+            "flex flex-1 items-center gap-3 text-left",
+            hasChildren ? "cursor-pointer" : "cursor-default",
+          )}
         >
-          {hasChildren && <ChevronRight className="h-4 w-4" />}
-        </span>
-        {group.icon ? (
           <span
-            aria-hidden
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-base leading-none"
+            className={cn(
+              "flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground transition-transform",
+              isExpanded && "rotate-90",
+            )}
           >
-            {group.icon}
+            {hasChildren && <ChevronRight className="h-4 w-4" />}
           </span>
-        ) : (
-          <span
-            aria-hidden
-            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-dashed border-border text-[10px] uppercase text-muted-foreground"
-          >
-            ·
-          </span>
-        )}
-        <div className="min-w-0 flex-1">
-          <div
-            className={`truncate leading-tight ${
-              depth === 0
-                ? "font-display text-[15px] text-foreground"
-                : "text-sm font-medium text-foreground"
-            } ${group.archived ? "text-muted-foreground line-through" : ""}`}
-          >
-            {group.label}
+          {group.icon ? (
+            <span
+              aria-hidden
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-base leading-none"
+            >
+              {group.icon}
+            </span>
+          ) : (
+            <span
+              aria-hidden
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-dashed border-border text-[10px] uppercase text-muted-foreground"
+            >
+              ·
+            </span>
+          )}
+          <div className="min-w-0 flex-1">
+            <div
+              className={cn(
+                "truncate leading-tight",
+                depth === 0
+                  ? "font-display text-[15px] text-foreground"
+                  : "text-sm font-medium text-foreground",
+                group.archived && "text-muted-foreground line-through",
+              )}
+            >
+              {group.label}
+            </div>
+            <div className="mt-0.5 text-[10px] text-muted-foreground">
+              {t("lineCount", { count: lineCount })}
+            </div>
           </div>
-          <div className="mt-0.5 text-[10px] text-muted-foreground">
-            {t("lineCount", { count: lineCount })}
-          </div>
+        </button>
+        <div className="shrink-0 self-center">
+          <SummaryCell
+            planned={planned}
+            actual={actual}
+            align="end"
+            onClick={() =>
+              onDrillDown(
+                makeTarget(group, selectedMonth, group.label, planned, actual),
+              )
+            }
+          />
         </div>
-        <div className="shrink-0">
-          <SummaryCell planned={planned} actual={actual} align="end" />
-        </div>
-      </button>
+      </div>
 
       {isExpanded && (
         <div className="border-t border-border/60">
@@ -976,6 +1179,8 @@ function MobileGroupCard({
                   onEditLine={onEditLine}
                   onDeleteLine={onDeleteLine}
                   onUpdateCell={onUpdateCell}
+                  makeTarget={makeTarget}
+                  onDrillDown={onDrillDown}
                 />
               ))}
             </div>

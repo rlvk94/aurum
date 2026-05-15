@@ -161,6 +161,7 @@ export const transactionRouter = createTRPCRouter({
       z
         .object({
           accountId: z.string().uuid().optional(),
+          accountIds: z.array(z.string().uuid()).optional(),
           categoryId: z.string().uuid().nullable().optional(),
           categoryIds: z.array(z.string().uuid()).optional(),
           includeUncategorized: z.boolean().optional(),
@@ -204,6 +205,9 @@ export const transactionRouter = createTRPCRouter({
 
       if (input?.accountId) {
         conditions.push(eq(transaction.accountId, input.accountId));
+      }
+      if (input?.accountIds && input.accountIds.length > 0) {
+        conditions.push(inArray(transaction.accountId, input.accountIds));
       }
       if (input?.type) {
         conditions.push(eq(transaction.type, input.type));

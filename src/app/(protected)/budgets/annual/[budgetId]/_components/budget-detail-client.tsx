@@ -18,6 +18,10 @@ import { YearRibbon } from "../../_components/year-ribbon";
 import { BudgetGrid } from "./budget-grid";
 import { AddLineDialog } from "./add-line-dialog";
 import { EditLineDialog } from "./edit-line-dialog";
+import {
+  BudgetTransactionsSheet,
+  type DrillDownTarget,
+} from "./budget-transactions-sheet";
 
 type BudgetDetail = RouterOutputs["budget"]["get"];
 type Line = BudgetDetail["lines"][number];
@@ -37,6 +41,7 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
 
   const [addOpen, setAddOpen] = useState(false);
   const [editing, setEditing] = useState<Line | null>(null);
+  const [drillTarget, setDrillTarget] = useState<DrillDownTarget | null>(null);
 
   const invalidate = () => {
     void utils.budget.get.invalidate({ id: budgetId });
@@ -251,6 +256,7 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
           updateCell.mutate({ lineId, monthIndex, amount })
         }
         onAddLine={() => setAddOpen(true)}
+        onDrillDown={setDrillTarget}
         currentMonthIndex={currentMonthIndex}
       />
 
@@ -265,6 +271,11 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
         line={editing}
         open={!!editing}
         onOpenChange={(open) => !open && setEditing(null)}
+      />
+      <BudgetTransactionsSheet
+        target={drillTarget}
+        open={!!drillTarget}
+        onOpenChange={(open) => !open && setDrillTarget(null)}
       />
     </div>
   );
