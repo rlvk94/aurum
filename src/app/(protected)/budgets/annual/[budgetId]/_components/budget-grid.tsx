@@ -1093,7 +1093,7 @@ function MobileGroupCard({
           onClick={() => hasChildren && onToggle(group.id)}
           aria-expanded={isExpanded}
           className={cn(
-            "flex flex-1 items-center gap-3 text-left",
+            "flex min-w-0 flex-1 items-center gap-3 text-left",
             hasChildren ? "cursor-pointer" : "cursor-default",
           )}
         >

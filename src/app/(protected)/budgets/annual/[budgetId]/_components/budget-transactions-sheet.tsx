@@ -120,7 +120,7 @@ export function BudgetTransactionsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-md"
+        className="flex w-full flex-col gap-0 overflow-hidden p-0 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] [&>button]:top-[calc(env(safe-area-inset-top,0px)+1rem)] sm:max-w-md"
       >
         <SheetHeader className="border-b border-border px-5 py-4">
           <div className="flex items-center gap-3">
