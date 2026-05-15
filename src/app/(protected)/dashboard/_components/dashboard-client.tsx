@@ -129,14 +129,19 @@ function StatCard({
 }) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-muted-foreground text-sm font-medium">
+      <CardHeader className="flex flex-row items-start justify-between gap-2 p-4 pb-2 sm:p-6 sm:pb-2">
+        <CardTitle className="min-w-0 truncate text-muted-foreground text-xs font-medium sm:text-sm">
           {title}
         </CardTitle>
-        <Icon className={`h-4 w-4 ${className ?? "text-muted-foreground"}`} />
+        <Icon
+          className={cn(
+            "h-4 w-4 shrink-0",
+            className ?? "text-muted-foreground",
+          )}
+        />
       </CardHeader>
-      <CardContent>
-        <div className="font-display text-xl break-words sm:text-2xl">
+      <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+        <div className="font-display text-base break-words tabular-nums leading-tight sm:text-2xl">
           {value}
         </div>
       </CardContent>
@@ -159,14 +164,14 @@ function LockedStatCard({
       className="rounded-lg text-left"
     >
       <Card className="h-full border-dashed">
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-muted-foreground text-sm font-medium">
+        <CardHeader className="flex flex-row items-start justify-between gap-2 p-4 pb-2 sm:p-6 sm:pb-2">
+          <CardTitle className="min-w-0 truncate text-muted-foreground text-xs font-medium sm:text-sm">
             {title}
           </CardTitle>
-          <Lock className="text-muted-foreground h-4 w-4" />
+          <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
         </CardHeader>
-        <CardContent>
-          <div className="font-display text-muted-foreground flex items-center gap-2 text-xl sm:text-2xl">
+        <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
+          <div className="font-display text-muted-foreground flex items-center gap-2 text-base sm:text-2xl">
             —
             <LockBadge />
           </div>
@@ -278,11 +283,11 @@ function AnnualBudgetCard({
         ) : (
           <div className="space-y-4">
             <div>
-              <div className="flex items-center justify-between text-sm">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 text-sm">
                 <span className="text-muted-foreground">
                   {t("spentVsPlanned")}
                 </span>
-                <span className="font-medium tabular-nums">
+                <span className="font-medium tabular-nums break-words text-right">
                   {formatAmount(totalActual)} / {formatAmount(totalPlanned)}
                 </span>
               </div>
@@ -533,7 +538,7 @@ export function DashboardClient() {
         )}
       </div>
 
-      <div className="grid gap-4 sm:gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2">
         <AnnualBudgetCard budgets={budgets} isLoading={budgetsLoading} />
 
         {has("projects") ? (
@@ -573,22 +578,22 @@ export function DashboardClient() {
                   return (
                     <div
                       key={tx.id}
-                      className="flex items-center justify-between gap-3 text-sm"
+                      className="flex w-full min-w-0 items-start gap-3 overflow-hidden text-sm sm:gap-4"
                     >
-                      <span className="text-muted-foreground w-20 whitespace-nowrap">
+                      <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground sm:w-20 sm:text-sm">
                         {format(dateObj, "d. MMM", { locale: dateLocale })}
                       </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-foreground truncate font-medium">
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <p className="truncate font-medium text-foreground">
                           {tx.description}
                         </p>
-                        <p className="text-muted-foreground truncate text-xs">
+                        <p className="truncate text-xs text-muted-foreground">
                           {accountMap.get(tx.accountId) ?? "—"}
                         </p>
                       </div>
                       <span
                         className={cn(
-                          "font-medium whitespace-nowrap",
+                          "shrink-0 whitespace-nowrap text-xs font-medium tabular-nums sm:text-sm",
                           tx.type === "expense" && "text-expense",
                           tx.type === "income" && "text-income",
                         )}
