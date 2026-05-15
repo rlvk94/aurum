@@ -31,6 +31,10 @@ type Props = {
   currentCategoryId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // When supplied, the dialog defers the mutation to the caller and
+  // closes after onPick returns. Used for the bulk-action flow where
+  // the caller knows the selection.
+  onPick?: (categoryId: string | null) => void;
 };
 
 export function TransactionCategoryDialog({
@@ -38,9 +42,12 @@ export function TransactionCategoryDialog({
   currentCategoryId,
   open,
   onOpenChange,
+  onPick,
 }: Props) {
   const t = useTranslations("transactions");
   const isMobile = useIsMobile();
+  const shouldRender = open && (transactionId !== null || onPick !== undefined);
+  const flowKey = transactionId ?? "bulk";
 
   if (!isMobile) {
     return (
@@ -52,12 +59,13 @@ export function TransactionCategoryDialog({
               {t("assignCategoryDescription")}
             </DialogDescription>
           </DialogHeader>
-          {open && transactionId && (
+          {shouldRender && (
             <CategoryGridFlow
-              key={transactionId}
+              key={flowKey}
               transactionId={transactionId}
               currentCategoryId={currentCategoryId}
               onClose={() => onOpenChange(false)}
+              onPick={onPick}
             />
           )}
         </DialogContent>
@@ -74,12 +82,13 @@ export function TransactionCategoryDialog({
             {t("assignCategoryDescription")}
           </DrawerDescription>
         </DrawerHeader>
-        {open && transactionId && (
+        {shouldRender && (
           <CategoryGridFlow
-            key={transactionId}
+            key={flowKey}
             transactionId={transactionId}
             currentCategoryId={currentCategoryId}
             onClose={() => onOpenChange(false)}
+            onPick={onPick}
             mobile
           />
         )}
@@ -92,11 +101,13 @@ function CategoryGridFlow({
   transactionId,
   currentCategoryId,
   onClose,
+  onPick,
   mobile = false,
 }: {
-  transactionId: string;
+  transactionId: string | null;
   currentCategoryId: string | null;
   onClose: () => void;
+  onPick?: (categoryId: string | null) => void;
   mobile?: boolean;
 }) {
   const t = useTranslations("transactions");
@@ -217,6 +228,12 @@ function CategoryGridFlow({
   }
 
   function pickLeaf(id: string | null) {
+    if (onPick) {
+      onPick(id);
+      onClose();
+      return;
+    }
+    if (!transactionId) return;
     updateTx.mutate({ id: transactionId, categoryId: id });
     onClose();
   }

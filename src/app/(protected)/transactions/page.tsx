@@ -52,11 +52,13 @@ import {
   TableHeader,
   TableRow,
 } from "~/app/_components/table";
+import { Checkbox } from "~/app/_components/checkbox";
 import posthog from "posthog-js";
 import { TransactionFormDialog } from "./_components/transaction-form-dialog";
 import { TransactionCategoryDialog } from "./_components/transaction-category-dialog";
 import { TransactionProjectQuickAssign } from "./_components/transaction-project-quick-assign";
 import { CsvImportDialog } from "./_components/csv-import-dialog";
+import { BulkActionBar } from "./_components/bulk-action-bar";
 import type { ProjectPalette } from "../projects/_lib/format";
 import {
   CategorySelect,
@@ -176,6 +178,70 @@ export default function TransactionsPage() {
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [quickAssign, setQuickAssign] = useState<Transaction | null>(null);
   const [projectAssign, setProjectAssign] = useState<Transaction | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
+  const [bulkProjectOpen, setBulkProjectOpen] = useState(false);
+
+  const toggleSelected = (id: string) =>
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+
+  const clearSelection = () => setSelectedIds(new Set());
+
+  const visibleIds = useMemo(
+    () => transactions.map((tx) => tx.id),
+    [transactions],
+  );
+
+  const allSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+  const someSelected =
+    !allSelected && visibleIds.some((id) => selectedIds.has(id));
+
+  const toggleSelectAll = () => {
+    setSelectedIds((prev) => {
+      if (visibleIds.every((id) => prev.has(id))) {
+        const next = new Set(prev);
+        for (const id of visibleIds) next.delete(id);
+        return next;
+      }
+      const next = new Set(prev);
+      for (const id of visibleIds) next.add(id);
+      return next;
+    });
+  };
+
+  const bulkUpdate = api.transaction.bulkUpdate.useMutation({
+    onSuccess: (data, variables) => {
+      posthog.capture("transactions_bulk_updated", {
+        count: data.updated,
+        category_changed: variables.categoryId !== undefined,
+        project_changed: variables.projectId !== undefined,
+        excluded_changed: variables.excludedFromCalculations !== undefined,
+      });
+      void utils.transaction.list.invalidate();
+      void utils.financialAccount.summary.invalidate();
+      void utils.budget.list.invalidate();
+      void utils.project.list.invalidate();
+      clearSelection();
+    },
+  });
+
+  const runBulk = (
+    fields: {
+      categoryId?: string | null;
+      projectId?: string | null;
+      excludedFromCalculations?: boolean;
+    },
+  ) => {
+    const ids = Array.from(selectedIds);
+    if (ids.length === 0) return;
+    bulkUpdate.mutate({ ids, ...fields });
+  };
 
   const deleteTx = api.transaction.delete.useMutation({
     onSuccess: (_, variables) => {
@@ -335,6 +401,7 @@ export default function TransactionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[40px]"></TableHead>
                   <TableHead>{tCommon("date")}</TableHead>
                   <TableHead>{t("descriptionLabel")}</TableHead>
                   <TableHead>{tCommon("category")}</TableHead>
@@ -349,6 +416,7 @@ export default function TransactionsPage() {
               <TableBody>
                 {Array.from({ length: 25 }).map((_, i) => (
                   <TableRow key={i}>
+                    <TableCell></TableCell>
                     <TableCell>
                       <Skeleton className="h-4 w-16" />
                     </TableCell>
@@ -400,6 +468,19 @@ export default function TransactionsPage() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-[40px]">
+                    <Checkbox
+                      checked={
+                        allSelected
+                          ? true
+                          : someSelected
+                            ? "indeterminate"
+                            : false
+                      }
+                      onCheckedChange={toggleSelectAll}
+                      aria-label={t("bulkSelectAllRows")}
+                    />
+                  </TableHead>
                   <TableHead>{tCommon("date")}</TableHead>
                   <TableHead>{t("descriptionLabel")}</TableHead>
                   <TableHead>{tCommon("category")}</TableHead>
@@ -427,8 +508,16 @@ export default function TransactionsPage() {
                       key={tx.id}
                       className={cn(
                         tx.excludedFromCalculations && "opacity-60",
+                        selectedIds.has(tx.id) && "bg-accent/40",
                       )}
                     >
+                      <TableCell>
+                        <Checkbox
+                          checked={selectedIds.has(tx.id)}
+                          onCheckedChange={() => toggleSelected(tx.id)}
+                          aria-label={t("bulkSelectRow")}
+                        />
+                      </TableCell>
                       <TableCell className="text-muted-foreground whitespace-nowrap">
                         {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
                       </TableCell>
@@ -604,9 +693,16 @@ export default function TransactionsPage() {
                   className={cn(
                     "rounded-lg border border-border bg-card p-3 shadow-card",
                     tx.excludedFromCalculations && "opacity-60",
+                    selectedIds.has(tx.id) && "border-primary bg-primary/5",
                   )}
                 >
                   <div className="flex items-start gap-2">
+                    <Checkbox
+                      checked={selectedIds.has(tx.id)}
+                      onCheckedChange={() => toggleSelected(tx.id)}
+                      aria-label={t("bulkSelectRow")}
+                      className="mt-0.5"
+                    />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1 text-xs text-muted-foreground">
                         {tx.transferGroupId && (
@@ -791,6 +887,34 @@ export default function TransactionsPage() {
           currentProjectId={projectAssign?.projectId ?? null}
           open={!!projectAssign}
           onOpenChange={(open) => !open && setProjectAssign(null)}
+        />
+      )}
+
+      <BulkActionBar
+        selectedCount={selectedIds.size}
+        hasProjects={hasProjects}
+        disabled={bulkUpdate.isPending}
+        onClear={clearSelection}
+        onCategorize={() => setBulkCategoryOpen(true)}
+        onExclude={() => runBulk({ excludedFromCalculations: true })}
+        onInclude={() => runBulk({ excludedFromCalculations: false })}
+        onAssignProject={() => setBulkProjectOpen(true)}
+      />
+
+      <TransactionCategoryDialog
+        transactionId={null}
+        currentCategoryId={null}
+        open={bulkCategoryOpen}
+        onOpenChange={setBulkCategoryOpen}
+        onPick={(categoryId) => runBulk({ categoryId })}
+      />
+      {hasProjects && (
+        <TransactionProjectQuickAssign
+          transactionId={null}
+          currentProjectId={null}
+          open={bulkProjectOpen}
+          onOpenChange={setBulkProjectOpen}
+          onPick={(projectId) => runBulk({ projectId })}
         />
       )}
     </div>

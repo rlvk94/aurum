@@ -24,6 +24,9 @@ type Props = {
   currentProjectId: string | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  // When supplied, the dialog defers the mutation to the caller and
+  // closes after onPick returns. Used by the bulk-action flow.
+  onPick?: (projectId: string | null) => void;
 };
 
 export function TransactionProjectQuickAssign({
@@ -31,6 +34,7 @@ export function TransactionProjectQuickAssign({
   currentProjectId,
   open,
   onOpenChange,
+  onPick,
 }: Props) {
   const t = useTranslations("projects");
   const tCommon = useTranslations("common");
@@ -90,6 +94,11 @@ export function TransactionProjectQuickAssign({
   });
 
   function pickProject(projectId: string | null) {
+    if (onPick) {
+      onPick(projectId);
+      onOpenChange(false);
+      return;
+    }
     if (!transactionId) return;
     updateTx.mutate({ id: transactionId, projectId });
     onOpenChange(false);
@@ -166,7 +175,7 @@ export function TransactionProjectQuickAssign({
             >
               {t("quickAssign.createNew")}
             </Button>
-            {currentProjectId && (
+            {(currentProjectId || onPick) && (
               <Button
                 type="button"
                 variant="ghost"
@@ -192,7 +201,9 @@ export function TransactionProjectQuickAssign({
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={(p) => {
-          if (transactionId) {
+          if (onPick) {
+            onPick(p.id);
+          } else if (transactionId) {
             updateTx.mutate({ id: transactionId, projectId: p.id });
           }
           onOpenChange(false);

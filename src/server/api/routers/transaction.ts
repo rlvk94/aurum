@@ -513,6 +513,63 @@ export const transactionRouter = createTRPCRouter({
         );
     }),
 
+  bulkUpdate: protectedProcedure
+    .input(
+      z
+        .object({
+          ids: z.array(z.string().uuid()).min(1).max(500),
+          categoryId: z.string().uuid().nullable().optional(),
+          projectId: z.string().uuid().nullable().optional(),
+          excludedFromCalculations: z.boolean().optional(),
+        })
+        .refine(
+          (v) =>
+            v.categoryId !== undefined ||
+            v.projectId !== undefined ||
+            v.excludedFromCalculations !== undefined,
+          { message: "At least one field must be provided" },
+        ),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const accessibleIds = await getAccessibleAccountIds(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+      );
+
+      if (accessibleIds.length === 0) return { updated: 0 };
+
+      if (input.categoryId) {
+        await assertCategoryIsLeaf(ctx.db, familyId, input.categoryId);
+      }
+
+      const result = await ctx.db
+        .update(transaction)
+        .set({
+          updatedAt: new Date(),
+          ...(input.categoryId !== undefined
+            ? { categoryId: input.categoryId }
+            : {}),
+          ...(input.projectId !== undefined
+            ? { projectId: input.projectId }
+            : {}),
+          ...(input.excludedFromCalculations !== undefined
+            ? { excludedFromCalculations: input.excludedFromCalculations }
+            : {}),
+        })
+        .where(
+          and(
+            inArray(transaction.id, input.ids),
+            eq(transaction.familyId, familyId),
+            inArray(transaction.accountId, accessibleIds),
+          ),
+        )
+        .returning({ id: transaction.id });
+
+      return { updated: result.length };
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
