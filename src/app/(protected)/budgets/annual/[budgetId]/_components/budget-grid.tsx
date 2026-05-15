@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import {
+  ChevronLeft,
   ChevronRight,
   MoreHorizontal,
   Pencil,
@@ -342,7 +343,20 @@ export function BudgetGrid({
   }
 
   return (
-    <div className="relative w-full min-w-0 max-w-full overflow-hidden rounded-[14px] border border-border bg-card shadow-card">
+    <>
+      <MobileBudget
+        tree={tree}
+        totals={totals}
+        months={months}
+        monthsLong={monthsLong}
+        currentMonthIndex={currentMonthIndex}
+        expanded={expanded}
+        onToggle={toggle}
+        onEditLine={onEditLine}
+        onDeleteLine={onDeleteLine}
+        onUpdateCell={onUpdateCell}
+      />
+      <div className="relative hidden w-full min-w-0 max-w-full overflow-hidden rounded-[14px] border border-border bg-card shadow-card md:block">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 z-30 h-px"
@@ -468,6 +482,7 @@ export function BudgetGrid({
         </table>
       </div>
     </div>
+    </>
   );
 }
 
@@ -725,5 +740,310 @@ function LineRow({
         </DropdownMenu>
       </td>
     </tr>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Mobile layout — vertical cards driven by a single selected-month switcher.
+// Renders below the md breakpoint; desktop table above continues to handle ≥md.
+// ---------------------------------------------------------------------------
+
+function MobileBudget({
+  tree,
+  totals,
+  months,
+  monthsLong,
+  currentMonthIndex,
+  expanded,
+  onToggle,
+  onEditLine,
+  onDeleteLine,
+  onUpdateCell,
+}: {
+  tree: CategoryGroup[];
+  totals: {
+    plannedByMonth: number[];
+    actualByMonth: number[];
+    plannedYear: number;
+    actualYear: number;
+  };
+  months: string[];
+  monthsLong: string[];
+  currentMonthIndex: number | null;
+  expanded: Set<string>;
+  onToggle: (id: string) => void;
+  onEditLine: (line: Line) => void;
+  onDeleteLine: (line: Line) => void;
+  onUpdateCell: (lineId: string, monthIndex: number, amount: number) => void;
+}) {
+  const t = useTranslations("budgets");
+  const initialMonth = currentMonthIndex ?? 0;
+  const [selectedMonth, setSelectedMonth] = useState(initialMonth);
+
+  const goPrev = () => setSelectedMonth((m) => (m + 11) % 12);
+  const goNext = () => setSelectedMonth((m) => (m + 1) % 12);
+
+  return (
+    <div className="space-y-3 md:hidden">
+      <div className="flex items-center justify-between rounded-[12px] border border-border bg-card px-2 py-2 shadow-card">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={t("previousMonth")}
+          onClick={goPrev}
+          className="h-10 w-10"
+        >
+          <ChevronLeft />
+        </Button>
+        <div className="flex flex-col items-center">
+          <span className="almanac-smallcaps text-[10px] text-muted-foreground">
+            {months[selectedMonth]}
+          </span>
+          <span className="font-display text-lg leading-tight text-foreground">
+            {monthsLong[selectedMonth]}
+          </span>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label={t("nextMonth")}
+          onClick={goNext}
+          className="h-10 w-10"
+        >
+          <ChevronRight />
+        </Button>
+      </div>
+
+      <div className="rounded-[12px] border border-border bg-card px-4 py-3 shadow-card">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <p className="almanac-smallcaps text-[10px] text-muted-foreground">
+              {monthsLong[selectedMonth]} · {t("totals")}
+            </p>
+          </div>
+          <SummaryCell
+            planned={totals.plannedByMonth[selectedMonth] ?? 0}
+            actual={totals.actualByMonth[selectedMonth] ?? 0}
+            size="lg"
+            align="end"
+          />
+        </div>
+        <div className="almanac-rule my-3" />
+        <div className="flex items-center justify-between gap-3">
+          <p className="almanac-smallcaps text-[10px] text-muted-foreground">
+            {t("yearTotal")}
+          </p>
+          <SummaryCell
+            planned={totals.plannedYear}
+            actual={totals.actualYear}
+            align="end"
+          />
+        </div>
+      </div>
+
+      {tree.map((group) => (
+        <MobileGroupCard
+          key={group.id}
+          group={group}
+          depth={0}
+          selectedMonth={selectedMonth}
+          monthsLong={monthsLong}
+          months={months}
+          expanded={expanded}
+          onToggle={onToggle}
+          onEditLine={onEditLine}
+          onDeleteLine={onDeleteLine}
+          onUpdateCell={onUpdateCell}
+        />
+      ))}
+    </div>
+  );
+}
+
+function MobileGroupCard({
+  group,
+  depth,
+  selectedMonth,
+  monthsLong,
+  months,
+  expanded,
+  onToggle,
+  onEditLine,
+  onDeleteLine,
+  onUpdateCell,
+}: {
+  group: CategoryGroup;
+  depth: 0 | 1;
+  selectedMonth: number;
+  monthsLong: string[];
+  months: string[];
+  expanded: Set<string>;
+  onToggle: (id: string) => void;
+  onEditLine: (line: Line) => void;
+  onDeleteLine: (line: Line) => void;
+  onUpdateCell: (lineId: string, monthIndex: number, amount: number) => void;
+}) {
+  const t = useTranslations("budgets");
+  const isExpanded = expanded.has(group.id);
+  const hasChildren = group.lines.length > 0 || group.subgroups.length > 0;
+  const lineCount =
+    group.lines.length +
+    group.subgroups.reduce((a, s) => a + s.lines.length, 0);
+  const planned = group.plannedByMonth[selectedMonth] ?? 0;
+  const actual = group.actualByMonth[selectedMonth] ?? 0;
+
+  const wrapperClass =
+    depth === 0
+      ? "rounded-[12px] border border-border bg-card shadow-card"
+      : "rounded-[10px] border border-border/60 bg-muted/[0.25]";
+
+  return (
+    <div className={wrapperClass}>
+      <button
+        type="button"
+        onClick={() => hasChildren && onToggle(group.id)}
+        aria-expanded={isExpanded}
+        className={`flex w-full items-center gap-3 px-3 py-3 text-left ${
+          hasChildren ? "cursor-pointer" : "cursor-default"
+        }`}
+      >
+        <span
+          className={`flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground transition-transform ${
+            isExpanded ? "rotate-90" : ""
+          }`}
+        >
+          {hasChildren && <ChevronRight className="h-4 w-4" />}
+        </span>
+        {group.icon ? (
+          <span
+            aria-hidden
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-base leading-none"
+          >
+            {group.icon}
+          </span>
+        ) : (
+          <span
+            aria-hidden
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-dashed border-border text-[10px] uppercase text-muted-foreground"
+          >
+            ·
+          </span>
+        )}
+        <div className="min-w-0 flex-1">
+          <div
+            className={`truncate leading-tight ${
+              depth === 0
+                ? "font-display text-[15px] text-foreground"
+                : "text-sm font-medium text-foreground"
+            } ${group.archived ? "text-muted-foreground line-through" : ""}`}
+          >
+            {group.label}
+          </div>
+          <div className="mt-0.5 text-[10px] text-muted-foreground">
+            {t("lineCount", { count: lineCount })}
+          </div>
+        </div>
+        <div className="shrink-0">
+          <SummaryCell planned={planned} actual={actual} align="end" />
+        </div>
+      </button>
+
+      {isExpanded && (
+        <div className="border-t border-border/60">
+          {group.lines.map((ln) => (
+            <MobileLineRow
+              key={ln.id}
+              line={ln.line}
+              selectedMonth={selectedMonth}
+              monthLabel={monthsLong[selectedMonth] ?? ""}
+              onEditLine={onEditLine}
+              onDeleteLine={onDeleteLine}
+              onUpdateCell={onUpdateCell}
+            />
+          ))}
+          {group.subgroups.length > 0 && (
+            <div className="space-y-2 px-2 py-2">
+              {group.subgroups.map((sub) => (
+                <MobileGroupCard
+                  key={sub.id}
+                  group={sub}
+                  depth={1}
+                  selectedMonth={selectedMonth}
+                  monthsLong={monthsLong}
+                  months={months}
+                  expanded={expanded}
+                  onToggle={onToggle}
+                  onEditLine={onEditLine}
+                  onDeleteLine={onDeleteLine}
+                  onUpdateCell={onUpdateCell}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function MobileLineRow({
+  line,
+  selectedMonth,
+  monthLabel,
+  onEditLine,
+  onDeleteLine,
+  onUpdateCell,
+}: {
+  line: Line;
+  selectedMonth: number;
+  monthLabel: string;
+  onEditLine: (line: Line) => void;
+  onDeleteLine: (line: Line) => void;
+  onUpdateCell: (lineId: string, monthIndex: number, amount: number) => void;
+}) {
+  const t = useTranslations("budgets");
+  const tCommon = useTranslations("common");
+  const planned = line.amounts[selectedMonth] ?? 0;
+
+  return (
+    <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2 last:border-b-0">
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-[13px] leading-tight text-foreground">
+          {line.name}
+        </div>
+        <div className="mt-0.5">
+          <span className="inline-flex items-center rounded-sm bg-muted/70 px-1.5 py-px text-[9px] uppercase tracking-wider text-muted-foreground">
+            {t(`recurrences.${line.recurrence}`)}
+          </span>
+        </div>
+      </div>
+      <div className="w-24 shrink-0">
+        <LineCell
+          planned={planned}
+          monthLabel={monthLabel}
+          onSave={(amount) => onUpdateCell(line.id, selectedMonth, amount)}
+        />
+      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => onEditLine(line)}>
+            <Pencil />
+            {tCommon("edit")}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="text-destructive"
+            onClick={() => onDeleteLine(line)}
+          >
+            <Trash2 />
+            {t("deleteLine")}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

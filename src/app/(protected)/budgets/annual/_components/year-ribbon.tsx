@@ -95,11 +95,12 @@ export function YearRibbon({
                   isLarge ? "text-[10px]" : "text-[9px]"
                 } ${isNow ? "text-primary" : "text-muted-foreground"}`}
               >
-                {label}
+                <span className="sm:hidden">{label.charAt(0)}</span>
+                <span className="hidden sm:inline">{label}</span>
               </span>
               {isLarge && (
                 <span
-                  className={`almanac-numerals text-[11px] ${varianceTextClass(
+                  className={`hidden sm:inline-block almanac-numerals text-[11px] ${varianceTextClass(
                     p,
                     a,
                   )}`}
@@ -109,7 +110,7 @@ export function YearRibbon({
               )}
             </div>
             {isLarge && (
-              <span className="almanac-numerals text-[10px] text-muted-foreground/80 px-1">
+              <span className="hidden sm:inline-block almanac-numerals text-[10px] text-muted-foreground/80 px-1">
                 {p > 0 ? formatMoney(p) : "—"}
               </span>
             )}

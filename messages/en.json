@@ -490,6 +490,8 @@
     "addFirstLine": "Add first line",
     "line": "Line",
     "categoryLineHeader": "Category / line",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
     "overBy": "Over by",
     "onBudget": "On budget",
     "lineName": "Name",
