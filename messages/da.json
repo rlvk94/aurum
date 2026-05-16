@@ -1408,5 +1408,13 @@
       "projects": "Projekter",
       "autoCategorisation": "Auto-kategorisering"
     }
+  },
+  "install": {
+    "title": "Installér app",
+    "description": "For at sikre den bedste oplevelse, venligst installér appen. Følg trinene nedenfor.",
+    "share": "Del",
+    "menu": "Menu",
+    "addToHomescreen": "Hjemmeskærm",
+    "continueInBrowser": "Fortsæt i browser"
   }
 }

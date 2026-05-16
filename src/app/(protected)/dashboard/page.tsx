@@ -1,4 +1,5 @@
 import { api, HydrateClient } from "~/trpc/server";
+import { InstallPrompt } from "~/app/_components/install-prompt";
 import { DashboardClient } from "./_components/dashboard-client";
 
 export default async function DashboardPage() {
@@ -27,6 +28,7 @@ export default async function DashboardPage() {
   return (
     <HydrateClient>
       <DashboardClient />
+      <InstallPrompt />
     </HydrateClient>
   );
 }

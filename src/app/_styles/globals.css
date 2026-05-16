@@ -484,3 +484,7 @@
 .whats-new-dot {
   animation: whats-new-pulse-dot 2.4s ease-out infinite;
 }
+
+@utility safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}

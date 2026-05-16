@@ -1408,5 +1408,13 @@
       "projects": "Projects",
       "autoCategorisation": "Auto-categorisation"
     }
+  },
+  "install": {
+    "title": "Install app",
+    "description": "For the best experience, please install the app. Follow the steps below.",
+    "share": "Share",
+    "menu": "Menu",
+    "addToHomescreen": "Home Screen",
+    "continueInBrowser": "Continue in browser"
   }
 }
