@@ -75,7 +75,7 @@ export function TransactionCategoryDialog({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90dvh]">
+      <DrawerContent className="max-h-[90dvh] overflow-hidden">
         <DrawerHeader className="sr-only">
           <DrawerTitle>{t("assignCategoryTitle")}</DrawerTitle>
           <DrawerDescription>
@@ -239,7 +239,7 @@ function CategoryGridFlow({
   }
 
   return (
-    <div className="flex h-[min(560px,80dvh)] flex-col">
+    <div className="flex h-[min(560px,80dvh)] max-h-full min-h-0 flex-col">
       <div className="flex min-h-14 items-center gap-2 border-b px-4 py-2">
         {step === "child" && !isSearching ? (
           <button
