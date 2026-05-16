@@ -8,7 +8,6 @@ import {
   SquarePlus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "~/app/_components/button";
 import {
@@ -87,7 +86,7 @@ export const InstallPrompt = () => {
           {platform === "ios" ? (
             <>
               <div className="flex w-14 flex-col items-center gap-2 text-center">
-                <Image
+                <img
                   src="/safari.png"
                   alt="Safari logo"
                   width={56}
@@ -115,7 +114,7 @@ export const InstallPrompt = () => {
             <>
               <div className="flex w-14 flex-col items-center gap-2 text-center">
                 <div className="size-14 rounded-xl bg-background p-1">
-                  <Image
+                  <img
                     src="/chrome.png"
                     alt="Chrome logo"
                     width={56}
