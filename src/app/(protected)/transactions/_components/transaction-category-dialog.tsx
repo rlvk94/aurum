@@ -273,7 +273,7 @@ function CategoryGridFlow({
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={tCategories("searchCategoriesPlaceholder")}
-          className="h-full flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          className="h-full flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
           autoFocus={!mobile}
         />
         <button
