@@ -19,6 +19,7 @@ import {
   assertCategoryIsLeaf,
   expandCategoryIds,
 } from "~/server/lib/category-helpers";
+import { refreshChallengeSnapshotsForFamily } from "~/server/lib/challenge-service";
 
 // Postgres TEXT columns reject null bytes with
 // "unsupported Unicode escape sequence". CSV data from banks sometimes
@@ -349,6 +350,8 @@ export const transactionRouter = createTRPCRouter({
         })
         .returning();
 
+      await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [input.date]);
+
       return created;
     }),
 
@@ -457,6 +460,13 @@ export const transactionRouter = createTRPCRouter({
         });
       }
 
+      if (inserted > 0) {
+        const dates = Array.from(
+          new Set(input.transactions.map((t) => t.date)),
+        );
+        await refreshChallengeSnapshotsForFamily(ctx.db, familyId, dates);
+      }
+
       return {
         total: input.transactions.length,
         inserted,
@@ -484,7 +494,7 @@ export const transactionRouter = createTRPCRouter({
       const { id, ...data } = input;
 
       const [existing] = await ctx.db
-        .select({ accountId: transaction.accountId })
+        .select({ accountId: transaction.accountId, date: transaction.date })
         .from(transaction)
         .where(
           and(eq(transaction.id, id), eq(transaction.familyId, familyId)),
@@ -511,6 +521,12 @@ export const transactionRouter = createTRPCRouter({
         .where(
           and(eq(transaction.id, id), eq(transaction.familyId, familyId)),
         );
+
+      const affectedDates = [existing.date];
+      if (data.date && data.date !== existing.date) {
+        affectedDates.push(data.date);
+      }
+      await refreshChallengeSnapshotsForFamily(ctx.db, familyId, affectedDates);
     }),
 
   bulkUpdate: protectedProcedure
@@ -565,7 +581,15 @@ export const transactionRouter = createTRPCRouter({
             inArray(transaction.accountId, accessibleIds),
           ),
         )
-        .returning({ id: transaction.id });
+        .returning({ id: transaction.id, date: transaction.date });
+
+      if (result.length > 0) {
+        await refreshChallengeSnapshotsForFamily(
+          ctx.db,
+          familyId,
+          result.map((r) => r.date),
+        );
+      }
 
       return { updated: result.length };
     }),
@@ -576,7 +600,7 @@ export const transactionRouter = createTRPCRouter({
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
 
       const [existing] = await ctx.db
-        .select({ accountId: transaction.accountId })
+        .select({ accountId: transaction.accountId, date: transaction.date })
         .from(transaction)
         .where(
           and(eq(transaction.id, input.id), eq(transaction.familyId, familyId)),
@@ -595,5 +619,9 @@ export const transactionRouter = createTRPCRouter({
         .where(
           and(eq(transaction.id, input.id), eq(transaction.familyId, familyId)),
         );
+
+      await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [
+        existing.date,
+      ]);
     }),
 });

@@ -1,5 +1,5 @@
 import "server-only";
-import { and, eq, gte, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, gte, inArray, isNull, lte, ne, or, sql } from "drizzle-orm";
 
 import type { db as dbInstance } from "~/server/db";
 import {
@@ -400,4 +400,57 @@ export async function rotateAllChallenges(
   }
 
   return { processed: rows.length, rotated, errors };
+}
+
+/**
+ * Recompute the snapshotted `finalAmount` + `status` for any closed challenge
+ * instance whose window contains one of the supplied transaction dates. Call
+ * this after transactions are inserted, updated, or deleted so that past-period
+ * history reflects the latest data instead of frozen-at-rotation values. Active
+ * instances are skipped (their progress is computed live on read).
+ */
+export async function refreshChallengeSnapshotsForFamily(
+  db: typeof dbInstance,
+  familyId: string,
+  affectedDates: string[],
+): Promise<void> {
+  if (affectedDates.length === 0) return;
+  const uniqueDates = Array.from(new Set(affectedDates.filter(Boolean)));
+  if (uniqueDates.length === 0) return;
+  const minDate = uniqueDates.reduce((a, b) => (a < b ? a : b));
+  const maxDate = uniqueDates.reduce((a, b) => (a > b ? a : b));
+
+  const rows = await db
+    .select()
+    .from(challenge)
+    .where(and(eq(challenge.familyId, familyId), isNull(challenge.archivedAt)));
+
+  const asOf = todayIso();
+
+  for (const row of rows) {
+    const instances = await db
+      .select()
+      .from(challengeInstance)
+      .where(
+        and(
+          eq(challengeInstance.challengeId, row.id),
+          ne(challengeInstance.status, "active"),
+          lte(challengeInstance.periodStart, maxDate),
+          gte(challengeInstance.periodEnd, minDate),
+        ),
+      );
+
+    for (const inst of instances) {
+      const hit = uniqueDates.some(
+        (d) => d >= inst.periodStart && d <= inst.periodEnd,
+      );
+      if (!hit) continue;
+      const finalAmount = await computeProgress(db, row, inst, asOf);
+      const status = decideStatus(row.type, finalAmount, row.targetAmount);
+      await db
+        .update(challengeInstance)
+        .set({ finalAmount, status, updatedAt: new Date() })
+        .where(eq(challengeInstance.id, inst.id));
+    }
+  }
 }

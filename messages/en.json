@@ -421,6 +421,10 @@
       "failed": "Missed",
       "archived": "Archived"
     },
+    "challengeCurrentPeriod": "Current period",
+    "challengeViewDetails": "View details for {name}",
+    "challengeNoTransactionsInPeriod": "No transactions in this period.",
+    "challengeNoTransactionsForType": "Net worth challenges don't show transactions.",
     "challengesEmptyState": "No challenges yet. Create one to turn your goals into a game.",
     "emptyState": "No budget created yet. Create your annual budget to get started.",
     "budgetsEmptyState": "No budgets yet. Create one to start planning the year.",

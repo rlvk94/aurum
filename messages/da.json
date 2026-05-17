@@ -421,6 +421,10 @@
       "failed": "Ikke nået",
       "archived": "Arkiveret"
     },
+    "challengeCurrentPeriod": "Nuværende periode",
+    "challengeViewDetails": "Vis detaljer for {name}",
+    "challengeNoTransactionsInPeriod": "Ingen transaktioner i denne periode.",
+    "challengeNoTransactionsForType": "Formueudfordringer viser ikke transaktioner.",
     "challengesEmptyState": "Ingen udfordringer endnu. Opret én for at gøre dine mål til et spil.",
     "emptyState": "Intet budget oprettet endnu. Opret dit årsbudget for at komme i gang.",
     "budgetsEmptyState": "Ingen budgetter endnu. Opret et for at planlægge året.",
