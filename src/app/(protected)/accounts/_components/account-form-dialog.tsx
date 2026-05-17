@@ -131,6 +131,7 @@ export function AccountFormDialog({
       onOpenChange(false);
       void utils.financialAccount.list.invalidate();
       void utils.financialAccount.summary.invalidate();
+      void utils.financialAccount.get.invalidate();
       if (account?.id) {
         void utils.financialAccount.listAccess.invalidate({
           accountId: account.id,
@@ -144,7 +145,7 @@ export function AccountFormDialog({
       name: account?.name ?? "",
       identifier: account?.identifier ?? "",
       type: (account?.type as AccountType) ?? "checking",
-      balance: account ? String(account.openingBalance / 100) : "",
+      balance: account ? String(account.balance / 100) : "",
       includeInNetWorth: account?.includeInNetWorth ?? true,
       visibility: (account?.visibility ?? "shared") as Visibility,
       accessUserIds: [] as string[],
@@ -158,7 +159,7 @@ export function AccountFormDialog({
         visibility: value.visibility,
         accessUserIds: isPrivate ? value.accessUserIds : [],
       };
-      const openingBalance = Math.round(
+      const balanceCents = Math.round(
         parseFloat(value.balance || "0") * 100,
       );
       if (isEdit) {
@@ -168,7 +169,7 @@ export function AccountFormDialog({
           identifier: value.identifier.trim(),
           type: value.type,
           includeInNetWorth: value.includeInNetWorth,
-          openingBalance,
+          balance: balanceCents,
           ...sharedPayload,
         });
       } else {
@@ -176,7 +177,7 @@ export function AccountFormDialog({
           name: value.name.trim(),
           identifier: value.identifier.trim(),
           type: value.type,
-          balance: openingBalance,
+          balance: balanceCents,
           includeInNetWorth: value.includeInNetWorth,
           ...sharedPayload,
         });
@@ -309,7 +310,7 @@ export function AccountFormDialog({
               children={(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>
-                    {t("openingBalance")}
+                    {isEdit ? t("balance") : t("openingBalance")}
                   </FieldLabel>
                   <Input
                     id={field.name}
@@ -323,7 +324,7 @@ export function AccountFormDialog({
                   />
                   {isEdit && (
                     <FieldDescription>
-                      {t("openingBalanceEditHelp")}
+                      {t("balanceEditHelp")}
                     </FieldDescription>
                   )}
                 </Field>

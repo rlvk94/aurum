@@ -155,7 +155,7 @@
     "institution": "Institution",
     "balance": "Balance",
     "openingBalance": "Opening balance",
-    "openingBalanceEditHelp": "Adjusting this updates the current balance by the same amount.",
+    "balanceEditHelp": "Sets the new balance directly. Past transactions are not recalculated.",
     "includeInNetWorth": "Include in net worth",
     "visibility": "Visibility",
     "visibilityShared": "Shared",

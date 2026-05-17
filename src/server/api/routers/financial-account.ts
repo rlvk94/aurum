@@ -88,7 +88,6 @@ async function assertUserCanEditAccount(
     .select({
       id: financialAccount.id,
       visibility: financialAccount.visibility,
-      openingBalance: financialAccount.openingBalance,
     })
     .from(financialAccount)
     .where(
@@ -506,12 +505,12 @@ export const financialAccountRouter = createTRPCRouter({
         accessUserIds: z.array(z.string()).optional(),
         includeInNetWorth: z.boolean().optional(),
         archived: z.boolean().optional(),
-        openingBalance: z.number().int().optional(),
+        balance: z.number().int().optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
-      const { id, accessUserIds, visibility, openingBalance, ...data } = input;
+      const { id, accessUserIds, visibility, balance, ...data } = input;
 
       const existing = await assertUserCanEditAccount(
         ctx.db,
@@ -522,22 +521,12 @@ export const financialAccountRouter = createTRPCRouter({
 
       const nextVisibility = visibility ?? existing.visibility;
 
-      // Adjust the cached balance by the same delta we apply to the opening
-      // balance so subsequent transaction-driven mutations stay correct.
-      const openingDelta =
-        openingBalance !== undefined
-          ? openingBalance - existing.openingBalance
-          : 0;
-
       await ctx.db
         .update(financialAccount)
         .set({
           ...data,
           ...(visibility !== undefined ? { visibility } : {}),
-          ...(openingBalance !== undefined ? { openingBalance } : {}),
-          ...(openingDelta !== 0
-            ? { balance: sql`${financialAccount.balance} + ${openingDelta}` }
-            : {}),
+          ...(balance !== undefined ? { balance } : {}),
           updatedAt: new Date(),
         })
         .where(

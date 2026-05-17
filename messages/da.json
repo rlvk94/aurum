@@ -155,7 +155,7 @@
     "institution": "Pengeinstitut",
     "balance": "Saldo",
     "openingBalance": "Åbningssaldo",
-    "openingBalanceEditHelp": "Justering opdaterer den aktuelle saldo med samme beløb.",
+    "balanceEditHelp": "Sætter den nye saldo direkte. Tidligere transaktioner genberegnes ikke.",
     "includeInNetWorth": "Medregn i formue",
     "visibility": "Synlighed",
     "visibilityShared": "Delt",
