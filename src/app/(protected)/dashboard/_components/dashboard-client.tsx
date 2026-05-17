@@ -83,36 +83,37 @@ function ChallengeRow({ challenge }: { challenge: Challenge }) {
         : "bg-primary";
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2">
-          <div className="bg-accent flex h-7 w-7 shrink-0 items-center justify-center rounded-md">
-            <Icon className="text-primary h-3.5 w-3.5" />
-          </div>
-          <p className="text-foreground truncate text-sm font-medium">
-            {challenge.name}
-          </p>
-          <Badge
-            variant={notStarted ? "outline" : "secondary"}
-            className="shrink-0 text-[10px]"
-          >
-            {notStarted
-              ? t("challengeNotStarted")
-              : t(`challengeRepetitions.${challenge.repetition}`)}
-          </Badge>
+    <Link
+      href={`/budgets/challenges/${challenge.id}`}
+      className="block space-y-2 rounded-md transition-colors hover:bg-accent/40"
+    >
+      <div className="flex min-w-0 items-center gap-2">
+        <div className="bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-md sm:h-7 sm:w-7">
+          <Icon className="text-primary h-4 w-4 sm:h-3.5 sm:w-3.5" />
         </div>
-        <span className="text-muted-foreground shrink-0 text-xs tabular-nums">
-          {formatAmount(challenge.progress)} /{" "}
-          {formatAmount(challenge.targetAmount)}
-        </span>
+        <p className="text-foreground min-w-0 flex-1 truncate text-base font-medium sm:text-sm">
+          {challenge.name}
+        </p>
+        <Badge
+          variant={notStarted ? "outline" : "secondary"}
+          className="shrink-0 text-xs sm:text-[10px]"
+        >
+          {notStarted
+            ? t("challengeNotStarted")
+            : t(`challengeRepetitions.${challenge.repetition}`)}
+        </Badge>
       </div>
-      <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
+      <div className="text-muted-foreground text-base tabular-nums sm:text-sm">
+        {formatAmount(challenge.progress)} /{" "}
+        {formatAmount(challenge.targetAmount)}
+      </div>
+      <div className="bg-muted h-2.5 w-full overflow-hidden rounded-full sm:h-1.5">
         <div
           className={`h-full rounded-full transition-all ${color}`}
           style={{ width: `${pct}%` }}
         />
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -130,18 +131,18 @@ function StatCard({
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2 p-4 pb-2 sm:p-6 sm:pb-2">
-        <CardTitle className="min-w-0 truncate text-muted-foreground text-xs font-medium sm:text-sm">
+        <CardTitle className="min-w-0 truncate text-muted-foreground text-sm font-medium">
           {title}
         </CardTitle>
         <Icon
           className={cn(
-            "h-4 w-4 shrink-0",
+            "h-5 w-5 shrink-0 sm:h-4 sm:w-4",
             className ?? "text-muted-foreground",
           )}
         />
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-        <div className="font-display text-base break-words tabular-nums leading-tight sm:text-2xl">
+        <div className="font-display text-3xl break-words tabular-nums leading-tight sm:text-2xl">
           {value}
         </div>
       </CardContent>
@@ -165,13 +166,13 @@ function LockedStatCard({
     >
       <Card className="h-full border-dashed">
         <CardHeader className="flex flex-row items-start justify-between gap-2 p-4 pb-2 sm:p-6 sm:pb-2">
-          <CardTitle className="min-w-0 truncate text-muted-foreground text-xs font-medium sm:text-sm">
+          <CardTitle className="min-w-0 truncate text-muted-foreground text-sm font-medium">
             {title}
           </CardTitle>
-          <Lock className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <Lock className="h-5 w-5 shrink-0 text-muted-foreground sm:h-4 sm:w-4" />
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-          <div className="font-display text-muted-foreground flex items-center gap-2 text-base sm:text-2xl">
+          <div className="font-display text-muted-foreground flex items-center gap-2 text-3xl sm:text-2xl">
             —
             <LockBadge />
           </div>
@@ -248,16 +249,18 @@ function AnnualBudgetCard({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-row items-start justify-between gap-3">
         <div>
-          <CardTitle className="text-lg">{t("annualBudgets")}</CardTitle>
-          <p className="text-muted-foreground mt-1 text-xs">
+          <CardTitle className="text-xl sm:text-lg">
+            {t("annualBudgets")}
+          </CardTitle>
+          <p className="text-muted-foreground mt-1 text-sm">
             {t("currentYearLabel", { year: currentYear })}
           </p>
         </div>
         <Link
           href="/budgets/annual"
-          className="text-muted-foreground hover:text-foreground text-sm"
+          className="text-muted-foreground hover:text-foreground shrink-0 text-base sm:text-sm"
         >
           →
         </Link>
@@ -276,14 +279,14 @@ function AnnualBudgetCard({
         ) : (budgets?.length ?? 0) === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
             <BookOpen className="text-muted-foreground h-6 w-6" />
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-base sm:text-sm">
               {t("annualBudgetsEmpty")}
             </p>
           </div>
         ) : (
           <div className="space-y-4">
             <div>
-              <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 text-sm">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1 text-base sm:text-sm">
                 <span className="text-muted-foreground">
                   {t("spentVsPlanned")}
                 </span>
@@ -291,7 +294,7 @@ function AnnualBudgetCard({
                   {formatAmount(totalActual)} / {formatAmount(totalPlanned)}
                 </span>
               </div>
-              <div className="bg-muted mt-2 h-2 overflow-hidden rounded-full">
+              <div className="bg-muted mt-2 h-3 overflow-hidden rounded-full sm:h-2">
                 <div
                   className={cn(
                     "h-full rounded-full transition-all",
@@ -301,7 +304,7 @@ function AnnualBudgetCard({
                 />
               </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 text-sm">
+            <div className="grid grid-cols-1 gap-2 text-base sm:grid-cols-3 sm:text-sm">
               <MetricBox
                 label={t("planned")}
                 value={formatAmount(totalPlanned)}
@@ -345,18 +348,20 @@ function ProjectRow({ project }: { project: Project }) {
         <div className="min-w-0">
           <div className="flex min-w-0 items-center gap-2">
             <span aria-hidden>{project.emoji}</span>
-            <p className="truncate text-sm font-medium">{project.name}</p>
+            <p className="truncate text-base font-medium sm:text-sm">
+              {project.name}
+            </p>
           </div>
-          <p className="text-muted-foreground mt-1 text-xs">
+          <p className="text-muted-foreground mt-1 text-sm sm:text-xs">
             {tProjects(`status.${statusKey(progress.status)}`)}
           </p>
         </div>
-        <span className="shrink-0 text-sm font-medium tabular-nums">
+        <span className="shrink-0 text-base font-medium tabular-nums sm:text-sm">
           {formatAmount(project.net)}
         </span>
       </div>
       {project.spendingLimit ? (
-        <div className="bg-muted mt-3 h-1.5 overflow-hidden rounded-full">
+        <div className="bg-muted mt-3 h-2.5 overflow-hidden rounded-full sm:h-1.5">
           <div
             className={cn(
               "h-full rounded-full transition-all",
@@ -382,11 +387,11 @@ function ProjectsCard({
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg">{t("projects")}</CardTitle>
+      <CardHeader className="flex flex-row items-start justify-between gap-3">
+        <CardTitle className="text-xl sm:text-lg">{t("projects")}</CardTitle>
         <Link
           href="/projects"
-          className="text-muted-foreground hover:text-foreground text-sm"
+          className="text-muted-foreground hover:text-foreground shrink-0 text-base sm:text-sm"
         >
           →
         </Link>
@@ -401,7 +406,7 @@ function ProjectsCard({
         ) : activeProjects.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
             <FolderHeart className="text-muted-foreground h-6 w-6" />
-            <p className="text-muted-foreground text-sm">
+            <p className="text-muted-foreground text-base sm:text-sm">
               {t("projectsEmpty")}
             </p>
           </div>
@@ -427,11 +432,11 @@ function MetricBox({
   tone?: "default" | "income" | "expense";
 }) {
   return (
-    <div className="bg-muted/50 rounded-lg p-3">
-      <p className="text-muted-foreground text-[11px]">{label}</p>
+    <div className="bg-muted/50 rounded-lg p-3 sm:p-3">
+      <p className="text-muted-foreground text-sm sm:text-[11px]">{label}</p>
       <p
         className={cn(
-          "mt-1 truncate text-sm font-medium tabular-nums",
+          "mt-1 truncate text-lg font-medium tabular-nums sm:text-sm",
           tone === "income" && "text-income",
           tone === "expense" && "text-expense",
         )}
@@ -499,7 +504,7 @@ export function DashboardClient() {
 
       <div
         data-tour-id="stats"
-        className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4"
+        className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4"
       >
         <StatCard
           title={t("weeklySpent")}
@@ -548,11 +553,13 @@ export function DashboardClient() {
         )}
 
         <Card data-tour-id="recent-transactions">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">{t("recentTransactions")}</CardTitle>
+          <CardHeader className="flex flex-row items-start justify-between gap-3">
+            <CardTitle className="text-xl sm:text-lg">
+              {t("recentTransactions")}
+            </CardTitle>
             <Link
               href="/transactions"
-              className="text-muted-foreground hover:text-foreground text-sm"
+              className="text-muted-foreground hover:text-foreground shrink-0 text-base sm:text-sm"
             >
               →
             </Link>
@@ -578,22 +585,22 @@ export function DashboardClient() {
                   return (
                     <div
                       key={tx.id}
-                      className="flex w-full min-w-0 items-start gap-3 overflow-hidden text-sm sm:gap-4"
+                      className="grid w-full min-w-0 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-3 overflow-hidden text-base sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:gap-4 sm:text-sm"
                     >
-                      <span className="shrink-0 whitespace-nowrap text-xs text-muted-foreground sm:w-20 sm:text-sm">
+                      <span className="whitespace-nowrap text-base text-muted-foreground sm:text-sm">
                         {format(dateObj, "d. MMM", { locale: dateLocale })}
                       </span>
-                      <div className="min-w-0 flex-1 overflow-hidden">
+                      <div className="min-w-0 overflow-hidden">
                         <p className="truncate font-medium text-foreground">
                           {tx.description}
                         </p>
-                        <p className="truncate text-xs text-muted-foreground">
+                        <p className="truncate text-base text-muted-foreground sm:text-xs">
                           {accountMap.get(tx.accountId) ?? "—"}
                         </p>
                       </div>
                       <span
                         className={cn(
-                          "shrink-0 whitespace-nowrap text-xs font-medium tabular-nums sm:text-sm",
+                          "whitespace-nowrap text-base font-medium tabular-nums sm:text-sm",
                           tx.type === "expense" && "text-expense",
                           tx.type === "income" && "text-income",
                         )}
@@ -606,7 +613,7 @@ export function DashboardClient() {
                 })}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">
+              <p className="text-muted-foreground text-base sm:text-sm">
                 {tTx("emptyState")}
               </p>
             )}
@@ -615,13 +622,13 @@ export function DashboardClient() {
 
         {has("challenges") ? (
           <Card data-tour-id="challenges">
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle className="text-lg">
+            <CardHeader className="flex flex-row items-start justify-between gap-3">
+              <CardTitle className="text-xl sm:text-lg">
                 {tBudgets("challenges")}
               </CardTitle>
               <Link
                 href="/budgets/challenges"
-                className="text-muted-foreground hover:text-foreground text-sm"
+                className="text-muted-foreground hover:text-foreground shrink-0 text-base sm:text-sm"
               >
                 →
               </Link>
@@ -636,7 +643,7 @@ export function DashboardClient() {
               ) : activeChallenges.length === 0 ? (
                 <div className="flex flex-col items-center justify-center gap-2 py-6 text-center">
                   <Target className="text-muted-foreground h-6 w-6" />
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-base sm:text-sm">
                     {tBudgets("challengesEmptyState")}
                   </p>
                 </div>
