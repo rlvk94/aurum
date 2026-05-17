@@ -120,6 +120,13 @@
       "when": 1777205319836,
       "tag": "0016_perpetual_leper_queen",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1779010346912,
+      "tag": "0017_steep_ares",
+      "breakpoints": true
     }
   ]
 }

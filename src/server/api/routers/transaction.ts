@@ -112,6 +112,27 @@ async function assertAccountAccess(
   }
 }
 
+function signedDelta(type: "income" | "expense", amount: number): number {
+  return type === "income" ? amount : -amount;
+}
+
+type DbOrTx = Parameters<Parameters<typeof dbInstance.transaction>[0]>[0] | typeof dbInstance;
+
+async function applyBalanceDelta(
+  db: DbOrTx,
+  accountId: string,
+  delta: number,
+): Promise<void> {
+  if (delta === 0) return;
+  await db
+    .update(financialAccount)
+    .set({
+      balance: sql`${financialAccount.balance} + ${delta}`,
+      updatedAt: new Date(),
+    })
+    .where(eq(financialAccount.id, accountId));
+}
+
 /** Return ISO date strings for the current week (Monday–Sunday) in Europe/Copenhagen. */
 function currentWeekRange(): { from: string; to: string } {
   const now = new Date();
@@ -350,6 +371,11 @@ export const transactionRouter = createTRPCRouter({
         })
         .returning();
 
+      await applyBalanceDelta(
+        ctx.db,
+        input.accountId,
+        signedDelta(input.type, input.amount),
+      );
       await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [input.date]);
 
       return created;
@@ -427,6 +453,7 @@ export const transactionRouter = createTRPCRouter({
       // partial data behind.
       const CHUNK = 500;
       let inserted = 0;
+      const balanceDeltas = new Map<string, number>();
       try {
         await ctx.db.transaction(async (tx) => {
           for (let i = 0; i < values.length; i += CHUNK) {
@@ -438,8 +465,23 @@ export const transactionRouter = createTRPCRouter({
                 target: [transaction.accountId, transaction.externalId],
                 where: isNotNull(transaction.externalId),
               })
-              .returning({ id: transaction.id });
+              .returning({
+                id: transaction.id,
+                accountId: transaction.accountId,
+                type: transaction.type,
+                amount: transaction.amount,
+              });
             inserted += result.length;
+            for (const row of result) {
+              const delta = signedDelta(row.type, row.amount);
+              balanceDeltas.set(
+                row.accountId,
+                (balanceDeltas.get(row.accountId) ?? 0) + delta,
+              );
+            }
+          }
+          for (const [accountId, delta] of balanceDeltas) {
+            await applyBalanceDelta(tx, accountId, delta);
           }
         });
       } catch (err) {
@@ -494,7 +536,12 @@ export const transactionRouter = createTRPCRouter({
       const { id, ...data } = input;
 
       const [existing] = await ctx.db
-        .select({ accountId: transaction.accountId, date: transaction.date })
+        .select({
+          accountId: transaction.accountId,
+          date: transaction.date,
+          type: transaction.type,
+          amount: transaction.amount,
+        })
         .from(transaction)
         .where(
           and(eq(transaction.id, id), eq(transaction.familyId, familyId)),
@@ -521,6 +568,16 @@ export const transactionRouter = createTRPCRouter({
         .where(
           and(eq(transaction.id, id), eq(transaction.familyId, familyId)),
         );
+
+      const oldDelta = signedDelta(existing.type, existing.amount);
+      const newType = data.type ?? existing.type;
+      const newAmount = data.amount ?? existing.amount;
+      const newDelta = signedDelta(newType, newAmount);
+      await applyBalanceDelta(
+        ctx.db,
+        existing.accountId,
+        newDelta - oldDelta,
+      );
 
       const affectedDates = [existing.date];
       if (data.date && data.date !== existing.date) {
@@ -600,7 +657,12 @@ export const transactionRouter = createTRPCRouter({
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
 
       const [existing] = await ctx.db
-        .select({ accountId: transaction.accountId, date: transaction.date })
+        .select({
+          accountId: transaction.accountId,
+          date: transaction.date,
+          type: transaction.type,
+          amount: transaction.amount,
+        })
         .from(transaction)
         .where(
           and(eq(transaction.id, input.id), eq(transaction.familyId, familyId)),
@@ -620,6 +682,11 @@ export const transactionRouter = createTRPCRouter({
           and(eq(transaction.id, input.id), eq(transaction.familyId, familyId)),
         );
 
+      await applyBalanceDelta(
+        ctx.db,
+        existing.accountId,
+        -signedDelta(existing.type, existing.amount),
+      );
       await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [
         existing.date,
       ]);

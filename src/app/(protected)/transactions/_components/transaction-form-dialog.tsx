@@ -127,6 +127,8 @@ export function TransactionFormDialog({
       form.reset();
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
+      void utils.financialAccount.list.invalidate();
+      void utils.financialAccount.get.invalidate();
       void utils.challenge.list.invalidate();
       void utils.challenge.get.invalidate();
     },
@@ -142,6 +144,8 @@ export function TransactionFormDialog({
       onOpenChange(false);
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
+      void utils.financialAccount.list.invalidate();
+      void utils.financialAccount.get.invalidate();
       void utils.challenge.list.invalidate();
       void utils.challenge.get.invalidate();
     },

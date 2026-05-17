@@ -117,6 +117,7 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
       void utils.financialAccount.summary.invalidate();
       void utils.financialAccount.stats.invalidate();
       void utils.financialAccount.get.invalidate();
+      void utils.financialAccount.list.invalidate();
       void utils.challenge.list.invalidate();
       void utils.challenge.get.invalidate();
     },

@@ -41,6 +41,7 @@ export const financialAccount = pgTable("financial_account", {
   identifier: text("identifier").notNull().unique(),
   type: accountTypeEnum("type").notNull(),
   visibility: accountVisibilityEnum("visibility").default("shared").notNull(),
+  openingBalance: integer("opening_balance").default(0).notNull(),
   balance: integer("balance").default(0).notNull(),
   includeInNetWorth: boolean("include_in_net_worth").default(true).notNull(),
   archived: boolean("archived").default(false).notNull(),

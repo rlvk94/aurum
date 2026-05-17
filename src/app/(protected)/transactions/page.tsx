@@ -250,6 +250,8 @@ export default function TransactionsPage() {
       posthog.capture("transaction_deleted", { transaction_id: variables.id });
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
+      void utils.financialAccount.list.invalidate();
+      void utils.financialAccount.get.invalidate();
       void utils.challenge.list.invalidate();
       void utils.challenge.get.invalidate();
     },

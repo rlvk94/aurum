@@ -144,7 +144,7 @@ export function AccountFormDialog({
       name: account?.name ?? "",
       identifier: account?.identifier ?? "",
       type: (account?.type as AccountType) ?? "checking",
-      balance: account ? String(account.balance / 100) : "",
+      balance: account ? String(account.openingBalance / 100) : "",
       includeInNetWorth: account?.includeInNetWorth ?? true,
       visibility: (account?.visibility ?? "shared") as Visibility,
       accessUserIds: [] as string[],
@@ -158,6 +158,9 @@ export function AccountFormDialog({
         visibility: value.visibility,
         accessUserIds: isPrivate ? value.accessUserIds : [],
       };
+      const openingBalance = Math.round(
+        parseFloat(value.balance || "0") * 100,
+      );
       if (isEdit) {
         updateAccount.mutate({
           id: account.id,
@@ -165,6 +168,7 @@ export function AccountFormDialog({
           identifier: value.identifier.trim(),
           type: value.type,
           includeInNetWorth: value.includeInNetWorth,
+          openingBalance,
           ...sharedPayload,
         });
       } else {
@@ -172,7 +176,7 @@ export function AccountFormDialog({
           name: value.name.trim(),
           identifier: value.identifier.trim(),
           type: value.type,
-          balance: Math.round(parseFloat(value.balance || "0") * 100),
+          balance: openingBalance,
           includeInNetWorth: value.includeInNetWorth,
           ...sharedPayload,
         });
@@ -300,28 +304,31 @@ export function AccountFormDialog({
               )}
             />
 
-            {!isEdit && (
-              <form.Field
-                name="balance"
-                children={(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>
-                      {t("openingBalance")}
-                    </FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="number"
-                      step="0.01"
-                      placeholder="0"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                    />
-                  </Field>
-                )}
-              />
-            )}
+            <form.Field
+              name="balance"
+              children={(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>
+                    {t("openingBalance")}
+                  </FieldLabel>
+                  <Input
+                    id={field.name}
+                    name={field.name}
+                    type="number"
+                    step="0.01"
+                    placeholder="0"
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                  />
+                  {isEdit && (
+                    <FieldDescription>
+                      {t("openingBalanceEditHelp")}
+                    </FieldDescription>
+                  )}
+                </Field>
+              )}
+            />
 
             <form.Field
               name="visibility"
