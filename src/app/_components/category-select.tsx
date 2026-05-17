@@ -232,7 +232,13 @@ export function CategorySelect(props: CategorySelectProps) {
         align="start"
         collisionPadding={8}
       >
-        <Command>
+        <Command
+          filter={(value, search) => {
+            const s = search.trim().toLowerCase();
+            if (!s) return 1;
+            return value.toLowerCase().includes(s) ? 1 : 0;
+          }}
+        >
           <CommandInput placeholder={t("searchPlaceholder")} />
           <CommandList
             className="max-h-[min(var(--radix-popover-content-available-height,320px),320px)] overscroll-contain"
