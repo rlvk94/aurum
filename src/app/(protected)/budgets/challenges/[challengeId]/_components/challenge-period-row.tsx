@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
-import { Badge } from "~/app/_components/badge";
 import { Skeleton } from "~/app/_components/skeleton";
 import {
   formatAmount,
@@ -17,17 +16,20 @@ import {
 type ChallengeDetail = RouterOutputs["challenge"]["get"];
 type ChallengeInstance = ChallengeDetail["instances"][number];
 type Category = RouterOutputs["category"]["list"][number];
+type QuickAssignTx = { id: string; categoryId: string | null };
 
 export function ChallengePeriodRow({
   instance,
   challenge,
   locale,
   categories,
+  onAssignCategory,
 }: {
   instance: ChallengeInstance;
   challenge: ChallengeDetail;
   locale: string;
   categories: Category[];
+  onAssignCategory: (tx: QuickAssignTx) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -84,6 +86,7 @@ export function ChallengePeriodRow({
             challenge={challenge}
             locale={locale}
             categories={categories}
+            onAssignCategory={onAssignCategory}
           />
         </div>
       )}
@@ -96,13 +99,16 @@ export function PeriodTransactions({
   challenge,
   locale,
   categories,
+  onAssignCategory,
 }: {
   instance: ChallengeInstance;
   challenge: ChallengeDetail;
   locale: string;
   categories: Category[];
+  onAssignCategory: (tx: QuickAssignTx) => void;
 }) {
   const t = useTranslations("budgets");
+  const tTx = useTranslations("transactions");
   const dateLocale = locale.startsWith("da") ? da : enUS;
 
   if (challenge.type === "net_worth_goal") {
@@ -192,17 +198,24 @@ export function PeriodTransactions({
               <span className="truncate text-foreground">{tx.description}</span>
               <span className="text-xs text-muted-foreground">{dateLabel}</span>
             </div>
-            {cat && (
-              <Badge
-                variant="outline"
-                className="shrink-0 gap-1 text-[10px] font-normal"
-              >
-                {cat.icon && (
-                  <span className="leading-none">{cat.icon}</span>
-                )}
-                <span>{cat.name}</span>
-              </Badge>
-            )}
+            <button
+              type="button"
+              onClick={() =>
+                onAssignCategory({ id: tx.id, categoryId: tx.categoryId })
+              }
+              className="inline-flex shrink-0 items-center gap-1 rounded-full text-xs transition hover:ring-2 hover:ring-primary/40 sm:text-[11px]"
+            >
+              {cat ? (
+                <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-accent-foreground">
+                  {cat.icon && <span className="leading-none">{cat.icon}</span>}
+                  <span>{cat.name}</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
+                  + {tTx("uncategorizedFilter")}
+                </span>
+              )}
+            </button>
             <span
               className={`ml-auto shrink-0 font-medium tabular-nums ${amountClass}`}
             >

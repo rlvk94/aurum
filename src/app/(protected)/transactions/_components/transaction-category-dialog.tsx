@@ -118,7 +118,8 @@ function CategoryGridFlow({
   const { data: categories = [] } = api.category.list.useQuery();
 
   type TxItem = RouterOutputs["transaction"]["list"]["items"][number];
-  type ListPage = { items: TxItem[]; nextCursor: unknown };
+  type ListData = { items: TxItem[]; nextCursor: unknown };
+  type ListPage = ListData;
   type InfiniteData = { pages: ListPage[]; pageParams: unknown[] };
 
   const transactionListKey: QueryKey = [["transaction", "list"]];
@@ -126,24 +127,27 @@ function CategoryGridFlow({
   const updateTx = api.transaction.update.useMutation({
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: transactionListKey });
-      const snapshot = queryClient.getQueriesData<InfiniteData>({
+      const snapshot = queryClient.getQueriesData({
         queryKey: transactionListKey,
       });
-      queryClient.setQueriesData<InfiniteData>(
+      queryClient.setQueriesData(
         { queryKey: transactionListKey },
-        (old) => {
-          if (!old?.pages) return old;
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              items: page.items.map((item) =>
-                item.id === variables.id
-                  ? { ...item, categoryId: variables.categoryId ?? null }
-                  : item,
-              ),
-            })),
-          };
+        (old: ListData | InfiniteData | undefined) => {
+          if (!old) return old;
+          const patchItem = (item: TxItem): TxItem =>
+            item.id === variables.id
+              ? { ...item, categoryId: variables.categoryId ?? null }
+              : item;
+          if ("pages" in old) {
+            return {
+              ...old,
+              pages: old.pages.map((page) => ({
+                ...page,
+                items: page.items.map(patchItem),
+              })),
+            };
+          }
+          return { ...old, items: old.items.map(patchItem) };
         },
       );
       return { snapshot };

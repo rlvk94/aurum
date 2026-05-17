@@ -29,6 +29,7 @@ import {
 import { Skeleton } from "~/app/_components/skeleton";
 import { usePageMetadata } from "~/app/_components/page-metadata";
 import { ChallengeFormDialog } from "../../_components/challenge-form-dialog";
+import { TransactionCategoryDialog } from "../../../../transactions/_components/transaction-category-dialog";
 import {
   computeOnTrack,
   daysBetween,
@@ -38,6 +39,8 @@ import {
   pickProgressColor,
 } from "../../_lib/challenge-progress";
 import { ChallengePeriodRow, PeriodTransactions } from "./challenge-period-row";
+
+export type QuickAssignTx = { id: string; categoryId: string | null };
 
 type ChallengeDetail = RouterOutputs["challenge"]["get"];
 
@@ -73,6 +76,7 @@ export function ChallengeDetailClient({ id }: { id: string }) {
   }, [challenge]);
 
   const [editing, setEditing] = useState(false);
+  const [quickAssign, setQuickAssign] = useState<QuickAssignTx | null>(null);
 
   const invalidate = () => {
     void utils.challenge.get.invalidate({ id });
@@ -131,6 +135,7 @@ export function ChallengeDetailClient({ id }: { id: string }) {
           challenge={challenge}
           locale={locale}
           categories={cats}
+          onAssignCategory={setQuickAssign}
         />
       ))}
     </div>
@@ -141,6 +146,7 @@ export function ChallengeDetailClient({ id }: { id: string }) {
       challenge={challenge}
       locale={locale}
       categories={cats}
+      onAssignCategory={setQuickAssign}
     />
   ) : null;
 
@@ -222,6 +228,13 @@ export function ChallengeDetailClient({ id }: { id: string }) {
         onOpenChange={(open) => setEditing(open)}
         challenge={challenge}
       />
+
+      <TransactionCategoryDialog
+        transactionId={quickAssign?.id ?? null}
+        currentCategoryId={quickAssign?.categoryId ?? null}
+        open={Boolean(quickAssign)}
+        onOpenChange={(open) => !open && setQuickAssign(null)}
+      />
     </div>
   );
 }
@@ -230,10 +243,12 @@ function CurrentPeriodCard({
   challenge,
   locale,
   categories,
+  onAssignCategory,
 }: {
   challenge: ChallengeDetail;
   locale: string;
   categories: RouterOutputs["category"]["list"];
+  onAssignCategory: (tx: QuickAssignTx) => void;
 }) {
   const t = useTranslations("budgets");
   const { currentInstance, progress, targetAmount } = challenge;
@@ -361,6 +376,7 @@ function CurrentPeriodCard({
             challenge={challenge}
             locale={locale}
             categories={categories}
+            onAssignCategory={onAssignCategory}
           />
         </div>
       </CardContent>
