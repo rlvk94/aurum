@@ -52,9 +52,9 @@ export function WhatsNewSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side={side}
-        className="w-full overflow-y-auto p-0 sm:max-w-md"
+        className="w-full overflow-y-auto p-0 pb-[env(safe-area-inset-bottom,0px)] sm:max-w-md [&>button]:top-[calc(1rem+env(safe-area-inset-top,0px))]"
       >
-        <SheetHeader className="border-b border-border bg-background px-6 py-5">
+        <SheetHeader className="border-b border-border bg-background px-6 pb-5 pt-[calc(1.25rem+env(safe-area-inset-top,0px))]">
           <SheetTitle className="font-display text-2xl">
             {t("title")}
           </SheetTitle>
