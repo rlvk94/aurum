@@ -117,6 +117,8 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
       void utils.financialAccount.summary.invalidate();
       void utils.financialAccount.stats.invalidate();
       void utils.financialAccount.get.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
     },
   });
 
@@ -166,6 +168,8 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
     onSettled: () => {
       void utils.transaction.list.invalidate();
       void utils.financialAccount.stats.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
     },
   });
 

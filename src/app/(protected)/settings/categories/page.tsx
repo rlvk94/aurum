@@ -77,12 +77,16 @@ export default function CategoriesPage() {
     onSuccess: () => {
       void utils.category.list.invalidate();
       void utils.transaction.list.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
     },
   });
 
   const applyKeywords = api.category.applyKeywords.useMutation({
     onSuccess: () => {
       void utils.transaction.list.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
     },
   });
 

@@ -162,6 +162,8 @@ function CategoryGridFlow({
     },
     onSettled: () => {
       void utils.transaction.list.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
     },
   });
 

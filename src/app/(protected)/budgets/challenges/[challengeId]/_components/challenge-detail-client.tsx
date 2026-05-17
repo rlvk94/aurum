@@ -209,8 +209,8 @@ export function ChallengeDetailClient({ id }: { id: string }) {
 
       {hasHistory ? (
         <div className="grid gap-6 lg:grid-cols-3 lg:items-start">
-          <div className="lg:col-span-1">{currentSection}</div>
-          <div className="lg:col-span-2">{historySection}</div>
+          <div className="min-w-0 lg:col-span-1">{currentSection}</div>
+          <div className="min-w-0 lg:col-span-2">{historySection}</div>
         </div>
       ) : (
         currentSection
@@ -280,7 +280,7 @@ function CurrentPeriodCard({
   );
 
   return (
-    <Card>
+    <Card className="overflow-hidden">
       <CardHeader className="flex flex-row items-start justify-between gap-3 pb-3">
         <div className="min-w-0">
           <p className="text-xs uppercase tracking-wide text-muted-foreground">

@@ -227,6 +227,8 @@ export default function TransactionsPage() {
       void utils.financialAccount.summary.invalidate();
       void utils.budget.list.invalidate();
       void utils.project.list.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
       clearSelection();
     },
   });
@@ -248,6 +250,8 @@ export default function TransactionsPage() {
       posthog.capture("transaction_deleted", { transaction_id: variables.id });
       void utils.transaction.list.invalidate();
       void utils.financialAccount.summary.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
     },
   });
 
@@ -295,6 +299,8 @@ export default function TransactionsPage() {
       void utils.transaction.list.invalidate();
       void utils.budget.list.invalidate();
       void utils.project.list.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
     },
   });
 
