@@ -33,6 +33,16 @@ export const ANNOUNCEMENTS: ReadonlyArray<Announcement> = [
     coverPalette: "gold",
     publishedAt: "2026-04-25",
   },
+  {
+    id: "2026-05-savings",
+    titleKey: "whatsNew.entries.2026-05-savings.title",
+    bodyKey: "whatsNew.entries.2026-05-savings.body",
+    ctaLabelKey: "whatsNew.entries.2026-05-savings.cta",
+    ctaHref: "/accounts",
+    emoji: "🪙",
+    coverPalette: "sage",
+    publishedAt: "2026-05-23",
+  },
 ];
 
 export function getVisibleAnnouncements(now: Date = new Date()): Announcement[] {

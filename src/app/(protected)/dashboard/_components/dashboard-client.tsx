@@ -516,7 +516,11 @@ export function DashboardClient() {
         />
         <StatCard
           title={t("totalBalance")}
-          value={summary ? formatAmount(summary.totalBalance) : "–"}
+          value={
+            summary
+              ? formatAmount(summary.totalBalance - summary.reservedTotal)
+              : "–"
+          }
           icon={Wallet}
         />
         {has("debts") ? (

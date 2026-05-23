@@ -127,6 +127,13 @@
       "when": 1779010346912,
       "tag": "0017_steep_ares",
       "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1779517399138,
+      "tag": "0018_chubby_thundra",
+      "breakpoints": true
     }
   ]
 }

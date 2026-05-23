@@ -33,6 +33,7 @@
     "category": "Kategori",
     "note": "Note",
     "actions": "Handlinger",
+    "more": "Flere handlinger",
     "currency": "kr."
   },
   "nav": {
@@ -205,6 +206,81 @@
       "next": "Næste",
       "weekShort": "Uge {n}, {year}"
     }
+  },
+  "savings": {
+    "card": {
+      "title": "Opsparinger",
+      "description": "Reservér penge på denne konto til specifikke mål",
+      "addButton": "Ny opsparing",
+      "empty": "Ingen opsparinger endnu. Opret en for at sætte penge til side.",
+      "totalReserved": "Samlet opsparing"
+    },
+    "dialog": {
+      "createTitle": "Ny opsparing",
+      "editTitle": "Rediger opsparing",
+      "createDescription": "Sæt penge til side fra denne konto til et specifikt mål",
+      "editDescription": "Opdater opsparingens oplysninger",
+      "name": "Navn",
+      "namePlaceholder": "F.eks. Sommerferie",
+      "emoji": "Emoji",
+      "color": "Farve",
+      "targetAmount": "Målbeløb",
+      "targetAmountHint": "Hvor meget vil du gerne spare op?",
+      "transferMode": "Overførselstilstand",
+      "monthlyAmount": "Månedligt beløb",
+      "monthlyAmountHint": "Overføres automatisk den 1. i hver måned",
+      "roundingStep": "Afrundingstrin",
+      "roundingStepHint": "Hver udgift afrundes op til nærmeste trin, og forskellen lægges i opsparingen",
+      "rounding5": "5 kr.",
+      "rounding10": "10 kr.",
+      "rounding50": "50 kr.",
+      "rounding100": "100 kr."
+    },
+    "mode": {
+      "manual": "Manuel",
+      "manualHint": "Flyt selv penge til opsparingen",
+      "manualShort": "Manuel",
+      "monthly_fixed": "Fast månedlig",
+      "monthly_fixedHint": "Automatisk overførsel hver måned",
+      "monthly_fixedShort": "Månedlig",
+      "rounding": "Afrunding",
+      "roundingHint": "Hver udgift afrundes op og forskellen spares",
+      "roundingShort": "Afrunding"
+    },
+    "status": {
+      "active": "Aktiv",
+      "paused": "Pauset",
+      "completed": "Mål nået",
+      "archived": "Arkiveret"
+    },
+    "source": {
+      "manual": "Manuel overførsel",
+      "monthly_auto": "Månedlig overførsel",
+      "rounding_auto": "Afrunding",
+      "withdraw": "Hævet",
+      "archive_return": "Returneret til konto"
+    },
+    "detail": {
+      "notFound": "Opsparing ikke fundet",
+      "of": "af {target}",
+      "deposit": "Indsæt",
+      "depositHint": "Flyt penge fra kontoen til opsparingen",
+      "withdraw": "Hæv",
+      "withdrawHint": "Flyt penge tilbage til den tilgængelige saldo",
+      "pause": "Pause",
+      "resume": "Fortsæt",
+      "archive": "Arkiver",
+      "deleteForever": "Slet permanent",
+      "depositTitle": "Flyt penge til opsparing",
+      "withdrawTitle": "Flyt penge tilbage til kontoen",
+      "notePlaceholder": "Note (valgfri)",
+      "history": "Historik",
+      "historyDescription": "Bevægelser ind og ud af denne opsparing",
+      "historyEmpty": "Ingen bevægelser endnu",
+      "confirmDeleteTitle": "Slet opsparing?",
+      "confirmDeleteBody": "Opsparingen og dens historik slettes permanent. Saldoen returneres til kontoen."
+    },
+    "completedToast": "🎉 {name} har nået sit mål!"
   },
   "categories": {
     "title": "Kategorier",
@@ -757,6 +833,11 @@
         "title": "Velkommen til Projekter",
         "body": "Hold styr på hver krone af en ferie, renovering eller andre store forløb ét sted. Knyt transaktioner til et projekt — på tværs af kategorier og konti — sæt en valgfri forbrugsgrænse og en periode, og se forløbet i ét blik. Åbn fanen Projekter under Økonomi i sidemenuen for at komme i gang.",
         "cta": "Åbn projekter"
+      },
+      "2026-05-savings": {
+        "title": "Opsparingsmål er her",
+        "body": "Hold styr på flere opsparingsmål på samme konto. Reservér penge til ferie, en ny cykel eller en buffer — og se kun det resterende beløb i din kontooversigt. Vælg mellem manuel overførsel, fast månedligt beløb eller automatisk afrunding på alle udgifter. Åbn en konto for at oprette din første opsparing.",
+        "cta": "Gå til konti"
       }
     }
   },

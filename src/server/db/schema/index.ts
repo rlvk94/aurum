@@ -11,4 +11,6 @@ export * from "./favorite";
 export * from "./financial-account";
 export * from "./income-plan";
 export * from "./project";
+export * from "./savings";
+export * from "./savings-transaction";
 export * from "./transaction";

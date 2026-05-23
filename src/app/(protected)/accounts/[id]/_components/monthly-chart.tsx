@@ -75,14 +75,22 @@ export function MonthlyChart({
         })}
       </div>
       <div className="flex items-end gap-2 sm:gap-3">
-        {monthly.map((m) => (
-          <div
-            key={m.month}
-            className="flex-1 text-center text-xs text-muted-foreground"
-          >
-            {format(parse(`${m.month}-01`, "yyyy-MM-dd", new Date()), "MMM", { locale: dateLocale })}
-          </div>
-        ))}
+        {monthly.map((m) => {
+          const d = parse(`${m.month}-01`, "yyyy-MM-dd", new Date());
+          return (
+            <div
+              key={m.month}
+              className="flex-1 text-center text-xs text-muted-foreground"
+            >
+              <span className="sm:hidden">
+                {format(d, "MMMMM", { locale: dateLocale })}
+              </span>
+              <span className="hidden sm:inline">
+                {format(d, "MMM", { locale: dateLocale })}
+              </span>
+            </div>
+          );
+        })}
       </div>
       <div className="flex items-center justify-center gap-4 pt-2 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">

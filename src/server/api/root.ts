@@ -12,6 +12,7 @@ import { financialAccountRouter } from "~/server/api/routers/financial-account";
 import { incomePlanRouter } from "~/server/api/routers/income-plan";
 import { invitationRouter } from "~/server/api/routers/invitation";
 import { projectRouter } from "~/server/api/routers/project";
+import { savingsRouter } from "~/server/api/routers/savings";
 import { transactionRouter } from "~/server/api/routers/transaction";
 import { userRouter } from "~/server/api/routers/user";
 import { announcementRouter } from "~/server/api/routers/announcement";
@@ -35,6 +36,7 @@ export const appRouter = createTRPCRouter({
   incomePlan: incomePlanRouter,
   invitation: invitationRouter,
   project: projectRouter,
+  savings: savingsRouter,
   transaction: transactionRouter,
   user: userRouter,
   announcement: announcementRouter,

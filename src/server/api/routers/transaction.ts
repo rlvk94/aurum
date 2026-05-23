@@ -7,9 +7,12 @@ import { db as dbInstance } from "~/server/db";
 import {
   financialAccount,
   financialAccountAccess,
+  savings,
+  savingsTransaction,
   transaction,
   user,
 } from "~/server/db/schema";
+import { applySavingsMovement } from "./savings";
 import { getPostHogClient } from "~/server/posthog";
 import {
   findMatchingCategoryId,
@@ -117,6 +120,132 @@ function signedDelta(type: "income" | "expense", amount: number): number {
 }
 
 type DbOrTx = Parameters<Parameters<typeof dbInstance.transaction>[0]>[0] | typeof dbInstance;
+
+/**
+ * Apply rounding-mode savings auto-transfers for an expense. Runs after
+ * the parent transaction has been inserted and the account balance
+ * adjusted. Splits the round-up delta equally across all active rounding
+ * savings on the account (remainder cents → earliest by createdAt).
+ *
+ * Income, transfers (rows with transferGroupId), and expenses that
+ * already produce a zero delta short-circuit without any savings work.
+ *
+ * The parent account's real balance is NOT touched here — savings
+ * reservations only affect the visual balance (computed as
+ * account.balance − sum(savings on that account)).
+ */
+async function applyRoundingForExpense(
+  tx: DbOrTx,
+  args: {
+    familyId: string;
+    accountId: string;
+    transactionId: string;
+    amount: number;
+    date: string;
+    transferGroupId?: string | null;
+  },
+): Promise<void> {
+  if (args.transferGroupId) return;
+
+  const recipients = await tx
+    .select({
+      id: savings.id,
+      accountId: savings.accountId,
+      roundingStep: savings.roundingStep,
+    })
+    .from(savings)
+    .where(
+      and(
+        eq(savings.accountId, args.accountId),
+        eq(savings.transferMode, "rounding"),
+        eq(savings.archived, false),
+        isNull(savings.pausedAt),
+      ),
+    )
+    .orderBy(savings.createdAt);
+
+  if (recipients.length === 0) return;
+
+  // All rounding savings on a single account share the same step today
+  // (the dialog enforces this implicitly per savings). Use each savings'
+  // own step so future per-savings tuning still works; for split
+  // semantics we use the FIRST recipient's step as the canonical one
+  // (the others contribute by sharing the delta).
+  const step = recipients[0]?.roundingStep ?? 0;
+  if (step <= 0) return;
+
+  const rounded = Math.ceil(args.amount / step) * step;
+  const delta = rounded - args.amount;
+  if (delta <= 0) return;
+
+  const perRecipient = Math.floor(delta / recipients.length);
+  let remainder = delta - perRecipient * recipients.length;
+
+  for (const r of recipients) {
+    const portion = perRecipient + (remainder > 0 ? 1 : 0);
+    if (remainder > 0) remainder -= 1;
+    if (portion <= 0) continue;
+    await applySavingsMovement(tx, {
+      savingsId: r.id,
+      accountId: r.accountId,
+      familyId: args.familyId,
+      amount: portion,
+      source: "rounding_auto",
+      date: args.date,
+      triggeringTransactionId: args.transactionId,
+    });
+  }
+}
+
+/**
+ * Remove all rounding_auto savings_transaction rows tied to a parent
+ * transaction and roll back the savings balances by their amounts.
+ * Used when the parent transaction is updated (re-apply with new state)
+ * or deleted (just remove).
+ *
+ * Note: completedAt / pausedAt are NOT un-set here even if a savings
+ * drops back below its target. That's a deliberate edge case — the
+ * celebration has already happened from the user's perspective.
+ */
+async function rollbackRoundingForTransaction(
+  tx: DbOrTx,
+  transactionId: string,
+): Promise<void> {
+  const rows = await tx
+    .select({
+      id: savingsTransaction.id,
+      savingsId: savingsTransaction.savingsId,
+      amount: savingsTransaction.amount,
+    })
+    .from(savingsTransaction)
+    .where(
+      and(
+        eq(savingsTransaction.triggeringTransactionId, transactionId),
+        eq(savingsTransaction.source, "rounding_auto"),
+      ),
+    );
+
+  for (const r of rows) {
+    await tx
+      .update(savings)
+      .set({
+        balance: sql`${savings.balance} - ${r.amount}`,
+        updatedAt: new Date(),
+      })
+      .where(eq(savings.id, r.savingsId));
+  }
+
+  if (rows.length > 0) {
+    await tx
+      .delete(savingsTransaction)
+      .where(
+        and(
+          eq(savingsTransaction.triggeringTransactionId, transactionId),
+          eq(savingsTransaction.source, "rounding_auto"),
+        ),
+      );
+  }
+}
 
 async function applyBalanceDelta(
   db: DbOrTx,
@@ -376,6 +505,18 @@ export const transactionRouter = createTRPCRouter({
         input.accountId,
         signedDelta(input.type, input.amount),
       );
+
+      if (input.type === "expense" && created) {
+        await applyRoundingForExpense(ctx.db, {
+          familyId,
+          accountId: input.accountId,
+          transactionId: created.id,
+          amount: input.amount,
+          date: input.date,
+          transferGroupId: input.transferGroupId,
+        });
+      }
+
       await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [input.date]);
 
       return created;
@@ -454,6 +595,14 @@ export const transactionRouter = createTRPCRouter({
       const CHUNK = 500;
       let inserted = 0;
       const balanceDeltas = new Map<string, number>();
+      type InsertedExpense = {
+        id: string;
+        accountId: string;
+        amount: number;
+        date: string;
+        transferGroupId: string | null;
+      };
+      const insertedExpenses: InsertedExpense[] = [];
       try {
         await ctx.db.transaction(async (tx) => {
           for (let i = 0; i < values.length; i += CHUNK) {
@@ -470,6 +619,8 @@ export const transactionRouter = createTRPCRouter({
                 accountId: transaction.accountId,
                 type: transaction.type,
                 amount: transaction.amount,
+                date: transaction.date,
+                transferGroupId: transaction.transferGroupId,
               });
             inserted += result.length;
             for (const row of result) {
@@ -478,10 +629,29 @@ export const transactionRouter = createTRPCRouter({
                 row.accountId,
                 (balanceDeltas.get(row.accountId) ?? 0) + delta,
               );
+              if (row.type === "expense") {
+                insertedExpenses.push({
+                  id: row.id,
+                  accountId: row.accountId,
+                  amount: row.amount,
+                  date: row.date,
+                  transferGroupId: row.transferGroupId,
+                });
+              }
             }
           }
           for (const [accountId, delta] of balanceDeltas) {
             await applyBalanceDelta(tx, accountId, delta);
+          }
+          for (const row of insertedExpenses) {
+            await applyRoundingForExpense(tx, {
+              familyId,
+              accountId: row.accountId,
+              transactionId: row.id,
+              amount: row.amount,
+              date: row.date,
+              transferGroupId: row.transferGroupId,
+            });
           }
         });
       } catch (err) {
@@ -579,6 +749,26 @@ export const transactionRouter = createTRPCRouter({
         newDelta - oldDelta,
       );
 
+      // Rounding tied to the prior state must be discarded before
+      // re-applying for the new state — otherwise a type or amount
+      // change leaves stale savings_transaction rows behind.
+      const oldWasExpense = existing.type === "expense";
+      const newIsExpense = newType === "expense";
+      const amountChanged = newAmount !== existing.amount;
+      if (oldWasExpense && (amountChanged || !newIsExpense)) {
+        await rollbackRoundingForTransaction(ctx.db, id);
+      }
+      if (newIsExpense && (amountChanged || !oldWasExpense)) {
+        await applyRoundingForExpense(ctx.db, {
+          familyId,
+          accountId: existing.accountId,
+          transactionId: id,
+          amount: newAmount,
+          date: data.date ?? existing.date,
+          transferGroupId: data.transferGroupId,
+        });
+      }
+
       const affectedDates = [existing.date];
       if (data.date && data.date !== existing.date) {
         affectedDates.push(data.date);
@@ -675,6 +865,10 @@ export const transactionRouter = createTRPCRouter({
         ctx.session.user.id,
         [existing.accountId],
       );
+
+      if (existing.type === "expense") {
+        await rollbackRoundingForTransaction(ctx.db, input.id);
+      }
 
       await ctx.db
         .delete(transaction)

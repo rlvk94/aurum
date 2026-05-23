@@ -25,6 +25,8 @@ export default async function AccountDetailPage({
     api.financialAccount.list.prefetch(),
     api.category.list.prefetch(),
     api.transaction.list.prefetch({ accountId: id }),
+    api.savings.list.prefetch({ accountId: id }),
+    api.savings.reservedByAccount.prefetch({ accountIds: [id] }),
   ]);
 
   return (

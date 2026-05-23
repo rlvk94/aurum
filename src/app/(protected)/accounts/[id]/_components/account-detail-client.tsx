@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Pencil } from "lucide-react";
 
 import { api } from "~/trpc/react";
+import { computeVisualBalance } from "~/app/_lib/account-balance";
 import { PageHeader } from "~/app/_components/page-header";
 import { usePageMetadata } from "~/app/_components/page-metadata";
 import { Button } from "~/app/_components/button";
@@ -25,6 +26,7 @@ import {
 import { MonthlyChart } from "./monthly-chart";
 import { CategoryBreakdownCard } from "./category-breakdown-card";
 import { AccountTransactions } from "./account-transactions";
+import { SavingsCard } from "./savings-card";
 
 function formatAmount(cents: number): string {
   const value = cents / 100;
@@ -47,6 +49,9 @@ export function AccountDetailClient({ id }: { id: string }) {
     id,
     months: 12,
   });
+  const { data: reservedByAccount = {} } =
+    api.savings.reservedByAccount.useQuery({ accountIds: [id] });
+  const reservedCents = reservedByAccount[id] ?? 0;
 
   usePageMetadata(
     account ? { title: account.name, parentPath: "/accounts" } : null,
@@ -93,10 +98,13 @@ export function AccountDetailClient({ id }: { id: string }) {
             <p
               className={cn(
                 "font-display text-2xl",
-                account.balance < 0 && "text-expense",
+                computeVisualBalance(account.balance, reservedCents) < 0 &&
+                  "text-expense",
               )}
             >
-              {formatAmount(account.balance)}
+              {formatAmount(
+                computeVisualBalance(account.balance, reservedCents),
+              )}
             </p>
           </CardContent>
         </Card>
@@ -173,6 +181,8 @@ export function AccountDetailClient({ id }: { id: string }) {
           )}
         </CardContent>
       </Card>
+
+      <SavingsCard accountId={id} accountArchived={account.archived} />
 
       <CategoryBreakdownCard accountId={id} />
 

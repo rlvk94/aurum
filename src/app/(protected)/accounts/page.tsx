@@ -13,6 +13,7 @@ import {
   Lock,
 } from "lucide-react";
 import { api, type RouterOutputs } from "~/trpc/react";
+import { computeVisualBalance } from "~/app/_lib/account-balance";
 import { PageHeader } from "~/app/_components/page-header";
 import { EmptyState } from "~/app/_components/empty-state";
 import { Button } from "~/app/_components/button";
@@ -42,12 +43,14 @@ function formatAmount(cents: number): string {
 
 function AccountCard({
   account,
+  reservedCents,
   archived = false,
   onEdit,
   onArchiveToggle,
   onDelete,
 }: {
   account: Account;
+  reservedCents: number;
   archived?: boolean;
   onEdit: () => void;
   onArchiveToggle: () => void;
@@ -56,6 +59,7 @@ function AccountCard({
   const t = useTranslations("accounts");
   const tCommon = useTranslations("common");
   const Icon = accountTypeIcons[account.type as AccountType];
+  const visualBalance = computeVisualBalance(account.balance, reservedCents);
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
 
@@ -85,7 +89,7 @@ function AccountCard({
             {t(`types.${accountTypeKeys[account.type as AccountType]}`)}
           </p>
           <p className="mt-1 font-display text-lg text-foreground">
-            {formatAmount(account.balance)}
+            {formatAmount(visualBalance)}
           </p>
         </div>
       </div>
@@ -142,6 +146,8 @@ export default function AccountsPage() {
   const utils = api.useUtils();
 
   const { data: accounts, isLoading } = api.financialAccount.list.useQuery();
+  const { data: reservedByAccount = {} } =
+    api.savings.reservedByAccount.useQuery();
   const [createOpen, setCreateOpen] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
 
@@ -186,6 +192,7 @@ export default function AccountsPage() {
                 <AccountCard
                   key={account.id}
                   account={account}
+                  reservedCents={reservedByAccount[account.id] ?? 0}
                   onEdit={() => setEditingAccount(account)}
                   onArchiveToggle={() =>
                     updateAccount.mutate({ id: account.id, archived: true })
@@ -206,6 +213,7 @@ export default function AccountsPage() {
                   <AccountCard
                     key={account.id}
                     account={account}
+                    reservedCents={reservedByAccount[account.id] ?? 0}
                     archived
                     onEdit={() => setEditingAccount(account)}
                     onArchiveToggle={() =>

@@ -9,6 +9,7 @@ import {
   category,
   financialAccount,
   financialAccountAccess,
+  savings,
   transaction,
   user,
   usersToFamilies,
@@ -183,8 +184,34 @@ export const financialAccountRouter = createTRPCRouter({
       .from(financialAccount)
       .where(and(filter, eq(financialAccount.archived, false)));
 
+    const accessibleRows = await ctx.db
+      .select({ id: financialAccount.id })
+      .from(financialAccount)
+      .where(and(filter, eq(financialAccount.archived, false)));
+    const accountIds = accessibleRows.map((r) => r.id);
+
+    let reservedTotal = 0;
+    if (accountIds.length > 0) {
+      const [reserved] = await ctx.db
+        .select({
+          total: sql<number>`coalesce(sum(${savings.balance}), 0)`,
+        })
+        .from(savings)
+        .where(
+          and(
+            eq(savings.familyId, familyId),
+            inArray(savings.accountId, accountIds),
+            eq(savings.archived, false),
+          ),
+        );
+      reservedTotal = Number(reserved?.total ?? 0);
+    }
+
     return {
       totalBalance: Number(result?.totalBalance ?? 0),
+      // Sum of savings reservations on accessible accounts. Subtract from
+      // totalBalance for the visual total. Net worth uses totalBalance.
+      reservedTotal,
       netWorthBalance: Number(result?.netWorthBalance ?? 0),
     };
   }),

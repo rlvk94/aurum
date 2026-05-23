@@ -33,6 +33,7 @@
     "category": "Category",
     "note": "Note",
     "actions": "Actions",
+    "more": "More actions",
     "currency": "kr."
   },
   "nav": {
@@ -205,6 +206,81 @@
       "next": "Next",
       "weekShort": "Week {n}, {year}"
     }
+  },
+  "savings": {
+    "card": {
+      "title": "Savings goals",
+      "description": "Reserve money on this account toward specific goals",
+      "addButton": "New goal",
+      "empty": "No savings goals yet. Create one to set money aside.",
+      "totalReserved": "Total saved"
+    },
+    "dialog": {
+      "createTitle": "New savings goal",
+      "editTitle": "Edit savings goal",
+      "createDescription": "Set money aside from this account toward a specific goal",
+      "editDescription": "Update the savings goal",
+      "name": "Name",
+      "namePlaceholder": "e.g. Summer holiday",
+      "emoji": "Emoji",
+      "color": "Color",
+      "targetAmount": "Target amount",
+      "targetAmountHint": "How much do you want to save?",
+      "transferMode": "Transfer mode",
+      "monthlyAmount": "Monthly amount",
+      "monthlyAmountHint": "Transferred automatically on the 1st of each month",
+      "roundingStep": "Rounding step",
+      "roundingStepHint": "Every expense is rounded up to the nearest step and the difference is moved into the goal",
+      "rounding5": "5 kr.",
+      "rounding10": "10 kr.",
+      "rounding50": "50 kr.",
+      "rounding100": "100 kr."
+    },
+    "mode": {
+      "manual": "Manual",
+      "manualHint": "Move money to the goal yourself",
+      "manualShort": "Manual",
+      "monthly_fixed": "Fixed monthly",
+      "monthly_fixedHint": "Auto-transfer every month",
+      "monthly_fixedShort": "Monthly",
+      "rounding": "Rounding",
+      "roundingHint": "Rounds up every expense and saves the difference",
+      "roundingShort": "Rounding"
+    },
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "completed": "Goal reached",
+      "archived": "Archived"
+    },
+    "source": {
+      "manual": "Manual transfer",
+      "monthly_auto": "Monthly auto-transfer",
+      "rounding_auto": "Rounding",
+      "withdraw": "Withdrawn",
+      "archive_return": "Returned to account"
+    },
+    "detail": {
+      "notFound": "Savings goal not found",
+      "of": "of {target}",
+      "deposit": "Deposit",
+      "depositHint": "Move money from the account into the goal",
+      "withdraw": "Withdraw",
+      "withdrawHint": "Move money back to the available balance",
+      "pause": "Pause",
+      "resume": "Resume",
+      "archive": "Archive",
+      "deleteForever": "Delete permanently",
+      "depositTitle": "Move money into goal",
+      "withdrawTitle": "Move money back to account",
+      "notePlaceholder": "Note (optional)",
+      "history": "History",
+      "historyDescription": "Movements in and out of this goal",
+      "historyEmpty": "No movements yet",
+      "confirmDeleteTitle": "Delete savings goal?",
+      "confirmDeleteBody": "The goal and its history are permanently deleted. The balance is returned to the account."
+    },
+    "completedToast": "🎉 {name} has reached its goal!"
   },
   "categories": {
     "title": "Categories",
@@ -757,6 +833,11 @@
         "title": "Introducing Projects",
         "body": "Track every kroner of a vacation, renovation, or any other big endeavor in one place. Tag transactions to a project — across categories and accounts — set an optional spending limit and a date range, and watch progress at a glance. Open the new Projects tab from the Finance group in the sidebar to get started.",
         "cta": "Open Projects"
+      },
+      "2026-05-savings": {
+        "title": "Savings goals are here",
+        "body": "Track multiple savings goals on the same account. Reserve money toward a holiday, a new bike or a buffer — and only see the available amount in your account overview. Pick manual transfers, a fixed monthly amount, or automatic round-up on every expense. Open any account to create your first goal.",
+        "cta": "Go to accounts"
       }
     }
   },

@@ -1,18 +1,18 @@
 import { SectionMarker } from "../section-marker";
 
 const POINTS = [
-  { m: "JAN", v: 412 },
-  { m: "FEB", v: 428 },
-  { m: "MAR", v: 421 },
-  { m: "APR", v: 446 },
-  { m: "MAJ", v: 462 },
-  { m: "JUN", v: 471 },
-  { m: "JUL", v: 469 },
-  { m: "AUG", v: 488 },
-  { m: "SEP", v: 502 },
-  { m: "OKT", v: 510 },
-  { m: "NOV", v: 524 },
-  { m: "DEC", v: 538 },
+  { m: "J", v: 412 },
+  { m: "F", v: 428 },
+  { m: "M", v: 421 },
+  { m: "A", v: 446 },
+  { m: "M", v: 462 },
+  { m: "J", v: 471 },
+  { m: "J", v: 469 },
+  { m: "A", v: 488 },
+  { m: "S", v: 502 },
+  { m: "O", v: 510 },
+  { m: "N", v: 524 },
+  { m: "D", v: 538 },
 ];
 
 export function NetWorthChart() {
@@ -107,7 +107,7 @@ export function NetWorthChart() {
 
         {POINTS.map((p, i) => (
           <text
-            key={p.m}
+            key={i}
             x={xs[i]}
             y={H - 8}
             fontSize="8"
