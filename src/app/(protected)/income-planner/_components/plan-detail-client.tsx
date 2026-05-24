@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { MoreHorizontal, Pencil, Sparkles } from "lucide-react";
+import { Copy, MoreHorizontal, Pencil, Sparkles } from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Badge } from "~/app/_components/badge";
@@ -27,9 +28,9 @@ export function PlanDetailClient({ planId }: { planId: string }) {
   const t = useTranslations("incomePlanner");
   const tCommon = useTranslations("common");
   const utils = api.useUtils();
+  const router = useRouter();
 
   const { data: plan } = api.incomePlan.get.useQuery({ id: planId });
-  const { data: accounts } = api.financialAccount.list.useQuery();
 
   const [editOpen, setEditOpen] = useState(false);
 
@@ -37,6 +38,13 @@ export function PlanDetailClient({ planId }: { planId: string }) {
     onSuccess: () => {
       void utils.incomePlan.get.invalidate({ id: planId });
       void utils.incomePlan.list.invalidate();
+    },
+  });
+
+  const duplicatePlan = api.incomePlan.duplicate.useMutation({
+    onSuccess: (created) => {
+      void utils.incomePlan.list.invalidate();
+      if (created) router.push(`/income-planner/${created.id}`);
     },
   });
 
@@ -68,7 +76,6 @@ export function PlanDetailClient({ planId }: { planId: string }) {
 
   if (!plan) return null;
 
-  const activeAccounts = (accounts ?? []).filter((a) => !a.archived);
   const planForEdit: PlanFromList = {
     ...plan,
     totalIncome,
@@ -108,6 +115,12 @@ export function PlanDetailClient({ planId }: { planId: string }) {
               <DropdownMenuItem onClick={() => setEditOpen(true)}>
                 <Pencil />
                 {t("editPlan")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => duplicatePlan.mutate({ id: planId })}
+              >
+                <Copy />
+                {t("duplicatePlan")}
               </DropdownMenuItem>
               {!plan.isActive && !plan.archived && (
                 <DropdownMenuItem
@@ -166,7 +179,6 @@ export function PlanDetailClient({ planId }: { planId: string }) {
           lines={plan.lines}
           incomes={plan.incomes}
           totalIncome={totalIncome}
-          accounts={activeAccounts}
           allocatedBps={allBpsAllocated}
         />
       </div>

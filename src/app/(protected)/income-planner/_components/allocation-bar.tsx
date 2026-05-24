@@ -2,13 +2,9 @@
 
 import { useTranslations } from "next-intl";
 import type { RouterOutputs } from "~/trpc/react";
+import type { ProjectPalette } from "~/app/(protected)/projects/_lib/format";
 import { cn } from "~/app/_lib/utils";
 
-import {
-  ACCOUNT_TYPE_ICONS,
-  colorForAccountType,
-  type AccountType,
-} from "../_lib/allocation-colors";
 import { bpsFromCents, formatMoney, formatPercentBps } from "../_lib/format";
 
 type Line = RouterOutputs["incomePlan"]["get"]["lines"][number];
@@ -16,7 +12,6 @@ type Line = RouterOutputs["incomePlan"]["get"]["lines"][number];
 type Segment = {
   id: string;
   label: string;
-  accountType: AccountType | null;
   bps: number;
   amountCents: number;
   color: string;
@@ -71,14 +66,13 @@ export function AllocationBar({
       amountCents = line.value;
       bps = bpsFromCents(line.value, totalIncome);
     }
-    const accountType = (line.accountType as AccountType | null) ?? null;
+    const palette = (line.targetColor as ProjectPalette) ?? "gold";
     return {
       id: line.id,
-      label: line.accountName ?? t("accountDeleted"),
-      accountType,
+      label: line.target || t("untitledTarget"),
       bps,
       amountCents,
-      color: colorForAccountType(accountType).bg,
+      color: `var(--project-cover-${palette}-to)`,
     };
   });
 
@@ -227,35 +221,27 @@ export function AllocationBar({
 
         {segments.length > 0 && (
           <ul className="grid w-full gap-1.5 sm:grid-cols-2 lg:flex-1">
-            {segments.map((seg) => {
-              const Icon = seg.accountType
-                ? ACCOUNT_TYPE_ICONS[seg.accountType]
-                : null;
-              return (
-                <li
-                  key={seg.id}
-                  className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 px-2.5 py-1.5"
-                >
-                  <span
-                    aria-hidden
-                    className="h-2.5 w-2.5 shrink-0 rounded-full"
-                    style={{ backgroundColor: seg.color }}
-                  />
-                  {Icon && (
-                    <Icon className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-                  )}
-                  <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
-                    {seg.label}
-                  </span>
-                  <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">
-                    {formatPercentBps(seg.bps)}
-                  </span>
-                  <span className="shrink-0 tabular-nums text-xs font-semibold text-foreground">
-                    {formatMoney(seg.amountCents)}
-                  </span>
-                </li>
-              );
-            })}
+            {segments.map((seg) => (
+              <li
+                key={seg.id}
+                className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 px-2.5 py-1.5"
+              >
+                <span
+                  aria-hidden
+                  className="h-2.5 w-2.5 shrink-0 rounded-full"
+                  style={{ backgroundColor: seg.color }}
+                />
+                <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+                  {seg.label}
+                </span>
+                <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">
+                  {formatPercentBps(seg.bps)}
+                </span>
+                <span className="shrink-0 tabular-nums text-xs font-semibold text-foreground">
+                  {formatMoney(seg.amountCents)}
+                </span>
+              </li>
+            ))}
           </ul>
         )}
       </div>

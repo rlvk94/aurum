@@ -3,9 +3,9 @@ import { and, asc, desc, eq, inArray, ne, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
+import { PROJECT_PALETTES } from "~/server/api/routers/project";
 import type { db as dbInstance } from "~/server/db";
 import {
-  financialAccount,
   incomePlan,
   incomePlanIncome,
   incomePlanLine,
@@ -15,6 +15,7 @@ import {
 // ── Validation ──────────────────────────────────────────────────────────────
 
 const allocationTypeSchema = z.enum(["percentage", "fixed"]);
+const targetColorSchema = z.enum(PROJECT_PALETTES);
 
 async function getActiveFamilyId(
   db: typeof dbInstance,
@@ -49,25 +50,6 @@ async function assertPlanBelongsToFamily(
     .where(and(eq(incomePlan.id, planId), eq(incomePlan.familyId, familyId)));
   if (!row) {
     throw new TRPCError({ code: "NOT_FOUND", message: "Plan not found" });
-  }
-}
-
-async function assertAccountBelongsToFamily(
-  db: DbOrTx,
-  accountId: string,
-  familyId: string,
-) {
-  const [row] = await db
-    .select({ id: financialAccount.id })
-    .from(financialAccount)
-    .where(
-      and(
-        eq(financialAccount.id, accountId),
-        eq(financialAccount.familyId, familyId),
-      ),
-    );
-  if (!row) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Account not found" });
   }
 }
 
@@ -190,25 +172,8 @@ export const incomePlanRouter = createTRPCRouter({
           .where(eq(incomePlanIncome.planId, plan.id))
           .orderBy(asc(incomePlanIncome.sortOrder), asc(incomePlanIncome.createdAt)),
         ctx.db
-          .select({
-            id: incomePlanLine.id,
-            planId: incomePlanLine.planId,
-            accountId: incomePlanLine.accountId,
-            allocationType: incomePlanLine.allocationType,
-            value: incomePlanLine.value,
-            note: incomePlanLine.note,
-            sortOrder: incomePlanLine.sortOrder,
-            createdAt: incomePlanLine.createdAt,
-            updatedAt: incomePlanLine.updatedAt,
-            accountName: financialAccount.name,
-            accountType: financialAccount.type,
-            accountArchived: financialAccount.archived,
-          })
+          .select()
           .from(incomePlanLine)
-          .leftJoin(
-            financialAccount,
-            eq(financialAccount.id, incomePlanLine.accountId),
-          )
           .where(eq(incomePlanLine.planId, plan.id))
           .orderBy(asc(incomePlanLine.sortOrder), asc(incomePlanLine.createdAt)),
       ]);
@@ -243,6 +208,82 @@ export const incomePlanRouter = createTRPCRouter({
             isActive: shouldActivate,
           })
           .returning();
+
+        return created;
+      });
+    }),
+
+  // Clone a plan along with its incomes and allocation lines. The new plan is
+  // inactive by default (only one plan per family may be active at a time) and
+  // gets a " (kopi)" suffix so it's easy to spot in the list.
+  duplicate: protectedProcedure
+    .input(z.object({ id: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+
+      return await ctx.db.transaction(async (tx) => {
+        const [source] = await tx
+          .select()
+          .from(incomePlan)
+          .where(
+            and(
+              eq(incomePlan.id, input.id),
+              eq(incomePlan.familyId, familyId),
+            ),
+          );
+        if (!source) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Plan not found" });
+        }
+
+        const [created] = await tx
+          .insert(incomePlan)
+          .values({
+            familyId,
+            name: `${source.name} (kopi)`,
+            description: source.description,
+            isActive: false,
+            archived: false,
+          })
+          .returning();
+        if (!created) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create plan copy",
+          });
+        }
+
+        const sourceIncomes = await tx
+          .select()
+          .from(incomePlanIncome)
+          .where(eq(incomePlanIncome.planId, source.id));
+        if (sourceIncomes.length > 0) {
+          await tx.insert(incomePlanIncome).values(
+            sourceIncomes.map((i) => ({
+              planId: created.id,
+              name: i.name,
+              amount: i.amount,
+              sortOrder: i.sortOrder,
+            })),
+          );
+        }
+
+        const sourceLines = await tx
+          .select()
+          .from(incomePlanLine)
+          .where(eq(incomePlanLine.planId, source.id));
+        if (sourceLines.length > 0) {
+          await tx.insert(incomePlanLine).values(
+            sourceLines.map((l) => ({
+              planId: created.id,
+              target: l.target,
+              targetColor: l.targetColor,
+              allocationType: l.allocationType,
+              value: l.value,
+              note: l.note,
+              sortOrder: l.sortOrder,
+            })),
+          );
+        }
 
         return created;
       });
@@ -400,7 +441,8 @@ export const incomePlanRouter = createTRPCRouter({
     .input(
       z.object({
         planId: z.string().uuid(),
-        accountId: z.string().uuid().nullable().optional(),
+        target: z.string().min(1).max(80),
+        targetColor: targetColorSchema,
         allocationType: allocationTypeSchema,
         value: z.number().int().min(0),
         note: z.string().max(500).optional(),
@@ -409,9 +451,6 @@ export const incomePlanRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
       await assertPlanBelongsToFamily(ctx.db, input.planId, familyId);
-      if (input.accountId) {
-        await assertAccountBelongsToFamily(ctx.db, input.accountId, familyId);
-      }
       validateLineValue(input.allocationType, input.value);
 
       const [orderRow] = await ctx.db
@@ -425,7 +464,8 @@ export const incomePlanRouter = createTRPCRouter({
         .insert(incomePlanLine)
         .values({
           planId: input.planId,
-          accountId: input.accountId ?? null,
+          target: input.target.trim(),
+          targetColor: input.targetColor,
           allocationType: input.allocationType,
           value: input.value,
           note: input.note ?? null,
@@ -440,7 +480,8 @@ export const incomePlanRouter = createTRPCRouter({
     .input(
       z.object({
         id: z.string().uuid(),
-        accountId: z.string().uuid().nullable().optional(),
+        target: z.string().min(1).max(80).optional(),
+        targetColor: targetColorSchema.optional(),
         allocationType: allocationTypeSchema.optional(),
         value: z.number().int().min(0).optional(),
         note: z.string().max(500).nullable().optional(),
@@ -470,18 +511,20 @@ export const incomePlanRouter = createTRPCRouter({
         });
       }
 
-      if (data.accountId) {
-        await assertAccountBelongsToFamily(ctx.db, data.accountId, familyId);
-      }
-
       if (data.value !== undefined) {
         const effectiveType = data.allocationType ?? row.allocationType;
         validateLineValue(effectiveType, data.value);
       }
 
+      const patch: Partial<typeof incomePlanLine.$inferInsert> = {
+        ...data,
+        updatedAt: new Date(),
+      };
+      if (data.target !== undefined) patch.target = data.target.trim();
+
       await ctx.db
         .update(incomePlanLine)
-        .set({ ...data, updatedAt: new Date() })
+        .set(patch)
         .where(eq(incomePlanLine.id, id));
     }),
 

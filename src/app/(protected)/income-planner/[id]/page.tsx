@@ -12,10 +12,7 @@ export default async function IncomePlanDetailPage({
   const { id } = await params;
 
   try {
-    await Promise.all([
-      api.incomePlan.get.prefetch({ id }),
-      api.financialAccount.list.prefetch(),
-    ]);
+    await api.incomePlan.get.prefetch({ id });
   } catch (error) {
     if (error instanceof TRPCError && error.code === "NOT_FOUND") {
       notFound();

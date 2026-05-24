@@ -35,7 +35,7 @@ export function PlanCard({
       href={`/income-planner/${plan.id}`}
       className={cn(
         "group relative block overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all",
-        "hover:-translate-y-0.5 hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         archived && "opacity-60",
         isHero && "px-6 py-7 sm:px-10 sm:py-10",
         !isHero && "p-5",

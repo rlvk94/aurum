@@ -10,7 +10,6 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 import { family } from "./family";
-import { financialAccount } from "./financial-account";
 
 // ── Enums ───────────────────────────────────────────────────────────────────
 
@@ -67,12 +66,11 @@ export const incomePlanIncome = pgTable(
   (table) => [index("income_plan_income_plan_idx").on(table.planId)],
 );
 
-// An allocation line on a plan, mapping a slice of total income to a specific
-// account. `value` is interpreted per `allocationType`:
+// An allocation line on a plan, mapping a slice of total income to a free-text
+// target (e.g. "Husleje", "Buffer"). `value` is interpreted per `allocationType`:
 //   - percentage → basis points (2500 = 25.00%). Range 0–10000.
 //   - fixed      → cents / øre.
-// accountId is set-null on account delete so the line surfaces a "deleted
-// account" state instead of silently disappearing.
+// `targetColor` is a palette key shared with projects/savings (gold, sand, …).
 export const incomePlanLine = pgTable(
   "income_plan_line",
   {
@@ -80,9 +78,8 @@ export const incomePlanLine = pgTable(
     planId: uuid("plan_id")
       .notNull()
       .references(() => incomePlan.id, { onDelete: "cascade" }),
-    accountId: uuid("account_id").references(() => financialAccount.id, {
-      onDelete: "set null",
-    }),
+    target: text("target").default("").notNull(),
+    targetColor: text("target_color").default("gold").notNull(),
     allocationType: incomePlanAllocationTypeEnum("allocation_type").notNull(),
     value: integer("value").default(0).notNull(),
     note: text("note"),
@@ -122,9 +119,5 @@ export const incomePlanLineRelations = relations(incomePlanLine, ({ one }) => ({
   plan: one(incomePlan, {
     fields: [incomePlanLine.planId],
     references: [incomePlan.id],
-  }),
-  account: one(financialAccount, {
-    fields: [incomePlanLine.accountId],
-    references: [financialAccount.id],
   }),
 }));

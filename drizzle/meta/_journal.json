@@ -134,6 +134,13 @@
       "when": 1779517399138,
       "tag": "0018_chubby_thundra",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1779948000000,
+      "tag": "0019_income_plan_line_target",
+      "breakpoints": true
     }
   ]
 }

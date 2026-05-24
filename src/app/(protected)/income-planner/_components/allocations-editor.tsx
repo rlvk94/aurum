@@ -1,35 +1,18 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import {
-  AlertCircle,
-  Check,
-  CheckCircle2,
-  Copy,
-  Plus,
-  Trash2,
-  Wallet,
-} from "lucide-react";
+import { AlertCircle, Check, CheckCircle2, Copy, Plus, Trash2 } from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/app/_components/select";
+  PROJECT_PALETTES,
+  type ProjectPalette,
+} from "~/app/(protected)/projects/_lib/format";
 import { cn } from "~/app/_lib/utils";
 
-import {
-  ACCOUNT_TYPE_ICONS,
-  colorForAccountType,
-  type AccountType,
-} from "../_lib/allocation-colors";
 import {
   bpsFromCents,
   formatMoney,
@@ -40,8 +23,9 @@ import {
 
 type Line = RouterOutputs["incomePlan"]["get"]["lines"][number];
 type Income = RouterOutputs["incomePlan"]["get"]["incomes"][number];
-type Account = RouterOutputs["financialAccount"]["list"][number];
 type Plan = RouterOutputs["incomePlan"]["get"];
+
+const DEFAULT_COLOR: ProjectPalette = "gold";
 
 // Monotonic counter for optimistic placeholder ids — kept at module scope so
 // React's ref-purity lint rule doesn't complain about `useRef().current += 1`
@@ -57,14 +41,12 @@ export function AllocationsEditor({
   lines,
   incomes,
   totalIncome,
-  accounts,
   allocatedBps,
 }: {
   planId: string;
   lines: Line[];
   incomes: Income[];
   totalIncome: number;
-  accounts: Account[];
   allocatedBps: number;
 }) {
   const t = useTranslations("incomePlanner");
@@ -102,24 +84,22 @@ export function AllocationsEditor({
   const addLine = api.incomePlan.addLine.useMutation(
     withOptimistic<{
       planId: string;
-      accountId?: string | null;
+      target: string;
+      targetColor: ProjectPalette;
       allocationType: "percentage" | "fixed";
       value: number;
     }>((prev, vars) => {
-      const acc = accounts.find((a) => a.id === vars.accountId);
       const newLine: Line = {
         id: genOptimisticId("line"),
         planId: vars.planId,
-        accountId: vars.accountId ?? null,
+        target: vars.target,
+        targetColor: vars.targetColor,
         allocationType: vars.allocationType,
         value: vars.value,
         note: null,
         sortOrder: prev.lines.length,
         createdAt: new Date(),
         updatedAt: new Date(),
-        accountName: acc?.name ?? null,
-        accountType: (acc?.type as AccountType | undefined) ?? null,
-        accountArchived: acc?.archived ?? null,
       };
       return { ...prev, lines: [...prev.lines, newLine] };
     }),
@@ -128,7 +108,8 @@ export function AllocationsEditor({
   const updateLine = api.incomePlan.updateLine.useMutation(
     withOptimistic<{
       id: string;
-      accountId?: string | null;
+      target?: string;
+      targetColor?: ProjectPalette;
       allocationType?: "percentage" | "fixed";
       value?: number;
     }>((prev, vars) => ({
@@ -136,15 +117,10 @@ export function AllocationsEditor({
       lines: prev.lines.map((l) => {
         if (l.id !== vars.id) return l;
         const patch = { ...l };
+        if (vars.target !== undefined) patch.target = vars.target;
+        if (vars.targetColor !== undefined) patch.targetColor = vars.targetColor;
         if (vars.allocationType !== undefined) patch.allocationType = vars.allocationType;
         if (vars.value !== undefined) patch.value = vars.value;
-        if (vars.accountId !== undefined) {
-          patch.accountId = vars.accountId;
-          const acc = accounts.find((a) => a.id === vars.accountId);
-          patch.accountName = acc?.name ?? null;
-          patch.accountType = (acc?.type as AccountType | null | undefined) ?? null;
-          patch.accountArchived = acc?.archived ?? null;
-        }
         return patch;
       }),
     })),
@@ -164,11 +140,10 @@ export function AllocationsEditor({
   const overCents = Math.round((totalIncome * overBps) / 10_000);
 
   const handleAdd = () => {
-    if (accounts.length === 0) return;
-    const firstAccount = accounts[0]!;
     addLine.mutate({
       planId,
-      accountId: firstAccount.id,
+      target: t("newTargetDefault"),
+      targetColor: DEFAULT_COLOR,
       allocationType: "percentage",
       value: 0,
     });
@@ -200,20 +175,7 @@ export function AllocationsEditor({
         />
       )}
 
-      {accounts.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-border px-6 py-8 text-center">
-          <Wallet className="mx-auto h-5 w-5 text-muted-foreground/60" />
-          <p className="mt-3 text-sm font-medium text-foreground">
-            {t("noAccountsHint")}
-          </p>
-          <Link
-            href="/accounts"
-            className="mt-3 inline-flex text-xs font-medium text-primary hover:underline"
-          >
-            {t("goToAccounts")} →
-          </Link>
-        </div>
-      ) : lines.length === 0 ? (
+      {lines.length === 0 ? (
         <div className="mt-4 rounded-xl border border-dashed border-border px-6 py-8 text-center">
           <p className="text-sm font-medium text-foreground">
             {t("noAllocationsYet")}
@@ -234,7 +196,6 @@ export function AllocationsEditor({
               line={line}
               incomes={incomes}
               totalIncome={totalIncome}
-              accounts={accounts}
               showPerSource={showPerSource}
               onUpdate={(patch) =>
                 updateLine.mutate({ id: line.id, ...patch })
@@ -345,7 +306,6 @@ function AllocationRow({
   line,
   incomes,
   totalIncome,
-  accounts,
   showPerSource,
   onUpdate,
   onDelete,
@@ -353,10 +313,10 @@ function AllocationRow({
   line: Line;
   incomes: Income[];
   totalIncome: number;
-  accounts: Account[];
   showPerSource: boolean;
   onUpdate: (patch: {
-    accountId?: string | null;
+    target?: string;
+    targetColor?: ProjectPalette;
     allocationType?: "percentage" | "fixed";
     value?: number;
   }) => void;
@@ -364,19 +324,30 @@ function AllocationRow({
 }) {
   const t = useTranslations("incomePlanner");
   const [valueText, setValueText] = useState(() => initialValueText(line));
-  const [syncKey, setSyncKey] = useState(`${line.allocationType}|${line.value}`);
-  const currentKey = `${line.allocationType}|${line.value}`;
+  const [targetText, setTargetText] = useState(line.target);
+  const [syncKey, setSyncKey] = useState(
+    `${line.allocationType}|${line.value}|${line.target}`,
+  );
+  const currentKey = `${line.allocationType}|${line.value}|${line.target}`;
   if (syncKey !== currentKey) {
     setSyncKey(currentKey);
     setValueText(initialValueText(line));
+    setTargetText(line.target);
   }
 
-  const color = colorForAccountType(line.accountType as AccountType | null);
-  const Icon = line.accountType
-    ? ACCOUNT_TYPE_ICONS[line.accountType as AccountType]
-    : null;
+  const palette = (line.targetColor as ProjectPalette) ?? DEFAULT_COLOR;
+  const stripeColor = `var(--project-cover-${palette}-to)`;
 
   const isPercentage = line.allocationType === "percentage";
+
+  const commitTarget = () => {
+    const trimmed = targetText.trim();
+    if (!trimmed || trimmed === line.target) {
+      setTargetText(line.target);
+      return;
+    }
+    onUpdate({ target: trimmed });
+  };
 
   const commitValue = () => {
     const parsed = isPercentage
@@ -438,46 +409,28 @@ function AllocationRow({
   return (
     <div className="group relative rounded-xl border border-border bg-background p-3 transition-colors hover:border-foreground/20">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
-        {/* Row 1 (mobile) / inline (desktop): color stripe + account picker */}
+        {/* Row 1 (mobile) / inline (desktop): color swatch picker + target input */}
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:contents">
-          <div
-            aria-hidden
-            className="h-9 w-1 shrink-0 rounded-full sm:h-10"
-            style={{ backgroundColor: color.bg }}
+          <ColorSwatchPicker
+            value={palette}
+            stripeColor={stripeColor}
+            onChange={(next) => onUpdate({ targetColor: next })}
+            label={t("targetColor")}
           />
-          <Select
-            value={line.accountId ?? ""}
-            onValueChange={(v) => onUpdate({ accountId: v || null })}
-          >
-            <SelectTrigger className="h-9 min-w-0 flex-1 border-transparent bg-transparent shadow-none hover:bg-muted data-[state=open]:bg-muted">
-              <SelectValue placeholder={t("pickAccount")}>
-                <span className="flex items-center gap-2 truncate">
-                  {Icon ? (
-                    <Icon className="h-4 w-4 shrink-0" style={{ color: color.bg }} />
-                  ) : (
-                    <span className="h-2 w-2 shrink-0 rounded-full bg-muted-foreground/30" />
-                  )}
-                  <span className="truncate">
-                    {line.accountName ?? t("accountDeleted")}
-                  </span>
-                </span>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              {accounts.map((a) => {
-                const AIcon = ACCOUNT_TYPE_ICONS[a.type as AccountType];
-                const aColor = colorForAccountType(a.type as AccountType);
-                return (
-                  <SelectItem key={a.id} value={a.id}>
-                    <span className="flex items-center gap-2">
-                      <AIcon className="h-4 w-4" style={{ color: aColor.bg }} />
-                      <span>{a.name}</span>
-                    </span>
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
+          <Input
+            value={targetText}
+            onChange={(e) => setTargetText(e.target.value)}
+            onBlur={commitTarget}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") e.currentTarget.blur();
+              if (e.key === "Escape") {
+                setTargetText(line.target);
+                e.currentTarget.blur();
+              }
+            }}
+            placeholder={t("targetPlaceholder")}
+            className="h-9 min-w-0 flex-1 border-transparent bg-transparent px-2 font-medium shadow-none hover:bg-muted focus-visible:bg-background"
+          />
         </div>
 
         {/* Row 2 (mobile) / inline (desktop): type toggle + value + delete */}
@@ -569,6 +522,71 @@ function AllocationRow({
               </li>
             ))}
           </ul>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Inline 8-color swatch picker. The trigger is a vertical stripe matching the
+// allocation row's accent; click to expand a row of palette swatches.
+function ColorSwatchPicker({
+  value,
+  stripeColor,
+  onChange,
+  label,
+}: {
+  value: ProjectPalette;
+  stripeColor: string;
+  onChange: (next: ProjectPalette) => void;
+  label: string;
+}) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="relative shrink-0">
+      <button
+        type="button"
+        aria-label={label}
+        aria-haspopup="true"
+        aria-expanded={open}
+        onClick={() => setOpen((o) => !o)}
+        onBlur={(e) => {
+          // Close when focus leaves the swatch + popover.
+          if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
+            setOpen(false);
+          }
+        }}
+        className="h-9 w-1.5 rounded-full transition-all hover:w-2 sm:h-10"
+        style={{ backgroundColor: stripeColor }}
+      />
+      {open && (
+        <div
+          className="absolute left-0 top-full z-20 mt-2 flex gap-1 rounded-md border border-border bg-popover p-1.5 shadow-elevated"
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          {PROJECT_PALETTES.map((p) => {
+            const selected = p === value;
+            return (
+              <button
+                key={p}
+                type="button"
+                aria-label={p}
+                aria-pressed={selected}
+                data-project-palette={p}
+                onClick={() => {
+                  onChange(p);
+                  setOpen(false);
+                }}
+                className={cn(
+                  "h-6 w-6 rounded-full transition",
+                  selected
+                    ? "ring-2 ring-foreground ring-offset-2 ring-offset-popover"
+                    : "opacity-90 hover:opacity-100",
+                )}
+              />
+            );
+          })}
         </div>
       )}
     </div>

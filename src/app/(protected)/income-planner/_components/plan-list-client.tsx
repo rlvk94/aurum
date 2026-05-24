@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Archive,
   ArchiveRestore,
   Calculator,
   CheckCircle2,
+  Copy,
   MoreHorizontal,
   Pencil,
   Plus,
@@ -33,6 +35,7 @@ type Plan = RouterOutputs["incomePlan"]["list"][number];
 export function PlanListClient() {
   const t = useTranslations("incomePlanner");
   const utils = api.useUtils();
+  const router = useRouter();
 
   const { data: plans } = api.incomePlan.list.useQuery();
 
@@ -47,6 +50,12 @@ export function PlanListClient() {
   });
   const deletePlan = api.incomePlan.delete.useMutation({
     onSuccess: () => void utils.incomePlan.list.invalidate(),
+  });
+  const duplicatePlan = api.incomePlan.duplicate.useMutation({
+    onSuccess: (created) => {
+      void utils.incomePlan.list.invalidate();
+      if (created) router.push(`/income-planner/${created.id}`);
+    },
   });
 
   const active = plans?.find((p) => p.isActive && !p.archived) ?? null;
@@ -82,6 +91,7 @@ export function PlanListClient() {
                   variant="hero"
                   onEdit={() => setEditingPlan(active)}
                   onSetActive={() => setActive.mutate({ id: active.id })}
+                  onDuplicate={() => duplicatePlan.mutate({ id: active.id })}
                   onArchive={() =>
                     updatePlan.mutate({ id: active.id, archived: true })
                   }
@@ -108,6 +118,7 @@ export function PlanListClient() {
                     plan={plan}
                     onEdit={() => setEditingPlan(plan)}
                     onSetActive={() => setActive.mutate({ id: plan.id })}
+                    onDuplicate={() => duplicatePlan.mutate({ id: plan.id })}
                     onArchive={() =>
                       updatePlan.mutate({ id: plan.id, archived: true })
                     }
@@ -136,6 +147,7 @@ export function PlanListClient() {
                     archived
                     onEdit={() => setEditingPlan(plan)}
                     onSetActive={() => setActive.mutate({ id: plan.id })}
+                    onDuplicate={() => duplicatePlan.mutate({ id: plan.id })}
                     onArchive={() =>
                       updatePlan.mutate({ id: plan.id, archived: false })
                     }
@@ -195,6 +207,7 @@ function PlanCardWithMenu({
   archived = false,
   onEdit,
   onSetActive,
+  onDuplicate,
   onArchive,
   onDelete,
 }: {
@@ -203,6 +216,7 @@ function PlanCardWithMenu({
   archived?: boolean;
   onEdit: () => void;
   onSetActive: () => void;
+  onDuplicate: () => void;
   onArchive: () => void;
   onDelete: () => void;
 }) {
@@ -228,6 +242,10 @@ function PlanCardWithMenu({
             <DropdownMenuItem onClick={onEdit}>
               <Pencil />
               {t("editPlan")}
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onDuplicate}>
+              <Copy />
+              {t("duplicatePlan")}
             </DropdownMenuItem>
             {!plan.isActive && !archived && (
               <DropdownMenuItem onClick={onSetActive}>
