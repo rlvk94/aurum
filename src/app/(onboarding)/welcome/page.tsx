@@ -18,11 +18,13 @@ import { authClient } from "~/app/_lib/auth-client";
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Input } from "~/app/_components/input";
+import { Checkbox } from "~/app/_components/checkbox";
+import { TermsContent } from "~/app/_components/terms-content";
 import { PlanCard } from "~/app/_components/billing/plan-card";
 import { PaymentForm } from "~/app/_components/billing/payment-form";
 import { cn } from "~/app/_lib/utils";
 
-type Step = "name" | "language" | "theme" | "family" | "plan";
+type Step = "name" | "language" | "terms" | "theme" | "family" | "plan";
 type Theme = "light" | "dark" | "system";
 type Cadence = "monthly" | "annual";
 type SelectedPlan = "individual" | "family";
@@ -74,11 +76,13 @@ const themes = [
 export default function WelcomePage() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
+  const tTerms = useTranslations("terms");
   const tBilling = useTranslations("billing.onboarding");
   const router = useRouter();
   const currentLocale = useLocale();
   const [direction, setDirection] = useState(1);
   const [name, setName] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [locale, setLocale] = useState<"da" | "en">(
     currentLocale === "en" ? "en" : "da",
   );
@@ -95,12 +99,18 @@ export default function WelcomePage() {
   } | null>(null);
 
   const { data: onboardingState } = api.user.getOnboardingState.useQuery();
+  const { data: me } = api.user.me.useQuery();
   const { data: families, isLoading: familiesLoading } =
     api.family.list.useQuery();
   const needsFamily = !familiesLoading && families?.length === 0;
 
+  const termsQuery = api.terms.current.useQuery(
+    { locale },
+    { enabled: ready },
+  );
+
   const steps = useMemo<Step[]>(() => {
-    const s: Step[] = ["language", "name", "theme"];
+    const s: Step[] = ["language", "terms", "name", "theme"];
     if (needsFamily) s.push("family", "plan");
     return s;
   }, [needsFamily]);
@@ -111,18 +121,27 @@ export default function WelcomePage() {
 
   // Resume from persisted step
   useEffect(() => {
-    if (onboardingState && !ready) {
+    if (onboardingState && me && !ready) {
       const resumeIndex = Math.min(
         onboardingState.onboardingStep,
         steps.length - 1,
       );
       setCurrentStepIndex(resumeIndex);
       setTheme(readThemeCookie());
+      // Prefill the existing name so users forced back through onboarding
+      // (e.g. the one-time terms re-consent reset) don't have to re-type it.
+      if (me.name) setName(me.name);
       setReady(true);
     }
-  }, [onboardingState, steps, ready]);
+  }, [onboardingState, me, steps, ready]);
+
+  // Treat the terms as accepted if the user ticked the box now, or already
+  // accepted this version before (e.g. when navigating back to this step).
+  // Acceptance itself is idempotent server-side.
+  const termsAgreed = termsAccepted || termsQuery.data?.accepted === true;
 
   const updateProfile = api.user.updateProfile.useMutation();
+  const acceptTerms = api.terms.accept.useMutation();
   const completeOnboarding = api.user.completeOnboarding.useMutation({
     onSuccess: () => {
       router.push("/dashboard");
@@ -176,6 +195,7 @@ export default function WelcomePage() {
 
   const isPending =
     updateProfile.isPending ||
+    acceptTerms.isPending ||
     completeOnboarding.isPending ||
     createFamily.isPending ||
     selectIndividual.isPending ||
@@ -184,6 +204,7 @@ export default function WelcomePage() {
 
   const error =
     updateProfile.error ??
+    acceptTerms.error ??
     completeOnboarding.error ??
     createFamily.error ??
     selectIndividual.error ??
@@ -195,6 +216,7 @@ export default function WelcomePage() {
     !showPaymentForm &&
     ((currentStep === "name" && name.trim().length > 0) ||
       currentStep === "language" ||
+      (currentStep === "terms" && Boolean(termsQuery.data) && termsAgreed) ||
       currentStep === "theme" ||
       (currentStep === "family" && familyName.trim().length > 0) ||
       (currentStep === "plan" && !activating));
@@ -230,6 +252,25 @@ export default function WelcomePage() {
           },
         );
       }
+    } else if (currentStep === "terms") {
+      const version = termsQuery.data?.version;
+      if (!version) return;
+      acceptTerms.mutate(
+        { version, locale },
+        {
+          onSuccess: () => {
+            updateProfile.mutate(
+              { onboardingStep: nextIndex },
+              {
+                onSuccess: () => {
+                  setDirection(1);
+                  setCurrentStepIndex(nextIndex);
+                },
+              },
+            );
+          },
+        },
+      );
     } else if (currentStep === "theme") {
       if (isLastStep) {
         updateProfile.mutate(
@@ -269,6 +310,8 @@ export default function WelcomePage() {
     selectedPlan,
     cadence,
     updateProfile,
+    acceptTerms,
+    termsQuery.data?.version,
     completeOnboarding,
     createFamily,
     selectIndividual,
@@ -501,6 +544,53 @@ export default function WelcomePage() {
                         )}
                       </button>
                     ))}
+                  </motion.div>
+                </div>
+              )}
+
+              {/* Step: Terms */}
+              {currentStep === "terms" && (
+                <div>
+                  <div className="mb-8 h-px w-12 bg-primary/40" />
+
+                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                    {tTerms("onboardingTitle")}
+                  </h1>
+                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+                    {tTerms("onboardingDescription")}
+                  </p>
+
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 0.2,
+                      ease: [0.16, 1, 0.3, 1],
+                    }}
+                    className="mt-8"
+                  >
+                    <div className="max-h-[42vh] overflow-y-auto rounded-lg border border-border bg-card/50 p-5">
+                      {termsQuery.data ? (
+                        <TermsContent content={termsQuery.data.content} />
+                      ) : (
+                        <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+                          <Loader2 className="size-4 animate-spin" />
+                          {tTerms("loading")}
+                        </div>
+                      )}
+                    </div>
+
+                    <label className="mt-5 flex cursor-pointer items-start gap-3">
+                      <Checkbox
+                        checked={termsAgreed}
+                        onCheckedChange={(v) => setTermsAccepted(v === true)}
+                        className="mt-0.5 size-5"
+                      />
+                      <span className="text-sm text-foreground">
+                        {tTerms("acceptLabel")}
+                      </span>
+                    </label>
                   </motion.div>
                 </div>
               )}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 import posthog from "posthog-js";
 import { authClient } from "~/app/_lib/auth-client";
@@ -24,6 +25,7 @@ type Step = "email" | "otp";
 export default function LoginPage() {
   const t = useTranslations("auth");
   const tCommon = useTranslations("common");
+  const tTerms = useTranslations("terms");
   const [step, setStep] = useState<Step>("email");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -182,6 +184,15 @@ export default function LoginPage() {
             {isLoading ? tCommon("loading") : t("sendCode")}
           </Button>
         </form>
+        <p className="text-muted-foreground mt-4 text-center text-xs">
+          {tTerms("loginNotice")}{" "}
+          <Link
+            href="/terms"
+            className="text-foreground underline underline-offset-2 hover:text-primary"
+          >
+            {tTerms("viewLink")}
+          </Link>
+        </p>
       </CardContent>
     </Card>
   );

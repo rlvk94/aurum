@@ -318,6 +318,17 @@
       "cannotAssignTopLevel": "Transaktioner skal tilknyttes en underkategori, ikke en overordnet"
     }
   },
+  "terms": {
+    "onboardingTitle": "Vilkår og betingelser",
+    "onboardingDescription": "Læs og accepter vores vilkår for at fortsætte.",
+    "acceptLabel": "Jeg har læst og accepterer vilkår og betingelser",
+    "readHint": "Rul igennem dokumentet nedenfor.",
+    "loading": "Indlæser vilkår …",
+    "pageTitle": "Vilkår og betingelser",
+    "backToHome": "Tilbage til forsiden",
+    "loginNotice": "Når du opretter en konto, bliver du bedt om at acceptere vores vilkår.",
+    "viewLink": "Vilkår og betingelser"
+  },
   "transactions": {
     "title": "Transaktioner",
     "assignCategoryTitle": "Vælg kategori",
@@ -1267,7 +1278,8 @@
         "features": "Funktioner",
         "pricing": "Priser",
         "faq": "Spørgsmål",
-        "contact": "Kontakt"
+        "contact": "Kontakt",
+        "terms": "Vilkår og betingelser"
       },
       "colophon": "Aurum · © 2026 · Danmark"
     }

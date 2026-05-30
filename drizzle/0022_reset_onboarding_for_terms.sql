@@ -1,0 +1,13 @@
+-- Reset onboarding for ALL existing users so that, on their next visit, the
+-- protected layout redirects them back through the onboarding flow and they are
+-- prompted to accept the Terms & Conditions. This lets us collect a recorded
+-- consent (terms_acceptance row) from the entire existing user base.
+--
+-- onboarding_step MUST be reset to 0: the welcome flow resumes at the persisted
+-- step, so leaving a higher value would skip past the terms step. Resetting to 0
+-- starts everyone at the first step (language → terms → …).
+--
+-- One-time data migration. Applied once in production via `npm run db:migrate`
+-- (tracked in the journal). It is NOT applied by `db:push`, which only syncs
+-- schema — reset your local dev user manually if you need to re-test the flow.
+UPDATE "user" SET "onboarded_at" = NULL, "onboarding_step" = 0;

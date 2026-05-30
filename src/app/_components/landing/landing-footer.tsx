@@ -10,6 +10,7 @@ export function LandingFooter() {
     { href: "#pricing", label: t("links.pricing") },
     { href: "#faq", label: t("links.faq") },
     { href: "#contact", label: t("links.contact") },
+    { href: "/terms", label: t("links.terms") },
   ];
 
   return (

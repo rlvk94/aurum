@@ -3,6 +3,7 @@ import { getSessionCookie } from "better-auth/cookies";
 
 const publicPaths = [
   "/login",
+  "/terms",
   "/api/auth",
   "/api/trpc",
   "/api/stripe",
