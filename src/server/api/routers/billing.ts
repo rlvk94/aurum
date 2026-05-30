@@ -13,6 +13,7 @@ import type { db as dbInstance } from "~/server/db";
 import { family, familySubscription } from "~/server/db/schema";
 import { getFamilySubscription } from "~/server/billing/entitlements";
 import { getStripe, priceIdFor } from "~/server/billing/stripe";
+import { validatePromotionCode } from "~/server/billing/promo";
 
 async function requireOwner(
   db: typeof dbInstance,
@@ -84,6 +85,22 @@ function extractClientSecret(
   return null;
 }
 
+/**
+ * Look up a customer-entered discount code and validate it. Codes are matched
+ * case-insensitively (Stripe stores them upper-cased), with the embedded coupon
+ * expanded so we can return the discount terms in one round-trip.
+ */
+async function resolvePromoCode(stripe: Stripe, code: string) {
+  const { data } = await stripe.promotionCodes.list({
+    code: code.trim().toUpperCase(),
+    active: true,
+    limit: 1,
+    // `promotion.coupon` is returned as an id by default — expand for the terms.
+    expand: ["data.promotion.coupon"],
+  });
+  return validatePromotionCode(data[0]);
+}
+
 export const billingRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx }) => {
     const familyId = await getActiveFamilyId(
@@ -153,6 +170,29 @@ export const billingRouter = createTRPCRouter({
   }),
 
   /**
+   * Validate a discount code before checkout so the UI can preview the terms.
+   * Read-only — does not apply anything. The code is re-resolved server-side in
+   * `createSubscription`, so a stale/invalid result here never grants a discount.
+   */
+  validatePromoCode: protectedProcedure
+    .input(z.object({ code: z.string().trim().min(1).max(64) }))
+    .query(async ({ ctx, input }) => {
+      await requireOwner(ctx.db, ctx.session.user.id);
+      const stripe = getStripe();
+      const result = await resolvePromoCode(stripe, input.code);
+      if (!result.valid) return { valid: false as const };
+      // Drop the promotion code id — the client never needs it (we re-resolve).
+      return {
+        valid: true as const,
+        code: result.code,
+        percentOff: result.percentOff,
+        amountOff: result.amountOff,
+        currency: result.currency,
+        duration: result.duration,
+      };
+    }),
+
+  /**
    * Create (or refresh) an incomplete subscription so the client can confirm
    * the first payment via Stripe Elements <PaymentElement />.
    *
@@ -161,7 +201,12 @@ export const billingRouter = createTRPCRouter({
    * to `active` once Stripe confirms the charge.
    */
   createSubscription: protectedProcedure
-    .input(z.object({ cadence: z.enum(["monthly", "annual"]) }))
+    .input(
+      z.object({
+        cadence: z.enum(["monthly", "annual"]),
+        promoCode: z.string().trim().min(1).max(64).optional(),
+      }),
+    )
     .mutation(async ({ ctx, input }) => {
       const familyId = await requireOwner(ctx.db, ctx.session.user.id);
       const publishableKey = env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
@@ -174,6 +219,21 @@ export const billingRouter = createTRPCRouter({
 
       const stripe = getStripe();
       const priceId = priceIdFor(input.cadence);
+
+      // Re-resolve the discount code server-side — never trust a client-supplied
+      // promotion code id. Re-checking here also closes the gap between the
+      // earlier `validatePromoCode` call and payment (expiry, max redemptions).
+      let promotionCodeId: string | undefined;
+      if (input.promoCode) {
+        const promo = await resolvePromoCode(stripe, input.promoCode);
+        if (!promo.valid) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Invalid or expired discount code",
+          });
+        }
+        promotionCodeId = promo.promotionCodeId;
+      }
 
       const customerId = await ensureStripeCustomer(
         ctx.db,
@@ -199,7 +259,10 @@ export const billingRouter = createTRPCRouter({
 
       // Reuse an existing incomplete subscription when cadence matches so we
       // don't pile up drafts on the customer; otherwise cancel and recreate.
+      // Skip reuse when a discount is being applied — we don't persist which
+      // promo a draft already carries, so recreate to guarantee it lands.
       if (
+        !promotionCodeId &&
         existing?.stripeSubscriptionId &&
         existing.status === "incomplete" &&
         existing.stripePriceId === priceId
@@ -247,6 +310,9 @@ export const billingRouter = createTRPCRouter({
           save_default_payment_method: "on_subscription",
           payment_method_types: ["card"],
         },
+        ...(promotionCodeId
+          ? { discounts: [{ promotion_code: promotionCodeId }] }
+          : {}),
         expand: [
           "latest_invoice.confirmation_secret",
           "latest_invoice.payment_intent",

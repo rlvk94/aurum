@@ -6,6 +6,7 @@ import { Check, Loader2 } from "lucide-react";
 
 import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
+import { Input } from "~/app/_components/input";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,13 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
   } | null>(null);
   const [isDark, setIsDark] = useState(false);
   const [activationError, setActivationError] = useState<string | null>(null);
+  const [promoInput, setPromoInput] = useState("");
+  const [appliedPromo, setAppliedPromo] = useState<{
+    code: string;
+    label: string;
+  } | null>(null);
+  const [promoError, setPromoError] = useState<string | null>(null);
+  const [promoChecking, setPromoChecking] = useState(false);
   const finishedRef = useRef(false);
 
   useEffect(() => {
@@ -99,7 +107,57 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
     setStep("cadence");
     setPaymentInfo(null);
     setActivationError(null);
+    setPromoInput("");
+    setAppliedPromo(null);
+    setPromoError(null);
+    setPromoChecking(false);
     finishedRef.current = false;
+  }
+
+  function formatDiscount(p: {
+    percentOff: number | null;
+    amountOff: number | null;
+    currency: string | null;
+  }): string {
+    if (p.percentOff != null) {
+      return t("promoDiscountPercent", { percent: p.percentOff });
+    }
+    if (p.amountOff != null) {
+      const major = (p.amountOff / 100).toLocaleString("da-DK");
+      const unit =
+        p.currency?.toLowerCase() === "dkk"
+          ? "kr."
+          : (p.currency?.toUpperCase() ?? "");
+      return t("promoDiscountAmount", { amount: `${major} ${unit}`.trim() });
+    }
+    return "";
+  }
+
+  async function applyPromo() {
+    const code = promoInput.trim();
+    if (!code) return;
+    setPromoChecking(true);
+    setPromoError(null);
+    try {
+      const result = await utils.billing.validatePromoCode.fetch({ code });
+      if (!result.valid) {
+        setAppliedPromo(null);
+        setPromoError(t("promoInvalid"));
+        return;
+      }
+      setAppliedPromo({ code: result.code, label: formatDiscount(result) });
+    } catch {
+      setAppliedPromo(null);
+      setPromoError(t("promoInvalid"));
+    } finally {
+      setPromoChecking(false);
+    }
+  }
+
+  function removePromo() {
+    setAppliedPromo(null);
+    setPromoInput("");
+    setPromoError(null);
   }
 
   function handleOpenChange(next: boolean) {
@@ -139,6 +197,68 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
               />
             </div>
 
+            <div className="space-y-1.5">
+              <label
+                htmlFor="promo-code"
+                className="text-sm font-medium text-foreground"
+              >
+                {t("promoLabel")}
+              </label>
+              {appliedPromo ? (
+                <div className="flex items-center justify-between rounded-lg border border-income/40 bg-income/5 px-3 py-2">
+                  <p className="text-sm text-foreground">
+                    {t("promoApplied", {
+                      code: appliedPromo.code,
+                      discount: appliedPromo.label,
+                    })}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={removePromo}
+                    className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                  >
+                    {t("promoRemove")}
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <Input
+                    id="promo-code"
+                    value={promoInput}
+                    onChange={(e) => {
+                      setPromoInput(e.target.value);
+                      if (promoError) setPromoError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void applyPromo();
+                      }
+                    }}
+                    placeholder={t("promoPlaceholder")}
+                    autoCapitalize="characters"
+                    className="uppercase"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={() => void applyPromo()}
+                    disabled={promoChecking || !promoInput.trim()}
+                  >
+                    {promoChecking ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      t("promoApply")
+                    )}
+                  </Button>
+                </div>
+              )}
+              {promoError && (
+                <p className="text-sm text-destructive" role="alert">
+                  {promoError}
+                </p>
+              )}
+            </div>
+
             {createSubscription.error && (
               <p className="text-sm text-destructive" role="alert">
                 {createSubscription.error.message}
@@ -150,7 +270,12 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
                 {t("cancel")}
               </Button>
               <Button
-                onClick={() => createSubscription.mutate({ cadence })}
+                onClick={() =>
+                  createSubscription.mutate({
+                    cadence,
+                    promoCode: appliedPromo?.code,
+                  })
+                }
                 disabled={createSubscription.isPending}
               >
                 {createSubscription.isPending ? (

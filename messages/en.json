@@ -1476,7 +1476,15 @@
       "paymentBody": "Enter your card to activate the Family plan.",
       "activatingTitle": "Activating subscription…",
       "activatingBody": "Stay on this page — it takes a few seconds.",
-      "activationTimedOut": "This is taking longer than expected. Try again or contact support."
+      "activationTimedOut": "This is taking longer than expected. Try again or contact support.",
+      "promoLabel": "Discount code",
+      "promoPlaceholder": "Enter code",
+      "promoApply": "Apply",
+      "promoRemove": "Remove",
+      "promoApplied": "{code} applied — {discount}",
+      "promoInvalid": "Invalid or expired discount code",
+      "promoDiscountPercent": "{percent}% off",
+      "promoDiscountAmount": "{amount} off"
     },
     "paymentForm": {
       "pay": "Pay and activate",
