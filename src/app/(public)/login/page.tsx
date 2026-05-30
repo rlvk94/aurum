@@ -54,14 +54,14 @@ export default function LoginPage() {
     setStep("otp");
   };
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const verify = async (otp: string) => {
+    if (isLoading) return;
     setIsLoading(true);
     setError("");
 
     const { error } = await authClient.signIn.emailOtp({
       email,
-      otp: code,
+      otp,
     });
 
     if (error) {
@@ -73,6 +73,17 @@ export default function LoginPage() {
     posthog.identify(email, { email });
     posthog.capture("login_completed", { email });
     window.location.href = "/dashboard";
+  };
+
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await verify(code);
+  };
+
+  const handleCodeChange = (value: string) => {
+    setCode(value);
+    if (error) setError("");
+    if (value.length === 6) void verify(value);
   };
 
   const handleResend = async () => {
@@ -111,7 +122,13 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleVerify} className="space-y-4">
             <div className="flex justify-center">
-              <InputOTP maxLength={6} value={code} onChange={setCode} autoFocus>
+              <InputOTP
+                maxLength={6}
+                value={code}
+                onChange={handleCodeChange}
+                disabled={isLoading}
+                autoFocus
+              >
                 <InputOTPGroup>
                   <InputOTPSlot index={0} />
                   <InputOTPSlot index={1} />
