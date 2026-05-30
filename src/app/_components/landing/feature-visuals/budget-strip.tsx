@@ -1,6 +1,7 @@
 import { SectionMarker } from "../section-marker";
 
 const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEC"];
+const MONTHS_SHORT = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
 
 const PLANNED = [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
 const ACTUAL = [7.2, 7.9, 8.4, 6.32, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -66,7 +67,8 @@ export function BudgetStrip() {
                   isCurrent ? "text-primary" : "text-muted-foreground/70"
                 }`}
               >
-                {m}
+                <span className="sm:hidden">{MONTHS_SHORT[i]}</span>
+                <span className="hidden sm:inline">{m}</span>
               </div>
             </div>
           );
