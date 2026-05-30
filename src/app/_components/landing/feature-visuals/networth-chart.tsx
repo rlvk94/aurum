@@ -96,7 +96,7 @@ export function NetWorthChart() {
         <text
           x={ax}
           y={padTop - 2}
-          fontSize="9"
+          fontSize="16"
           fill="var(--primary)"
           textAnchor="middle"
           className="almanac-smallcaps"
@@ -110,7 +110,7 @@ export function NetWorthChart() {
             key={i}
             x={xs[i]}
             y={H - 8}
-            fontSize="8"
+            fontSize="18"
             fill="var(--muted-foreground)"
             textAnchor="middle"
             style={{ letterSpacing: "0.14em", textTransform: "uppercase" }}
