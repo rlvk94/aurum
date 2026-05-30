@@ -39,6 +39,7 @@ const LEADING_PREFIXES: readonly string[] = [
   "dk-kort",
   "dk kort",
   "dkkort",
+  "kort dk",
   "kortkøb",
   "kort køb",
   "maestro",
@@ -52,7 +53,14 @@ const LEADING_PREFIXES: readonly string[] = [
   // NB: "indbetaling"/"udbetaling" are intentionally NOT stripped — they are
   // part of real payer names ("Udbetaling Danmark") more often than pure noise.
   "mobilepay",
+  "mobile pay",
+  "mob.pay",
   "mobp",
+  // Statement-type lead-ins that wrap the real payee ("Forretning: Proton",
+  // "Ydelse 0111261 Boliglån"). A leading ref/contract number is stripped
+  // separately, see `stripLeadingPrefixes`.
+  "forretning",
+  "ydelse",
   "bgs",
   "bs",
   "køb",
@@ -63,6 +71,21 @@ const LEADING_PREFIXES: readonly string[] = [
  * followed by a number that was already stripped), drop it too.
  */
 const REF_MARKERS = new Set(["kortnr", "ref", "nota", "notanr", "bilag"]);
+
+/**
+ * Trailing 2-letter country codes appended by card networks
+ * ("Thomann De Dk" -> "Thomann"). Kept conservative: only unambiguous codes
+ * that are not also common standalone merchant suffixes (e.g. "it" for IT firms
+ * is intentionally excluded).
+ */
+const COUNTRY_CODES = new Set(["dk", "de", "se", "no", "nl", "gb", "uk"]);
+
+/**
+ * A prefix may be followed by any of these before the merchant starts:
+ * whitespace, colon ("Mobilepay: ..."), asterisk ("Mob.pay*..."), or hyphen.
+ */
+const PREFIX_SEPARATOR = /[\s:*-]/;
+const LEADING_SEPARATORS = /^[\s:*-]+/;
 
 /** Canonical casing for known acronyms / brand stems (lowercased key). */
 const BRAND_CASING: Record<string, string> = {
@@ -107,9 +130,30 @@ function isNoiseDigits(token: string): boolean {
   return DIGITS_RE.test(token) && token.length >= 4;
 }
 
-/** Collapse whitespace, NFC-normalize, trim. */
+/**
+ * NFC-normalize, collapse whitespace, and repair common bank-export artifacts:
+ *  - "ø" mangled to "@" inside a word ("R@NNEDE" -> "Rønnede"),
+ *  - a dangling trailing slash / asterisk ("ZINKBAKKEN.DK/" -> "ZINKBAKKEN.DK").
+ */
 function normalizeWhitespace(text: string): string {
-  return text.normalize("NFC").replace(/\s+/g, " ").trim();
+  return text
+    .normalize("NFC")
+    .replace(/\s+/g, " ")
+    .trim()
+    .replace(/(\p{L})@(\p{L})/gu, "$1ø$2")
+    .replace(/[/*]+$/, "")
+    .trim();
+}
+
+/**
+ * Split a store/terminal number glued between a brand and a location
+ * ("LIDL225HASLEV" -> "LIDL 225 HASLEV"). Requires 2+ digits flanked by letters
+ * so brand names that legitimately end in a single digit (Q8, TV2, G4S) and
+ * pure-numeric ids are left untouched. Applied AFTER prefix stripping so it
+ * never disturbs a glued reference code (e.g. "DK-NOTAf145d").
+ */
+function splitGluedStoreCode(text: string): string {
+  return text.replace(/(\p{L})(\d{2,})(\p{L})/gu, "$1 $2 $3");
 }
 
 /** Strip leading card/channel prefixes and a leading "den <date>". */
@@ -128,13 +172,40 @@ function stripLeadingPrefixes(text: string): string {
       continue;
     }
 
+    // "DK-NOTA52017 ZINKBAKKEN" / "DANKORT-NOTA F145D SAXO" — a card-nota line
+    // whose reference code is glued to (or spaced after) the "NOTA" marker.
+    const notaMatch = /^(?:dankort|dk)-?nota[0-9a-zæøå]*(?:\s+|$)/i.exec(current);
+    if (notaMatch && notaMatch[0].length < current.length) {
+      current = current.slice(notaMatch[0].length);
+      changed = true;
+      continue;
+    }
+
+    // A leading bare date or reference/contract/account number left in front of
+    // the merchant by a channel word ("Ydelse 0111261 Boliglån" -> "Boliglån").
+    // A pure-digit FIRST token is an id, never a merchant. Never strip the only
+    // remaining token (so a bare ref row keeps its number for the null check).
+    const leadMatch = /^(\S+)(?:\s+|$)/.exec(current);
+    if (leadMatch) {
+      const token = leadMatch[1]!.toLowerCase();
+      const rest = current.slice(leadMatch[0].length);
+      if (
+        rest.trim().length > 0 &&
+        (isDateToken(token) || (DIGITS_RE.test(token) && token.length >= 4))
+      ) {
+        current = rest;
+        changed = true;
+        continue;
+      }
+    }
+
     for (const prefix of LEADING_PREFIXES) {
       if (
         lower === prefix ||
-        lower.startsWith(prefix + " ") ||
-        lower.startsWith(prefix + "-")
+        (lower.startsWith(prefix) &&
+          PREFIX_SEPARATOR.test(lower.charAt(prefix.length)))
       ) {
-        current = current.slice(prefix.length).replace(/^[\s-]+/, "");
+        current = current.slice(prefix.length).replace(LEADING_SEPARATORS, "");
         changed = true;
         break;
       }
@@ -168,6 +239,10 @@ function stripTrailingNoise(text: string): string {
     if (idx === protectedIndex) break;
 
     if (isDateToken(lower) || isNoiseDigits(lower)) {
+      tokens.pop();
+      continue;
+    }
+    if (COUNTRY_CODES.has(lower)) {
       tokens.pop();
       continue;
     }
@@ -209,7 +284,8 @@ function toDisplayCase(text: string): string {
 export function stripBankNoise(raw: string): string {
   const normalized = normalizeWhitespace(raw);
   if (!normalized) return "";
-  return stripTrailingNoise(stripLeadingPrefixes(normalized)).trim();
+  const deprefixed = splitGluedStoreCode(stripLeadingPrefixes(normalized));
+  return stripTrailingNoise(deprefixed).trim();
 }
 
 /**

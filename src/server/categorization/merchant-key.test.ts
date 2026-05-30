@@ -23,6 +23,28 @@ describe("deriveMerchantKey", () => {
     expect(deriveMerchantKey("H&M")).toBe("h&m");
   });
 
+  it("sees through noisy statement prefixes to the merchant", () => {
+    expect(deriveMerchantKey("Forretning: Proton")).toBe("proton");
+    expect(deriveMerchantKey("Mobilepay: Nrgi Elhan")).toBe("nrgi");
+    expect(deriveMerchantKey("Ydelse 0111261 Boliglån")).toBe("boliglån");
+    expect(deriveMerchantKey("Kort Dk Mob.pay*rejsekort")).toBe("rejsekort");
+    expect(deriveMerchantKey("Forretning: Thomann De Dk")).toBe("thomann");
+    // "Sp" is a kept merchant abbreviation, so it is the stable key.
+    expect(deriveMerchantKey("Forretning: Sp Juleeventyr")).toBe("sp");
+  });
+
+  it("reduces real-world Danske Bank card/online lines to the brand", () => {
+    expect(deriveMerchantKey("Køb kort DK NETTO HASLEV")).toBe("netto");
+    expect(deriveMerchantKey("KØB KORT DK AURUM")).toBe("aurum");
+    expect(deriveMerchantKey("Køb kort DK LIDL225HASLEV")).toBe("lidl");
+    expect(deriveMerchantKey("Køb kort DK MENY R@NNEDE")).toBe("meny");
+    expect(deriveMerchantKey("DK-NOTA52017 ZINKBAKKEN.DK/")).toBe("zinkbakken");
+    expect(deriveMerchantKey("DK-NOTAf145d SAXO.COM")).toBe("saxo");
+    expect(deriveMerchantKey("DK-NOTAC3414 GRUSDIREKTE APS")).toBe(
+      "grusdirekte",
+    );
+  });
+
   it("returns null for transfers and bare reference rows", () => {
     expect(deriveMerchantKey("Overførsel")).toBeNull();
     expect(deriveMerchantKey("Straksoverførsel 0012345")).toBeNull();
