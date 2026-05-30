@@ -11,11 +11,13 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Check, Sparkles } from "lucide-react";
+import { Check, Lock } from "lucide-react";
 
 import { setUpgradeModalListener } from "./upgrade-modal-bus";
 
 import { api } from "~/trpc/react";
+import { useIsMobile } from "~/app/_hooks/use-mobile";
+import { cn } from "~/app/_lib/utils";
 import { Button } from "~/app/_components/button";
 import {
   Dialog,
@@ -24,6 +26,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "~/app/_components/dialog";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+} from "~/app/_components/drawer";
 
 type UpgradeContextValue = {
   open: (feature?: string) => void;
@@ -87,6 +96,7 @@ export function UpgradeModal({ open, feature, onOpenChange }: Props) {
   const t = useTranslations("billing.upgradeModal");
   const tFeature = useTranslations("billing.featureCopy");
   const router = useRouter();
+  const isMobile = useIsMobile();
 
   const { data: family } = api.family.current.useQuery(undefined, {
     staleTime: 60 * 1000,
@@ -117,6 +127,103 @@ export function UpgradeModal({ open, feature, onOpenChange }: Props) {
     }
   })();
 
+  const goToBilling = () => {
+    onOpenChange(false);
+    router.push("/settings/billing");
+  };
+
+  // Hero — Family-plan banner. `bleed` cancels the host container's own
+  // padding so the banner touches the edges (Dialog has padding; the Drawer
+  // body does not, so it passes an empty string).
+  const hero = (bleed: string) => (
+    <div
+      className={cn(
+        "bg-primary/5 border-border/60 border-b px-6 pt-6 pb-5",
+        bleed,
+      )}
+    >
+      <div className="flex items-start gap-4">
+        <span
+          aria-hidden
+          className="bg-primary/10 text-primary border-primary/20 inline-flex size-10 shrink-0 items-center justify-center rounded-lg border"
+        >
+          <Lock className="size-5" />
+        </span>
+        <div>
+          <h2 className="font-display text-foreground text-2xl leading-tight tracking-tight sm:text-[1.65rem]">
+            {t("hero.title")}
+          </h2>
+          <p className="text-muted-foreground mt-1 text-sm">
+            {t("hero.subtitle")}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+
+  const detail = (
+    <div>
+      {featureTitle && (
+        <h3 className="font-display text-foreground text-lg font-semibold">
+          {featureTitle}
+        </h3>
+      )}
+      {featureBody && (
+        <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
+          {featureBody}
+        </p>
+      )}
+
+      {bullets.length > 0 && (
+        <ul className="text-foreground/90 mt-4 space-y-2.5 text-sm">
+          {bullets.map((b) => (
+            <li key={b} className="flex items-start gap-3">
+              <span
+                aria-hidden
+                className="bg-primary/15 text-primary mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full"
+              >
+                <Check className="size-3" strokeWidth={3} />
+              </span>
+              <span>{b}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {isMember && (
+        <p className="border-border bg-muted/40 text-muted-foreground mt-5 rounded-md border px-4 py-3 text-sm leading-relaxed">
+          {t("memberNote")}
+        </p>
+      )}
+    </div>
+  );
+
+  if (isMobile) {
+    return (
+      <Drawer open={open} onOpenChange={onOpenChange}>
+        <DrawerContent className="max-h-[92dvh] overflow-hidden">
+          <DrawerHeader className="sr-only">
+            <DrawerTitle>{featureTitle ?? t("title")}</DrawerTitle>
+          </DrawerHeader>
+          {/* Pull up over the drag-handle strip so the hero fills to the very
+              top edge; extra top padding keeps the text clear of the handle. */}
+          <div className="-mt-6 overflow-y-auto">
+            {hero("rounded-t-[10px] pt-8")}
+            <div className="px-4 pt-4 pb-2">{detail}</div>
+          </div>
+          {!isMember && (
+            <DrawerFooter>
+              <Button onClick={goToBilling}>{t("cta")}</Button>
+              <Button variant="ghost" onClick={() => onOpenChange(false)}>
+                {t("cancel")}
+              </Button>
+            </DrawerFooter>
+          )}
+        </DrawerContent>
+      </Drawer>
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
@@ -127,78 +234,16 @@ export function UpgradeModal({ open, feature, onOpenChange }: Props) {
           <DialogTitle>{featureTitle ?? t("title")}</DialogTitle>
         </DialogHeader>
 
-        {/* Hero — full-bleed Family-plan banner. Negative margins cancel the
-            DialogContent's own padding so it touches the dialog edges. */}
-        <div className="from-primary/15 border-primary/20 via-primary/5 relative -mx-4 -mt-4 overflow-hidden border-b bg-gradient-to-br to-transparent px-6 pt-6 pb-5 sm:-mx-6 sm:-mt-6 sm:px-7">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -top-16 -right-16 h-48 w-48 rounded-full blur-2xl"
-            style={{
-              background:
-                "radial-gradient(circle, hsl(38 60% 50% / 0.35), transparent 70%)",
-            }}
-          />
-          <span className="border-primary/30 bg-primary/10 text-primary inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium tracking-wide uppercase">
-            <Sparkles aria-hidden className="size-3.5" />
-            {t("hero.eyebrow")}
-          </span>
-          <h2 className="font-display text-foreground mt-2.5 text-2xl leading-tight tracking-tight sm:text-[1.65rem]">
-            {t("hero.title")}
-          </h2>
-          <p className="text-muted-foreground mt-1 text-sm">
-            {t("hero.subtitle")}
-          </p>
-        </div>
+        {hero("-mx-4 -mt-4 sm:-mx-6 sm:-mt-6 sm:px-7")}
 
-        {/* Feature detail — uses DialogContent's default padding */}
-        <div>
-          {featureTitle && (
-            <h3 className="font-display text-foreground text-lg font-semibold">
-              {featureTitle}
-            </h3>
-          )}
-          {featureBody && (
-            <p className="text-muted-foreground mt-1 text-sm leading-relaxed">
-              {featureBody}
-            </p>
-          )}
-
-          {bullets.length > 0 && (
-            <ul className="text-foreground/90 mt-4 space-y-2.5 text-sm">
-              {bullets.map((b) => (
-                <li key={b} className="flex items-start gap-3">
-                  <span
-                    aria-hidden
-                    className="bg-primary/15 text-primary mt-0.5 inline-flex size-5 shrink-0 items-center justify-center rounded-full"
-                  >
-                    <Check className="size-3" strokeWidth={3} />
-                  </span>
-                  <span>{b}</span>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {isMember && (
-            <p className="border-border bg-muted/40 text-muted-foreground mt-5 rounded-md border px-4 py-3 text-sm leading-relaxed">
-              {t("memberNote")}
-            </p>
-          )}
-        </div>
+        {detail}
 
         {!isMember && (
           <DialogFooter>
             <Button variant="ghost" onClick={() => onOpenChange(false)}>
               {t("cancel")}
             </Button>
-            <Button
-              onClick={() => {
-                onOpenChange(false);
-                router.push("/settings/billing");
-              }}
-            >
-              {t("cta")}
-            </Button>
+            <Button onClick={goToBilling}>{t("cta")}</Button>
           </DialogFooter>
         )}
       </DialogContent>
