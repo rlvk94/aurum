@@ -318,6 +318,17 @@
       "cannotAssignTopLevel": "Transactions must be assigned to a sub-category, not a top-level category"
     }
   },
+  "terms": {
+    "onboardingTitle": "Terms & Conditions",
+    "onboardingDescription": "Read and accept our terms to continue.",
+    "acceptLabel": "I have read and accept the Terms & Conditions",
+    "readHint": "Scroll through the document below.",
+    "loading": "Loading terms …",
+    "pageTitle": "Terms & Conditions",
+    "backToHome": "Back to home",
+    "loginNotice": "When you create an account, you'll be asked to accept our terms.",
+    "viewLink": "Terms & Conditions"
+  },
   "transactions": {
     "title": "Transactions",
     "assignCategoryTitle": "Choose category",
@@ -1267,7 +1278,8 @@
         "features": "Features",
         "pricing": "Pricing",
         "faq": "Questions",
-        "contact": "Contact"
+        "contact": "Contact",
+        "terms": "Terms & Conditions"
       },
       "colophon": "Aurum · © 2026 · Denmark"
     }

@@ -14,4 +14,5 @@ export * from "./income-plan";
 export * from "./project";
 export * from "./savings";
 export * from "./savings-transaction";
+export * from "./terms";
 export * from "./transaction";
