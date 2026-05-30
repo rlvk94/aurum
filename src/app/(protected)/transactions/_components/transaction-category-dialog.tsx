@@ -9,6 +9,7 @@ import { useQueryClient, type QueryKey } from "@tanstack/react-query";
 import { cn } from "~/app/_lib/utils";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { useIsMobile } from "~/app/_hooks/use-mobile";
+import { Button } from "~/app/_components/button";
 import {
   Dialog,
   DialogContent,
@@ -171,6 +172,30 @@ function CategoryGridFlow({
     },
   });
 
+  // After a single-transaction pick, offer to apply the same category to other
+  // uncategorized transactions from the same merchant.
+  const [similarPrompt, setSimilarPrompt] = useState<{
+    categoryId: string;
+    count: number;
+  } | null>(null);
+  const applySimilar = api.transaction.applyToSimilar.useMutation();
+
+  async function applyToSimilarConfirmed() {
+    if (!transactionId || !similarPrompt) return;
+    await applySimilar.mutateAsync({
+      sourceTransactionId: transactionId,
+      categoryId: similarPrompt.categoryId,
+    });
+    posthog.capture("transactions_applied_to_similar", {
+      category_id: similarPrompt.categoryId,
+      count: similarPrompt.count,
+    });
+    void utils.transaction.list.invalidate();
+    void utils.challenge.list.invalidate();
+    void utils.challenge.get.invalidate();
+    onClose();
+  }
+
   const groups = useMemo(() => {
     const visible = categories.filter((c) => !c.archived);
     const topLevel = visible.filter((c) => !c.parentId);
@@ -215,13 +240,7 @@ function CategoryGridFlow({
     const out: Array<{ parent: Category; child: Category }> = [];
     for (const { parent, children } of groups) {
       for (const child of children) {
-        const hay = [
-          child.name,
-          parent.name,
-          ...(child.keywords ?? []),
-        ]
-          .join(" ")
-          .toLowerCase();
+        const hay = [child.name, parent.name].join(" ").toLowerCase();
         if (hay.includes(searchQuery)) out.push({ parent, child });
       }
     }
@@ -241,7 +260,48 @@ function CategoryGridFlow({
     }
     if (!transactionId) return;
     updateTx.mutate({ id: transactionId, categoryId: id });
-    onClose();
+    // Removing a category, or re-picking the same one: nothing to fan out.
+    if (id === null || id === currentCategoryId) {
+      onClose();
+      return;
+    }
+    // Check for other uncategorized transactions from the same merchant.
+    const txId = transactionId;
+    applySimilar
+      .mutateAsync({ sourceTransactionId: txId, categoryId: id, dryRun: true })
+      .then((res) => {
+        if (res.matched > 0) setSimilarPrompt({ categoryId: id, count: res.matched });
+        else onClose();
+      })
+      .catch(() => onClose());
+  }
+
+  if (similarPrompt) {
+    return (
+      <div className="flex flex-col gap-4 p-6">
+        <div className="space-y-1">
+          <h2 className="font-display text-lg">{t("applyToSimilarTitle")}</h2>
+          <p className="text-sm text-muted-foreground">
+            {t("applyToSimilarBody", { count: similarPrompt.count })}
+          </p>
+        </div>
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="outline"
+            onClick={onClose}
+            disabled={applySimilar.isPending}
+          >
+            {t("applyToSimilarCancel")}
+          </Button>
+          <Button
+            onClick={() => void applyToSimilarConfirmed()}
+            disabled={applySimilar.isPending}
+          >
+            {t("applyToSimilarConfirm", { count: similarPrompt.count })}
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   return (

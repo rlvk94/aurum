@@ -308,8 +308,7 @@ export function CategorySelect(props: CategorySelectProps) {
                   </div>
                 ) : (
                   <CommandItem
-                    value={[parent.name, ...(parent.keywords ?? [])].join(" ")}
-                    keywords={parent.keywords ?? []}
+                    value={parent.name}
                     onSelect={() => toggleId(parent.id)}
                     className="font-medium"
                   >
@@ -327,12 +326,7 @@ export function CategorySelect(props: CategorySelectProps) {
                 {children.map((child) => (
                   <CommandItem
                     key={child.id}
-                    value={[
-                      parent.name,
-                      child.name,
-                      ...(child.keywords ?? []),
-                    ].join(" ")}
-                    keywords={child.keywords ?? []}
+                    value={[parent.name, child.name].join(" ")}
                     onSelect={() => toggleId(child.id)}
                     className="pl-7"
                   >

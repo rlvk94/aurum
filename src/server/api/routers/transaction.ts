@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { and, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, ne, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
@@ -14,10 +14,14 @@ import {
 } from "~/server/db/schema";
 import { applySavingsMovement } from "./savings";
 import { getPostHogClient } from "~/server/posthog";
+import { loadLearnedRules } from "./category";
 import {
-  findMatchingCategoryId,
-  loadCategoriesWithKeywords,
-} from "./category";
+  deriveMerchantKey,
+  indexLearnedRules,
+  ruleCategoryFor,
+  sanitizeBankText,
+} from "~/server/categorization";
+import { learnFromCategorization } from "~/server/categorization/learn";
 import {
   assertCategoryIsLeaf,
   expandCategoryIds,
@@ -519,6 +523,18 @@ export const transactionRouter = createTRPCRouter({
 
       await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [input.date]);
 
+      // Learn the merchant→category mapping from this manual entry (skip
+      // transfers, which carry no merchant).
+      if (input.categoryId && !input.transferGroupId) {
+        await learnFromCategorization(ctx.db, {
+          familyId,
+          description: input.description,
+          metadata: null,
+          categoryId: input.categoryId,
+          source: "user_create",
+        });
+      }
+
       return created;
     }),
 
@@ -558,22 +574,32 @@ export const transactionRouter = createTRPCRouter({
         Array.from(allAccountIds),
       );
 
-      const categoriesWithKeywords = await loadCategoriesWithKeywords(
-        ctx.db,
-        familyId,
+      const learnedIndex = indexLearnedRules(
+        await loadLearnedRules(ctx.db, familyId),
       );
 
       const now = new Date();
       const values = input.transactions.map((t) => {
-        const description = stripNullBytes(t.description);
+        const rawDescription = stripNullBytes(t.description);
+        // Clean the noisy bank text for storage/display. Falls back to the raw
+        // text only if cleaning emptied it (it never does for non-empty input).
+        const description = sanitizeBankText(rawDescription) || rawDescription;
         const note = t.note ? stripNullBytes(t.note) : null;
         const metadata = sanitizeMetadata(t.metadata);
-        const categoryId = findMatchingCategoryId(
-          categoriesWithKeywords,
-          description,
-          note,
-          metadata,
-        );
+        // Keep the original bank text for reference/audit. It is NOT matched
+        // against — `rawDescription` is not a safelisted metadata key.
+        const storedMetadata =
+          rawDescription && rawDescription !== description
+            ? { ...(metadata ?? {}), rawDescription }
+            : metadata;
+        // Auto-categorize from learned/seeded merchant rules; null otherwise.
+        const categoryId =
+          t.transferGroupId
+            ? null
+            : ruleCategoryFor(
+                learnedIndex,
+                deriveMerchantKey(description, storedMetadata),
+              );
         return {
           familyId,
           accountId: t.accountId,
@@ -583,7 +609,7 @@ export const transactionRouter = createTRPCRouter({
           date: t.date,
           description,
           note,
-          metadata,
+          metadata: storedMetadata,
           categoryId,
           externalId: stripNullBytes(t.externalId),
           importedAt: now,
@@ -711,6 +737,10 @@ export const transactionRouter = createTRPCRouter({
           date: transaction.date,
           type: transaction.type,
           amount: transaction.amount,
+          categoryId: transaction.categoryId,
+          description: transaction.description,
+          metadata: transaction.metadata,
+          transferGroupId: transaction.transferGroupId,
         })
         .from(transaction)
         .where(
@@ -774,6 +804,131 @@ export const transactionRouter = createTRPCRouter({
         affectedDates.push(data.date);
       }
       await refreshChallengeSnapshotsForFamily(ctx.db, familyId, affectedDates);
+
+      // Learn from a user categorization/correction: only when a (non-null)
+      // category was set that differs from the previous one, and the row isn't
+      // a transfer. Correcting away from a wrong auto-assignment is the
+      // strongest signal — the same upsert also bumps the wrong rule's
+      // conflictCount.
+      if (
+        data.categoryId !== undefined &&
+        data.categoryId !== null &&
+        data.categoryId !== existing.categoryId &&
+        !existing.transferGroupId
+      ) {
+        await learnFromCategorization(ctx.db, {
+          familyId,
+          description: data.description ?? existing.description,
+          metadata: existing.metadata,
+          categoryId: data.categoryId,
+          source: "user_correction",
+        });
+      }
+    }),
+
+  /**
+   * After a user categorizes one transaction, offer to apply the same category
+   * to other UNCATEGORIZED transactions from the same merchant. `dryRun` returns
+   * just the count (to power the prompt); a real run also learns the rule once.
+   */
+  applyToSimilar: protectedProcedure
+    .input(
+      z.object({
+        sourceTransactionId: z.string().uuid(),
+        categoryId: z.string().uuid(),
+        dryRun: z.boolean().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const accessibleIds = await getAccessibleAccountIds(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+      );
+      if (accessibleIds.length === 0) return { matched: 0, updated: 0 };
+
+      await assertCategoryIsLeaf(ctx.db, familyId, input.categoryId);
+
+      const [source] = await ctx.db
+        .select({
+          description: transaction.description,
+          metadata: transaction.metadata,
+        })
+        .from(transaction)
+        .where(
+          and(
+            eq(transaction.id, input.sourceTransactionId),
+            eq(transaction.familyId, familyId),
+          ),
+        );
+      if (!source) return { matched: 0, updated: 0 };
+
+      const merchantKey = deriveMerchantKey(source.description, source.metadata);
+      if (!merchantKey) return { matched: 0, updated: 0 };
+
+      // Candidate set: uncategorized rows in accessible accounts. The merchant
+      // key is derived in JS, so it can't be a SQL filter — fine at current
+      // volume. (A denormalized transaction.merchant_key column is the
+      // scaling follow-up once bank streaming raises volume.)
+      const candidates = await ctx.db
+        .select({
+          id: transaction.id,
+          date: transaction.date,
+          description: transaction.description,
+          metadata: transaction.metadata,
+          transferGroupId: transaction.transferGroupId,
+        })
+        .from(transaction)
+        .where(
+          and(
+            eq(transaction.familyId, familyId),
+            inArray(transaction.accountId, accessibleIds),
+            isNull(transaction.categoryId),
+            // Exclude the source row itself (it's being categorized via the
+            // separate update; this avoids a race counting it as "similar").
+            ne(transaction.id, input.sourceTransactionId),
+          ),
+        );
+
+      const matches = candidates.filter(
+        (tx) =>
+          !tx.transferGroupId &&
+          deriveMerchantKey(tx.description, tx.metadata) === merchantKey,
+      );
+
+      if (input.dryRun) return { matched: matches.length, updated: 0 };
+      if (matches.length === 0) return { matched: 0, updated: 0 };
+
+      await ctx.db
+        .update(transaction)
+        .set({ categoryId: input.categoryId, updatedAt: new Date() })
+        .where(
+          and(
+            inArray(
+              transaction.id,
+              matches.map((m) => m.id),
+            ),
+            eq(transaction.familyId, familyId),
+          ),
+        );
+
+      // One user decision → one learning hit (not one per row).
+      await learnFromCategorization(ctx.db, {
+        familyId,
+        description: source.description,
+        metadata: source.metadata,
+        categoryId: input.categoryId,
+        source: "apply_to_similar",
+      });
+
+      await refreshChallengeSnapshotsForFamily(
+        ctx.db,
+        familyId,
+        matches.map((m) => m.date),
+      );
+
+      return { matched: matches.length, updated: matches.length };
     }),
 
   bulkUpdate: protectedProcedure

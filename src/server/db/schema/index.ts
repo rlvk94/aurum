@@ -3,6 +3,7 @@ export * from "./asset";
 export * from "./auth";
 export * from "./billing";
 export * from "./budget";
+export * from "./categorization-rule";
 export * from "./category";
 export * from "./challenge";
 export * from "./debt";

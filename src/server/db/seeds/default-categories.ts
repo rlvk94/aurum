@@ -1,5 +1,17 @@
 import type { Locale } from "~/i18n/config";
 
+/**
+ * `keywords` are seed merchant terms. On family creation each one is reduced to
+ * a merchant key (see `deriveMerchantKey`) and seeded as a default
+ * categorization rule, giving a new family auto-categorization out of the box.
+ * The user's own categorizations then refine these rules over time.
+ *
+ * Guidelines:
+ *  1. Prefer real merchant/payee names ("netto", "circle k") — they reduce to
+ *     clean keys. Generic words ("el", "bar") make poor keys and are avoided.
+ *  2. A term that reduces to the same merchant key under two different leaves
+ *     is ambiguous; the seeder drops it from cold-start rather than guess.
+ */
 export type SeedCategoryLeaf = {
   name: Record<Locale, string>;
   icon?: string;
@@ -31,7 +43,9 @@ export const defaultCategories: DefaultCategorySeed = [
         {
           name: { da: "Forbrug", en: "Utilities" },
           icon: "💡",
-          keywords: ["el", "vand", "varme", "fjernvarme", "naturgas", "ørsted", "norlys", "andel energi", "radius", "hofor", "evida"],
+          // "el" dropped — 2-char fragment that matched mid-word (telenor/shell)
+          // under the old substring matcher.
+          keywords: ["vand", "varme", "fjernvarme", "naturgas", "ørsted", "norlys", "andel energi", "radius", "hofor", "evida"],
         },
         {
           name: { da: "Ejerforening", en: "HOA" },
@@ -235,7 +249,8 @@ export const defaultCategories: DefaultCategorySeed = [
         {
           name: { da: "Bar, café & restaurant", en: "Bar, café & restaurant" },
           icon: "🍷",
-          keywords: ["restaurant", "café", "cafe", "bar", "pub", "bryggeri", "kro", "bistro", "starbucks", "baresso", "espresso house"],
+          // "bar"/"kro" dropped — generic words that name many unrelated things.
+          keywords: ["restaurant", "café", "cafe", "pub", "bryggeri", "bistro", "starbucks", "baresso", "espresso house"],
         },
         {
           name: { da: "Tøj, sko & accessories", en: "Clothing, shoes & accessories" },
@@ -366,7 +381,9 @@ export const defaultCategories: DefaultCategorySeed = [
         {
           name: { da: "Ferieaktiviteter", en: "Vacation activities" },
           icon: "🎢",
-          keywords: ["aktivitet", "udflugt", "entre", "oplevelse", "tivoli"],
+          // "tivoli" kept only under Biograf/forlystelser — a duplicate here
+          // would make "Tivoli" ambiguous between two same-type leaves.
+          keywords: ["aktivitet", "udflugt", "entre", "oplevelse"],
         },
         {
           name: { da: "Rejseforsikring", en: "Travel insurance" },
@@ -418,7 +435,7 @@ export const defaultCategories: DefaultCategorySeed = [
         {
           name: { da: "Studielån", en: "Student loan" },
           icon: "🎓",
-          keywords: ["su-lån", "studielån", "udbetaling danmark"],
+          keywords: ["su-lån", "studielån"],
         },
         {
           name: { da: "Forbrugslån", en: "Consumer loan" },
@@ -433,7 +450,7 @@ export const defaultCategories: DefaultCategorySeed = [
         {
           name: { da: "Udlånsrenter", en: "Loan interest" },
           icon: "📈",
-          keywords: ["rente", "udlånsrente", "lånerente"],
+          keywords: ["udlånsrente", "lånerente"],
         },
       ],
     },
@@ -445,7 +462,7 @@ export const defaultCategories: DefaultCategorySeed = [
         {
           name: { da: "Pensionsopsparing", en: "Pension savings" },
           icon: "👴",
-          keywords: ["pension", "pfa", "velliv", "danica", "sampension", "industriens pension", "akademikerpension", "atp"],
+          keywords: ["pfa", "velliv", "danica", "sampension", "industriens pension", "akademikerpension"],
         },
         {
           name: { da: "Børneopsparing", en: "Child savings" },
@@ -476,7 +493,7 @@ export const defaultCategories: DefaultCategorySeed = [
         {
           name: { da: "Pensionsudbetaling", en: "Pension payout" },
           icon: "👴",
-          keywords: ["pension", "pensionsudbetaling", "folkepension", "atp livslang"],
+          keywords: ["pensionsudbetaling", "folkepension", "atp livslang"],
         },
         {
           name: { da: "Overførselsindkomst", en: "Transfer income" },
@@ -501,7 +518,7 @@ export const defaultCategories: DefaultCategorySeed = [
         {
           name: { da: "Renteindtægter", en: "Interest income" },
           icon: "💹",
-          keywords: ["rente", "renteindtægt", "tilgodehavende rente"],
+          keywords: ["renteindtægt", "tilgodehavende rente"],
         },
         {
           name: { da: "Udbytte & afkast", en: "Dividends & returns" },
