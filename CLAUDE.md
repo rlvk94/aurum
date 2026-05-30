@@ -192,6 +192,8 @@ Server code lives outside `src/app/`:
 - `0018` — 7-day grace period and downgrade policy for failed payments
 - `0019` — Centralized plan-entitlements module (`src/server/billing/plans.ts`)
 - `0020` — Stripe Price IDs configured via environment variables
+- `0022` — Discount codes at checkout (Stripe promotion codes)
+- `0023` — Terms & Conditions acceptance with versioned snapshots
 
 ## Testing
 

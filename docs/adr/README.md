@@ -62,3 +62,5 @@ YYYY-MM-DD
 | 0018 | [7-Day Grace Period and Downgrade Policy](0018-grace-period-downgrade-policy.md) | Proposed |
 | 0019 | [Centralized Plan-Entitlements Module](0019-plan-entitlements-module.md) | Proposed |
 | 0020 | [Stripe Price IDs via Environment Variables](0020-stripe-prices-via-env.md) | Proposed |
+| 0022 | [Discount Codes at Checkout](0022-discount-codes-at-checkout.md) | Proposed |
+| 0023 | [Terms & Conditions Acceptance with Versioned Snapshots](0023-terms-and-conditions-acceptance.md) | Proposed |
