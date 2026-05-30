@@ -1476,7 +1476,15 @@
       "paymentBody": "Indtast dit kort for at aktivere Familie-abonnementet.",
       "activatingTitle": "Aktiverer abonnement…",
       "activatingBody": "Bliv på siden — det tager nogle få sekunder.",
-      "activationTimedOut": "Det tog længere end forventet. Prøv igen eller kontakt support."
+      "activationTimedOut": "Det tog længere end forventet. Prøv igen eller kontakt support.",
+      "promoLabel": "Rabatkode",
+      "promoPlaceholder": "Indtast kode",
+      "promoApply": "Anvend",
+      "promoRemove": "Fjern",
+      "promoApplied": "{code} anvendt — {discount}",
+      "promoInvalid": "Ugyldig eller udløbet rabatkode",
+      "promoDiscountPercent": "{percent} % rabat",
+      "promoDiscountAmount": "{amount} rabat"
     },
     "paymentForm": {
       "pay": "Betal og aktiver",
