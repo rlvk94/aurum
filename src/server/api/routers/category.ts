@@ -6,78 +6,54 @@ import { TRPCError } from "@trpc/server";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db as dbInstance } from "~/server/db";
 import {
+  categorizationRule,
   category,
   financialAccount,
   financialAccountAccess,
   transaction,
   user,
+  usersToFamilies,
 } from "~/server/db/schema";
-
-const keywordsSchema = z.array(z.string().min(1).max(100)).max(50);
-
-type CategoryWithKeywords = {
-  id: string;
-  keywords: string[];
-};
-
-/**
- * Find the matching category for a transaction based on keywords.
- * Builds keyword→category pairs sorted by keyword length desc (longest/most specific first).
- * Matches case-insensitively against description + note + metadata values.
- */
-export function findMatchingCategoryId(
-  categories: CategoryWithKeywords[],
-  description: string,
-  note: string | null,
-  metadata: Record<string, string> | null,
-): string | null {
-  const parts = [description, note ?? ""];
-  if (metadata) parts.push(...Object.values(metadata));
-  const haystack = parts.join("\n").toLowerCase();
-
-  const pairs: Array<{ keyword: string; categoryId: string }> = [];
-  for (const cat of categories) {
-    for (const kw of cat.keywords) {
-      pairs.push({ keyword: kw.toLowerCase(), categoryId: cat.id });
-    }
-  }
-  pairs.sort((a, b) => b.keyword.length - a.keyword.length);
-
-  for (const { keyword, categoryId } of pairs) {
-    if (haystack.includes(keyword)) {
-      return categoryId;
-    }
-  }
-  return null;
-}
+import {
+  deriveMerchantKey,
+  indexLearnedRules,
+  ruleCategoryFor,
+  type LearnedRule,
+} from "~/server/categorization";
+import { reseedRulesForCategories } from "~/server/db/seeds/seed-categories";
 
 /**
- * Load all non-archived leaf categories with keywords for a family. Parents
- * are excluded so auto-categorization can never assign a transaction to a
- * top-level category.
+ * Load a family's learned merchant→category rules, restricted to rules whose
+ * target category is still a non-archived LEAF (a category may have been
+ * archived or gained children since the rule was learned — such rules are
+ * ignored, never assigned).
  */
-export async function loadCategoriesWithKeywords(
+export async function loadLearnedRules(
   db: typeof dbInstance,
   familyId: string,
-): Promise<CategoryWithKeywords[]> {
+): Promise<LearnedRule[]> {
   const child = alias(category, "child_cat");
-  const rows = await db
+  return db
     .select({
-      id: category.id,
-      keywords: category.keywords,
+      merchantKey: categorizationRule.merchantKey,
+      categoryId: categorizationRule.categoryId,
+      hitCount: categorizationRule.hitCount,
+      conflictCount: categorizationRule.conflictCount,
     })
-    .from(category)
+    .from(categorizationRule)
+    .innerJoin(category, eq(category.id, categorizationRule.categoryId))
     .where(
       and(
-        eq(category.familyId, familyId),
+        eq(categorizationRule.familyId, familyId),
         eq(category.archived, false),
         notExists(
-          db.select({ one: sql`1` }).from(child).where(eq(child.parentId, category.id)),
+          db
+            .select({ one: sql`1` })
+            .from(child)
+            .where(eq(child.parentId, category.id)),
         ),
       ),
     );
-
-  return rows.filter((r) => r.keywords.length > 0);
 }
 
 async function getActiveFamilyId(
@@ -114,7 +90,6 @@ export const categoryRouter = createTRPCRouter({
         name: z.string().min(1).max(100),
         parentId: z.string().uuid().nullable().optional(),
         icon: z.string().max(16).nullable().optional(),
-        keywords: keywordsSchema.optional(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -155,7 +130,6 @@ export const categoryRouter = createTRPCRouter({
           name: input.name.trim(),
           parentId: input.parentId ?? null,
           icon: input.icon ?? null,
-          keywords: input.keywords ?? [],
         })
         .returning();
 
@@ -169,7 +143,6 @@ export const categoryRouter = createTRPCRouter({
         name: z.string().min(1).max(100).optional(),
         parentId: z.string().uuid().nullable().optional(),
         icon: z.string().max(16).nullable().optional(),
-        keywords: keywordsSchema.optional(),
         archived: z.boolean().optional(),
       }),
     )
@@ -254,10 +227,12 @@ export const categoryRouter = createTRPCRouter({
         .where(and(eq(category.id, input.id), eq(category.familyId, familyId)));
     }),
 
-  applyKeywords: protectedProcedure.mutation(async ({ ctx }) => {
+  autoCategorize: protectedProcedure.mutation(async ({ ctx }) => {
     const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
-    const cats = await loadCategoriesWithKeywords(ctx.db, familyId);
-    if (cats.length === 0) return { updated: 0 };
+    const learnedIndex = indexLearnedRules(
+      await loadLearnedRules(ctx.db, familyId),
+    );
+    if (learnedIndex.size === 0) return { updated: 0 };
 
     const accessRows = await ctx.db
       .select({ accountId: financialAccountAccess.accountId })
@@ -284,8 +259,8 @@ export const categoryRouter = createTRPCRouter({
       .select({
         id: transaction.id,
         description: transaction.description,
-        note: transaction.note,
         metadata: transaction.metadata,
+        transferGroupId: transaction.transferGroupId,
       })
       .from(transaction)
       .where(
@@ -301,11 +276,10 @@ export const categoryRouter = createTRPCRouter({
 
     let updated = 0;
     for (const tx of uncategorized) {
-      const matched = findMatchingCategoryId(
-        cats,
-        tx.description,
-        tx.note,
-        tx.metadata,
+      if (tx.transferGroupId) continue;
+      const matched = ruleCategoryFor(
+        learnedIndex,
+        deriveMerchantKey(tx.description, tx.metadata),
       );
       if (matched) {
         await ctx.db
@@ -317,5 +291,58 @@ export const categoryRouter = createTRPCRouter({
     }
 
     return { updated };
+  }),
+
+  /**
+   * Owner-only: delete all of the family's categorization rules and re-seed the
+   * defaults against its current categories — leaving rule state as it would be
+   * for a brand-new family. Learned corrections are wiped; seeded defaults
+   * return.
+   */
+  resetRules: protectedProcedure.mutation(async ({ ctx }) => {
+    const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+
+    const [membership] = await ctx.db
+      .select({ role: usersToFamilies.role })
+      .from(usersToFamilies)
+      .where(
+        and(
+          eq(usersToFamilies.userId, ctx.session.user.id),
+          eq(usersToFamilies.familyId, familyId),
+        ),
+      );
+    if (membership?.role !== "owner") {
+      throw new TRPCError({
+        code: "FORBIDDEN",
+        message: "Owner role required",
+      });
+    }
+
+    const child = alias(category, "child_cat");
+    const rules = await ctx.db.transaction(async (tx) => {
+      await tx
+        .delete(categorizationRule)
+        .where(eq(categorizationRule.familyId, familyId));
+
+      const leaves = await tx
+        .select({ id: category.id, name: category.name })
+        .from(category)
+        .where(
+          and(
+            eq(category.familyId, familyId),
+            eq(category.archived, false),
+            notExists(
+              tx
+                .select({ one: sql`1` })
+                .from(child)
+                .where(eq(child.parentId, category.id)),
+            ),
+          ),
+        );
+
+      return reseedRulesForCategories(tx, familyId, leaves);
+    });
+
+    return { rules };
   }),
 });

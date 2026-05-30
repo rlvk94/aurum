@@ -24,7 +24,6 @@ export const category = pgTable(
     }),
     name: text("name").notNull(),
     icon: text("icon"),
-    keywords: text("keywords").array().default([]).notNull(),
     archived: boolean("archived").default(false).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .$defaultFn(() => new Date())

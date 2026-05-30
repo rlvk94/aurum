@@ -32,6 +32,9 @@ import {
   type ParseDiagnostics,
 } from "./csv-parsers";
 import { CsvImportMappingStep } from "./csv-import-mapping-step";
+// Pure, isomorphic helper — import the file directly (not the barrel) to keep
+// server-only categorization code out of the client bundle.
+import { sanitizeBankText } from "~/server/categorization/sanitize";
 
 type Account = RouterOutputs["financialAccount"]["list"][number];
 
@@ -319,7 +322,9 @@ export function CsvImportDialog({
                         { locale: dateLocale },
                       )}
                     </span>
-                    <span className="flex-1 truncate">{row.description}</span>
+                    <span className="flex-1 truncate">
+                      {sanitizeBankText(row.description)}
+                    </span>
                     <span
                       className={
                         row.type === "expense" ? "text-expense" : "text-income"

@@ -13,6 +13,7 @@ import {
   ChevronRight,
   Maximize2,
   Minimize2,
+  RotateCcw,
 } from "lucide-react";
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Badge } from "~/app/_components/badge";
@@ -26,6 +27,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "~/app/_components/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "~/app/_components/dialog";
 import { cn } from "~/app/_lib/utils";
 import { CategoryFormDialog } from "./_components/category-form-dialog";
 
@@ -69,9 +78,12 @@ export default function CategoriesPage() {
   const utils = api.useUtils();
 
   const { data: categories = [], isLoading } = api.category.list.useQuery();
+  const { data: currentFamily } = api.family.current.useQuery();
+  const isOwner = currentFamily?.role === "owner";
   const [form, setForm] = useState<FormState>(null);
   const [search, setSearch] = useState("");
   const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
+  const [resetOpen, setResetOpen] = useState(false);
 
   const deleteCategory = api.category.delete.useMutation({
     onSuccess: () => {
@@ -82,12 +94,16 @@ export default function CategoriesPage() {
     },
   });
 
-  const applyKeywords = api.category.applyKeywords.useMutation({
+  const autoCategorize = api.category.autoCategorize.useMutation({
     onSuccess: () => {
       void utils.transaction.list.invalidate();
       void utils.challenge.list.invalidate();
       void utils.challenge.get.invalidate();
     },
+  });
+
+  const resetRules = api.category.resetRules.useMutation({
+    onSuccess: () => setResetOpen(false),
   });
 
   const visible = useMemo(
@@ -127,7 +143,6 @@ export default function CategoriesPage() {
     const q = search.trim().toLowerCase();
     if (cat.name.toLowerCase().includes(q)) return true;
     if (parentName?.toLowerCase().includes(q)) return true;
-    if (cat.keywords.some((k) => k.toLowerCase().includes(q))) return true;
     return false;
   };
 
@@ -182,13 +197,23 @@ export default function CategoriesPage() {
         title={t("title")}
         actions={
           <>
+            {isOwner && (
+              <Button
+                variant="outline"
+                onClick={() => setResetOpen(true)}
+                disabled={resetRules.isPending}
+              >
+                <RotateCcw />
+                {t("resetRules")}
+              </Button>
+            )}
             <Button
               variant="outline"
-              onClick={() => applyKeywords.mutate()}
-              disabled={applyKeywords.isPending}
+              onClick={() => autoCategorize.mutate()}
+              disabled={autoCategorize.isPending}
             >
               <Play />
-              {t("applyKeywords")}
+              {t("autoCategorize")}
             </Button>
             <Button onClick={() => setForm({ mode: "create" })}>
               <Plus />
@@ -198,9 +223,9 @@ export default function CategoriesPage() {
         }
       />
 
-      {applyKeywords.data && applyKeywords.data.updated > 0 && (
+      {autoCategorize.data && autoCategorize.data.updated > 0 && (
         <p className="text-sm text-income">
-          {t("applySuccess", { count: applyKeywords.data.updated })}
+          {t("applySuccess", { count: autoCategorize.data.updated })}
         </p>
       )}
 
@@ -321,7 +346,7 @@ export default function CategoriesPage() {
                               defaultParentId: parent.id,
                             })
                           }
-                          className="flex min-h-[64px] items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-card/50 px-3 py-3 text-sm text-muted-foreground transition hover:border-primary/40 hover:bg-accent/30 hover:text-foreground"
+                          className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-card/50 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:bg-accent/30 hover:text-foreground"
                         >
                           <Plus className="h-4 w-4" />
                           {t("addSubcategory")}
@@ -355,6 +380,31 @@ export default function CategoriesPage() {
         category={form?.mode === "edit" ? form.category : undefined}
         allCategories={categories}
       />
+
+      <Dialog open={resetOpen} onOpenChange={setResetOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("resetRulesTitle")}</DialogTitle>
+            <DialogDescription>{t("resetRulesBody")}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setResetOpen(false)}
+              disabled={resetRules.isPending}
+            >
+              {tCommon("cancel")}
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => resetRules.mutate()}
+              disabled={resetRules.isPending}
+            >
+              {resetRules.isPending ? tCommon("loading") : t("resetRulesConfirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -370,20 +420,17 @@ function ChildTile({
 }) {
   const tCommon = useTranslations("common");
   return (
-    <div className="rounded-lg border border-border bg-card p-3">
-      <div className="flex items-center gap-2">
-        <span className="text-lg leading-none">
-          {category.icon ?? "📁"}
-        </span>
-        <div className="min-w-0 flex-1">
-          <div className="truncate text-sm font-medium">{category.name}</div>
-        </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="-mr-1 h-7 w-7">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
+    <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+      <span className="text-lg leading-none">{category.icon ?? "📁"}</span>
+      <span className="min-w-0 flex-1 truncate text-sm font-medium">
+        {category.name}
+      </span>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="-mr-1 h-7 w-7">
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem onClick={onEdit}>
               <Pencil />
@@ -393,22 +440,8 @@ function ChildTile({
               <Trash2 />
               {tCommon("delete")}
             </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      {category.keywords.length > 0 && (
-        <div className="mt-2 flex flex-wrap gap-1">
-          {category.keywords.map((kw) => (
-            <Badge
-              key={kw}
-              variant="secondary"
-              className="px-1.5 py-0 text-[10px] font-normal"
-            >
-              {kw}
-            </Badge>
-          ))}
-        </div>
-      )}
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   );
 }
