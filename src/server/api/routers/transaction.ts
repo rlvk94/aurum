@@ -2,6 +2,11 @@ import { z } from "zod";
 import { and, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, ne, or, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
+import {
+  checkSplittableOriginal,
+  validateSplitParts,
+} from "~/server/lib/split-helpers";
+
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { db as dbInstance } from "~/server/db";
 import {
@@ -121,6 +126,88 @@ async function assertAccountAccess(
 
 function signedDelta(type: "income" | "expense", amount: number): number {
   return type === "income" ? amount : -amount;
+}
+
+type SplitOriginal = {
+  id: string;
+  accountId: string;
+  type: "income" | "expense";
+  amount: number;
+  date: string;
+  description: string;
+  transferGroupId: string | null;
+  splitParentId: string | null;
+};
+
+/** Load a family-scoped original and assert the caller can access its account. */
+async function loadSplitOriginal(
+  db: typeof dbInstance,
+  familyId: string,
+  userId: string,
+  transactionId: string,
+): Promise<SplitOriginal> {
+  const [original] = await db
+    .select({
+      id: transaction.id,
+      accountId: transaction.accountId,
+      type: transaction.type,
+      amount: transaction.amount,
+      date: transaction.date,
+      description: transaction.description,
+      transferGroupId: transaction.transferGroupId,
+      splitParentId: transaction.splitParentId,
+    })
+    .from(transaction)
+    .where(
+      and(
+        eq(transaction.id, transactionId),
+        eq(transaction.familyId, familyId),
+      ),
+    );
+
+  if (!original) throw new TRPCError({ code: "NOT_FOUND" });
+  await assertAccountAccess(db, familyId, userId, [original.accountId]);
+  return original;
+}
+
+async function hasSplitParts(
+  db: typeof dbInstance,
+  originalId: string,
+): Promise<boolean> {
+  const [child] = await db
+    .select({ id: transaction.id })
+    .from(transaction)
+    .where(eq(transaction.splitParentId, originalId))
+    .limit(1);
+  return Boolean(child);
+}
+
+/** Throw a typed BAD_REQUEST if the parts don't sum to the original exactly. */
+function assertSplitSum(
+  originalAmount: number,
+  parts: { amount: number }[],
+): void {
+  const result = validateSplitParts(originalAmount, parts);
+  if (result.ok) return;
+  const message =
+    result.reason === "too_few_parts"
+      ? "A split needs at least two parts"
+      : result.reason === "sum_mismatch"
+        ? "Parts must sum to the original amount"
+        : "Each part amount must be a positive whole number";
+  throw new TRPCError({ code: "BAD_REQUEST", message });
+}
+
+async function assertPartCategoriesLeaf(
+  db: typeof dbInstance,
+  familyId: string,
+  parts: { categoryId?: string }[],
+): Promise<void> {
+  for (const part of parts) {
+    if (part.categoryId) {
+      await assertCategoryIsLeaf(db, familyId, part.categoryId);
+    }
+  }
 }
 
 type DbOrTx = Parameters<Parameters<typeof dbInstance.transaction>[0]>[0] | typeof dbInstance;
@@ -356,6 +443,10 @@ export const transactionRouter = createTRPCRouter({
       const conditions = [
         eq(transaction.familyId, familyId),
         inArray(transaction.accountId, accessibleIds),
+        // Hide split originals: a row that has child parts is replaced in the
+        // list by its parts (which carry the real categories). The parts
+        // themselves stay visible. Backed by transaction_split_parent_idx.
+        sql`NOT EXISTS (SELECT 1 FROM "transaction" "child" WHERE "child"."split_parent_id" = ${transaction.id})`,
       ];
 
       if (input?.accountId) {
@@ -741,6 +832,7 @@ export const transactionRouter = createTRPCRouter({
           description: transaction.description,
           metadata: transaction.metadata,
           transferGroupId: transaction.transferGroupId,
+          splitParentId: transaction.splitParentId,
         })
         .from(transaction)
         .where(
@@ -757,6 +849,22 @@ export const transactionRouter = createTRPCRouter({
         ctx.session.user.id,
         [existing.accountId],
       );
+
+      // A split part's amount/type is owned by the split (it must keep summing
+      // to the bank original). Editing it here would desync the parts from the
+      // original and corrupt the balance — parts never moved balance, so the
+      // delta below would be wrong. Change parts via updateSplit instead.
+      const isPart = existing.splitParentId !== null;
+      if (
+        isPart &&
+        ((data.amount !== undefined && data.amount !== existing.amount) ||
+          (data.type !== undefined && data.type !== existing.type))
+      ) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Edit a split part's amount via Edit split",
+        });
+      }
 
       if (data.categoryId) {
         await assertCategoryIsLeaf(ctx.db, familyId, data.categoryId);
@@ -996,6 +1104,243 @@ export const transactionRouter = createTRPCRouter({
       return { updated: result.length };
     }),
 
+  /**
+   * Split one transaction into ≥2 parts, each with its own category. The
+   * original stays the bank source of truth (keeps externalId, amount, and
+   * account-balance contribution) but is flipped to
+   * excludedFromCalculations=true; the parts carry the real categories, are
+   * counted in calcs, have externalId=NULL, and never touch the account
+   * balance. Net effect on balance / net worth: zero.
+   */
+  split: protectedProcedure
+    .input(
+      z.object({
+        transactionId: z.string().uuid(),
+        parts: z
+          .array(
+            z.object({
+              amount: z.number().int().positive(),
+              categoryId: z.string().uuid().optional(),
+              projectId: z.string().uuid().nullable().optional(),
+              note: z.string().max(1000).optional(),
+            }),
+          )
+          .min(2),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const original = await loadSplitOriginal(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+        input.transactionId,
+      );
+
+      const guard = checkSplittableOriginal(original);
+      if (!guard.ok) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message:
+            guard.reason === "is_transfer"
+              ? "Cannot split a transfer"
+              : "Cannot split a part",
+        });
+      }
+
+      const alreadySplit = await hasSplitParts(ctx.db, original.id);
+      if (alreadySplit) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Transaction is already split",
+        });
+      }
+
+      assertSplitSum(original.amount, input.parts);
+      await assertPartCategoriesLeaf(ctx.db, familyId, input.parts);
+
+      await ctx.db.transaction(async (tx) => {
+        await tx.insert(transaction).values(
+          input.parts.map((p) => ({
+            familyId,
+            accountId: original.accountId,
+            splitParentId: original.id,
+            type: original.type,
+            amount: p.amount,
+            date: original.date,
+            description: original.description,
+            note: p.note ?? null,
+            categoryId: p.categoryId ?? null,
+            projectId: p.projectId ?? null,
+            excludedFromCalculations: false,
+          })),
+        );
+        await tx
+          .update(transaction)
+          .set({ excludedFromCalculations: true, updatedAt: new Date() })
+          .where(eq(transaction.id, original.id));
+      });
+
+      await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [
+        original.date,
+      ]);
+    }),
+
+  /** Re-validate the sum and replace all parts of an existing split. */
+  updateSplit: protectedProcedure
+    .input(
+      z.object({
+        transactionId: z.string().uuid(),
+        parts: z
+          .array(
+            z.object({
+              amount: z.number().int().positive(),
+              categoryId: z.string().uuid().optional(),
+              projectId: z.string().uuid().nullable().optional(),
+              note: z.string().max(1000).optional(),
+            }),
+          )
+          .min(2),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const original = await loadSplitOriginal(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+        input.transactionId,
+      );
+
+      if (!(await hasSplitParts(ctx.db, original.id))) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Transaction is not split",
+        });
+      }
+
+      assertSplitSum(original.amount, input.parts);
+      await assertPartCategoriesLeaf(ctx.db, familyId, input.parts);
+
+      await ctx.db.transaction(async (tx) => {
+        await tx
+          .delete(transaction)
+          .where(eq(transaction.splitParentId, original.id));
+        await tx.insert(transaction).values(
+          input.parts.map((p) => ({
+            familyId,
+            accountId: original.accountId,
+            splitParentId: original.id,
+            type: original.type,
+            amount: p.amount,
+            date: original.date,
+            description: original.description,
+            note: p.note ?? null,
+            categoryId: p.categoryId ?? null,
+            projectId: p.projectId ?? null,
+            excludedFromCalculations: false,
+          })),
+        );
+      });
+
+      await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [
+        original.date,
+      ]);
+    }),
+
+  /** Remove all parts and restore the original to calculations and the list. */
+  unsplit: protectedProcedure
+    .input(z.object({ transactionId: z.string().uuid() }))
+    .mutation(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+      const original = await loadSplitOriginal(
+        ctx.db,
+        familyId,
+        ctx.session.user.id,
+        input.transactionId,
+      );
+
+      await ctx.db.transaction(async (tx) => {
+        await tx
+          .delete(transaction)
+          .where(eq(transaction.splitParentId, original.id));
+        await tx
+          .update(transaction)
+          .set({ excludedFromCalculations: false, updatedAt: new Date() })
+          .where(eq(transaction.id, original.id));
+      });
+
+      await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [
+        original.date,
+      ]);
+    }),
+
+  /**
+   * Inspect view: returns the bank-source original (date, description, full
+   * amount, account, externalId bank reference) plus its sibling parts.
+   * Accepts either the original's id or any part's id.
+   */
+  getSplit: protectedProcedure
+    .input(z.object({ transactionId: z.string().uuid() }))
+    .query(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+
+      const [row] = await ctx.db
+        .select({ id: transaction.id, splitParentId: transaction.splitParentId })
+        .from(transaction)
+        .where(
+          and(
+            eq(transaction.id, input.transactionId),
+            eq(transaction.familyId, familyId),
+          ),
+        );
+      if (!row) throw new TRPCError({ code: "NOT_FOUND" });
+
+      const originalId = row.splitParentId ?? row.id;
+
+      const [original] = await ctx.db
+        .select({
+          id: transaction.id,
+          date: transaction.date,
+          description: transaction.description,
+          amount: transaction.amount,
+          type: transaction.type,
+          accountId: transaction.accountId,
+          accountName: financialAccount.name,
+          externalId: transaction.externalId,
+        })
+        .from(transaction)
+        .innerJoin(
+          financialAccount,
+          eq(financialAccount.id, transaction.accountId),
+        )
+        .where(
+          and(
+            eq(transaction.id, originalId),
+            eq(transaction.familyId, familyId),
+          ),
+        );
+      if (!original) throw new TRPCError({ code: "NOT_FOUND" });
+
+      await assertAccountAccess(ctx.db, familyId, ctx.session.user.id, [
+        original.accountId,
+      ]);
+
+      const parts = await ctx.db
+        .select({
+          id: transaction.id,
+          amount: transaction.amount,
+          categoryId: transaction.categoryId,
+          projectId: transaction.projectId,
+          note: transaction.note,
+        })
+        .from(transaction)
+        .where(eq(transaction.splitParentId, originalId))
+        .orderBy(transaction.createdAt, transaction.id);
+
+      return { original, parts };
+    }),
+
   delete: protectedProcedure
     .input(z.object({ id: z.string().uuid() }))
     .mutation(async ({ ctx, input }) => {
@@ -1007,6 +1352,7 @@ export const transactionRouter = createTRPCRouter({
           date: transaction.date,
           type: transaction.type,
           amount: transaction.amount,
+          splitParentId: transaction.splitParentId,
         })
         .from(transaction)
         .where(
@@ -1021,21 +1367,30 @@ export const transactionRouter = createTRPCRouter({
         [existing.accountId],
       );
 
-      if (existing.type === "expense") {
+      // A part never moved the account balance (the original owns it) and
+      // never triggered rounding, so deleting one must NOT roll back balance.
+      const isPart = existing.splitParentId !== null;
+
+      if (existing.type === "expense" && !isPart) {
         await rollbackRoundingForTransaction(ctx.db, input.id);
       }
 
+      // Deleting an original with parts cascades the parts away (FK). Those
+      // parts were counted in calcs, so the snapshot refresh below (on the
+      // shared date) drops their contribution.
       await ctx.db
         .delete(transaction)
         .where(
           and(eq(transaction.id, input.id), eq(transaction.familyId, familyId)),
         );
 
-      await applyBalanceDelta(
-        ctx.db,
-        existing.accountId,
-        -signedDelta(existing.type, existing.amount),
-      );
+      if (!isPart) {
+        await applyBalanceDelta(
+          ctx.db,
+          existing.accountId,
+          -signedDelta(existing.type, existing.amount),
+        );
+      }
       await refreshChallengeSnapshotsForFamily(ctx.db, familyId, [
         existing.date,
       ]);
