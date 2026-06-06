@@ -27,6 +27,9 @@ export function ProtectedSidebar() {
   useEffect(() => {
     if (renderedIsSettings === isSettings) return;
     if (isMobile && openMobile) return;
+    // Intentional: the swap is deferred until the mobile Sheet has finished
+    // closing (see note above), which can only be observed from an effect.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setRenderedIsSettings(isSettings);
   }, [isSettings, renderedIsSettings, isMobile, openMobile]);
 

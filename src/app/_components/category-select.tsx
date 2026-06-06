@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { Check, ChevronsUpDown, MinusCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
@@ -68,6 +68,7 @@ type CategorySelectProps = SingleProps | MultiProps;
 export function CategorySelect(props: CategorySelectProps) {
   const t = useTranslations("categories");
   const [open, setOpen] = useState(false);
+  const listboxId = useId();
 
   const {
     categories,
@@ -212,8 +213,10 @@ export function CategorySelect(props: CategorySelectProps) {
         <button
           type="button"
           id={id}
+          role="combobox"
           disabled={disabled}
           aria-invalid={ariaInvalid}
+          aria-controls={listboxId}
           aria-expanded={open}
           aria-haspopup="listbox"
           className={cn(
@@ -241,6 +244,7 @@ export function CategorySelect(props: CategorySelectProps) {
         >
           <CommandInput placeholder={t("searchPlaceholder")} />
           <CommandList
+            id={listboxId}
             className="max-h-[min(var(--radix-popover-content-available-height,320px),320px)] overscroll-contain"
             onWheel={(e) => {
               // Radix Dialog's react-remove-scroll blocks wheel events on
@@ -261,7 +265,7 @@ export function CategorySelect(props: CategorySelectProps) {
           >
             <CommandEmpty>{t("noCategoriesMatch")}</CommandEmpty>
 
-            {(((!isMulti && sentinelLabel) || uncategorizedOption) && (
+            {(((!isMulti && sentinelLabel != null) || uncategorizedOption) && (
               <>
                 <CommandGroup>
                   {!isMulti && sentinelLabel && (

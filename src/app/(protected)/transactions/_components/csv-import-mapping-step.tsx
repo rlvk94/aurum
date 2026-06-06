@@ -336,7 +336,7 @@ export function CsvImportMappingStep({
         </ul>
       )}
 
-      {diagnostics && diagnostics.produced === 0 && (
+      {diagnostics?.produced === 0 && (
         <div className="border-destructive/40 bg-destructive/5 text-destructive space-y-1 rounded-lg border p-3 text-sm">
           <p className="font-medium">
             {t("mappingDiagnosticsNoneProduced", {

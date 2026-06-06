@@ -124,13 +124,12 @@ export function CategoryFormDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
         >
           <FieldGroup>
-            <form.Field
-              name="name"
-              children={(field) => {
+            <form.Field name="name">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -153,11 +152,10 @@ export function CategoryFormDialog({
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="icon"
-              children={(field) => (
+            <form.Field name="icon">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     {t("categoryIcon")}
@@ -173,12 +171,11 @@ export function CategoryFormDialog({
                   />
                 </Field>
               )}
-            />
+            </form.Field>
 
             {isEdit && category?.parentId && (
-              <form.Field
-                name="parentId"
-                children={(field) => (
+              <form.Field name="parentId">
+                {(field) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>{t("parent")}</FieldLabel>
                     <Select
@@ -203,7 +200,7 @@ export function CategoryFormDialog({
                     </Select>
                   </Field>
                 )}
-              />
+              </form.Field>
             )}
           </FieldGroup>
 

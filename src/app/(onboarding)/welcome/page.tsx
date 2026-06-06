@@ -119,19 +119,23 @@ export default function WelcomePage() {
   const currentStep = steps[currentStepIndex] ?? "name";
   const totalSteps = steps.length;
 
-  // Resume from persisted step
+  // Resume from persisted step — seed editable form state once the user and
+  // onboarding records have loaded. These values are user-editable afterward,
+  // so they can't be derived during render.
   useEffect(() => {
     if (onboardingState && me && !ready) {
       const resumeIndex = Math.min(
         onboardingState.onboardingStep,
         steps.length - 1,
       );
+      /* eslint-disable react-hooks/set-state-in-effect */
       setCurrentStepIndex(resumeIndex);
       setTheme(readThemeCookie());
       // Prefill the existing name so users forced back through onboarding
       // (e.g. the one-time terms re-consent reset) don't have to re-type it.
       if (me.name) setName(me.name);
       setReady(true);
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [onboardingState, me, steps, ready]);
 
@@ -176,6 +180,9 @@ export default function WelcomePage() {
       !finishedRef.current
     ) {
       finishedRef.current = true;
+      // Reacting to polled subscription status flipping to "active" — a change
+      // in an external system that can only be observed from an effect.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setActivating(false);
       completeOnboarding.mutate();
     }

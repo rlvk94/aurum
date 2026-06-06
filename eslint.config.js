@@ -5,7 +5,7 @@ import drizzle from "eslint-plugin-drizzle";
 
 export default tseslint.config(
   {
-    ignores: [".next"],
+    ignores: [".next", ".claude"],
   },
   ...nextCoreWebVitals,
   {
@@ -27,7 +27,7 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-unused-vars": [
         "warn",
-        { argsIgnorePattern: "^_" },
+        { argsIgnorePattern: "^_", varsIgnorePattern: "^_" },
       ],
       "@typescript-eslint/require-await": "off",
       "@typescript-eslint/no-misused-promises": [

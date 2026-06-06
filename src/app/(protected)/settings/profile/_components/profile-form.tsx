@@ -30,6 +30,7 @@ function Avatar({ src, name }: { src: string | null; name: string }) {
   if (src) {
     return (
       <div className="flex h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+        {/* eslint-disable-next-line @next/next/no-img-element -- external avatar URL (e.g. Google), tiny 64px image; next/image remotePatterns config not warranted */}
         <img
           src={src}
           alt=""

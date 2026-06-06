@@ -156,7 +156,7 @@ export function TransactionFormDialog({
 
   const form = useForm({
     defaultValues: {
-      type: (transaction?.type as TxType) ?? "expense",
+      type: transaction?.type ?? "expense",
       accountId: transaction?.accountId ?? accounts[0]?.id ?? "",
       amount: transaction ? String(transaction.amount / 100) : "",
       date: transaction?.date ?? today(),
@@ -227,13 +227,12 @@ export function TransactionFormDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
         >
           <FieldGroup>
-            <form.Field
-              name="type"
-              children={(field) => (
+            <form.Field name="type">
+              {(field) => (
                 <Field>
                   <FieldLabel>{tCommon("type")}</FieldLabel>
                   <RadioGroup
@@ -269,11 +268,10 @@ export function TransactionFormDialog({
                   </RadioGroup>
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="accountId"
-              children={(field) => {
+            <form.Field name="accountId">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -301,11 +299,10 @@ export function TransactionFormDialog({
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="amount"
-              children={(field) => {
+            <form.Field name="amount">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -334,11 +331,10 @@ export function TransactionFormDialog({
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="date"
-              children={(field) => {
+            <form.Field name="date">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 const dateValue = field.state.value
@@ -384,11 +380,10 @@ export function TransactionFormDialog({
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="description"
-              children={(field) => {
+            <form.Field name="description">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -410,11 +405,10 @@ export function TransactionFormDialog({
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="categoryId"
-              children={(field) => (
+            <form.Field name="categoryId">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     {tCommon("category")}
@@ -430,12 +424,11 @@ export function TransactionFormDialog({
                   />
                 </Field>
               )}
-            />
+            </form.Field>
 
             {hasProjects && (
-              <form.Field
-                name="projectId"
-                children={(field) => (
+              <form.Field name="projectId">
+                {(field) => (
                   <Field>
                     <FieldLabel htmlFor={field.name}>
                       {tProjects("filterLabel")}
@@ -463,12 +456,11 @@ export function TransactionFormDialog({
                     </Select>
                   </Field>
                 )}
-              />
+              </form.Field>
             )}
 
-            <form.Field
-              name="note"
-              children={(field) => (
+            <form.Field name="note">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t("noteLabel")}</FieldLabel>
                   <Input
@@ -480,11 +472,10 @@ export function TransactionFormDialog({
                   />
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="excludedFromCalculations"
-              children={(field) => (
+            <form.Field name="excludedFromCalculations">
+              {(field) => (
                 <Field>
                   <div className="flex items-start gap-3">
                     <Checkbox
@@ -504,7 +495,7 @@ export function TransactionFormDialog({
                   </div>
                 </Field>
               )}
-            />
+            </form.Field>
           </FieldGroup>
 
           {mutation.error && (

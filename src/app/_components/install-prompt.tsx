@@ -8,6 +8,7 @@ import {
   SquarePlus,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { Button } from "~/app/_components/button";
 import {
@@ -57,8 +58,13 @@ export const InstallPrompt = () => {
       return;
     }
 
+    // Platform/visibility derive from client-only APIs (navigator, matchMedia,
+    // localStorage, Date) unavailable during SSR render, so they must be set
+    // from this mount effect.
+    /* eslint-disable react-hooks/set-state-in-effect */
     setPlatform(isAndroid ? "android" : "ios");
     setVisible(true);
+    /* eslint-enable react-hooks/set-state-in-effect */
   }, []);
 
   const handleOpenChange = (open: boolean) => {
@@ -86,7 +92,7 @@ export const InstallPrompt = () => {
           {platform === "ios" ? (
             <>
               <div className="flex w-14 flex-col items-center gap-2 text-center">
-                <img
+                <Image
                   src="/safari.png"
                   alt="Safari logo"
                   width={56}
@@ -114,7 +120,7 @@ export const InstallPrompt = () => {
             <>
               <div className="flex w-14 flex-col items-center gap-2 text-center">
                 <div className="size-14 rounded-xl bg-background p-1">
-                  <img
+                  <Image
                     src="/chrome.png"
                     alt="Chrome logo"
                     width={56}

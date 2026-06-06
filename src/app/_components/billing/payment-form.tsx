@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Loader2 } from "lucide-react";
 import {
@@ -48,7 +48,7 @@ export function PaymentForm({
     () => ({
       clientSecret,
       appearance: {
-        theme: (isDark ? "night" : "stripe") as "night" | "stripe",
+        theme: isDark ? ("night" as const) : ("stripe" as const),
         variables: {
           colorPrimary: "#c8941f",
           fontFamily: "DM Sans, system-ui, sans-serif",
@@ -78,12 +78,7 @@ function PaymentFormInner({
   const elements = useElements();
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (!stripe || !elements) return;
-    setReady(true);
-  }, [stripe, elements]);
+  const ready = Boolean(stripe && elements);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

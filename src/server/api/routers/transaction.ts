@@ -8,7 +8,7 @@ import {
 } from "~/server/lib/split-helpers";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { db as dbInstance } from "~/server/db";
+import { type db as dbInstance } from "~/server/db";
 import {
   financialAccount,
   financialAccountAccess,
@@ -499,7 +499,7 @@ export const transactionRouter = createTRPCRouter({
           conditions.push(eq(transaction.projectId, input.projectId));
         }
       }
-      if (input?.search && input.search.trim()) {
+      if (input?.search?.trim()) {
         const pattern = `%${input.search.trim()}%`;
         const searchCondition = or(
           ilike(transaction.description, pattern),

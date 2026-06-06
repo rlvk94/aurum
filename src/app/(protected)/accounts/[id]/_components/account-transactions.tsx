@@ -100,10 +100,6 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
   });
   const transactions = data?.items;
 
-  const accountMap = useMemo(
-    () => new Map(accounts.map((a) => [a.id, a])),
-    [accounts],
-  );
   const categoryMap = useMemo(
     () => new Map(categories.map((c) => [c.id, c])),
     [categories],
@@ -401,7 +397,7 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
                             {tx.note}
                           </p>
                         )}
-                        {(category || tx.excludedFromCalculations) && (
+                        {(category != null || tx.excludedFromCalculations) && (
                           <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
                             {category && (
                               <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">

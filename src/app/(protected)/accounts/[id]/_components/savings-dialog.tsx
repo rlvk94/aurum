@@ -28,7 +28,6 @@ import {
   Drawer,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "~/app/_components/drawer";

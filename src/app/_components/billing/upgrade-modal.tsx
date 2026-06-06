@@ -120,7 +120,7 @@ export function UpgradeModal({ open, feature, onOpenChange }: Props) {
   const bullets = (() => {
     if (!feature) return [] as string[];
     try {
-      const raw = tFeature.raw(`${feature}.bullets`);
+      const raw: unknown = tFeature.raw(`${feature}.bullets`);
       return Array.isArray(raw) ? (raw as string[]) : [];
     } catch {
       return [];

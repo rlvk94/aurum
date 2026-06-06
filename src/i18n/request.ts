@@ -1,6 +1,14 @@
 import { getRequestConfig } from "next-intl/server";
+import type { AbstractIntlMessages } from "use-intl/core";
 import { cookies, headers } from "next/headers";
 import { type Locale, locales, defaultLocale } from "./config";
+
+async function loadMessages(locale: Locale): Promise<AbstractIntlMessages> {
+  const mod = (await import(`../../messages/${locale}.json`)) as {
+    default: AbstractIntlMessages;
+  };
+  return mod.default;
+}
 
 /**
  * Resolves the active locale for the current request.
@@ -24,7 +32,7 @@ export default getRequestConfig(async () => {
   if (cookieLocale && locales.includes(cookieLocale)) {
     return {
       locale: cookieLocale,
-      messages: (await import(`../../messages/${cookieLocale}.json`)).default,
+      messages: await loadMessages(cookieLocale),
     };
   }
 
@@ -39,6 +47,6 @@ export default getRequestConfig(async () => {
 
   return {
     locale,
-    messages: (await import(`../../messages/${locale}.json`)).default,
+    messages: await loadMessages(locale),
   };
 });
