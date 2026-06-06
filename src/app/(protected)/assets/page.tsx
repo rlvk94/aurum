@@ -25,7 +25,6 @@ import {
 import {
   AssetFormDialog,
   assetTypeIcons,
-  type AssetType,
 } from "./_components/asset-form-dialog";
 
 type Asset = RouterOutputs["asset"]["list"][number];
@@ -55,7 +54,7 @@ function AssetCard({
   const t = useTranslations("assets");
   const tAccounts = useTranslations("accounts");
   const tCommon = useTranslations("common");
-  const Icon = assetTypeIcons[asset.type as AssetType];
+  const Icon = assetTypeIcons[asset.type];
 
   const hasLoans = asset.linkedDebts.length > 0;
   const equityPct =
@@ -76,7 +75,7 @@ function AssetCard({
           <div>
             <p className="font-medium text-foreground">{asset.name}</p>
             <p className="text-xs text-muted-foreground">
-              {t(`types.${asset.type as AssetType}`)}
+              {t(`types.${asset.type}`)}
             </p>
             <p className="mt-1 font-display text-lg text-foreground">
               {formatAmount(asset.value)}
@@ -150,15 +149,6 @@ export default function AssetsPage() {
     enabled: has("assets"),
   });
 
-  if (!has("assets")) {
-    let bullets: string[] = [];
-    try {
-      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
-    } catch {
-      bullets = [];
-    }
-    return <FamilyFeatureTeaser feature="assets" bullets={bullets} />;
-  }
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Asset | null>(null);
 
@@ -175,6 +165,16 @@ export default function AssetsPage() {
       void utils.asset.summary.invalidate();
     },
   });
+
+  if (!has("assets")) {
+    let bullets: string[] = [];
+    try {
+      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    } catch {
+      bullets = [];
+    }
+    return <FamilyFeatureTeaser feature="assets" bullets={bullets} />;
+  }
 
   const activeAssets = assets?.filter((a) => !a.archived) ?? [];
   const archivedAssets = assets?.filter((a) => a.archived) ?? [];

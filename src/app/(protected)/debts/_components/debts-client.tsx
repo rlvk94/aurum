@@ -177,16 +177,6 @@ export function DebtsClient() {
     enabled: has("debts"),
   });
 
-  if (!has("debts")) {
-    let bullets: string[] = [];
-    try {
-      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
-    } catch {
-      bullets = [];
-    }
-    return <FamilyFeatureTeaser feature="debts" bullets={bullets} />;
-  }
-
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Debt | null>(null);
 
@@ -202,6 +192,16 @@ export function DebtsClient() {
   const deleteDebt = api.debt.delete.useMutation({
     onSuccess: invalidateAll,
   });
+
+  if (!has("debts")) {
+    let bullets: string[] = [];
+    try {
+      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    } catch {
+      bullets = [];
+    }
+    return <FamilyFeatureTeaser feature="debts" bullets={bullets} />;
+  }
 
   if (isLoading) return null;
 

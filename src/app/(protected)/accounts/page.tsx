@@ -27,7 +27,6 @@ import {
   AccountFormDialog,
   accountTypeIcons,
   accountTypeKeys,
-  type AccountType,
 } from "~/app/(protected)/accounts/_components/account-form-dialog";
 
 type Account = RouterOutputs["financialAccount"]["list"][number];
@@ -58,7 +57,7 @@ function AccountCard({
 }) {
   const t = useTranslations("accounts");
   const tCommon = useTranslations("common");
-  const Icon = accountTypeIcons[account.type as AccountType];
+  const Icon = accountTypeIcons[account.type];
   const visualBalance = computeVisualBalance(account.balance, reservedCents);
 
   const stop = (e: React.MouseEvent) => e.stopPropagation();
@@ -86,7 +85,7 @@ function AccountCard({
             )}
           </div>
           <p className="text-xs text-muted-foreground">
-            {t(`types.${accountTypeKeys[account.type as AccountType]}`)}
+            {t(`types.${accountTypeKeys[account.type]}`)}
           </p>
           <p className="mt-1 font-display text-lg text-foreground">
             {formatAmount(visualBalance)}

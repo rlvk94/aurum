@@ -3,7 +3,7 @@ import { and, asc, desc, eq, inArray, isNull, sql } from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { db as dbInstance } from "~/server/db";
+import { type db as dbInstance } from "~/server/db";
 import {
   financialAccount,
   financialAccountAccess,

@@ -4,7 +4,7 @@ import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { requireWithinLimit } from "~/server/billing/entitlements";
-import { db as dbInstance } from "~/server/db";
+import { type db as dbInstance } from "~/server/db";
 import {
   category,
   financialAccount,

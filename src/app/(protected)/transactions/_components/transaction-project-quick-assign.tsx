@@ -175,7 +175,7 @@ export function TransactionProjectQuickAssign({
             >
               {t("quickAssign.createNew")}
             </Button>
-            {(currentProjectId || onPick) && (
+            {(currentProjectId != null || onPick != null) && (
               <Button
                 type="button"
                 variant="ghost"

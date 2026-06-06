@@ -83,7 +83,7 @@ export function AssetFormDialog({
   const form = useForm({
     defaultValues: {
       name: asset?.name ?? "",
-      type: (asset?.type as AssetType) ?? "property",
+      type: asset?.type ?? "property",
       value: asset ? String(asset.value / 100) : "",
       note: asset?.note ?? "",
     },
@@ -132,13 +132,12 @@ export function AssetFormDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
         >
           <FieldGroup>
-            <form.Field
-              name="name"
-              children={(field) => {
+            <form.Field name="name">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -161,11 +160,10 @@ export function AssetFormDialog({
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="type"
-              children={(field) => (
+            <form.Field name="type">
+              {(field) => (
                 <Field>
                   <FieldLabel>{t("assetType")}</FieldLabel>
                   <div className="grid grid-cols-5 gap-2">
@@ -191,11 +189,10 @@ export function AssetFormDialog({
                   </div>
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="value"
-              children={(field) => (
+            <form.Field name="value">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     {t("currentValue")}
@@ -211,11 +208,10 @@ export function AssetFormDialog({
                   />
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="note"
-              children={(field) => (
+            <form.Field name="note">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t("noteLabel")}</FieldLabel>
                   <Input
@@ -227,7 +223,7 @@ export function AssetFormDialog({
                   />
                 </Field>
               )}
-            />
+            </form.Field>
           </FieldGroup>
 
           {mutation.error && (

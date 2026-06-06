@@ -38,6 +38,7 @@ function MemberAvatar({ image, name }: { image: string | null; name: string }) {
   if (image) {
     return (
       <div className="border-border bg-muted h-9 w-9 overflow-hidden rounded-full border">
+        {/* eslint-disable-next-line @next/next/no-img-element -- external avatar URL (e.g. Google), tiny 36px image; next/image remotePatterns config not warranted */}
         <img
           src={image}
           alt=""

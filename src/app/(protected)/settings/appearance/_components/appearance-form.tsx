@@ -32,6 +32,10 @@ const themes = [
   { code: "system" as const, icon: Monitor },
 ] as const;
 
+function setCookie(name: string, value: string, maxAge: number) {
+  document.cookie = `${name}=${value};path=/;max-age=${maxAge}`;
+}
+
 function applyTheme(theme: Theme) {
   const prefersDark = window.matchMedia(
     "(prefers-color-scheme: dark)",
@@ -51,13 +55,13 @@ export function AppearanceForm() {
   });
 
   const handleLocaleChange = (locale: Locale) => {
-    document.cookie = `locale=${locale};path=/;max-age=${LOCALE_COOKIE_MAX_AGE}`;
+    setCookie("locale", locale, LOCALE_COOKIE_MAX_AGE);
     updateProfile.mutate({ locale });
     router.refresh();
   };
 
   const handleThemeChange = (theme: Theme) => {
-    document.cookie = `theme=${theme};path=/;max-age=${THEME_COOKIE_MAX_AGE}`;
+    setCookie("theme", theme, THEME_COOKIE_MAX_AGE);
     applyTheme(theme);
     updateProfile.mutate({ theme });
   };

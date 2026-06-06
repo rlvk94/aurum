@@ -4,7 +4,7 @@ import { alias } from "drizzle-orm/pg-core";
 import { TRPCError } from "@trpc/server";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
-import { db as dbInstance } from "~/server/db";
+import { type db as dbInstance } from "~/server/db";
 import {
   categorizationRule,
   category,

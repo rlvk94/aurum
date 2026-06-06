@@ -49,11 +49,6 @@ export function ProjectsClient() {
     enabled: has("projects"),
   });
 
-  if (!has("projects")) {
-    const bullets = (tTeaser.raw("bullets") as string[]) ?? [];
-    return <FamilyFeatureTeaser feature="projects" bullets={bullets} />;
-  }
-
   const [filter, setFilter] = useState<Filter>("all");
   const [createOpen, setCreateOpen] = useState(false);
   const [createDefaults, setCreateDefaults] = useState<{
@@ -110,6 +105,11 @@ export function ProjectsClient() {
   }
 
   const isEmpty = (projects ?? []).length === 0;
+
+  if (!has("projects")) {
+    const bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    return <FamilyFeatureTeaser feature="projects" bullets={bullets} />;
+  }
 
   return (
     <div className="container mx-auto space-y-6">

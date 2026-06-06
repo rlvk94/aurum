@@ -27,16 +27,6 @@ export function ChallengesClient() {
     { enabled: has("challenges") },
   );
 
-  if (!has("challenges")) {
-    let bullets: string[] = [];
-    try {
-      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
-    } catch {
-      bullets = [];
-    }
-    return <FamilyFeatureTeaser feature="challenges" bullets={bullets} />;
-  }
-
   const [createOpen, setCreateOpen] = useState(false);
   const [editing, setEditing] = useState<Challenge | null>(null);
 
@@ -53,6 +43,16 @@ export function ChallengesClient() {
   const deleteChallenge = api.challenge.delete.useMutation({
     onSuccess: invalidate,
   });
+
+  if (!has("challenges")) {
+    let bullets: string[] = [];
+    try {
+      bullets = (tTeaser.raw("bullets") as string[]) ?? [];
+    } catch {
+      bullets = [];
+    }
+    return <FamilyFeatureTeaser feature="challenges" bullets={bullets} />;
+  }
 
   if (isLoading) return null;
 

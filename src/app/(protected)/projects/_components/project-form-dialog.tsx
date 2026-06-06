@@ -117,7 +117,7 @@ export function ProjectFormDialog({
     onSuccess: (created, vars) => {
       posthog.capture("project_created", {
         has_limit: vars.spendingLimit != null,
-        has_dates: Boolean(vars.startDate || vars.endDate),
+        has_dates: vars.startDate != null || vars.endDate != null,
       });
       onOpenChange(false);
       form.reset();
@@ -219,7 +219,7 @@ export function ProjectFormDialog({
               {({ emoji, palette, name }) => (
                 <div className="-mt-2">
                   <ProjectCover
-                    palette={palette as ProjectPalette}
+                    palette={palette}
                     emoji={emoji || "📌"}
                     size="lg"
                   >

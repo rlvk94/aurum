@@ -16,7 +16,6 @@ const publicPaths = [
   "/icon.svg",
   "/apple-icon",
 ];
-const authRequiredPaths = ["/welcome"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -24,7 +23,6 @@ export function proxy(request: NextRequest) {
   const isPublic =
     pathname === "/" ||
     publicPaths.some((path) => pathname.startsWith(path));
-  const isAuthRequired = authRequiredPaths.some((path) => pathname.startsWith(path));
   const hasSession = Boolean(getSessionCookie(request));
 
   // Authenticated users visiting login → redirect to dashboard

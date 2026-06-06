@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import posthog from "posthog-js";
 
-import { api, type RouterOutputs } from "~/trpc/react";
+import { api } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
 import { Badge } from "~/app/_components/badge";
 import { usePageMetadata } from "~/app/_components/page-metadata";
@@ -45,8 +45,6 @@ import {
   type ProjectPalette,
   type ProjectStatus,
 } from "../../_lib/format";
-
-type ProjectDetail = RouterOutputs["project"]["get"];
 
 const STATUS_CLASSES: Record<ProjectStatus | "archived", string> = {
   no_dates: "bg-secondary text-secondary-foreground",

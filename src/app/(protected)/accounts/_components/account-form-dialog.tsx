@@ -144,7 +144,7 @@ export function AccountFormDialog({
     defaultValues: {
       name: account?.name ?? "",
       identifier: account?.identifier ?? "",
-      type: (account?.type as AccountType) ?? "checking",
+      type: account?.type ?? "checking",
       balance: account ? String(account.balance / 100) : "",
       includeInNetWorth: account?.includeInNetWorth ?? true,
       visibility: (account?.visibility ?? "shared") as Visibility,
@@ -216,13 +216,12 @@ export function AccountFormDialog({
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
         >
           <FieldGroup>
-            <form.Field
-              name="name"
-              children={(field) => {
+            <form.Field name="name">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -246,11 +245,10 @@ export function AccountFormDialog({
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="identifier"
-              children={(field) => {
+            <form.Field name="identifier">
+              {(field) => {
                 const isInvalid =
                   field.state.meta.isTouched && !field.state.meta.isValid;
                 return (
@@ -273,11 +271,10 @@ export function AccountFormDialog({
                   </Field>
                 );
               }}
-            />
+            </form.Field>
 
-            <form.Field
-              name="type"
-              children={(field) => (
+            <form.Field name="type">
+              {(field) => (
                 <Field>
                   <FieldLabel>{t("accountType")}</FieldLabel>
                   <div className="grid grid-cols-3 gap-2">
@@ -303,11 +300,10 @@ export function AccountFormDialog({
                   </div>
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="balance"
-              children={(field) => (
+            <form.Field name="balance">
+              {(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>
                     {isEdit ? t("balance") : t("openingBalance")}
@@ -329,11 +325,10 @@ export function AccountFormDialog({
                   )}
                 </Field>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="visibility"
-              children={(field) => (
+            <form.Field name="visibility">
+              {(field) => (
                 <Field>
                   <FieldLabel>{t("visibility")}</FieldLabel>
                   <div className="grid grid-cols-2 gap-2">
@@ -375,14 +370,13 @@ export function AccountFormDialog({
                   </div>
                 </Field>
               )}
-            />
+            </form.Field>
 
             <form.Subscribe selector={(s) => s.values.visibility}>
               {(visibility) =>
                 visibility === "private" && (
-                  <form.Field
-                    name="accessUserIds"
-                    children={(field) => {
+                  <form.Field name="accessUserIds">
+                    {(field) => {
                       const selected = new Set(field.state.value);
                       return (
                         <Field>
@@ -446,14 +440,13 @@ export function AccountFormDialog({
                         </Field>
                       );
                     }}
-                  />
+                  </form.Field>
                 )
               }
             </form.Subscribe>
 
-            <form.Field
-              name="includeInNetWorth"
-              children={(field) => (
+            <form.Field name="includeInNetWorth">
+              {(field) => (
                 <Field orientation="horizontal">
                   <Checkbox
                     id={field.name}
@@ -467,7 +460,7 @@ export function AccountFormDialog({
                   </FieldLabel>
                 </Field>
               )}
-            />
+            </form.Field>
           </FieldGroup>
 
           {mutation.error && (
