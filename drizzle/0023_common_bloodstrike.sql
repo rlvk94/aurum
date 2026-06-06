@@ -1,0 +1,3 @@
+ALTER TABLE "transaction" ADD COLUMN "split_parent_id" uuid;--> statement-breakpoint
+ALTER TABLE "transaction" ADD CONSTRAINT "transaction_split_parent_id_transaction_id_fk" FOREIGN KEY ("split_parent_id") REFERENCES "public"."transaction"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE INDEX "transaction_split_parent_idx" ON "transaction" USING btree ("split_parent_id") WHERE "transaction"."split_parent_id" IS NOT NULL;

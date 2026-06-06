@@ -1,5 +1,6 @@
 import { relations, sql } from "drizzle-orm";
 import {
+  type AnyPgColumn,
   boolean,
   date,
   index,
@@ -43,6 +44,17 @@ export const transaction = pgTable(
     projectId: uuid("project_id").references(() => project.id, {
       onDelete: "set null",
     }),
+    /**
+     * When set, this row is a child "part" of a split transaction. The parent
+     * keeps the bank source-of-truth (externalId, amount, balance contribution)
+     * and is flipped to excludedFromCalculations; parts carry the real
+     * categories and are counted in calcs. Cascade delete: removing the
+     * original removes its parts.
+     */
+    splitParentId: uuid("split_parent_id").references(
+      (): AnyPgColumn => transaction.id,
+      { onDelete: "cascade" },
+    ),
     type: transactionTypeEnum("type").notNull(),
     amount: integer("amount").notNull(),
     date: date("date", { mode: "string" }).notNull(),
@@ -84,12 +96,17 @@ export const transaction = pgTable(
     index("transaction_project_idx")
       .on(table.projectId)
       .where(sql`${table.projectId} IS NOT NULL`),
+    // Backs the split-original anti-join (NOT EXISTS child WHERE
+    // split_parent_id = transaction.id) and the parts lookup.
+    index("transaction_split_parent_idx")
+      .on(table.splitParentId)
+      .where(sql`${table.splitParentId} IS NOT NULL`),
   ],
 );
 
 // ── Relations ───────────────────────────────────────────────────────────────
 
-export const transactionRelations = relations(transaction, ({ one }) => ({
+export const transactionRelations = relations(transaction, ({ one, many }) => ({
   family: one(family, {
     fields: [transaction.familyId],
     references: [family.id],
@@ -106,5 +123,13 @@ export const transactionRelations = relations(transaction, ({ one }) => ({
   project: one(project, {
     fields: [transaction.projectId],
     references: [project.id],
+  }),
+  splitParent: one(transaction, {
+    fields: [transaction.splitParentId],
+    references: [transaction.id],
+    relationName: "transactionSplit",
+  }),
+  splitParts: many(transaction, {
+    relationName: "transactionSplit",
   }),
 }));

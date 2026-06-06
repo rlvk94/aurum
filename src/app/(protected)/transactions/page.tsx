@@ -16,6 +16,7 @@ import {
   Upload,
   MoreHorizontal,
   Pencil,
+  Split,
   Trash2,
   Search,
 } from "lucide-react";
@@ -56,6 +57,10 @@ import { Checkbox } from "~/app/_components/checkbox";
 import posthog from "posthog-js";
 import { TransactionFormDialog } from "./_components/transaction-form-dialog";
 import { TransactionCategoryDialog } from "./_components/transaction-category-dialog";
+import {
+  TransactionSplitDialog,
+  TransactionInspectDialog,
+} from "./_components/transaction-split-dialog";
 import { TransactionProjectQuickAssign } from "./_components/transaction-project-quick-assign";
 import { CsvImportDialog } from "./_components/csv-import-dialog";
 import { BulkActionBar } from "./_components/bulk-action-bar";
@@ -178,6 +183,8 @@ export default function TransactionsPage() {
   const [editing, setEditing] = useState<Transaction | null>(null);
   const [quickAssign, setQuickAssign] = useState<Transaction | null>(null);
   const [projectAssign, setProjectAssign] = useState<Transaction | null>(null);
+  const [splitTarget, setSplitTarget] = useState<Transaction | null>(null);
+  const [inspectId, setInspectId] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkCategoryOpen, setBulkCategoryOpen] = useState(false);
   const [bulkProjectOpen, setBulkProjectOpen] = useState(false);
@@ -252,6 +259,17 @@ export default function TransactionsPage() {
       void utils.financialAccount.summary.invalidate();
       void utils.financialAccount.list.invalidate();
       void utils.financialAccount.get.invalidate();
+      void utils.challenge.list.invalidate();
+      void utils.challenge.get.invalidate();
+    },
+  });
+
+  const unsplitTx = api.transaction.unsplit.useMutation({
+    onSuccess: () => {
+      posthog.capture("transaction_unsplit");
+      void utils.transaction.list.invalidate();
+      void utils.financialAccount.summary.invalidate();
+      void utils.budget.list.invalidate();
       void utils.challenge.list.invalidate();
       void utils.challenge.get.invalidate();
     },
@@ -537,6 +555,16 @@ export default function TransactionsPage() {
                               aria-label={t("linkedTransaction")}
                             />
                           )}
+                          {tx.splitParentId && (
+                            <button
+                              type="button"
+                              onClick={() => setInspectId(tx.id)}
+                              aria-label={t("inspectOriginal")}
+                              className="text-muted-foreground hover:text-foreground shrink-0"
+                            >
+                              <Split className="h-3.5 w-3.5" />
+                            </button>
+                          )}
                           <div>
                             <p className="text-foreground font-medium">
                               {tx.description}
@@ -640,6 +668,39 @@ export default function TransactionsPage() {
                               <Pencil />
                               {tCommon("edit")}
                             </DropdownMenuItem>
+                            {tx.splitParentId ? (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() => setSplitTarget(tx)}
+                                >
+                                  <Split />
+                                  {t("editSplit")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => setInspectId(tx.id)}
+                                >
+                                  <Eye />
+                                  {t("inspectOriginal")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    unsplitTx.mutate({
+                                      transactionId: tx.splitParentId!,
+                                    })
+                                  }
+                                >
+                                  <Link2 />
+                                  {t("unsplit")}
+                                </DropdownMenuItem>
+                              </>
+                            ) : (
+                              <DropdownMenuItem
+                                onClick={() => setSplitTarget(tx)}
+                              >
+                                <Split />
+                                {t("splitTransaction")}
+                              </DropdownMenuItem>
+                            )}
                             {hasProjects && (
                               <DropdownMenuItem
                                 onClick={() => setProjectAssign(tx)}
@@ -719,6 +780,16 @@ export default function TransactionsPage() {
                             aria-label={t("linkedTransaction")}
                           />
                         )}
+                        {tx.splitParentId && (
+                          <button
+                            type="button"
+                            onClick={() => setInspectId(tx.id)}
+                            aria-label={t("inspectOriginal")}
+                            className="shrink-0"
+                          >
+                            <Split className="h-3 w-3" />
+                          </button>
+                        )}
                         <span className="whitespace-nowrap">
                           {format(dateObj, "d. MMM yyyy", {
                             locale: dateLocale,
@@ -772,6 +843,39 @@ export default function TransactionsPage() {
                             <Pencil />
                             {tCommon("edit")}
                           </DropdownMenuItem>
+                          {tx.splitParentId ? (
+                            <>
+                              <DropdownMenuItem
+                                onClick={() => setSplitTarget(tx)}
+                              >
+                                <Split />
+                                {t("editSplit")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => setInspectId(tx.id)}
+                              >
+                                <Eye />
+                                {t("inspectOriginal")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  unsplitTx.mutate({
+                                    transactionId: tx.splitParentId!,
+                                  })
+                                }
+                              >
+                                <Link2 />
+                                {t("unsplit")}
+                              </DropdownMenuItem>
+                            </>
+                          ) : (
+                            <DropdownMenuItem
+                              onClick={() => setSplitTarget(tx)}
+                            >
+                              <Split />
+                              {t("splitTransaction")}
+                            </DropdownMenuItem>
+                          )}
                           {hasProjects && (
                             <DropdownMenuItem
                               onClick={() => setProjectAssign(tx)}
@@ -888,6 +992,16 @@ export default function TransactionsPage() {
         currentCategoryId={quickAssign?.categoryId ?? null}
         open={Boolean(quickAssign)}
         onOpenChange={(open) => !open && setQuickAssign(null)}
+      />
+      <TransactionSplitDialog
+        target={splitTarget}
+        open={Boolean(splitTarget)}
+        onOpenChange={(open) => !open && setSplitTarget(null)}
+      />
+      <TransactionInspectDialog
+        transactionId={inspectId}
+        open={Boolean(inspectId)}
+        onOpenChange={(open) => !open && setInspectId(null)}
       />
       {hasProjects && (
         <TransactionProjectQuickAssign

@@ -108,6 +108,9 @@ export function TransactionFormDialog({
   const locale = useLocale();
   const utils = api.useUtils();
   const isEdit = transaction !== undefined;
+  // A split part's amount/type belongs to the split (must keep summing to the
+  // bank original), so lock those fields here — edit them via "Edit split".
+  const isPart = transaction?.splitParentId != null;
   const { has: hasFeature } = useEntitlements();
   const hasProjects = hasFeature("projects");
   const { data: categories = [] } = api.category.list.useQuery();
@@ -236,6 +239,7 @@ export function TransactionFormDialog({
                   <RadioGroup
                     value={field.state.value}
                     onValueChange={(v) => field.handleChange(v as TxType)}
+                    disabled={isPart}
                     className="grid grid-cols-2 gap-2"
                   >
                     {typeOptions.map((opt) => {
@@ -317,7 +321,13 @@ export function TransactionFormDialog({
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
+                      disabled={isPart}
                     />
+                    {isPart && (
+                      <p className="text-muted-foreground text-xs">
+                        {t("splitAmountLocked")}
+                      </p>
+                    )}
                     {isInvalid && (
                       <FieldError errors={field.state.meta.errors} />
                     )}

@@ -162,6 +162,13 @@
       "when": 1780120779054,
       "tag": "0022_reset_onboarding_for_terms",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1780724463022,
+      "tag": "0023_common_bloodstrike",
+      "breakpoints": true
     }
   ]
 }
