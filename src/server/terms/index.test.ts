@@ -37,4 +37,15 @@ describe("terms bundle", () => {
     expect(getTermsByVersion("2026-05-30")?.version).toBe("2026-05-30");
     expect(getTermsByVersion("nope")).toBeUndefined();
   });
+
+  it("2026-06-13 covers push notifications in both locales", () => {
+    const v = getTermsByVersion("2026-06-13");
+    expect(v).toBeDefined();
+    expect(v!.content.da.toLowerCase()).toContain("push-beskeder");
+    expect(v!.content.en.toLowerCase()).toContain("push notifications");
+    // Derived from the prior version → must still carry the change clause.
+    expect(v!.content.en.toLowerCase()).toContain(
+      "may change these terms at any time",
+    );
+  });
 });
