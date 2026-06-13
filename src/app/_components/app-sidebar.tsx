@@ -16,7 +16,6 @@ import {
 } from "lucide-react";
 
 import {
-  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -31,6 +30,7 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "~/app/_components/sidebar";
+import { useCloseMobileOnNavClick } from "~/app/_components/use-close-mobile-on-nav-click";
 import {
   Collapsible,
   CollapsibleContent,
@@ -44,17 +44,18 @@ import {
 } from "~/app/_components/billing/family-nav-item";
 import { UserMenu } from "~/app/_components/user-menu";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebarContent() {
   const t = useTranslations("nav");
   const pathname = usePathname();
+  const closeMobileOnNavClick = useCloseMobileOnNavClick();
 
   return (
-    <Sidebar variant="inset" data-tour-id="navigation" {...props}>
+    <>
       <SidebarHeader>
         <FamilySwitcher />
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent onClick={closeMobileOnNavClick}>
         {/* Dashboard — top level, no label */}
         <SidebarGroup>
           <SidebarGroupContent>
@@ -205,6 +206,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarFooter>
 
       <SidebarRail />
-    </Sidebar>
+    </>
   );
 }

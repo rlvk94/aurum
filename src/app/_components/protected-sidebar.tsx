@@ -1,37 +1,49 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 
-import { AppSidebar } from "~/app/_components/app-sidebar";
-import { SettingsSidebar } from "~/app/_components/settings-sidebar";
-import { useSidebar } from "~/app/_components/sidebar";
+import { AppSidebarContent } from "~/app/_components/app-sidebar";
+import { SettingsSidebarContent } from "~/app/_components/settings-sidebar";
+import { Sidebar, useSidebar } from "~/app/_components/sidebar";
 
 export function ProtectedSidebar() {
   const pathname = usePathname();
-  const { isMobile, openMobile, setOpenMobile } = useSidebar();
+  const { isMobile, setOpenMobile } = useSidebar();
   const isSettings = pathname.startsWith("/settings");
+  const prevPathnameRef = useRef(pathname);
 
-  // Render the sidebar variant in a separate state so we can defer the
-  // swap until the mobile Sheet finishes closing. Swapping while the Sheet
-  // is mid-open unmounts Radix Dialog before its body-style cleanup runs,
-  // which leaves the page unresponsive in iOS standalone PWA mode.
-  const [renderedIsSettings, setRenderedIsSettings] = useState(isSettings);
-
-  // Close the mobile sidebar after navigating — on desktop the sidebar stays
-  // pinned, but on mobile it overlays content and should dismiss on selection.
+  // On mobile the sidebar overlays content, so it dismisses after the user
+  // picks a destination. Exception: keep the sheet open when *entering* the
+  // settings section so the user can pick a settings sub-page without
+  // reopening it. We detect the transition (prev path wasn't settings) rather
+  // than matching "/settings" directly, because next.config redirects
+  // /settings → /settings/profile, so usePathname never reports "/settings".
+  // Moving between settings sub-pages closes like any normal navigation.
   useEffect(() => {
-    if (isMobile) setOpenMobile(false);
-  }, [pathname, isMobile, setOpenMobile]);
+    const prev = prevPathnameRef.current;
+    if (prev === pathname) return;
+    prevPathnameRef.current = pathname;
 
-  useEffect(() => {
-    if (renderedIsSettings === isSettings) return;
-    if (isMobile && openMobile) return;
-    // Intentional: the swap is deferred until the mobile Sheet has finished
-    // closing (see note above), which can only be observed from an effect.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setRenderedIsSettings(isSettings);
-  }, [isSettings, renderedIsSettings, isMobile, openMobile]);
+    if (!isMobile) return;
 
-  return renderedIsSettings ? <SettingsSidebar /> : <AppSidebar />;
+    const enteringSettings = isSettings && !prev.startsWith("/settings");
+    if (enteringSettings) return;
+
+    setOpenMobile(false);
+  }, [pathname, isSettings, isMobile, setOpenMobile]);
+
+  // A single Sidebar wrapper hosts both variants so the mobile Sheet (a Radix
+  // Dialog) stays mounted across the app↔settings swap — only its children
+  // change. Previously each variant rendered its own Sheet, so swapping while
+  // the Sheet was open unmounted the Dialog before its body-style cleanup ran,
+  // leaving `pointer-events: none` stuck on the body and the page unresponsive.
+  return (
+    <Sidebar
+      variant="inset"
+      data-tour-id={isSettings ? undefined : "navigation"}
+    >
+      {isSettings ? <SettingsSidebarContent /> : <AppSidebarContent />}
+    </Sidebar>
+  );
 }
