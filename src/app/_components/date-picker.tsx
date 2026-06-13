@@ -70,7 +70,7 @@ export function DatePicker({
           data-empty={!selected}
           onBlur={onBlur}
           className={cn(
-            "w-full justify-start text-left font-normal data-[empty=true]:text-muted-foreground",
+            "data-[empty=true]:text-muted-foreground w-full justify-start text-left font-normal",
             className,
           )}
           aria-invalid={rest["aria-invalid"]}

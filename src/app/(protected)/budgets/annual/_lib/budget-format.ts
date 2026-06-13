@@ -78,7 +78,20 @@ export function varianceClass(planned: number, actual: number): string {
 export function parseMonthsShort(raw: string): string[] {
   const list = raw.split(",").map((s) => s.trim());
   if (list.length !== 12) {
-    return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
   }
   return list;
 }

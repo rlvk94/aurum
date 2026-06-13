@@ -174,7 +174,9 @@ function stripLeadingPrefixes(text: string): string {
 
     // "DK-NOTA52017 ZINKBAKKEN" / "DANKORT-NOTA F145D SAXO" — a card-nota line
     // whose reference code is glued to (or spaced after) the "NOTA" marker.
-    const notaMatch = /^(?:dankort|dk)-?nota[0-9a-zæøå]*(?:\s+|$)/i.exec(current);
+    const notaMatch = /^(?:dankort|dk)-?nota[0-9a-zæøå]*(?:\s+|$)/i.exec(
+      current,
+    );
     if (notaMatch && notaMatch[0].length < current.length) {
       current = current.slice(notaMatch[0].length);
       changed = true;
@@ -268,11 +270,7 @@ function caseWord(word: string): string {
 }
 
 function toDisplayCase(text: string): string {
-  return text
-    .split(" ")
-    .filter(Boolean)
-    .map(caseWord)
-    .join(" ");
+  return text.split(" ").filter(Boolean).map(caseWord).join(" ");
 }
 
 /**

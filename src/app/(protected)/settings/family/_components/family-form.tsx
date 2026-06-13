@@ -45,7 +45,7 @@ export function FamilyForm() {
       <PageHeader title={t("title")} description={t("description")} />
 
       {!isOwner && (
-        <p className="rounded-md border border-dashed bg-muted/30 p-3 text-sm text-muted-foreground">
+        <p className="bg-muted/30 text-muted-foreground rounded-md border border-dashed p-3 text-sm">
           {t("readOnlyNotice")}
         </p>
       )}
@@ -70,7 +70,7 @@ export function FamilyForm() {
 
       <div className="flex items-center justify-end gap-3">
         {savedAt && !dirty && (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm">
             {tSettings("saved")}
           </span>
         )}

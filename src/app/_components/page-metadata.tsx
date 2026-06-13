@@ -27,10 +27,7 @@ export function PageMetadataProvider({
   // Stale metadata is cleared by `usePageMetadata`'s cleanup on unmount —
   // we intentionally don't reset on pathname change here, since a parent
   // effect running after a child's `setMetadata` would wipe the new value.
-  const value = React.useMemo(
-    () => ({ metadata, setMetadata }),
-    [metadata],
-  );
+  const value = React.useMemo(() => ({ metadata, setMetadata }), [metadata]);
 
   return (
     <PageMetadataContext.Provider value={value}>

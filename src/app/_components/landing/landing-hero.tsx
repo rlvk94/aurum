@@ -8,18 +8,20 @@ export function LandingHero({ isAuthed }: { isAuthed: boolean }) {
 
   return (
     <section className="almanac-grain relative overflow-hidden">
-      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 px-6 pt-20 pb-24 lg:grid-cols-[1.35fr_1fr] lg:gap-12 lg:pt-32 lg:pb-32 lg:min-h-[calc(100svh-4rem)]">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 items-center gap-16 px-6 pt-20 pb-24 lg:min-h-[calc(100svh-4rem)] lg:grid-cols-[1.35fr_1fr] lg:gap-12 lg:pt-32 lg:pb-32">
         {/* Left column — editorial copy stack */}
         <div className="relative">
-          <h1 className="font-display text-5xl leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+          <h1 className="font-display text-foreground text-5xl leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
             {t("headlineLead")}{" "}
             <em className="not-italic">
-              <span className="font-display italic text-primary">{t("headlineEm")}</span>
+              <span className="font-display text-primary italic">
+                {t("headlineEm")}
+              </span>
             </em>
             {t("headlineTrail")}
           </h1>
 
-          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
+          <p className="text-muted-foreground mt-6 max-w-xl text-lg leading-relaxed">
             {t("subhead")}
           </p>
 
@@ -46,14 +48,14 @@ export function LandingHero({ isAuthed }: { isAuthed: boolean }) {
           {/* Decorative gold rule between columns */}
           <div
             aria-hidden
-            className="pointer-events-none absolute -left-6 top-0 hidden h-full w-px bg-gradient-to-b from-transparent via-primary/20 to-transparent lg:block"
+            className="via-primary/20 pointer-events-none absolute top-0 -left-6 hidden h-full w-px bg-gradient-to-b from-transparent to-transparent lg:block"
           />
 
           {/* Back card — peeking transaction row */}
-          <div className="absolute right-0 top-0 w-[78%] rotate-[1.5deg] rounded-lg border border-border bg-card p-4 shadow-card">
+          <div className="border-border bg-card shadow-card absolute top-0 right-0 w-[78%] rotate-[1.5deg] rounded-lg border p-4">
             <div className="flex items-baseline justify-between">
               <SectionMarker>{t("demo.txnTitle")}</SectionMarker>
-              <span className="almanac-numerals text-[10px] tracking-tight text-muted-foreground">
+              <span className="almanac-numerals text-muted-foreground text-[10px] tracking-tight">
                 {t("demo.backDate")}
               </span>
             </div>
@@ -61,23 +63,27 @@ export function LandingHero({ isAuthed }: { isAuthed: boolean }) {
             <ul className="mt-3 space-y-3">
               <li className="flex items-center justify-between text-sm">
                 <div>
-                  <div className="font-medium text-foreground">{t("demo.txnRow1Name")}</div>
-                  <div className="almanac-smallcaps mt-0.5 text-[9px] tracking-[0.18em] text-muted-foreground">
+                  <div className="text-foreground font-medium">
+                    {t("demo.txnRow1Name")}
+                  </div>
+                  <div className="almanac-smallcaps text-muted-foreground mt-0.5 text-[9px] tracking-[0.18em]">
                     {t("demo.txnRow1Cat")}
                   </div>
                 </div>
-                <div className="almanac-numerals font-display text-base text-foreground">
+                <div className="almanac-numerals font-display text-foreground text-base">
                   {t("demo.txnRow1Amount")}
                 </div>
               </li>
               <li className="flex items-center justify-between text-sm">
                 <div>
-                  <div className="font-medium text-foreground">{t("demo.txnRow2Name")}</div>
-                  <div className="almanac-smallcaps mt-0.5 text-[9px] tracking-[0.18em] text-income">
+                  <div className="text-foreground font-medium">
+                    {t("demo.txnRow2Name")}
+                  </div>
+                  <div className="almanac-smallcaps text-income mt-0.5 text-[9px] tracking-[0.18em]">
                     {t("demo.txnRow2Cat")}
                   </div>
                 </div>
-                <div className="almanac-numerals font-display text-base text-income">
+                <div className="almanac-numerals font-display text-income text-base">
                   {t("demo.txnRow2Amount")}
                 </div>
               </li>
@@ -85,31 +91,36 @@ export function LandingHero({ isAuthed }: { isAuthed: boolean }) {
           </div>
 
           {/* Front card — budget fragment */}
-          <div className="absolute bottom-4 left-0 w-[82%] -rotate-[2deg] rounded-lg border border-border bg-card p-5 shadow-elevated">
+          <div className="border-border bg-card shadow-elevated absolute bottom-4 left-0 w-[82%] -rotate-[2deg] rounded-lg border p-5">
             <div className="flex items-baseline justify-between">
               <SectionMarker>{t("demo.budgetTitle")}</SectionMarker>
-              <span className="almanac-smallcaps text-[10px] tracking-[0.18em] text-warning">
+              <span className="almanac-smallcaps text-warning text-[10px] tracking-[0.18em]">
                 {t("demo.budgetDelta")}
               </span>
             </div>
 
-            <div className="mt-3 font-display text-xl text-foreground">
+            <div className="font-display text-foreground mt-3 text-xl">
               {t("demo.budgetCategory")}
             </div>
 
             <div className="almanac-numerals mt-2 flex items-baseline gap-2">
-              <span className="font-display text-3xl text-foreground">
+              <span className="font-display text-foreground text-3xl">
                 {t("demo.budgetSpent")}
               </span>
-              <span className="text-sm text-muted-foreground">{t("demo.budgetPlanned")}</span>
+              <span className="text-muted-foreground text-sm">
+                {t("demo.budgetPlanned")}
+              </span>
             </div>
 
             {/* Mini progress */}
             <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-(--expense-muted)">
-              <div className="h-full rounded-full bg-warning" style={{ width: "79%" }} />
+              <div
+                className="bg-warning h-full rounded-full"
+                style={{ width: "79%" }}
+              />
             </div>
 
-            <div className="almanac-smallcaps mt-3 text-[10px] tracking-[0.18em] text-muted-foreground">
+            <div className="almanac-smallcaps text-muted-foreground mt-3 text-[10px] tracking-[0.18em]">
               {t("demo.budgetCaption")}
             </div>
           </div>
@@ -122,14 +133,16 @@ export function LandingHero({ isAuthed }: { isAuthed: boolean }) {
         aria-label="Scroll to features"
         className="group absolute bottom-8 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 lg:flex"
       >
-        <span className="almanac-smallcaps text-[9px] tracking-[0.32em] text-muted-foreground transition-colors group-hover:text-primary">
+        <span className="almanac-smallcaps text-muted-foreground group-hover:text-primary text-[9px] tracking-[0.32em] transition-colors">
           {t("scroll")}
         </span>
-        <div className="relative h-12 w-px overflow-hidden bg-primary/20">
+        <div className="bg-primary/20 relative h-12 w-px overflow-hidden">
           <div
             aria-hidden
-            className="absolute left-0 top-0 h-3 w-full bg-primary"
-            style={{ animation: "almanac-scroll-dot 2.4s ease-in-out infinite" }}
+            className="bg-primary absolute top-0 left-0 h-3 w-full"
+            style={{
+              animation: "almanac-scroll-dot 2.4s ease-in-out infinite",
+            }}
           />
         </div>
       </a>

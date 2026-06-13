@@ -360,9 +360,7 @@ export async function rotateChallenge(
  * Rotates every non-archived challenge system-wide. Called by the cron job.
  * Reports per-family counts so operators can sanity-check in logs.
  */
-export async function rotateAllChallenges(
-  db: typeof dbInstance,
-): Promise<{
+export async function rotateAllChallenges(db: typeof dbInstance): Promise<{
   processed: number;
   rotated: number;
   errors: { challengeId: string; message: string }[];
@@ -380,7 +378,10 @@ export async function rotateAllChallenges(
       // Count rotations by checking whether the latest instance's periodEnd
       // moved forward after rotation.
       const [beforeLatest] = await db
-        .select({ id: challengeInstance.id, periodEnd: challengeInstance.periodEnd })
+        .select({
+          id: challengeInstance.id,
+          periodEnd: challengeInstance.periodEnd,
+        })
         .from(challengeInstance)
         .where(eq(challengeInstance.challengeId, row.id))
         .orderBy(sql`${challengeInstance.periodStart} desc`)

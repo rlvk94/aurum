@@ -29,14 +29,19 @@ export function FeatureRow({
           <FolioNumeral value={folio} className="text-5xl" />
           <SectionMarker>{eyebrow}</SectionMarker>
         </div>
-        <h3 className="mt-4 max-w-md font-display text-3xl leading-tight text-foreground sm:text-4xl">
+        <h3 className="font-display text-foreground mt-4 max-w-md text-3xl leading-tight sm:text-4xl">
           {headline}
         </h3>
-        <p className="mt-4 max-w-md text-base leading-relaxed text-muted-foreground">
+        <p className="text-muted-foreground mt-4 max-w-md text-base leading-relaxed">
           {body}
         </p>
       </div>
-      <div className={cn("relative", side === "right" ? "lg:order-1" : "lg:order-2")}>
+      <div
+        className={cn(
+          "relative",
+          side === "right" ? "lg:order-1" : "lg:order-2",
+        )}
+      >
         {visual}
       </div>
     </article>

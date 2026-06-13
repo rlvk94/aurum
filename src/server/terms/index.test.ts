@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-  TERMS_VERSIONS,
-  getCurrentTerms,
-  getTermsByVersion,
-} from "./index";
+import { TERMS_VERSIONS, getCurrentTerms, getTermsByVersion } from "./index";
 
 describe("terms bundle", () => {
   it("ships at least one version with da + en content", () => {

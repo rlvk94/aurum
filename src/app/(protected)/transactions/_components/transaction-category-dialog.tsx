@@ -270,7 +270,8 @@ function CategoryGridFlow({
     applySimilar
       .mutateAsync({ sourceTransactionId: txId, categoryId: id, dryRun: true })
       .then((res) => {
-        if (res.matched > 0) setSimilarPrompt({ categoryId: id, count: res.matched });
+        if (res.matched > 0)
+          setSimilarPrompt({ categoryId: id, count: res.matched });
         else onClose();
       })
       .catch(() => onClose());
@@ -281,7 +282,7 @@ function CategoryGridFlow({
       <div className="flex flex-col gap-4 p-6">
         <div className="space-y-1">
           <h2 className="font-display text-lg">{t("applyToSimilarTitle")}</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t("applyToSimilarBody", { count: similarPrompt.count })}
           </p>
         </div>
@@ -311,7 +312,7 @@ function CategoryGridFlow({
           <button
             type="button"
             onClick={() => setStep("parent")}
-            className="-ml-1 inline-flex h-8 w-8 items-center justify-center rounded-md hover:bg-accent"
+            className="hover:bg-accent -ml-1 inline-flex h-8 w-8 items-center justify-center rounded-md"
             aria-label={tCommon("back")}
           >
             <ArrowLeft className="h-4 w-4" />
@@ -319,7 +320,7 @@ function CategoryGridFlow({
         ) : (
           <span className="w-8" aria-hidden />
         )}
-        <div className="flex-1 text-center font-display text-base">
+        <div className="font-display flex-1 text-center text-base">
           {isSearching || step === "parent" ? (
             t("assignCategoryTitle")
           ) : (
@@ -333,13 +334,13 @@ function CategoryGridFlow({
       </div>
 
       <div className="flex h-12 shrink-0 items-center gap-2 border-b px-3">
-        <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+        <Search className="text-muted-foreground h-4 w-4 shrink-0" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={tCategories("searchCategoriesPlaceholder")}
-          className="h-full flex-1 bg-transparent text-base outline-none placeholder:text-muted-foreground"
+          className="placeholder:text-muted-foreground h-full flex-1 bg-transparent text-base outline-none"
           autoFocus={!mobile}
         />
         <button
@@ -347,7 +348,7 @@ function CategoryGridFlow({
           onClick={() => setSearch("")}
           aria-label={tCommon("clear")}
           className={cn(
-            "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition hover:bg-accent hover:text-foreground",
+            "text-muted-foreground hover:bg-accent hover:text-foreground inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition",
             !search && "invisible",
           )}
           tabIndex={search ? 0 : -1}
@@ -359,7 +360,7 @@ function CategoryGridFlow({
       {isSearching ? (
         <div className="flex-1 overflow-y-auto p-4">
           {searchMatches.length === 0 ? (
-            <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
+            <div className="text-muted-foreground flex h-full items-center justify-center p-6 text-center text-sm">
               {tCategories("noCategoriesMatch")}
             </div>
           ) : (
@@ -370,7 +371,7 @@ function CategoryGridFlow({
                     type="button"
                     onClick={() => pickLeaf(child.id)}
                     className={cn(
-                      "flex w-full items-center gap-3 rounded-lg border bg-card px-3 py-2.5 text-left transition hover:border-primary/40 hover:bg-accent/50 active:scale-[0.99]",
+                      "bg-card hover:border-primary/40 hover:bg-accent/50 flex w-full items-center gap-3 rounded-lg border px-3 py-2.5 text-left transition active:scale-[0.99]",
                       child.id === currentCategoryId &&
                         "border-primary bg-primary/5",
                     )}
@@ -387,7 +388,7 @@ function CategoryGridFlow({
                       >
                         {child.name}
                       </span>
-                      <span className="truncate text-xs text-muted-foreground">
+                      <span className="text-muted-foreground truncate text-xs">
                         {parent.name}
                       </span>
                     </span>
@@ -426,7 +427,7 @@ function CategoryGridFlow({
                   type="button"
                   onClick={() => pickLeaf(null)}
                   className={cn(
-                    "mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed bg-card px-3 py-3 text-muted-foreground transition hover:border-primary/40 hover:bg-accent/50 hover:text-foreground active:scale-[0.99]",
+                    "bg-card text-muted-foreground hover:border-primary/40 hover:bg-accent/50 hover:text-foreground mt-1 flex w-full items-center justify-center gap-2 rounded-xl border border-dashed px-3 py-3 transition active:scale-[0.99]",
                     mobile ? "text-base" : "text-sm",
                   )}
                 >
@@ -440,7 +441,7 @@ function CategoryGridFlow({
               aria-hidden={step !== "child"}
             >
               {selectedChildren.length === 0 ? (
-                <div className="flex h-full items-center justify-center p-6 text-center text-sm text-muted-foreground">
+                <div className="text-muted-foreground flex h-full items-center justify-center p-6 text-center text-sm">
                   {tCategories("noSubcategoriesYet")}
                 </div>
               ) : (
@@ -483,7 +484,7 @@ function Tile({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border bg-card p-3 text-center transition",
+        "bg-card flex aspect-square flex-col items-center justify-center gap-2 rounded-xl border p-3 text-center transition",
         "hover:border-primary/40 hover:bg-accent/50 active:scale-[0.97]",
         selected && "border-primary bg-primary/5",
       )}
@@ -493,7 +494,7 @@ function Tile({
       </span>
       <span
         className={cn(
-          "line-clamp-2 break-words font-medium leading-tight",
+          "line-clamp-2 leading-tight font-medium break-words",
           mobile ? "text-sm" : "text-xs",
         )}
       >

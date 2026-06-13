@@ -92,7 +92,10 @@ export function deriveProgress(args: {
     status = "no_dates";
   } else if (startDate && today < startDate) {
     status = "not_started";
-    daysToStart = differenceInCalendarDays(parseISO(startDate), parseISO(today));
+    daysToStart = differenceInCalendarDays(
+      parseISO(startDate),
+      parseISO(today),
+    );
   } else if (endDate && today > endDate) {
     status = "ended";
     daysSinceEnd = differenceInCalendarDays(parseISO(today), parseISO(endDate));

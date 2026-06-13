@@ -54,14 +54,12 @@ export function CategorySplit({
         return (
           <li
             key={r.categoryId ?? "uncategorized"}
-            className="relative h-12 overflow-hidden rounded-lg bg-muted/40"
+            className="bg-muted/40 relative h-12 overflow-hidden rounded-lg"
           >
             <div
               className={cn(
                 "absolute inset-y-0 left-0 rounded-lg transition-[width] duration-500 ease-out",
-                r.isUncategorized
-                  ? "bg-muted-foreground/15"
-                  : "bg-primary/15",
+                r.isUncategorized ? "bg-muted-foreground/15" : "bg-primary/15",
               )}
               style={{ width: `${barWidth}%` }}
               aria-hidden
@@ -73,14 +71,14 @@ export function CategorySplit({
                     {r.categoryIcon}
                   </span>
                 )}
-                <span className="truncate text-sm font-medium text-foreground">
+                <span className="text-foreground truncate text-sm font-medium">
                   {r.isUncategorized ? t("uncategorized") : r.categoryName}
                 </span>
-                <span className="shrink-0 rounded-md bg-background/80 px-1.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums text-foreground shadow-card">
+                <span className="bg-background/80 text-foreground shadow-card shrink-0 rounded-md px-1.5 py-0.5 font-mono text-[11px] font-semibold tabular-nums">
                   {formatPercent(r.pct)}
                 </span>
               </div>
-              <span className="shrink-0 text-sm font-medium tabular-nums text-foreground">
+              <span className="text-foreground shrink-0 text-sm font-medium tabular-nums">
                 {formatAmount(r.totalCents)}
               </span>
             </div>
@@ -97,10 +95,10 @@ export function CategorySplitSkeleton() {
       {[72, 58, 44, 32, 22, 14].map((w, i) => (
         <li
           key={i}
-          className="relative h-12 overflow-hidden rounded-lg bg-muted/40"
+          className="bg-muted/40 relative h-12 overflow-hidden rounded-lg"
         >
           <div
-            className="absolute inset-y-0 left-0 animate-pulse rounded-lg bg-muted"
+            className="bg-muted absolute inset-y-0 left-0 animate-pulse rounded-lg"
             style={{ width: `${w}%` }}
           />
         </li>

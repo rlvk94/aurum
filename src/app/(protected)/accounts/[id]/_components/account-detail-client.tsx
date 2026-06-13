@@ -89,10 +89,10 @@ export function AccountDetailClient({ id }: { id: string }) {
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {tDetail("currentBalance")}
             </CardTitle>
-            <Icon className="h-4 w-4 text-muted-foreground" />
+            <Icon className="text-muted-foreground h-4 w-4" />
           </CardHeader>
           <CardContent>
             <p
@@ -111,7 +111,7 @@ export function AccountDetailClient({ id }: { id: string }) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {tDetail("totalIncome")}
             </CardTitle>
             <CardDescription className="text-xs">
@@ -119,7 +119,7 @@ export function AccountDetailClient({ id }: { id: string }) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="font-display text-2xl text-income">
+            <p className="font-display text-income text-2xl">
               {stats ? formatAmount(stats.totals.incomeCents) : "—"}
             </p>
           </CardContent>
@@ -127,7 +127,7 @@ export function AccountDetailClient({ id }: { id: string }) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {tDetail("totalExpense")}
             </CardTitle>
             <CardDescription className="text-xs">
@@ -135,7 +135,7 @@ export function AccountDetailClient({ id }: { id: string }) {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <p className="font-display text-2xl text-expense">
+            <p className="font-display text-expense text-2xl">
               {stats ? formatAmount(stats.totals.expenseCents) : "—"}
             </p>
           </CardContent>
@@ -143,7 +143,7 @@ export function AccountDetailClient({ id }: { id: string }) {
 
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {tDetail("netChange")}
             </CardTitle>
             <CardDescription className="text-xs">
@@ -175,7 +175,7 @@ export function AccountDetailClient({ id }: { id: string }) {
           {stats?.monthly.some((m) => m.incomeCents || m.expenseCents) ? (
             <MonthlyChart monthly={stats.monthly} />
           ) : (
-            <p className="py-8 text-center text-sm text-muted-foreground">
+            <p className="text-muted-foreground py-8 text-center text-sm">
               {tDetail("noMonthlyData")}
             </p>
           )}

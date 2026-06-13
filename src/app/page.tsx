@@ -22,7 +22,7 @@ export default async function Home() {
   const isAuthed = Boolean(session?.user);
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       <LandingNav isAuthed={isAuthed} />
       <main>
         <LandingHero isAuthed={isAuthed} />

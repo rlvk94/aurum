@@ -42,8 +42,8 @@ export function ProjectCover({
       <span
         aria-hidden
         className={cn(
-          "project-cover-emoji absolute left-4 top-3 leading-none",
-          size === "hero" && "left-6 top-6",
+          "project-cover-emoji absolute top-3 left-4 leading-none",
+          size === "hero" && "top-6 left-6",
           EMOJI_SIZE[size],
         )}
       >

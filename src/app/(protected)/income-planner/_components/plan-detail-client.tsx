@@ -54,7 +54,8 @@ export function PlanDetailClient({ planId }: { planId: string }) {
   );
 
   const { allocatedBps, overAllocated, allBpsAllocated } = useMemo(() => {
-    if (!plan) return { allocatedBps: 0, overAllocated: false, allBpsAllocated: 0 };
+    if (!plan)
+      return { allocatedBps: 0, overAllocated: false, allBpsAllocated: 0 };
     let bps = 0;
     for (const line of plan.lines) {
       if (line.allocationType === "percentage") {
@@ -88,7 +89,7 @@ export function PlanDetailClient({ planId }: { planId: string }) {
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Hero */}
-      <section className="relative overflow-hidden rounded-2xl border border-border bg-card px-5 py-6 shadow-elevated sm:px-10 sm:py-12">
+      <section className="border-border bg-card shadow-elevated relative overflow-hidden rounded-2xl border px-5 py-6 sm:px-10 sm:py-12">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0"
@@ -99,13 +100,13 @@ export function PlanDetailClient({ planId }: { planId: string }) {
         />
 
         {/* Action menu */}
-        <div className="absolute right-3 top-3 z-10 sm:right-4 sm:top-4">
+        <div className="absolute top-3 right-3 z-10 sm:top-4 sm:right-4">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 rounded-full bg-background/70 backdrop-blur hover:bg-background"
+                className="bg-background/70 hover:bg-background h-9 w-9 rounded-full backdrop-blur"
                 aria-label={tCommon("actions")}
               >
                 <MoreHorizontal />
@@ -137,25 +138,25 @@ export function PlanDetailClient({ planId }: { planId: string }) {
         <div className="relative flex flex-col gap-6 pr-12 lg:flex-row lg:items-end lg:justify-between lg:gap-8 lg:pr-14">
           <div className="min-w-0">
             {plan.isActive && !plan.archived && (
-              <Badge className="mb-3 gap-1 rounded-full border-0 bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-primary">
+              <Badge className="bg-primary/10 text-primary mb-3 gap-1 rounded-full border-0 px-2.5 py-0.5 text-[10px] font-medium tracking-[0.14em] uppercase">
                 <Sparkles className="h-3 w-3" />
                 {t("activeBadge")}
               </Badge>
             )}
-            <h1 className="font-display text-3xl leading-[1.05] text-foreground sm:text-4xl lg:text-5xl">
+            <h1 className="font-display text-foreground text-3xl leading-[1.05] sm:text-4xl lg:text-5xl">
               {plan.name}
             </h1>
             {plan.description && (
-              <p className="mt-3 max-w-prose text-sm text-muted-foreground sm:text-base">
+              <p className="text-muted-foreground mt-3 max-w-prose text-sm sm:text-base">
                 {plan.description}
               </p>
             )}
           </div>
           <div className="text-left lg:text-right">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
               {t("monthlyIncomeTotal")}
             </p>
-            <p className="mt-1 font-display text-4xl tabular-nums text-foreground sm:text-5xl lg:text-6xl">
+            <p className="font-display text-foreground mt-1 text-4xl tabular-nums sm:text-5xl lg:text-6xl">
               {formatMoney(totalIncome)}
             </p>
           </div>

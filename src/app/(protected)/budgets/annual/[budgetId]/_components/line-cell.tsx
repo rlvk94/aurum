@@ -63,7 +63,7 @@ export function LineCell({ planned, monthLabel, isCurrent, onSave }: Props) {
         <button
           type="button"
           aria-label={`${monthLabel}: ${t("cellEdit")}`}
-          className={`flex h-full w-full items-center justify-end rounded-[6px] px-2.5 py-2 text-right transition-colors hover:bg-primary/[0.05] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 focus-visible:ring-offset-background ${
+          className={`hover:bg-primary/[0.05] focus-visible:ring-primary/60 focus-visible:ring-offset-background flex h-full w-full items-center justify-end rounded-[6px] px-2.5 py-2 text-right transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none ${
             isCurrent ? "bg-primary/[0.03]" : ""
           }`}
         >
@@ -73,16 +73,16 @@ export function LineCell({ planned, monthLabel, isCurrent, onSave }: Props) {
       <PopoverContent className="w-60 p-4" align="center">
         <div className="space-y-4">
           <div>
-            <p className="almanac-smallcaps text-[10px] text-muted-foreground">
+            <p className="almanac-smallcaps text-muted-foreground text-[10px]">
               {monthLabel}
             </p>
-            <p className="mt-1 font-display text-2xl text-foreground almanac-numerals">
+            <p className="font-display text-foreground almanac-numerals mt-1 text-2xl">
               {planned > 0 ? formatMoney(planned) : "—"}
             </p>
           </div>
           <div>
             <label
-              className="almanac-smallcaps text-[9px] text-muted-foreground"
+              className="almanac-smallcaps text-muted-foreground text-[9px]"
               htmlFor="cell-amount"
             >
               {t("cellPlanned")}
@@ -103,9 +103,9 @@ export function LineCell({ planned, monthLabel, isCurrent, onSave }: Props) {
               }}
               placeholder="0"
               inputMode="numeric"
-              className="mt-1 almanac-numerals"
+              className="almanac-numerals mt-1"
             />
-            <p className="mt-1.5 text-[10px] text-muted-foreground">
+            <p className="text-muted-foreground mt-1.5 text-[10px]">
               ⏎ {tCommon("save")} · Esc {tCommon("cancel")}
             </p>
           </div>

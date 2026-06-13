@@ -1,9 +1,4 @@
-export type Repetition =
-  | "one_off"
-  | "weekly"
-  | "monthly"
-  | "yearly"
-  | "custom";
+export type Repetition = "one_off" | "weekly" | "monthly" | "yearly" | "custom";
 
 function parseIso(iso: string): Date {
   return new Date(`${iso}T00:00:00Z`);
@@ -65,8 +60,7 @@ export function computePeriodWindow(
   const MS_PER_DAY = 86_400_000;
 
   if (repetition === "weekly" || repetition === "custom") {
-    const stride =
-      repetition === "weekly" ? 7 : (customDurationDays ?? 0);
+    const stride = repetition === "weekly" ? 7 : (customDurationDays ?? 0);
     if (stride <= 0) {
       throw new Error("custom challenge missing customDurationDays");
     }

@@ -170,7 +170,7 @@ function InviteForm({
       </CardHeader>
       <CardContent className="space-y-3">
         {atLimit && (
-          <p className="rounded-md border border-dashed bg-muted/30 p-3 text-sm text-muted-foreground">
+          <p className="bg-muted/30 text-muted-foreground rounded-md border border-dashed p-3 text-sm">
             {tBilling("limitReached")}
           </p>
         )}

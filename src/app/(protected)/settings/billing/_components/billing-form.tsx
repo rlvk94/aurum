@@ -142,7 +142,7 @@ export function BillingForm() {
               <button
                 type="button"
                 onClick={() => setSwitchCadenceOpen(true)}
-                className="text-xs text-primary underline-offset-4 hover:underline"
+                className="text-primary text-xs underline-offset-4 hover:underline"
               >
                 {targetCadence === "annual"
                   ? t("switchToAnnual")
@@ -202,16 +202,13 @@ export function BillingForm() {
           </DialogHeader>
 
           {changeCadence.error && (
-            <p className="text-sm text-destructive" role="alert">
+            <p className="text-destructive text-sm" role="alert">
               {changeCadence.error.message}
             </p>
           )}
 
           <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setSwitchCadenceOpen(false)}
-            >
+            <Button variant="ghost" onClick={() => setSwitchCadenceOpen(false)}>
               {t("switchDialog.dismiss")}
             </Button>
             <Button
@@ -240,7 +237,7 @@ export function BillingForm() {
           </DialogHeader>
 
           {cancelSubscription.error && (
-            <p className="text-sm text-destructive" role="alert">
+            <p className="text-destructive text-sm" role="alert">
               {cancelSubscription.error.message}
             </p>
           )}

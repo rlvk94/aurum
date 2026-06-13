@@ -39,8 +39,8 @@ function formatAmount(cents: number): string {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-0.5 font-medium text-foreground">{value}</p>
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="text-foreground mt-0.5 font-medium">{value}</p>
     </div>
   );
 }
@@ -77,26 +77,28 @@ export function DebtDetailClient({ id }: { id: string }) {
         title={debt.name}
         description={debt.lender}
         actions={
-          paidOff ? <Badge variant="secondary">{t("paidOff")}</Badge> : undefined
+          paidOff ? (
+            <Badge variant="secondary">{t("paidOff")}</Badge>
+          ) : undefined
         }
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {t("currentBalance")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-display text-2xl text-debt">
+            <p className="font-display text-debt text-2xl">
               {formatAmount(summary.outstandingBalance)}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {t(`paymentPerFrequency.${debt.paymentFrequency}`)}
             </CardTitle>
           </CardHeader>
@@ -108,19 +110,19 @@ export function DebtDetailClient({ id }: { id: string }) {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {t("principalPaid")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="font-display text-2xl text-income">
+            <p className="font-display text-income text-2xl">
               {formatAmount(summary.principalPaid)}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {t("interestPaid")}
             </CardTitle>
           </CardHeader>
@@ -138,7 +140,7 @@ export function DebtDetailClient({ id }: { id: string }) {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+            <div className="text-muted-foreground mb-1 flex items-center justify-between text-xs">
               <span>{progressPct}%</span>
               <span>
                 {t("monthsRemaining", {
@@ -150,19 +152,16 @@ export function DebtDetailClient({ id }: { id: string }) {
                 })}
               </span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
               <div
-                className="h-full rounded-full bg-primary transition-all"
+                className="bg-primary h-full rounded-full transition-all"
                 style={{ width: `${progressPct}%` }}
               />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4 pt-2 sm:grid-cols-4">
-            <Stat
-              label={t("principal")}
-              value={formatAmount(debt.principal)}
-            />
+            <Stat label={t("principal")} value={formatAmount(debt.principal)} />
             <Stat
               label={t("interestRate")}
               value={`${(debt.interestRateBps / 100).toFixed(2)}%`}
@@ -250,10 +249,10 @@ export function DebtDetailClient({ id }: { id: string }) {
                         <TableCell className="text-right font-mono text-sm">
                           {formatAmount(row.payment)}
                         </TableCell>
-                        <TableCell className="text-right font-mono text-sm text-income">
+                        <TableCell className="text-income text-right font-mono text-sm">
                           {formatAmount(row.principal)}
                         </TableCell>
-                        <TableCell className="text-right font-mono text-sm text-muted-foreground">
+                        <TableCell className="text-muted-foreground text-right font-mono text-sm">
                           {formatAmount(row.interest)}
                         </TableCell>
                         <TableCell className="text-right font-mono text-sm">

@@ -4,9 +4,7 @@ import type { Locale } from "~/i18n/config";
 import { deriveMerchantKey } from "~/server/categorization";
 import { defaultCategories } from "./default-categories";
 
-type Transaction = Parameters<
-  Parameters<typeof dbInstance.transaction>[0]
->[0];
+type Transaction = Parameters<Parameters<typeof dbInstance.transaction>[0]>[0];
 
 /** merchantKey -> set of candidate leaf category ids. */
 type RuleTargets = Map<string, Set<string>>;

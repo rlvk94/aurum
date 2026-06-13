@@ -51,9 +51,13 @@ function slotIndices(
     case "monthly":
       return [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
     case "quarterly":
-      return [0, 3, 6, 9].map((offset) => (start + offset) % 12).sort((a, b) => a - b);
+      return [0, 3, 6, 9]
+        .map((offset) => (start + offset) % 12)
+        .sort((a, b) => a - b);
     case "semi_annual":
-      return [0, 6].map((offset) => (start + offset) % 12).sort((a, b) => a - b);
+      return [0, 6]
+        .map((offset) => (start + offset) % 12)
+        .sort((a, b) => a - b);
     case "annual":
       return [start];
     case "custom":

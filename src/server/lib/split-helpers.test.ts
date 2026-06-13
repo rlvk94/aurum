@@ -40,9 +40,9 @@ describe("validateSplitParts", () => {
   });
 
   it("rejects non-positive part amounts", () => {
-    expect(
-      validateSplitParts(1000, [{ amount: 1000 }, { amount: 0 }]),
-    ).toEqual({ ok: false, reason: "non_positive_amount" });
+    expect(validateSplitParts(1000, [{ amount: 1000 }, { amount: 0 }])).toEqual(
+      { ok: false, reason: "non_positive_amount" },
+    );
     expect(
       validateSplitParts(1000, [{ amount: 1100 }, { amount: -100 }]),
     ).toEqual({ ok: false, reason: "non_positive_amount" });

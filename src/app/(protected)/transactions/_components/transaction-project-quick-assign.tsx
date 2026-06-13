@@ -119,7 +119,7 @@ export function TransactionProjectQuickAssign({
 
           <div className="-mx-2 max-h-[60vh] overflow-y-auto px-2">
             {visibleProjects.length === 0 ? (
-              <p className="px-2 py-6 text-center text-sm text-muted-foreground">
+              <p className="text-muted-foreground px-2 py-6 text-center text-sm">
                 {t("emptyState")}
               </p>
             ) : (
@@ -132,22 +132,24 @@ export function TransactionProjectQuickAssign({
                         type="button"
                         onClick={() => pickProject(p.id)}
                         className={cn(
-                          "flex w-full items-center gap-3 rounded-lg border border-transparent p-3 text-left transition hover:border-border hover:bg-accent",
+                          "hover:border-border hover:bg-accent flex w-full items-center gap-3 rounded-lg border border-transparent p-3 text-left transition",
                           isCurrent && "border-primary bg-primary/5",
                         )}
                       >
                         <span
-                          data-project-palette={p.coverPalette as ProjectPalette}
+                          data-project-palette={
+                            p.coverPalette as ProjectPalette
+                          }
                           className="project-cover-shimmer flex h-10 w-10 items-center justify-center rounded-md text-xl"
                         >
                           <span className="project-cover-emoji">{p.emoji}</span>
                         </span>
                         <div className="min-w-0 flex-1">
-                          <p className="truncate font-medium text-foreground">
+                          <p className="text-foreground truncate font-medium">
                             {p.name}
                           </p>
                           {p.spendingLimit && (
-                            <p className="truncate text-xs text-muted-foreground">
+                            <p className="text-muted-foreground truncate text-xs">
                               {Math.min(
                                 100,
                                 Math.round(
@@ -166,7 +168,7 @@ export function TransactionProjectQuickAssign({
             )}
           </div>
 
-          <div className="space-y-2 border-t border-border pt-3">
+          <div className="border-border space-y-2 border-t pt-3">
             <Button
               type="button"
               variant="outline"
@@ -179,7 +181,7 @@ export function TransactionProjectQuickAssign({
               <Button
                 type="button"
                 variant="ghost"
-                className="w-full justify-start text-destructive hover:text-destructive"
+                className="text-destructive hover:text-destructive w-full justify-start"
                 onClick={() => pickProject(null)}
               >
                 {t("quickAssign.remove")}

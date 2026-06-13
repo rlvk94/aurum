@@ -45,7 +45,9 @@ function buildSubscription(
 
 describe("projectSubscription", () => {
   it("maps active → plan=family", () => {
-    const projected = projectSubscription(buildSubscription({ status: "active" }));
+    const projected = projectSubscription(
+      buildSubscription({ status: "active" }),
+    );
     expect(projected.plan).toBe("family");
     expect(projected.status).toBe("active");
   });
@@ -149,8 +151,8 @@ describe("graceJustStarted / graceJustEnded", () => {
     expect(
       graceJustEnded({ status: "active", priorGraceEndsAt: new Date() }),
     ).toBe(true);
-    expect(
-      graceJustEnded({ status: "active", priorGraceEndsAt: null }),
-    ).toBe(false);
+    expect(graceJustEnded({ status: "active", priorGraceEndsAt: null })).toBe(
+      false,
+    );
   });
 });

@@ -86,7 +86,8 @@ const createSchema = z
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
-        message: "At least one categoryId is required for spend-less challenges",
+        message:
+          "At least one categoryId is required for spend-less challenges",
         path: ["categoryIds"],
       });
     }
@@ -199,10 +200,7 @@ async function assertCategoriesInFamily(
     .select({ id: category.id })
     .from(category)
     .where(
-      and(
-        inArray(category.id, categoryIds),
-        eq(category.familyId, familyId),
-      ),
+      and(inArray(category.id, categoryIds), eq(category.familyId, familyId)),
     );
   if (rows.length !== new Set(categoryIds).size) {
     throw new TRPCError({

@@ -115,7 +115,7 @@ function PaymentFormInner({
       <PaymentElement options={{ layout: "tabs" }} />
 
       {error && (
-        <p className="text-sm text-destructive" role="alert">
+        <p className="text-destructive text-sm" role="alert">
           {error}
         </p>
       )}

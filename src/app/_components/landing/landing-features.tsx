@@ -48,15 +48,15 @@ export function LandingFeatures() {
       <div className="mx-auto max-w-6xl px-6">
         <header className="max-w-2xl">
           <SectionMarker>{t("marker")}</SectionMarker>
-          <h2 className="mt-4 font-display text-4xl leading-tight text-foreground sm:text-5xl">
+          <h2 className="font-display text-foreground mt-4 text-4xl leading-tight sm:text-5xl">
             {t("heading")}
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+          <p className="text-muted-foreground mt-4 text-base leading-relaxed">
             {t("lead")}
           </p>
         </header>
 
-        <div className="mt-8 divide-y divide-primary/10">
+        <div className="divide-primary/10 mt-8 divide-y">
           {items.map((item) => (
             <FeatureRow
               key={item.key}

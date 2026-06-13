@@ -15,10 +15,7 @@ import {
   usersToFamilies,
 } from "~/server/db/schema";
 
-async function getActiveFamilyId(
-  db: typeof dbInstance,
-  userId: string,
-) {
+async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   const [dbUser] = await db
     .select({ activeFamilyId: user.activeFamilyId })
     .from(user)
@@ -146,9 +143,9 @@ async function replaceAccessList(
       );
   }
   if (toAdd.length > 0) {
-    await db.insert(financialAccountAccess).values(
-      toAdd.map((userId) => ({ accountId, userId })),
-    );
+    await db
+      .insert(financialAccountAccess)
+      .values(toAdd.map((userId) => ({ accountId, userId })));
   }
 }
 
@@ -265,7 +262,11 @@ export const financialAccountRouter = createTRPCRouter({
       // Build the month window: first day of (now - (months-1)) through now.
       const now = new Date();
       const startDate = new Date(
-        Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - (input.months - 1), 1),
+        Date.UTC(
+          now.getUTCFullYear(),
+          now.getUTCMonth() - (input.months - 1),
+          1,
+        ),
       );
       const endDate = new Date(
         Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0),
@@ -301,7 +302,10 @@ export const financialAccountRouter = createTRPCRouter({
             lte(transaction.date, toStr),
           ),
         )
-        .groupBy(sql`to_char(${transaction.date}, 'YYYY-MM')`, transaction.type);
+        .groupBy(
+          sql`to_char(${transaction.date}, 'YYYY-MM')`,
+          transaction.type,
+        );
 
       const monthMap = new Map<
         string,
@@ -503,9 +507,9 @@ export const financialAccountRouter = createTRPCRouter({
         targetUserIds.add(ctx.session.user.id);
         const ids = Array.from(targetUserIds);
         await assertUsersInFamily(ctx.db, familyId, ids);
-        await ctx.db.insert(financialAccountAccess).values(
-          ids.map((userId) => ({ accountId: created.id, userId })),
-        );
+        await ctx.db
+          .insert(financialAccountAccess)
+          .values(ids.map((userId) => ({ accountId: created.id, userId })));
       }
 
       return created;

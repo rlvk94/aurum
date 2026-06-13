@@ -32,30 +32,28 @@ export async function GET(
   const glyphSize = Math.round(spec.size * spec.glyphScale);
 
   return new ImageResponse(
-    (
-      <div
-        style={{
-          width: "100%",
-          height: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: BG,
-        }}
+    <div
+      style={{
+        width: "100%",
+        height: "100%",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: BG,
+      }}
+    >
+      <svg
+        width={glyphSize}
+        height={glyphSize}
+        viewBox="0 0 64 64"
+        xmlns="http://www.w3.org/2000/svg"
       >
-        <svg
-          width={glyphSize}
-          height={glyphSize}
-          viewBox="0 0 64 64"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            d="M14 50 L28 14 H36 L50 50 H42.5 L39 40 H25 L21.5 50 Z M27.2 33 H36.8 L32 19.5 Z"
-            fill={FG}
-          />
-        </svg>
-      </div>
-    ),
+        <path
+          d="M14 50 L28 14 H36 L50 50 H42.5 L39 40 H25 L21.5 50 Z M27.2 33 H36.8 L32 19.5 Z"
+          fill={FG}
+        />
+      </svg>
+    </div>,
     {
       width: spec.size,
       height: spec.size,

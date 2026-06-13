@@ -55,11 +55,11 @@ export function UserMenu() {
                 size="lg"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
-                <div className="relative flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-accent">
+                <div className="bg-sidebar-accent relative flex aspect-square size-8 items-center justify-center rounded-lg">
                   <Users className="size-4" />
                   {unread > 0 && (
                     <span
-                      className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground shadow-card whats-new-dot"
+                      className="bg-primary text-primary-foreground shadow-card whats-new-dot absolute -top-1 -right-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold"
                       aria-hidden
                     >
                       {unreadDisplay}
@@ -84,7 +84,7 @@ export function UserMenu() {
                 {unread > 0 && (
                   <span
                     aria-label={tWhatsNew("openButtonLabel")}
-                    className="flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold leading-none text-primary-foreground"
+                    className="bg-primary text-primary-foreground flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] leading-none font-semibold"
                   >
                     {unreadDisplay}
                   </span>

@@ -14,10 +14,7 @@ import { cn } from "~/app/_lib/utils";
 
 import { ProjectCard } from "./project-card";
 import { ProjectFormDialog } from "./project-form-dialog";
-import {
-  deriveProgress,
-  type ProjectPalette,
-} from "../_lib/format";
+import { deriveProgress, type ProjectPalette } from "../_lib/format";
 
 type Project = RouterOutputs["project"]["list"][number];
 
@@ -81,8 +78,13 @@ export function ProjectsClient() {
           net: p.net,
         }).status;
         if (filter === "active")
-          return status === "active" || status === "not_started" || status === "no_dates";
-        if (filter === "ended") return status === "ended" || status === "met" || status === "over";
+          return (
+            status === "active" ||
+            status === "not_started" ||
+            status === "no_dates"
+          );
+        if (filter === "ended")
+          return status === "ended" || status === "met" || status === "over";
         return true;
       });
     const archived = all.filter((p) => p.archivedAt);
@@ -133,7 +135,7 @@ export function ProjectsClient() {
         <EmptyHero suggestions={SUGGESTIONS} onPick={handleSuggestion} />
       ) : (
         <>
-          <div className="flex flex-wrap items-center gap-1 rounded-full border border-border bg-card p-1 shadow-card sm:w-fit">
+          <div className="border-border bg-card shadow-card flex flex-wrap items-center gap-1 rounded-full border p-1 sm:w-fit">
             {(["all", "active", "ended"] as Filter[]).map((f) => (
               <button
                 key={f}
@@ -169,14 +171,14 @@ export function ProjectsClient() {
           )}
 
           {active.length === 0 && (
-            <p className="rounded-lg border border-dashed border-border bg-card/50 px-6 py-10 text-center text-sm text-muted-foreground">
+            <p className="border-border bg-card/50 text-muted-foreground rounded-lg border border-dashed px-6 py-10 text-center text-sm">
               {t("emptyState")}
             </p>
           )}
 
           {archived.length > 0 && (
             <div className="space-y-3">
-              <h2 className="font-display text-base text-muted-foreground">
+              <h2 className="font-display text-muted-foreground text-base">
                 {t("archivedHeading")}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -226,16 +228,16 @@ function EmptyHero({
   const t = useTranslations("projects");
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-8 shadow-card sm:p-12">
+    <div className="border-border bg-card shadow-card rounded-2xl border p-8 sm:p-12">
       <div className="flex flex-col items-start gap-6 md:flex-row md:items-center md:gap-8">
         <div
           data-project-palette="gold"
-          className="project-cover-shimmer flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl shadow-elevated"
+          className="project-cover-shimmer shadow-elevated flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl"
         >
           <FolderHeart className="h-10 w-10 text-[var(--cover-glyph)]" />
         </div>
         <div className="max-w-2xl space-y-2">
-          <h2 className="font-display text-3xl text-foreground">
+          <h2 className="font-display text-foreground text-3xl">
             {t("emptyStateTitle")}
           </h2>
           <p className="text-muted-foreground">{t("emptyStateBody")}</p>
@@ -243,7 +245,7 @@ function EmptyHero({
       </div>
 
       <div className="mt-10 space-y-4">
-        <p className="text-sm font-medium text-foreground">
+        <p className="text-foreground text-sm font-medium">
           {t("suggestionsLabel")}
         </p>
         <div className="grid gap-4 sm:grid-cols-3">
@@ -252,7 +254,7 @@ function EmptyHero({
               key={s.key}
               type="button"
               onClick={() => onPick(s)}
-              className="group flex items-center gap-4 rounded-xl border border-border bg-background p-4 text-left transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-card"
+              className="group border-border bg-background hover:border-primary/40 hover:shadow-card flex items-center gap-4 rounded-xl border p-4 text-left transition hover:-translate-y-0.5"
             >
               <span
                 data-project-palette={s.palette}
@@ -261,14 +263,14 @@ function EmptyHero({
                 <span className="project-cover-emoji">{s.emoji}</span>
               </span>
               <div className="min-w-0 flex-1">
-                <p className="font-display text-lg text-foreground">
+                <p className="font-display text-foreground text-lg">
                   {t(`suggestions.${s.key}`)}
                 </p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-muted-foreground text-xs">
                   {t("createProjectShort")}
                 </p>
               </div>
-              <ArrowRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-0.5 group-hover:text-foreground" />
+              <ArrowRight className="text-muted-foreground group-hover:text-foreground h-4 w-4 transition group-hover:translate-x-0.5" />
             </button>
           ))}
         </div>
@@ -276,4 +278,3 @@ function EmptyHero({
     </div>
   );
 }
-

@@ -1,7 +1,33 @@
 import { SectionMarker } from "../section-marker";
 
-const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAJ", "JUN", "JUL", "AUG", "SEP", "OKT", "NOV", "DEC"];
-const MONTHS_SHORT = ["J", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
+const MONTHS = [
+  "JAN",
+  "FEB",
+  "MAR",
+  "APR",
+  "MAJ",
+  "JUN",
+  "JUL",
+  "AUG",
+  "SEP",
+  "OKT",
+  "NOV",
+  "DEC",
+];
+const MONTHS_SHORT = [
+  "J",
+  "F",
+  "M",
+  "A",
+  "M",
+  "J",
+  "J",
+  "A",
+  "S",
+  "O",
+  "N",
+  "D",
+];
 
 const PLANNED = [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8];
 const ACTUAL = [7.2, 7.9, 8.4, 6.32, 0, 0, 0, 0, 0, 0, 0, 0];
@@ -10,17 +36,19 @@ const CURRENT_INDEX = 3;
 export function BudgetStrip() {
   const max = 10;
   return (
-    <div className="relative w-full rounded-lg border border-border bg-card p-6 shadow-card">
+    <div className="border-border bg-card shadow-card relative w-full rounded-lg border p-6">
       <div className="flex items-baseline justify-between">
         <div>
           <SectionMarker>§ Årsbudget · 2026</SectionMarker>
-          <div className="mt-2 font-display text-xl text-foreground">Dagligvarer</div>
+          <div className="font-display text-foreground mt-2 text-xl">
+            Dagligvarer
+          </div>
         </div>
         <div className="text-right">
-          <div className="almanac-numerals text-2xl font-display text-foreground">
-            29.820 <span className="text-base text-muted-foreground">kr.</span>
+          <div className="almanac-numerals font-display text-foreground text-2xl">
+            29.820 <span className="text-muted-foreground text-base">kr.</span>
           </div>
-          <div className="almanac-smallcaps mt-0.5 text-[10px] tracking-[0.18em] text-muted-foreground">
+          <div className="almanac-smallcaps text-muted-foreground mt-0.5 text-[10px] tracking-[0.18em]">
             År til dato
           </div>
         </div>
@@ -50,7 +78,9 @@ export function BudgetStrip() {
                     className="absolute bottom-0 left-1/2 w-2 -translate-x-1/2 rounded-sm"
                     style={{
                       height: `${actualH}%`,
-                      backgroundColor: isOver ? "var(--expense)" : "var(--income)",
+                      backgroundColor: isOver
+                        ? "var(--expense)"
+                        : "var(--income)",
                       opacity: isCurrent ? 1 : 0.55,
                     }}
                   />
@@ -58,7 +88,7 @@ export function BudgetStrip() {
                 {isCurrent && (
                   <div
                     aria-hidden
-                    className="absolute -top-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-primary"
+                    className="bg-primary absolute -top-1 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full"
                   />
                 )}
               </div>

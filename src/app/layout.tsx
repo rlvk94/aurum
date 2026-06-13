@@ -83,7 +83,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${dmSans.variable} ${dmSerifDisplay.variable}${isDark ? " dark" : ""}`}
+      className={`${dmSans.variable} ${dmSerifDisplay.variable}${isDark ? "dark" : ""}`}
       suppressHydrationWarning
     >
       <head>

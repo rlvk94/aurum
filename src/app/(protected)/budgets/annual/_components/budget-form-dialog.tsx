@@ -147,7 +147,9 @@ export function BudgetFormDialog({
                       aria-invalid={isInvalid}
                       autoFocus={!isEdit}
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -173,7 +175,9 @@ export function BudgetFormDialog({
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
                     />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                    {isInvalid && (
+                      <FieldError errors={field.state.meta.errors} />
+                    )}
                   </Field>
                 );
               }}
@@ -203,11 +207,11 @@ export function BudgetFormDialog({
                   <Field>
                     <FieldLabel>{t("budgetAccounts")}</FieldLabel>
                     {activeAccounts.length === 0 ? (
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {t("budgetAccountsAll")}
                       </p>
                     ) : (
-                      <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-3">
+                      <div className="border-border bg-card flex flex-col gap-2 rounded-lg border p-3">
                         {activeAccounts.map((a) => {
                           const checked = selected.has(a.id);
                           const id = `budget-account-${a.id}`;
@@ -244,7 +248,7 @@ export function BudgetFormDialog({
           </FieldGroup>
 
           {mutation.error && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6">

@@ -38,22 +38,25 @@ export function FamilyFeatureTeaser({ feature, bullets }: Props) {
   })();
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col items-start gap-6 rounded-xl border border-border bg-card p-8 shadow-card sm:p-10">
+    <div className="border-border bg-card shadow-card mx-auto flex w-full max-w-2xl flex-col items-start gap-6 rounded-xl border p-8 sm:p-10">
       <div className="flex items-center gap-2">
-        <Sparkles className="size-5 text-primary" />
+        <Sparkles className="text-primary size-5" />
         <LockBadge />
       </div>
       <div>
-        <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl">
+        <h1 className="font-display text-foreground text-3xl leading-tight tracking-tight sm:text-4xl">
           {title}
         </h1>
-        <p className="mt-3 text-base text-muted-foreground">{body}</p>
+        <p className="text-muted-foreground mt-3 text-base">{body}</p>
       </div>
       {bullets && bullets.length > 0 && (
-        <ul className="space-y-2 text-sm text-foreground/90">
+        <ul className="text-foreground/90 space-y-2 text-sm">
           {bullets.map((b, i) => (
             <li key={i} className="flex items-start gap-3">
-              <span aria-hidden className="mt-2 block h-px w-3 shrink-0 bg-primary" />
+              <span
+                aria-hidden
+                className="bg-primary mt-2 block h-px w-3 shrink-0"
+              />
               <span>{b}</span>
             </li>
           ))}

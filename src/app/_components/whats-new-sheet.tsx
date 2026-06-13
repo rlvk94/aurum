@@ -54,7 +54,7 @@ export function WhatsNewSheet({
         side={side}
         className="w-full overflow-y-auto p-0 pb-[env(safe-area-inset-bottom,0px)] sm:max-w-md [&>button]:top-[calc(1rem+env(safe-area-inset-top,0px))]"
       >
-        <SheetHeader className="border-b border-border bg-background px-6 pb-5 pt-[calc(1.25rem+env(safe-area-inset-top,0px))]">
+        <SheetHeader className="border-border bg-background border-b px-6 pt-[calc(1.25rem+env(safe-area-inset-top,0px))] pb-5">
           <SheetTitle className="font-display text-2xl">
             {t("title")}
           </SheetTitle>
@@ -63,7 +63,7 @@ export function WhatsNewSheet({
 
         <div className="space-y-4 px-4 py-5 sm:px-6">
           {items.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-border bg-card/50 px-6 py-12 text-center text-sm text-muted-foreground">
+            <p className="border-border bg-card/50 text-muted-foreground rounded-lg border border-dashed px-6 py-12 text-center text-sm">
               {t("noUpdates")}
             </p>
           ) : (

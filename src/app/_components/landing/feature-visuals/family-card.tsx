@@ -4,19 +4,26 @@ const MEMBERS = [
   { initials: "MR", name: "Marie", role: "Ejer", color: "var(--primary)" },
   { initials: "JK", name: "Jakob", role: "Medlem", color: "var(--savings)" },
   { initials: "AR", name: "Astrid", role: "Medlem", color: "var(--income)" },
-  { initials: "LV", name: "Lukas", role: "Inviteret", color: "var(--muted-foreground)" },
+  {
+    initials: "LV",
+    name: "Lukas",
+    role: "Inviteret",
+    color: "var(--muted-foreground)",
+  },
 ];
 
 export function FamilyCard() {
   return (
-    <div className="relative w-full rounded-lg border border-border bg-card p-6 shadow-card">
+    <div className="border-border bg-card shadow-card relative w-full rounded-lg border p-6">
       <div className="flex items-baseline justify-between">
         <SectionMarker>§ Husstanden</SectionMarker>
-        <span className="almanac-numerals font-display text-sm text-muted-foreground">04 / ∞</span>
+        <span className="almanac-numerals font-display text-muted-foreground text-sm">
+          04 / ∞
+        </span>
       </div>
 
-      <div className="mt-5 font-display text-2xl text-foreground">
-        Familien <span className="italic text-primary">Holm</span>
+      <div className="font-display text-foreground mt-5 text-2xl">
+        Familien <span className="text-primary italic">Holm</span>
       </div>
 
       <div className="almanac-rule mt-5" />
@@ -26,14 +33,16 @@ export function FamilyCard() {
           <li key={m.initials} className="flex items-center gap-3">
             <div
               aria-hidden
-              className="flex h-9 w-9 items-center justify-center rounded-full font-display text-sm text-white"
+              className="font-display flex h-9 w-9 items-center justify-center rounded-full text-sm text-white"
               style={{ backgroundColor: m.color }}
             >
               {m.initials}
             </div>
             <div className="flex-1">
-              <div className="text-sm font-medium text-foreground">{m.name}</div>
-              <div className="almanac-smallcaps text-[9px] tracking-[0.18em] text-muted-foreground">
+              <div className="text-foreground text-sm font-medium">
+                {m.name}
+              </div>
+              <div className="almanac-smallcaps text-muted-foreground text-[9px] tracking-[0.18em]">
                 {m.role}
               </div>
             </div>
@@ -45,7 +54,7 @@ export function FamilyCard() {
         type="button"
         disabled
         aria-hidden
-        className="almanac-smallcaps mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md border border-dashed border-primary/40 px-3 py-2 text-[10px] tracking-[0.22em] text-primary/80"
+        className="almanac-smallcaps border-primary/40 text-primary/80 mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md border border-dashed px-3 py-2 text-[10px] tracking-[0.22em]"
       >
         + Inviter medlem
       </button>

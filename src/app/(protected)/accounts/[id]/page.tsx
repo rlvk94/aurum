@@ -11,7 +11,9 @@ export default async function AccountDetailPage({
   // the current month, in UTC (date-fns is local-time but the transaction.date
   // column is a bare DATE so timezone doesn't shift the bucket).
   const now = new Date();
-  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1))
+  const from = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth() - 11, 1),
+  )
     .toISOString()
     .slice(0, 10);
   const to = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0))

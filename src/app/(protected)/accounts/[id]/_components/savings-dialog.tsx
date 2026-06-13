@@ -149,7 +149,8 @@ export function SavingsDialog({
     defaultValues: {
       name: savings?.name ?? "",
       emoji: savings?.emoji ?? "🎯",
-      color: (savings?.color as ProjectPalette | undefined) ??
+      color:
+        (savings?.color as ProjectPalette | undefined) ??
         ("gold" satisfies ProjectPalette),
       targetAmount: savings ? String(savings.targetAmount / 100) : "",
       transferMode: savings?.transferMode ?? "manual",
@@ -213,254 +214,241 @@ export function SavingsDialog({
       }}
     >
       <FieldGroup>
-            <form.Field name="name">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>
-                      {t("dialog.name")}
-                    </FieldLabel>
-                    <Input
-                      id={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder={t("dialog.namePlaceholder")}
-                      aria-invalid={isInvalid}
-                      autoFocus={!isEdit}
-                    />
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            </form.Field>
+        <form.Field name="name">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>{t("dialog.name")}</FieldLabel>
+                <Input
+                  id={field.name}
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  placeholder={t("dialog.namePlaceholder")}
+                  aria-invalid={isInvalid}
+                  autoFocus={!isEdit}
+                />
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        </form.Field>
 
-            <form.Field name="emoji">
-              {(field) => (
-                <Field>
-                  <FieldLabel htmlFor={field.name}>
-                    {t("dialog.emoji")}
-                  </FieldLabel>
-                  <div className="flex items-stretch gap-2">
-                    <Input
-                      id={field.name}
-                      value={field.state.value}
-                      onChange={(e) =>
-                        field.handleChange(e.target.value.slice(0, 8))
-                      }
-                      onBlur={field.handleBlur}
-                      maxLength={8}
-                      className="w-16 text-center text-lg"
-                    />
-                    <div
-                      role="listbox"
-                      aria-label={t("dialog.emoji")}
-                      className="flex flex-1 flex-wrap items-center gap-1 rounded-md border border-input bg-background p-1.5"
-                    >
-                      {SAVINGS_EMOJI_SUGGESTIONS.map((e) => (
-                        <button
-                          type="button"
-                          key={e}
-                          onClick={() => field.handleChange(e)}
-                          className={cn(
-                            "h-8 w-8 rounded text-lg transition hover:bg-accent",
-                            field.state.value === e &&
-                              "bg-accent ring-1 ring-primary",
-                          )}
-                          aria-pressed={field.state.value === e}
-                        >
-                          {e}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </Field>
-              )}
-            </form.Field>
-
-            <form.Field name="color">
-              {(field) => (
-                <Field>
-                  <FieldLabel>{t("dialog.color")}</FieldLabel>
-                  <div className="flex flex-wrap gap-2">
-                    {PROJECT_PALETTES.map((p) => {
-                      const selected = field.state.value === p;
-                      return (
-                        <button
-                          key={p}
-                          type="button"
-                          aria-label={p}
-                          aria-pressed={selected}
-                          onClick={() => field.handleChange(p)}
-                          data-project-palette={p}
-                          className={cn(
-                            "h-9 w-12 rounded-md transition",
-                            selected
-                              ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                              : "opacity-90 hover:opacity-100",
-                          )}
-                        />
-                      );
-                    })}
-                  </div>
-                </Field>
-              )}
-            </form.Field>
-
-            <form.Field name="targetAmount">
-              {(field) => {
-                const isInvalid =
-                  field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>
-                      {t("dialog.targetAmount")}
-                    </FieldLabel>
-                    <Input
-                      id={field.name}
-                      type="number"
-                      step="1"
-                      min="0"
-                      placeholder="0"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                    />
-                    <FieldDescription>
-                      {t("dialog.targetAmountHint")}
-                    </FieldDescription>
-                    {isInvalid && (
-                      <FieldError errors={field.state.meta.errors} />
-                    )}
-                  </Field>
-                );
-              }}
-            </form.Field>
-
-            <form.Field name="transferMode">
-              {(field) => (
-                <Field>
-                  <FieldLabel>{t("dialog.transferMode")}</FieldLabel>
-                  <div className="grid gap-2 sm:grid-cols-3">
-                    {(["manual", "monthly_fixed", "rounding"] as const).map(
-                      (m) => {
-                        const selected = field.state.value === m;
-                        const Icon = MODE_ICONS[m];
-                        return (
-                          <button
-                            key={m}
-                            type="button"
-                            onClick={() => field.handleChange(m)}
-                            aria-pressed={selected}
-                            className={cn(
-                              "flex flex-col items-start justify-start rounded-md border border-input bg-card p-3 text-left text-sm transition",
-                              selected
-                                ? "border-primary bg-primary/10 ring-1 ring-primary"
-                                : "hover:bg-accent",
-                            )}
-                          >
-                            <div className="flex items-center gap-2 font-medium">
-                              <Icon className="h-4 w-4 text-muted-foreground" />
-                              {t(`mode.${m}`)}
-                            </div>
-                            <div className="mt-1 text-xs text-muted-foreground">
-                              {t(`mode.${m}Hint`)}
-                            </div>
-                          </button>
-                        );
-                      },
-                    )}
-                  </div>
-                </Field>
-              )}
-            </form.Field>
-
-            <form.Subscribe selector={(s) => s.values.transferMode}>
-              {(mode) => (
-                <>
-                  {mode === "monthly_fixed" && (
-                    <form.Field name="monthlyAmount">
-                      {(field) => {
-                        const isInvalid =
-                          field.state.meta.isTouched &&
-                          !field.state.meta.isValid;
-                        return (
-                          <Field data-invalid={isInvalid}>
-                            <FieldLabel htmlFor={field.name}>
-                              {t("dialog.monthlyAmount")}
-                            </FieldLabel>
-                            <Input
-                              id={field.name}
-                              type="number"
-                              step="1"
-                              min="0"
-                              placeholder="0"
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) =>
-                                field.handleChange(e.target.value)
-                              }
-                              aria-invalid={isInvalid}
-                            />
-                            <FieldDescription>
-                              {t("dialog.monthlyAmountHint")}
-                            </FieldDescription>
-                            {isInvalid && (
-                              <FieldError errors={field.state.meta.errors} />
-                            )}
-                          </Field>
-                        );
-                      }}
-                    </form.Field>
-                  )}
-                  {mode === "rounding" && (
-                    <form.Field name="roundingStep">
-                      {(field) => (
-                        <Field>
-                          <FieldLabel>{t("dialog.roundingStep")}</FieldLabel>
-                          <div className="grid grid-cols-4 gap-2">
-                            {ROUNDING_OPTIONS.map((opt) => {
-                              const selected =
-                                field.state.value === String(opt.value);
-                              return (
-                                <button
-                                  key={opt.value}
-                                  type="button"
-                                  onClick={() =>
-                                    field.handleChange(String(opt.value))
-                                  }
-                                  aria-pressed={selected}
-                                  className={cn(
-                                    "rounded-md border border-input bg-card py-2 text-sm font-medium transition",
-                                    selected
-                                      ? "border-primary bg-primary/10 ring-1 ring-primary"
-                                      : "hover:bg-accent",
-                                  )}
-                                >
-                                  {t(`dialog.${opt.labelKey}`)}
-                                </button>
-                              );
-                            })}
-                          </div>
-                          <FieldDescription>
-                            {t("dialog.roundingStepHint")}
-                          </FieldDescription>
-                        </Field>
+        <form.Field name="emoji">
+          {(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t("dialog.emoji")}</FieldLabel>
+              <div className="flex items-stretch gap-2">
+                <Input
+                  id={field.name}
+                  value={field.state.value}
+                  onChange={(e) =>
+                    field.handleChange(e.target.value.slice(0, 8))
+                  }
+                  onBlur={field.handleBlur}
+                  maxLength={8}
+                  className="w-16 text-center text-lg"
+                />
+                <div
+                  role="listbox"
+                  aria-label={t("dialog.emoji")}
+                  className="border-input bg-background flex flex-1 flex-wrap items-center gap-1 rounded-md border p-1.5"
+                >
+                  {SAVINGS_EMOJI_SUGGESTIONS.map((e) => (
+                    <button
+                      type="button"
+                      key={e}
+                      onClick={() => field.handleChange(e)}
+                      className={cn(
+                        "hover:bg-accent h-8 w-8 rounded text-lg transition",
+                        field.state.value === e &&
+                          "bg-accent ring-primary ring-1",
                       )}
-                    </form.Field>
-                  )}
-                </>
+                      aria-pressed={field.state.value === e}
+                    >
+                      {e}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field name="color">
+          {(field) => (
+            <Field>
+              <FieldLabel>{t("dialog.color")}</FieldLabel>
+              <div className="flex flex-wrap gap-2">
+                {PROJECT_PALETTES.map((p) => {
+                  const selected = field.state.value === p;
+                  return (
+                    <button
+                      key={p}
+                      type="button"
+                      aria-label={p}
+                      aria-pressed={selected}
+                      onClick={() => field.handleChange(p)}
+                      data-project-palette={p}
+                      className={cn(
+                        "h-9 w-12 rounded-md transition",
+                        selected
+                          ? "ring-foreground ring-offset-background ring-2 ring-offset-2"
+                          : "opacity-90 hover:opacity-100",
+                      )}
+                    />
+                  );
+                })}
+              </div>
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Field name="targetAmount">
+          {(field) => {
+            const isInvalid =
+              field.state.meta.isTouched && !field.state.meta.isValid;
+            return (
+              <Field data-invalid={isInvalid}>
+                <FieldLabel htmlFor={field.name}>
+                  {t("dialog.targetAmount")}
+                </FieldLabel>
+                <Input
+                  id={field.name}
+                  type="number"
+                  step="1"
+                  min="0"
+                  placeholder="0"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  aria-invalid={isInvalid}
+                />
+                <FieldDescription>
+                  {t("dialog.targetAmountHint")}
+                </FieldDescription>
+                {isInvalid && <FieldError errors={field.state.meta.errors} />}
+              </Field>
+            );
+          }}
+        </form.Field>
+
+        <form.Field name="transferMode">
+          {(field) => (
+            <Field>
+              <FieldLabel>{t("dialog.transferMode")}</FieldLabel>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {(["manual", "monthly_fixed", "rounding"] as const).map((m) => {
+                  const selected = field.state.value === m;
+                  const Icon = MODE_ICONS[m];
+                  return (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => field.handleChange(m)}
+                      aria-pressed={selected}
+                      className={cn(
+                        "border-input bg-card flex flex-col items-start justify-start rounded-md border p-3 text-left text-sm transition",
+                        selected
+                          ? "border-primary bg-primary/10 ring-primary ring-1"
+                          : "hover:bg-accent",
+                      )}
+                    >
+                      <div className="flex items-center gap-2 font-medium">
+                        <Icon className="text-muted-foreground h-4 w-4" />
+                        {t(`mode.${m}`)}
+                      </div>
+                      <div className="text-muted-foreground mt-1 text-xs">
+                        {t(`mode.${m}Hint`)}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+          )}
+        </form.Field>
+
+        <form.Subscribe selector={(s) => s.values.transferMode}>
+          {(mode) => (
+            <>
+              {mode === "monthly_fixed" && (
+                <form.Field name="monthlyAmount">
+                  {(field) => {
+                    const isInvalid =
+                      field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>
+                          {t("dialog.monthlyAmount")}
+                        </FieldLabel>
+                        <Input
+                          id={field.name}
+                          type="number"
+                          step="1"
+                          min="0"
+                          placeholder="0"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                        />
+                        <FieldDescription>
+                          {t("dialog.monthlyAmountHint")}
+                        </FieldDescription>
+                        {isInvalid && (
+                          <FieldError errors={field.state.meta.errors} />
+                        )}
+                      </Field>
+                    );
+                  }}
+                </form.Field>
               )}
-            </form.Subscribe>
-          </FieldGroup>
+              {mode === "rounding" && (
+                <form.Field name="roundingStep">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>{t("dialog.roundingStep")}</FieldLabel>
+                      <div className="grid grid-cols-4 gap-2">
+                        {ROUNDING_OPTIONS.map((opt) => {
+                          const selected =
+                            field.state.value === String(opt.value);
+                          return (
+                            <button
+                              key={opt.value}
+                              type="button"
+                              onClick={() =>
+                                field.handleChange(String(opt.value))
+                              }
+                              aria-pressed={selected}
+                              className={cn(
+                                "border-input bg-card rounded-md border py-2 text-sm font-medium transition",
+                                selected
+                                  ? "border-primary bg-primary/10 ring-primary ring-1"
+                                  : "hover:bg-accent",
+                              )}
+                            >
+                              {t(`dialog.${opt.labelKey}`)}
+                            </button>
+                          );
+                        })}
+                      </div>
+                      <FieldDescription>
+                        {t("dialog.roundingStepHint")}
+                      </FieldDescription>
+                    </Field>
+                  )}
+                </form.Field>
+              )}
+            </>
+          )}
+        </form.Subscribe>
+      </FieldGroup>
 
       {mutation.error && (
-        <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+        <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
       )}
 
       <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
@@ -482,7 +470,11 @@ export function SavingsDialog({
 
   if (isMobile) {
     return (
-      <Drawer open={open} onOpenChange={handleOpenChange} repositionInputs={false}>
+      <Drawer
+        open={open}
+        onOpenChange={handleOpenChange}
+        repositionInputs={false}
+      >
         <DrawerContent className="max-h-[92dvh]">
           <DrawerHeader>
             <DrawerTitle>{title}</DrawerTitle>

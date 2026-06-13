@@ -119,38 +119,38 @@ export function IncomeEditor({
   const total = incomes.reduce((s, i) => s + i.amount, 0);
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
+    <section className="border-border bg-card shadow-card rounded-2xl border p-4 sm:p-6">
       <header className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
             {t("incomeSources")}
           </p>
-          <p className="mt-1 max-w-xs text-xs text-muted-foreground/80">
+          <p className="text-muted-foreground/80 mt-1 max-w-xs text-xs">
             {t("incomeSourcesHint")}
           </p>
         </div>
         <div className="text-right">
-          <p className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+          <p className="text-muted-foreground text-[10px] tracking-[0.14em] uppercase">
             {t("monthlyIncomeTotal")}
           </p>
-          <p className="font-display text-xl tabular-nums text-foreground">
+          <p className="font-display text-foreground text-xl tabular-nums">
             {formatMoney(total)}
           </p>
         </div>
       </header>
 
       {incomes.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-border px-6 py-8 text-center">
-          <Wallet className="mx-auto h-5 w-5 text-muted-foreground/60" />
-          <p className="mt-3 text-sm font-medium text-foreground">
+        <div className="border-border rounded-xl border border-dashed px-6 py-8 text-center">
+          <Wallet className="text-muted-foreground/60 mx-auto h-5 w-5" />
+          <p className="text-foreground mt-3 text-sm font-medium">
             {t("noIncomeYet")}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-xs">
             {t("noIncomeHint")}
           </p>
         </div>
       ) : (
-        <ul className="divide-y divide-border">
+        <ul className="divide-border divide-y">
           {incomes.map((income) => (
             <IncomeRow
               key={income.id}
@@ -165,9 +165,7 @@ export function IncomeEditor({
       )}
 
       <AddIncomeRow
-        onAdd={(name, amount) =>
-          addIncome.mutate({ planId, name, amount })
-        }
+        onAdd={(name, amount) => addIncome.mutate({ planId, name, amount })}
       />
     </section>
   );
@@ -184,7 +182,9 @@ function IncomeRow({
 }) {
   const t = useTranslations("incomePlanner");
   const [name, setName] = useState(income.name);
-  const [amountText, setAmountText] = useState(formatAmountForField(income.amount));
+  const [amountText, setAmountText] = useState(
+    formatAmountForField(income.amount),
+  );
   const [amountFocused, setAmountFocused] = useState(false);
   const [syncKey, setSyncKey] = useState(`${income.name}|${income.amount}`);
   const currentKey = `${income.name}|${income.amount}`;
@@ -231,7 +231,7 @@ function IncomeRow({
             e.currentTarget.blur();
           }
         }}
-        className="h-9 min-w-0 flex-1 border-transparent bg-transparent px-2 font-medium shadow-none hover:bg-muted focus-visible:bg-background"
+        className="hover:bg-muted focus-visible:bg-background h-9 min-w-0 flex-1 border-transparent bg-transparent px-2 font-medium shadow-none"
       />
       <Input
         value={amountText}
@@ -240,9 +240,7 @@ function IncomeRow({
           setAmountFocused(true);
           // Switch to raw numeric string for easy editing.
           if (income.amount > 0) {
-            setAmountText(
-              (income.amount / 100).toString().replace(".", ","),
-            );
+            setAmountText((income.amount / 100).toString().replace(".", ","));
           } else {
             setAmountText("");
           }
@@ -258,13 +256,13 @@ function IncomeRow({
           }
         }}
         inputMode="decimal"
-        className="h-9 w-24 shrink-0 border-transparent bg-transparent px-2 text-right font-display tabular-nums shadow-none hover:bg-muted focus-visible:bg-background sm:w-32"
+        className="font-display hover:bg-muted focus-visible:bg-background h-9 w-24 shrink-0 border-transparent bg-transparent px-2 text-right tabular-nums shadow-none sm:w-32"
       />
-      <span className="shrink-0 text-xs text-muted-foreground">kr.</span>
+      <span className="text-muted-foreground shrink-0 text-xs">kr.</span>
       <Button
         variant="ghost"
         size="icon"
-        className="h-8 w-8 text-muted-foreground transition-opacity hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 sm:group-focus-within:opacity-100"
+        className="text-muted-foreground hover:text-destructive h-8 w-8 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
         onClick={onDelete}
         aria-label={t("deleteIncome")}
       >
@@ -300,8 +298,8 @@ function AddIncomeRow({
     (parseMoneyInput(amountText) ?? 0) > 0;
 
   return (
-    <div className="mt-3 flex items-center gap-2 rounded-xl border border-dashed border-border bg-muted/40 p-2.5 transition-colors focus-within:border-primary focus-within:bg-background sm:gap-3">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+    <div className="border-border bg-muted/40 focus-within:border-primary focus-within:bg-background mt-3 flex items-center gap-2 rounded-xl border border-dashed p-2.5 transition-colors sm:gap-3">
+      <div className="bg-primary/10 text-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-full">
         <Plus className="h-3.5 w-3.5" />
       </div>
       <Input
@@ -312,7 +310,7 @@ function AddIncomeRow({
           if (e.key === "Enter") commit();
         }}
         placeholder={t("incomeNamePlaceholder")}
-        className="h-8 min-w-0 flex-1 border-transparent bg-transparent px-2 shadow-none focus-visible:bg-background"
+        className="focus-visible:bg-background h-8 min-w-0 flex-1 border-transparent bg-transparent px-2 shadow-none"
       />
       <Input
         value={amountText}
@@ -322,9 +320,9 @@ function AddIncomeRow({
         }}
         inputMode="decimal"
         placeholder="0"
-        className="h-8 w-24 shrink-0 border-transparent bg-transparent px-2 text-right font-display tabular-nums shadow-none focus-visible:bg-background sm:w-32"
+        className="font-display focus-visible:bg-background h-8 w-24 shrink-0 border-transparent bg-transparent px-2 text-right tabular-nums shadow-none sm:w-32"
       />
-      <span className="shrink-0 text-xs text-muted-foreground">kr.</span>
+      <span className="text-muted-foreground shrink-0 text-xs">kr.</span>
       <Button
         size="icon"
         className={cn("h-8 w-8", !canSubmit && "opacity-40")}

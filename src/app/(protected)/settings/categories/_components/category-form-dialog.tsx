@@ -118,7 +118,9 @@ export function CategoryFormDialog({
             {isEdit ? t("editCategory") : t("addCategory")}
           </DialogTitle>
           <DialogDescription>
-            {isEdit ? t("editCategoryDescription") : t("addCategoryDescription")}
+            {isEdit
+              ? t("editCategoryDescription")
+              : t("addCategoryDescription")}
           </DialogDescription>
         </DialogHeader>
         <form
@@ -190,9 +192,7 @@ export function CategoryFormDialog({
                       <SelectContent>
                         {possibleParents.map((c) => (
                           <SelectItem key={c.id} value={c.id}>
-                            {c.icon && (
-                              <span className="mr-1.5">{c.icon}</span>
-                            )}
+                            {c.icon && <span className="mr-1.5">{c.icon}</span>}
                             {c.name}
                           </SelectItem>
                         ))}
@@ -205,7 +205,7 @@ export function CategoryFormDialog({
           </FieldGroup>
 
           {mutation.error && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6">

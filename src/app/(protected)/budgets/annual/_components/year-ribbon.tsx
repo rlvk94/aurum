@@ -51,7 +51,8 @@ export function YearRibbon({
         const a = actual[i] ?? 0;
         const state = cellState(p, a);
         const plannedPct = Math.max(2, (p / max) * 100);
-        const actualPct = p > 0 ? Math.min(140, (a / p) * 100) : a > 0 ? 100 : 0;
+        const actualPct =
+          p > 0 ? Math.min(140, (a / p) * 100) : a > 0 ? 100 : 0;
         const isNow = currentMonthIndex === i;
 
         return (
@@ -64,14 +65,14 @@ export function YearRibbon({
             <div
               className={`relative overflow-hidden rounded-[3px] ${barHeight} ${trackClass(
                 state,
-              )} ${isNow ? "ring-1 ring-primary/70 ring-offset-1 ring-offset-background" : ""}`}
+              )} ${isNow ? "ring-primary/70 ring-offset-background ring-1 ring-offset-1" : ""}`}
             >
               <div
-                className="absolute bottom-0 left-0 right-0 border-t border-dashed border-primary/35"
+                className="border-primary/35 absolute right-0 bottom-0 left-0 border-t border-dashed"
                 style={{ height: `${plannedPct}%` }}
               />
               <div
-                className={`absolute bottom-0 left-0 right-0 origin-bottom transition-[height] duration-500 ease-out ${fillClass(
+                className={`absolute right-0 bottom-0 left-0 origin-bottom transition-[height] duration-500 ease-out ${fillClass(
                   state,
                 )}`}
                 style={{
@@ -80,7 +81,7 @@ export function YearRibbon({
               />
               {isLarge && state === "over" && (
                 <div
-                  className="absolute left-0 right-0 h-px bg-expense"
+                  className="bg-expense absolute right-0 left-0 h-px"
                   style={{ bottom: `${(p / max) * 100}%` }}
                 />
               )}
@@ -100,7 +101,7 @@ export function YearRibbon({
               </span>
               {isLarge && (
                 <span
-                  className={`hidden sm:inline-block almanac-numerals text-[11px] ${varianceTextClass(
+                  className={`almanac-numerals hidden text-[11px] sm:inline-block ${varianceTextClass(
                     p,
                     a,
                   )}`}
@@ -110,13 +111,13 @@ export function YearRibbon({
               )}
             </div>
             {isLarge && (
-              <span className="hidden sm:inline-block almanac-numerals text-[10px] text-muted-foreground/80 px-1">
+              <span className="almanac-numerals text-muted-foreground/80 hidden px-1 text-[10px] sm:inline-block">
                 {p > 0 ? formatMoney(p) : "—"}
               </span>
             )}
             {/* Subtle actual pct overshoot marker */}
             {!isLarge && actualPct > 100 && (
-              <span className="absolute -top-0.5 left-1/2 -translate-x-1/2 text-[7px] text-expense">
+              <span className="text-expense absolute -top-0.5 left-1/2 -translate-x-1/2 text-[7px]">
                 ●
               </span>
             )}

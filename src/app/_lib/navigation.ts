@@ -1,5 +1,6 @@
 import {
   ArrowLeftRight,
+  Bell,
   Calculator,
   CreditCard,
   FolderHeart,
@@ -145,6 +146,12 @@ export const ROUTES: RouteEntry[] = [
     path: "/settings/appearance",
     titleKey: "settings.nav.appearance",
     icon: Palette,
+    parent: "/settings",
+  },
+  {
+    path: "/settings/notifications",
+    titleKey: "settings.nav.notifications",
+    icon: Bell,
     parent: "/settings",
   },
 ];

@@ -88,7 +88,7 @@ export const InstallPrompt = () => {
           <DrawerTitle>{t("title")}</DrawerTitle>
           <DrawerDescription>{t("description")}</DrawerDescription>
         </DrawerHeader>
-        <div className="mx-4 flex items-center justify-center gap-4 rounded-xl bg-muted py-8">
+        <div className="bg-muted mx-4 flex items-center justify-center gap-4 rounded-xl py-8">
           {platform === "ios" ? (
             <>
               <div className="flex w-14 flex-col items-center gap-2 text-center">
@@ -101,16 +101,16 @@ export const InstallPrompt = () => {
                 />
                 <p className="text-sm">Safari</p>
               </div>
-              <ArrowRightIcon className="mb-6 size-6 text-muted-foreground" />
+              <ArrowRightIcon className="text-muted-foreground mb-6 size-6" />
               <div className="flex w-14 flex-col items-center gap-2 text-center">
-                <div className="grid size-14 place-items-center rounded-xl bg-background">
+                <div className="bg-background grid size-14 place-items-center rounded-xl">
                   <ShareIcon className="size-6 text-blue-500" />
                 </div>
                 <p className="text-sm">{t("share")}</p>
               </div>
-              <ArrowRightIcon className="mb-6 size-6 text-muted-foreground" />
+              <ArrowRightIcon className="text-muted-foreground mb-6 size-6" />
               <div className="flex w-14 flex-col items-center gap-2 text-center">
-                <div className="grid size-14 place-items-center rounded-xl bg-background">
+                <div className="bg-background grid size-14 place-items-center rounded-xl">
                   <SquarePlus className="size-6" />
                 </div>
                 <p className="text-sm">{t("addToHomescreen")}</p>
@@ -119,7 +119,7 @@ export const InstallPrompt = () => {
           ) : (
             <>
               <div className="flex w-14 flex-col items-center gap-2 text-center">
-                <div className="size-14 rounded-xl bg-background p-1">
+                <div className="bg-background size-14 rounded-xl p-1">
                   <Image
                     src="/chrome.png"
                     alt="Chrome logo"
@@ -129,16 +129,16 @@ export const InstallPrompt = () => {
                 </div>
                 <p className="text-sm">Chrome</p>
               </div>
-              <ArrowRightIcon className="mb-6 size-6 text-muted-foreground" />
+              <ArrowRightIcon className="text-muted-foreground mb-6 size-6" />
               <div className="flex w-14 flex-col items-center gap-2 text-center">
-                <div className="grid size-14 place-items-center rounded-xl bg-background">
+                <div className="bg-background grid size-14 place-items-center rounded-xl">
                   <EllipsisVerticalIcon className="size-6" />
                 </div>
                 <p className="text-sm">{t("menu")}</p>
               </div>
-              <ArrowRightIcon className="mb-6 size-6 text-muted-foreground" />
+              <ArrowRightIcon className="text-muted-foreground mb-6 size-6" />
               <div className="flex w-14 flex-col items-center gap-2 text-center">
-                <div className="grid size-14 place-items-center rounded-xl bg-background">
+                <div className="bg-background grid size-14 place-items-center rounded-xl">
                   <MonitorDownIcon className="size-6" />
                 </div>
                 <p className="text-sm">{t("addToHomescreen")}</p>

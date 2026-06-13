@@ -69,8 +69,7 @@ export function resolveRows(
       date: row.date,
       description: row.description || "—",
       note: row.note || undefined,
-      metadata:
-        Object.keys(row.metadata).length > 0 ? row.metadata : undefined,
+      metadata: Object.keys(row.metadata).length > 0 ? row.metadata : undefined,
       externalId: row.externalId ?? `${row.date}:${row.amount}:${row.balance}`,
       counterPresent: Boolean(counterCanonical),
       counterAccountId,

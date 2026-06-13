@@ -64,3 +64,5 @@ YYYY-MM-DD
 | 0020 | [Stripe Price IDs via Environment Variables](0020-stripe-prices-via-env.md) | Proposed |
 | 0022 | [Discount Codes at Checkout](0022-discount-codes-at-checkout.md) | Proposed |
 | 0023 | [Terms & Conditions Acceptance with Versioned Snapshots](0023-terms-and-conditions-acceptance.md) | Proposed |
+| 0024 | [Split Transactions](0024-split-transactions.md) | Proposed |
+| 0025 | [Multi-Channel Notification System](0025-multi-channel-notifications.md) | Proposed |

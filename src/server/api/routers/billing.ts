@@ -71,10 +71,7 @@ function extractClientSecret(
   if (!invoice || typeof invoice === "string") return null;
   const inv = invoice as unknown as {
     confirmation_secret?: { client_secret?: string | null } | null;
-    payment_intent?:
-      | { client_secret?: string | null }
-      | string
-      | null;
+    payment_intent?: { client_secret?: string | null } | string | null;
   };
   if (inv.confirmation_secret?.client_secret) {
     return inv.confirmation_secret.client_secret;
@@ -103,10 +100,7 @@ async function resolvePromoCode(stripe: Stripe, code: string) {
 
 export const billingRouter = createTRPCRouter({
   current: protectedProcedure.query(async ({ ctx }) => {
-    const familyId = await getActiveFamilyId(
-      ctx.db,
-      ctx.session.user.id,
-    );
+    const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
     const sub = await getFamilySubscription(ctx.db, familyId);
     return {
       plan: sub.plan,
@@ -442,9 +436,12 @@ export const billingRouter = createTRPCRouter({
     }
 
     const stripe = getStripe();
-    const updated = await stripe.subscriptions.update(row.stripeSubscriptionId, {
-      cancel_at_period_end: true,
-    });
+    const updated = await stripe.subscriptions.update(
+      row.stripeSubscriptionId,
+      {
+        cancel_at_period_end: true,
+      },
+    );
 
     // Reflect immediately so the UI doesn't lag behind the webhook.
     await ctx.db

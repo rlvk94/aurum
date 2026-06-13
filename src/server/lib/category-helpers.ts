@@ -73,10 +73,7 @@ export async function expandCategoryIdsMap(
   ids: string[],
 ): Promise<Map<string, string[]>> {
   if (ids.length === 0) return new Map();
-  const cond = or(
-    inArray(category.id, ids),
-    inArray(category.parentId, ids),
-  );
+  const cond = or(inArray(category.id, ids), inArray(category.parentId, ids));
   const rows = await db
     .select({ id: category.id, parentId: category.parentId })
     .from(category)

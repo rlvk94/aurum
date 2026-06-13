@@ -15,8 +15,8 @@ type Budget = RouterOutputs["budget"]["list"][number];
 function HeroBackdrop() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
-      <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-      <div className="absolute -left-24 bottom-0 h-56 w-56 rounded-full bg-accent blur-3xl opacity-60" />
+      <div className="bg-primary/10 absolute -top-24 -right-24 h-72 w-72 rounded-full blur-3xl" />
+      <div className="bg-accent absolute bottom-0 -left-24 h-56 w-56 rounded-full opacity-60 blur-3xl" />
     </div>
   );
 }
@@ -70,17 +70,17 @@ export function BudgetsClient() {
   return (
     <div className="space-y-12">
       {/* HERO */}
-      <section className="almanac-grain relative overflow-hidden rounded-[18px] border border-border bg-card px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
+      <section className="almanac-grain border-border bg-card relative overflow-hidden rounded-[18px] border px-5 py-8 sm:px-8 sm:py-10 md:px-12 md:py-14">
         <HeroBackdrop />
         <div className="relative grid gap-6 sm:gap-8 md:grid-cols-[1.2fr_1fr] md:items-end">
           <div>
-            <p className="almanac-smallcaps text-[11px] text-primary">
+            <p className="almanac-smallcaps text-primary text-[11px]">
               {t("almanacLabel")}
             </p>
-            <h1 className="mt-3 font-display text-[clamp(2.5rem,5vw,4.25rem)] leading-[0.98] text-foreground">
+            <h1 className="font-display text-foreground mt-3 text-[clamp(2.5rem,5vw,4.25rem)] leading-[0.98]">
               {t("almanacHeadline")}
             </h1>
-            <p className="mt-4 max-w-xl text-sm text-muted-foreground">
+            <p className="text-muted-foreground mt-4 max-w-xl text-sm">
               {t("almanacSubhead")}
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -93,7 +93,7 @@ export function BudgetsClient() {
                 {t("createBudget")}
               </Button>
               {hasBudgets && (
-                <span className="almanac-smallcaps text-[10px] text-muted-foreground">
+                <span className="almanac-smallcaps text-muted-foreground text-[10px]">
                   {t("chaptersCount", { count: grouped.length })}
                 </span>
               )}
@@ -101,7 +101,7 @@ export function BudgetsClient() {
           </div>
 
           {hasBudgets ? (
-            <dl className="grid grid-cols-3 gap-2 rounded-[12px] border border-border/70 bg-background/50 p-4 backdrop-blur">
+            <dl className="border-border/70 bg-background/50 grid grid-cols-3 gap-2 rounded-[12px] border p-4 backdrop-blur">
               <Metric
                 label={t("currentYear")}
                 value={String(currentYear)}
@@ -123,7 +123,7 @@ export function BudgetsClient() {
               />
             </dl>
           ) : (
-            <div className="flex items-center gap-3 rounded-[12px] border border-dashed border-primary/30 bg-primary/5 p-4 text-xs text-primary/80">
+            <div className="border-primary/30 bg-primary/5 text-primary/80 flex items-center gap-3 rounded-[12px] border border-dashed p-4 text-xs">
               <Sparkles className="h-4 w-4 shrink-0" />
               <p>{t("almanacInvite")}</p>
             </div>
@@ -142,12 +142,12 @@ export function BudgetsClient() {
               <section key={year} className="space-y-6">
                 <header className="flex items-baseline justify-between gap-3 sm:gap-6">
                   <div className="flex min-w-0 items-baseline gap-2 sm:gap-4">
-                    <h2 className="font-display text-[clamp(2.5rem,9vw,5.5rem)] leading-none text-foreground almanac-numerals">
+                    <h2 className="font-display text-foreground almanac-numerals text-[clamp(2.5rem,9vw,5.5rem)] leading-none">
                       {year}
                     </h2>
                     {isCurrentYear && (
-                      <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium text-primary almanac-smallcaps">
-                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-primary" />
+                      <span className="bg-primary/10 text-primary almanac-smallcaps inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-medium">
+                        <span className="bg-primary h-1.5 w-1.5 animate-pulse rounded-full" />
                         {t("current")}
                       </span>
                     )}
@@ -155,7 +155,7 @@ export function BudgetsClient() {
                   <div className="hidden flex-1 sm:block">
                     <div className="almanac-rule" />
                   </div>
-                  <span className="almanac-smallcaps shrink-0 text-[10px] text-muted-foreground">
+                  <span className="almanac-smallcaps text-muted-foreground shrink-0 text-[10px]">
                     {t("lineCount", { count: items.length })}
                   </span>
                 </header>
@@ -210,11 +210,11 @@ function Metric({
           : "text-foreground";
   return (
     <div>
-      <dt className="almanac-smallcaps text-[9px] text-muted-foreground">
+      <dt className="almanac-smallcaps text-muted-foreground text-[9px]">
         {label}
       </dt>
       <dd
-        className={`mt-1 almanac-numerals leading-tight ${
+        className={`almanac-numerals mt-1 leading-tight ${
           serif ? "font-display text-2xl" : "text-sm font-medium"
         } ${color}`}
       >
@@ -227,16 +227,19 @@ function Metric({
 function EmptyChapter({ onCreate }: { onCreate: () => void }) {
   const t = useTranslations("budgets");
   return (
-    <div className="relative overflow-hidden rounded-[18px] border border-dashed border-border bg-card px-5 py-12 sm:px-8 sm:py-16">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-50">
-        <div className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/8 blur-3xl" />
+    <div className="border-border bg-card relative overflow-hidden rounded-[18px] border border-dashed px-5 py-12 sm:px-8 sm:py-16">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-50"
+      >
+        <div className="bg-primary/8 absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" />
       </div>
       <div className="relative mx-auto flex max-w-lg flex-col items-center text-center">
-        <BookOpen className="h-10 w-10 text-primary/70" />
-        <h2 className="mt-6 font-display text-3xl text-foreground">
+        <BookOpen className="text-primary/70 h-10 w-10" />
+        <h2 className="font-display text-foreground mt-6 text-3xl">
           {t("almanacEmptyHeadline")}
         </h2>
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="text-muted-foreground mt-3 text-sm">
           {t("budgetsEmptyState")}
         </p>
         <Button className="mt-7" size="lg" onClick={onCreate}>

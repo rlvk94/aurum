@@ -113,18 +113,18 @@ export function ChallengeCard({
     <Link
       href={`/budgets/challenges/${challenge.id}`}
       aria-label={t("challengeViewDetails", { name: challenge.name })}
-      className="group block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="group focus-visible:ring-ring block rounded-xl outline-none focus-visible:ring-2"
     >
       <Card
-        className={`${archived ? "opacity-60" : ""} transition-shadow group-hover:shadow-elevated`}
+        className={`${archived ? "opacity-60" : ""} group-hover:shadow-elevated transition-shadow`}
       >
         <CardHeader className="flex flex-row items-start justify-between gap-3 pb-3">
           <div className="flex min-w-0 items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
-              <Icon className="h-5 w-5 text-primary" />
+            <div className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+              <Icon className="text-primary h-5 w-5" />
             </div>
             <div className="min-w-0">
-              <p className="truncate font-medium text-foreground">
+              <p className="text-foreground truncate font-medium">
                 {challenge.name}
               </p>
               <div className="mt-1 flex flex-wrap items-center gap-1.5">
@@ -174,28 +174,28 @@ export function ChallengeCard({
         </CardHeader>
         <CardContent className="space-y-3">
           <div>
-            <p className="text-xs text-muted-foreground">{amountLabel}</p>
-            <p className="font-display text-2xl text-foreground">
+            <p className="text-muted-foreground text-xs">{amountLabel}</p>
+            <p className="font-display text-foreground text-2xl">
               {formatAmount(progress)}
-              <span className="ml-1 text-sm text-muted-foreground">
+              <span className="text-muted-foreground ml-1 text-sm">
                 / {formatAmount(targetAmount)}
               </span>
             </p>
           </div>
 
           {periodLabel && (
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <p className="text-muted-foreground flex items-center gap-1.5 text-xs">
               <CalendarRange className="h-3.5 w-3.5" />
               <span>{periodLabel}</span>
             </p>
           )}
 
           <div>
-            <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+            <div className="text-muted-foreground mb-1 flex items-center justify-between text-xs">
               <span>{t("challengeProgress")}</span>
               <span>{displayPct}%</span>
             </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+            <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
               <div
                 className={`h-full rounded-full transition-all ${progressColor}`}
                 style={{ width: `${displayPct}%` }}
@@ -211,7 +211,7 @@ export function ChallengeCard({
                   : t("challengeRemaining")}
               </p>
               {!isOver && (
-                <p className="font-medium text-foreground">
+                <p className="text-foreground font-medium">
                   {formatAmount(Math.max(0, remaining))}
                 </p>
               )}

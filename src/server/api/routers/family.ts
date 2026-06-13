@@ -12,10 +12,7 @@ import {
 } from "~/server/db/schema";
 import { seedDefaultCategories } from "~/server/db/seeds/seed-categories";
 
-export async function getActiveFamilyId(
-  db: typeof dbInstance,
-  userId: string,
-) {
+export async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   const [dbUser] = await db
     .select({ activeFamilyId: user.activeFamilyId })
     .from(user)
@@ -138,11 +135,7 @@ export const familyRouter = createTRPCRouter({
           .from(user)
           .where(eq(user.id, ctx.session.user.id));
 
-        await seedDefaultCategories(
-          tx,
-          newFamily!.id,
-          dbUser?.locale ?? "da",
-        );
+        await seedDefaultCategories(tx, newFamily!.id, dbUser?.locale ?? "da");
 
         await tx
           .update(user)

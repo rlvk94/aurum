@@ -104,12 +104,13 @@ export function AllocationBar({
   );
 
   const isFullSingle =
-    wedges.length === 1 && Math.abs(wedges[0]!.endAngle - wedges[0]!.startAngle - 2 * Math.PI) < 1e-6;
+    wedges.length === 1 &&
+    Math.abs(wedges[0]!.endAngle - wedges[0]!.startAngle - 2 * Math.PI) < 1e-6;
 
   return (
     <div className="space-y-4">
       {/* Summary strip */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] uppercase tracking-[0.18em]">
+      <div className="flex flex-wrap items-center justify-between gap-3 text-[11px] tracking-[0.18em] uppercase">
         <span className="text-muted-foreground">{t("allocation")}</span>
         <div className="flex items-center gap-3">
           <span
@@ -128,7 +129,8 @@ export function AllocationBar({
           </span>
           {!overAllocated && unallocatedBps > 0 && totalIncome > 0 && (
             <span className="text-muted-foreground">
-              · {t("unallocatedAmount", {
+              ·{" "}
+              {t("unallocatedAmount", {
                 amount: formatMoney(
                   Math.round((totalIncome * unallocatedBps) / 10_000),
                 ),
@@ -188,14 +190,14 @@ export function AllocationBar({
           {/* Center label */}
           <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
             {empty ? (
-              <span className="px-6 text-center text-xs text-muted-foreground">
+              <span className="text-muted-foreground px-6 text-center text-xs">
                 {t("noAllocationsYet")}
               </span>
             ) : (
               <>
                 <span
                   className={cn(
-                    "font-display text-3xl tabular-nums leading-none",
+                    "font-display text-3xl leading-none tabular-nums",
                     overAllocated
                       ? "text-expense"
                       : safeAllocated === 10_000
@@ -205,7 +207,7 @@ export function AllocationBar({
                 >
                   {formatPercentBps(safeAllocated)}
                 </span>
-                <span className="mt-1 text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="text-muted-foreground mt-1 text-[10px] tracking-[0.18em] uppercase">
                   {t("allocatedLower")}
                 </span>
               </>
@@ -213,7 +215,7 @@ export function AllocationBar({
           </div>
 
           {overAllocated && (
-            <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-expense px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-expense-foreground shadow-sm">
+            <div className="bg-expense text-expense-foreground absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide whitespace-nowrap uppercase shadow-sm">
               {t("overAllocated")}
             </div>
           )}
@@ -224,20 +226,20 @@ export function AllocationBar({
             {segments.map((seg) => (
               <li
                 key={seg.id}
-                className="flex items-center gap-2 rounded-lg border border-border/60 bg-background/40 px-2.5 py-1.5"
+                className="border-border/60 bg-background/40 flex items-center gap-2 rounded-lg border px-2.5 py-1.5"
               >
                 <span
                   aria-hidden
                   className="h-2.5 w-2.5 shrink-0 rounded-full"
                   style={{ backgroundColor: seg.color }}
                 />
-                <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+                <span className="text-foreground min-w-0 flex-1 truncate text-xs font-medium">
                   {seg.label}
                 </span>
-                <span className="shrink-0 tabular-nums text-[11px] text-muted-foreground">
+                <span className="text-muted-foreground shrink-0 text-[11px] tabular-nums">
                   {formatPercentBps(seg.bps)}
                 </span>
-                <span className="shrink-0 tabular-nums text-xs font-semibold text-foreground">
+                <span className="text-foreground shrink-0 text-xs font-semibold tabular-nums">
                   {formatMoney(seg.amountCents)}
                 </span>
               </li>

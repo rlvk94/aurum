@@ -73,7 +73,7 @@ export function FamilySwitcher() {
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
                 <Home className="size-4" />
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
@@ -98,16 +98,16 @@ export function FamilySwitcher() {
                 key={f.familyId}
                 onClick={() => setActiveFamily.mutate({ familyId: f.familyId })}
               >
-                <Home  />
+                <Home />
                 <span className="flex-1 truncate">{f.familyName}</span>
                 {f.familyId === activeFamily?.familyId && (
-                  <span className="ml-2 h-1.5 w-1.5 rounded-full bg-sidebar-primary" />
+                  <span className="bg-sidebar-primary ml-2 h-1.5 w-1.5 rounded-full" />
                 )}
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => setCreateDialogOpen(true)}>
-              <Plus  />
+              <Plus />
               {tFamily("createFamily")}
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -130,10 +130,7 @@ export function FamilySwitcher() {
               }}
             >
               <div className="space-y-2 py-4">
-                <label
-                  htmlFor="newFamilyName"
-                  className="text-sm font-medium"
-                >
+                <label htmlFor="newFamilyName" className="text-sm font-medium">
                   {tFamily("familyName")}
                 </label>
                 <Input
@@ -147,9 +144,7 @@ export function FamilySwitcher() {
               <DialogFooter>
                 <Button
                   type="submit"
-                  disabled={
-                    !newFamilyName.trim() || createFamily.isPending
-                  }
+                  disabled={!newFamilyName.trim() || createFamily.isPending}
                 >
                   {tCommon("create")}
                 </Button>

@@ -17,29 +17,31 @@ export function LandingFaq() {
       <div className="mx-auto max-w-4xl px-6">
         <header className="max-w-2xl">
           <SectionMarker>{t("marker")}</SectionMarker>
-          <h2 className="mt-4 font-display text-4xl leading-tight text-foreground sm:text-5xl">
+          <h2 className="font-display text-foreground mt-4 text-4xl leading-tight sm:text-5xl">
             {t("heading")}
           </h2>
         </header>
 
-        <ul className="mt-12 border-t border-primary/15">
+        <ul className="border-primary/15 mt-12 border-t">
           {items.map((item, i) => {
             const isOpen = open === i;
             return (
-              <li key={i} className="border-b border-primary/15">
+              <li key={i} className="border-primary/15 border-b">
                 <button
                   type="button"
                   onClick={() => setOpen(isOpen ? null : i)}
                   className="group flex w-full items-baseline gap-6 py-6 text-left transition-colors"
                   aria-expanded={isOpen}
                 >
-                  <span className="font-display almanac-numerals shrink-0 text-2xl text-primary/60 group-hover:text-primary">
+                  <span className="font-display almanac-numerals text-primary/60 group-hover:text-primary shrink-0 text-2xl">
                     Q.
                   </span>
                   <span
                     className={cn(
-                      "flex-1 font-display text-xl leading-snug transition-colors sm:text-2xl",
-                      isOpen ? "text-primary italic" : "text-foreground italic group-hover:text-primary",
+                      "font-display flex-1 text-xl leading-snug transition-colors sm:text-2xl",
+                      isOpen
+                        ? "text-primary italic"
+                        : "text-foreground group-hover:text-primary italic",
                     )}
                   >
                     {item.q}
@@ -49,7 +51,7 @@ export function LandingFaq() {
                     className={cn(
                       "font-display shrink-0 text-3xl leading-none transition-all duration-300",
                       isOpen
-                        ? "rotate-45 text-primary"
+                        ? "text-primary rotate-45"
                         : "text-muted-foreground group-hover:text-primary",
                     )}
                   >
@@ -64,11 +66,11 @@ export function LandingFaq() {
                   )}
                 >
                   <div className="min-h-0 overflow-hidden">
-                    <div className="flex items-baseline gap-6 pb-7 pr-12">
-                      <span className="font-display shrink-0 text-2xl text-primary/40">
+                    <div className="flex items-baseline gap-6 pr-12 pb-7">
+                      <span className="font-display text-primary/40 shrink-0 text-2xl">
                         A.
                       </span>
-                      <p className="flex-1 text-base leading-relaxed text-muted-foreground">
+                      <p className="text-muted-foreground flex-1 text-base leading-relaxed">
                         {item.a}
                       </p>
                     </div>

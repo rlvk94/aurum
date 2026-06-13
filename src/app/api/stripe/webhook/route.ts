@@ -68,10 +68,7 @@ async function markProcessed(event: Stripe.Event): Promise<void> {
   }
 }
 
-async function dispatch(
-  event: Stripe.Event,
-  stripe: Stripe,
-): Promise<void> {
+async function dispatch(event: Stripe.Event, stripe: Stripe): Promise<void> {
   switch (event.type) {
     case "customer.subscription.created":
     case "customer.subscription.updated":

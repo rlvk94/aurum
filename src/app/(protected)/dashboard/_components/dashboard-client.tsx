@@ -33,6 +33,7 @@ import { useEntitlements } from "~/app/_hooks/use-entitlements";
 import { cn } from "~/app/_lib/utils";
 import type { BooleanFeatureKey } from "~/server/billing/plans";
 import { deriveProgress } from "~/app/(protected)/projects/_lib/format";
+import { PushBanner } from "./push-banner";
 
 type Challenge = RouterOutputs["challenge"]["list"][number];
 type Budget = RouterOutputs["budget"]["list"][number];
@@ -85,7 +86,7 @@ function ChallengeRow({ challenge }: { challenge: Challenge }) {
   return (
     <Link
       href={`/budgets/challenges/${challenge.id}`}
-      className="block space-y-2 rounded-md transition-colors hover:bg-accent/40"
+      className="hover:bg-accent/40 block space-y-2 rounded-md transition-colors"
     >
       <div className="flex min-w-0 items-center gap-2">
         <div className="bg-accent flex h-8 w-8 shrink-0 items-center justify-center rounded-md sm:h-7 sm:w-7">
@@ -131,7 +132,7 @@ function StatCard({
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2 p-4 pb-2 sm:p-6 sm:pb-2">
-        <CardTitle className="min-w-0 truncate text-muted-foreground text-sm font-medium">
+        <CardTitle className="text-muted-foreground min-w-0 truncate text-sm font-medium">
           {title}
         </CardTitle>
         <Icon
@@ -142,7 +143,7 @@ function StatCard({
         />
       </CardHeader>
       <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
-        <div className="font-display text-3xl break-words tabular-nums leading-tight sm:text-2xl">
+        <div className="font-display text-3xl leading-tight break-words tabular-nums sm:text-2xl">
           {value}
         </div>
       </CardContent>
@@ -166,10 +167,10 @@ function LockedStatCard({
     >
       <Card className="h-full border-dashed">
         <CardHeader className="flex flex-row items-start justify-between gap-2 p-4 pb-2 sm:p-6 sm:pb-2">
-          <CardTitle className="min-w-0 truncate text-muted-foreground text-sm font-medium">
+          <CardTitle className="text-muted-foreground min-w-0 truncate text-sm font-medium">
             {title}
           </CardTitle>
-          <Lock className="h-5 w-5 shrink-0 text-muted-foreground sm:h-4 sm:w-4" />
+          <Lock className="text-muted-foreground h-5 w-5 shrink-0 sm:h-4 sm:w-4" />
         </CardHeader>
         <CardContent className="p-4 pt-0 sm:p-6 sm:pt-0">
           <div className="font-display text-muted-foreground flex items-center gap-2 text-3xl sm:text-2xl">
@@ -290,7 +291,7 @@ function AnnualBudgetCard({
                 <span className="text-muted-foreground">
                   {t("spentVsPlanned")}
                 </span>
-                <span className="font-medium tabular-nums break-words text-right">
+                <span className="text-right font-medium break-words tabular-nums">
                   {formatAmount(totalActual)} / {formatAmount(totalPlanned)}
                 </span>
               </div>
@@ -502,6 +503,8 @@ export function DashboardClient() {
     <div className="space-y-6">
       <PageHeader title={t("title")} />
 
+      <PushBanner />
+
       <div
         data-tour-id="stats"
         className="grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4"
@@ -591,20 +594,20 @@ export function DashboardClient() {
                       key={tx.id}
                       className="grid w-full min-w-0 grid-cols-[3.5rem_minmax(0,1fr)_auto] items-start gap-3 overflow-hidden text-base sm:grid-cols-[5rem_minmax(0,1fr)_auto] sm:gap-4 sm:text-sm"
                     >
-                      <span className="whitespace-nowrap text-base text-muted-foreground sm:text-sm">
+                      <span className="text-muted-foreground text-base whitespace-nowrap sm:text-sm">
                         {format(dateObj, "d. MMM", { locale: dateLocale })}
                       </span>
                       <div className="min-w-0 overflow-hidden">
-                        <p className="truncate font-medium text-foreground">
+                        <p className="text-foreground truncate font-medium">
                           {tx.description}
                         </p>
-                        <p className="truncate text-base text-muted-foreground sm:text-xs">
+                        <p className="text-muted-foreground truncate text-base sm:text-xs">
                           {accountMap.get(tx.accountId) ?? "—"}
                         </p>
                       </div>
                       <span
                         className={cn(
-                          "whitespace-nowrap text-base font-medium tabular-nums sm:text-sm",
+                          "text-base font-medium whitespace-nowrap tabular-nums sm:text-sm",
                           tx.type === "expense" && "text-expense",
                           tx.type === "income" && "text-income",
                         )}

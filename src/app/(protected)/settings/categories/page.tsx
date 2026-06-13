@@ -157,7 +157,9 @@ export default function CategoriesPage() {
         if (!parentMatch && filteredChildren.length === 0) return null;
         return { parent, children: parentMatch ? children : filteredChildren };
       })
-      .filter((g): g is { parent: Category; children: Category[] } => g !== null);
+      .filter(
+        (g): g is { parent: Category; children: Category[] } => g !== null,
+      );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [groups, search]);
 
@@ -224,7 +226,7 @@ export default function CategoriesPage() {
       />
 
       {autoCategorize.data && autoCategorize.data.updated > 0 && (
-        <p className="text-sm text-income">
+        <p className="text-income text-sm">
           {t("applySuccess", { count: autoCategorize.data.updated })}
         </p>
       )}
@@ -235,7 +237,7 @@ export default function CategoriesPage() {
         <>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative max-w-md flex-1">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
@@ -263,7 +265,7 @@ export default function CategoriesPage() {
                 return (
                   <section
                     key={parent.id}
-                    className="overflow-hidden rounded-xl border border-border bg-card shadow-card"
+                    className="border-border bg-card shadow-card overflow-hidden rounded-xl border"
                   >
                     <header className="flex items-center gap-2 px-4 py-3">
                       <button
@@ -274,7 +276,7 @@ export default function CategoriesPage() {
                       >
                         <ChevronRight
                           className={cn(
-                            "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                            "text-muted-foreground h-4 w-4 shrink-0 transition-transform",
                             expanded && "rotate-90",
                           )}
                         />
@@ -288,7 +290,11 @@ export default function CategoriesPage() {
                       </button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -325,7 +331,7 @@ export default function CategoriesPage() {
                       </DropdownMenu>
                     </header>
                     {expanded && (
-                      <div className="grid gap-2 border-t border-border bg-background/40 p-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                      <div className="border-border bg-background/40 grid gap-2 border-t p-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         {children.map((child) => (
                           <ChildTile
                             key={child.id}
@@ -346,7 +352,7 @@ export default function CategoriesPage() {
                               defaultParentId: parent.id,
                             })
                           }
-                          className="flex items-center justify-center gap-2 rounded-lg border border-dashed border-border bg-card/50 px-3 py-2 text-sm text-muted-foreground transition hover:border-primary/40 hover:bg-accent/30 hover:text-foreground"
+                          className="border-border bg-card/50 text-muted-foreground hover:border-primary/40 hover:bg-accent/30 hover:text-foreground flex items-center justify-center gap-2 rounded-lg border border-dashed px-3 py-2 text-sm transition"
                         >
                           <Plus className="h-4 w-4" />
                           {t("addSubcategory")}
@@ -400,7 +406,9 @@ export default function CategoriesPage() {
               onClick={() => resetRules.mutate()}
               disabled={resetRules.isPending}
             >
-              {resetRules.isPending ? tCommon("loading") : t("resetRulesConfirm")}
+              {resetRules.isPending
+                ? tCommon("loading")
+                : t("resetRulesConfirm")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -420,7 +428,7 @@ function ChildTile({
 }) {
   const tCommon = useTranslations("common");
   return (
-    <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-2">
+    <div className="border-border bg-card flex items-center gap-2 rounded-lg border px-3 py-2">
       <span className="text-lg leading-none">{category.icon ?? "📁"}</span>
       <span className="min-w-0 flex-1 truncate text-sm font-medium">
         {category.name}
@@ -431,15 +439,15 @@ function ChildTile({
             <MoreHorizontal className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>
-              <Pencil />
-              {tCommon("edit")}
-            </DropdownMenuItem>
-            <DropdownMenuItem className="text-destructive" onClick={onDelete}>
-              <Trash2 />
-              {tCommon("delete")}
-            </DropdownMenuItem>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={onEdit}>
+            <Pencil />
+            {tCommon("edit")}
+          </DropdownMenuItem>
+          <DropdownMenuItem className="text-destructive" onClick={onDelete}>
+            <Trash2 />
+            {tCommon("delete")}
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

@@ -35,9 +35,7 @@ const ACTIVATION_TIMEOUT_MS = 30000;
 const THEME_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 
 function applyTheme(theme: Theme) {
-  const prefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)",
-  ).matches;
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const isDark = theme === "dark" || (theme === "system" && prefersDark);
   document.documentElement.classList.toggle("dark", isDark);
 }
@@ -104,10 +102,7 @@ export default function WelcomePage() {
     api.family.list.useQuery();
   const needsFamily = !familiesLoading && families?.length === 0;
 
-  const termsQuery = api.terms.current.useQuery(
-    { locale },
-    { enabled: ready },
-  );
+  const termsQuery = api.terms.current.useQuery({ locale }, { enabled: ready });
 
   const steps = useMemo<Step[]>(() => {
     const s: Step[] = ["language", "terms", "name", "theme"];
@@ -392,9 +387,9 @@ export default function WelcomePage() {
         transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         className="relative z-10 flex items-center justify-between gap-3 px-5 pt-6 sm:px-12 sm:pt-10"
       >
-        <span className="font-display text-xl tracking-wide text-foreground">
+        <span className="font-display text-foreground text-xl tracking-wide">
           {tCommon("appName")}
-          <span className="ml-0.5 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
+          <span className="bg-primary ml-0.5 inline-block h-1.5 w-1.5 rounded-full" />
         </span>
 
         {/* Step dots — centered */}
@@ -423,7 +418,7 @@ export default function WelcomePage() {
             await authClient.signOut();
             router.push("/login");
           }}
-          className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground flex items-center gap-1.5 text-sm transition-colors"
         >
           <LogOut className="size-3.5" />
           <span className="hidden sm:inline">{tCommon("logout")}</span>
@@ -431,7 +426,7 @@ export default function WelcomePage() {
       </motion.header>
 
       {/* Main content — vertically centered */}
-      <main className="relative z-10 flex flex-1 items-center justify-center px-5 pb-32 pt-8 sm:px-12 sm:pb-24">
+      <main className="relative z-10 flex flex-1 items-center justify-center px-5 pt-8 pb-32 sm:px-12 sm:pb-24">
         <div className="w-full max-w-md">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
@@ -457,13 +452,13 @@ export default function WelcomePage() {
                       delay: 0.3,
                       ease: [0.16, 1, 0.3, 1],
                     }}
-                    className="mb-8 h-px bg-primary/40"
+                    className="bg-primary/40 mb-8 h-px"
                   />
 
-                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                  <h1 className="font-display text-foreground text-3xl leading-tight tracking-tight sm:text-4xl md:text-5xl">
                     {t("welcomeTitle")}
                   </h1>
-                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+                  <p className="text-muted-foreground mt-3 text-base sm:text-lg">
                     {t("welcomeDescription")}
                   </p>
 
@@ -479,7 +474,7 @@ export default function WelcomePage() {
                   >
                     <label
                       htmlFor="name"
-                      className="mb-3 block text-sm font-medium text-foreground"
+                      className="text-foreground mb-3 block text-sm font-medium"
                     >
                       {t("nameLabel")}
                     </label>
@@ -500,12 +495,12 @@ export default function WelcomePage() {
               {/* Step: Language */}
               {currentStep === "language" && (
                 <div>
-                  <div className="mb-8 h-px w-12 bg-primary/40" />
+                  <div className="bg-primary/40 mb-8 h-px w-12" />
 
-                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                  <h1 className="font-display text-foreground text-3xl leading-tight tracking-tight sm:text-4xl md:text-5xl">
                     {t("languageTitle")}
                   </h1>
-                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+                  <p className="text-muted-foreground mt-3 text-base sm:text-lg">
                     {t("languageDescription")}
                   </p>
 
@@ -532,7 +527,7 @@ export default function WelcomePage() {
                         )}
                       >
                         <span className="text-2xl">{lang.flag}</span>
-                        <span className="flex-1 text-base font-medium text-foreground">
+                        <span className="text-foreground flex-1 text-base font-medium">
                           {lang.label}
                         </span>
                         {locale === lang.code && (
@@ -544,9 +539,9 @@ export default function WelcomePage() {
                               stiffness: 500,
                               damping: 30,
                             }}
-                            className="flex h-5 w-5 items-center justify-center rounded-full bg-primary"
+                            className="bg-primary flex h-5 w-5 items-center justify-center rounded-full"
                           >
-                            <Check className="h-3 w-3 text-primary-foreground" />
+                            <Check className="text-primary-foreground h-3 w-3" />
                           </motion.div>
                         )}
                       </button>
@@ -558,12 +553,12 @@ export default function WelcomePage() {
               {/* Step: Terms */}
               {currentStep === "terms" && (
                 <div>
-                  <div className="mb-8 h-px w-12 bg-primary/40" />
+                  <div className="bg-primary/40 mb-8 h-px w-12" />
 
-                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                  <h1 className="font-display text-foreground text-3xl leading-tight tracking-tight sm:text-4xl md:text-5xl">
                     {tTerms("onboardingTitle")}
                   </h1>
-                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+                  <p className="text-muted-foreground mt-3 text-base sm:text-lg">
                     {tTerms("onboardingDescription")}
                   </p>
 
@@ -577,11 +572,11 @@ export default function WelcomePage() {
                     }}
                     className="mt-8"
                   >
-                    <div className="max-h-[42vh] overflow-y-auto rounded-lg border border-border bg-card/50 p-5">
+                    <div className="border-border bg-card/50 max-h-[42vh] overflow-y-auto rounded-lg border p-5">
                       {termsQuery.data ? (
                         <TermsContent content={termsQuery.data.content} />
                       ) : (
-                        <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted-foreground">
+                        <div className="text-muted-foreground flex items-center justify-center gap-2 py-8 text-sm">
                           <Loader2 className="size-4 animate-spin" />
                           {tTerms("loading")}
                         </div>
@@ -594,7 +589,7 @@ export default function WelcomePage() {
                         onCheckedChange={(v) => setTermsAccepted(v === true)}
                         className="mt-0.5 size-5"
                       />
-                      <span className="text-sm text-foreground">
+                      <span className="text-foreground text-sm">
                         {tTerms("acceptLabel")}
                       </span>
                     </label>
@@ -605,12 +600,12 @@ export default function WelcomePage() {
               {/* Step: Theme */}
               {currentStep === "theme" && (
                 <div>
-                  <div className="mb-8 h-px w-12 bg-primary/40" />
+                  <div className="bg-primary/40 mb-8 h-px w-12" />
 
-                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                  <h1 className="font-display text-foreground text-3xl leading-tight tracking-tight sm:text-4xl md:text-5xl">
                     {t("themeTitle")}
                   </h1>
-                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+                  <p className="text-muted-foreground mt-3 text-base sm:text-lg">
                     {t("themeDescription")}
                   </p>
 
@@ -645,13 +640,13 @@ export default function WelcomePage() {
                               : "border-border bg-background hover:border-primary/30 hover:bg-accent/50",
                           )}
                         >
-                          <Icon className="size-5 text-foreground" />
+                          <Icon className="text-foreground size-5" />
                           <div className="flex-1">
-                            <div className="text-base font-medium text-foreground">
+                            <div className="text-foreground text-base font-medium">
                               {t(labelKey)}
                             </div>
                             {option.code === "system" && (
-                              <div className="text-xs text-muted-foreground">
+                              <div className="text-muted-foreground text-xs">
                                 {t("themeSystemDescription")}
                               </div>
                             )}
@@ -665,9 +660,9 @@ export default function WelcomePage() {
                                 stiffness: 500,
                                 damping: 30,
                               }}
-                              className="flex h-5 w-5 items-center justify-center rounded-full bg-primary"
+                              className="bg-primary flex h-5 w-5 items-center justify-center rounded-full"
                             >
-                              <Check className="h-3 w-3 text-primary-foreground" />
+                              <Check className="text-primary-foreground h-3 w-3" />
                             </motion.div>
                           )}
                         </button>
@@ -680,22 +675,22 @@ export default function WelcomePage() {
               {/* Step: Plan */}
               {currentStep === "plan" && (
                 <div>
-                  <div className="mb-8 h-px w-12 bg-primary/40" />
+                  <div className="bg-primary/40 mb-8 h-px w-12" />
 
-                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                  <h1 className="font-display text-foreground text-3xl leading-tight tracking-tight sm:text-4xl md:text-5xl">
                     {tBilling("title")}
                   </h1>
-                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+                  <p className="text-muted-foreground mt-3 text-base sm:text-lg">
                     {tBilling("description")}
                   </p>
 
                   {activating ? (
-                    <div className="mt-10 rounded-lg border border-primary/30 bg-primary/5 p-6 text-center">
-                      <Loader2 className="mx-auto mb-3 size-6 animate-spin text-primary" />
-                      <div className="font-medium text-foreground">
+                    <div className="border-primary/30 bg-primary/5 mt-10 rounded-lg border p-6 text-center">
+                      <Loader2 className="text-primary mx-auto mb-3 size-6 animate-spin" />
+                      <div className="text-foreground font-medium">
                         {tBilling("activating")}
                       </div>
-                      <div className="mt-1 text-sm text-muted-foreground">
+                      <div className="text-muted-foreground mt-1 text-sm">
                         {tBilling("activatingHint")}
                       </div>
                     </div>
@@ -713,7 +708,7 @@ export default function WelcomePage() {
                         isDark={isDark}
                       />
                       {activationError && (
-                        <p className="mt-4 text-sm text-destructive">
+                        <p className="text-destructive mt-4 text-sm">
                           {activationError}
                         </p>
                       )}
@@ -721,12 +716,12 @@ export default function WelcomePage() {
                   ) : (
                     <>
                       {activationError && (
-                        <p className="mt-6 text-sm text-destructive">
+                        <p className="text-destructive mt-6 text-sm">
                           {activationError}
                         </p>
                       )}
 
-                      <div className="mt-8 inline-flex items-center gap-1 rounded-full border border-border bg-card p-1 shadow-card">
+                      <div className="border-border bg-card shadow-card mt-8 inline-flex items-center gap-1 rounded-full border p-1">
                         {(["monthly", "annual"] as const).map((c) => (
                           <button
                             key={c}
@@ -772,12 +767,12 @@ export default function WelcomePage() {
               {/* Step: Family */}
               {currentStep === "family" && (
                 <div>
-                  <div className="mb-8 h-px w-12 bg-primary/40" />
+                  <div className="bg-primary/40 mb-8 h-px w-12" />
 
-                  <h1 className="font-display text-3xl leading-tight tracking-tight text-foreground sm:text-4xl md:text-5xl">
+                  <h1 className="font-display text-foreground text-3xl leading-tight tracking-tight sm:text-4xl md:text-5xl">
                     {t("familyTitle")}
                   </h1>
-                  <p className="mt-3 text-base text-muted-foreground sm:text-lg">
+                  <p className="text-muted-foreground mt-3 text-base sm:text-lg">
                     {t("familyDescription")}
                   </p>
 
@@ -793,7 +788,7 @@ export default function WelcomePage() {
                   >
                     <label
                       htmlFor="familyName"
-                      className="mb-3 block text-sm font-medium text-foreground"
+                      className="text-foreground mb-3 block text-sm font-medium"
                     >
                       {t("familyNameLabel")}
                     </label>
@@ -816,7 +811,7 @@ export default function WelcomePage() {
                 <motion.p
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="mt-4 text-sm text-destructive"
+                  className="text-destructive mt-4 text-sm"
                 >
                   {tCommon("error")}
                 </motion.p>
@@ -859,13 +854,13 @@ export default function WelcomePage() {
             delay: 0.4,
             ease: [0.16, 1, 0.3, 1],
           }}
-          className="fixed bottom-[max(env(safe-area-inset-bottom,0px),1.25rem)] right-4 z-20 sm:bottom-10 sm:right-12"
+          className="fixed right-4 bottom-[max(env(safe-area-inset-bottom,0px),1.25rem)] z-20 sm:right-12 sm:bottom-10"
         >
           <Button
             size="lg"
             disabled={!canContinue || isPending}
             onClick={handleContinue}
-            className="h-12 gap-2 rounded-full px-6 shadow-elevated transition-all duration-200 hover:shadow-lg disabled:opacity-40"
+            className="shadow-elevated h-12 gap-2 rounded-full px-6 transition-all duration-200 hover:shadow-lg disabled:opacity-40"
           >
             {isPending ? (
               <>

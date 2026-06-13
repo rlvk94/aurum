@@ -2,7 +2,6 @@ import "server-only";
 
 import { eq } from "drizzle-orm";
 import { render } from "@react-email/render";
-import { createTranslator } from "next-intl";
 
 import { env } from "~/env";
 import { defaultLocale, type Locale } from "~/i18n/config";
@@ -10,11 +9,8 @@ import { db } from "~/server/db";
 import { family, user, usersToFamilies } from "~/server/db/schema";
 
 import { getResendClient } from "./client";
-import {
-  getUserLocaleByEmail,
-  getUserLocaleById,
-  loadMessages,
-} from "./locale";
+import { getUserLocaleByEmail, getUserLocaleById } from "./locale";
+import { buildTranslators } from "./translators";
 import { BillingEventEmail } from "./templates/billing-event-email";
 import { InviteEmail } from "./templates/invite-email";
 import { OtpEmail } from "./templates/otp-email";
@@ -56,28 +52,7 @@ async function dispatch({ to, subject, html, replyTo }: DispatchArgs) {
   }
 }
 
-type Translator = (
-  key: string,
-  values?: Record<string, string | number>,
-) => string;
-
-async function buildTranslators(locale: Locale) {
-  const messages = await loadMessages(locale);
-  const makeT = (namespace: string): Translator => {
-    const t = createTranslator({
-      locale,
-      messages: messages as never,
-      namespace: namespace as never,
-    }) as unknown as Translator;
-    return t;
-  };
-  return { common: makeT("emails.common"), makeT };
-}
-
-export async function sendSignInOtpEmail(args: {
-  to: string;
-  code: string;
-}) {
+export async function sendSignInOtpEmail(args: { to: string; code: string }) {
   const locale = await getUserLocaleByEmail(args.to);
   const { common, makeT } = await buildTranslators(locale);
   const t = makeT("emails.signInOtp");

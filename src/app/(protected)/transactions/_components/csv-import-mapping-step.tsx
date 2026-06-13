@@ -112,9 +112,7 @@ export function CsvImportMappingStep({
         </SelectTrigger>
         <SelectContent>
           {optional && (
-            <SelectItem value={NONE_VALUE}>
-              {t("mappingColumnNone")}
-            </SelectItem>
+            <SelectItem value={NONE_VALUE}>{t("mappingColumnNone")}</SelectItem>
           )}
           {Array.from({ length: columnCount }, (_, i) => (
             <SelectItem key={i} value={String(i)}>
@@ -198,7 +196,7 @@ export function CsvImportMappingStep({
               <TableHeader>
                 <TableRow>
                   {Array.from({ length: columnCount }, (_, i) => (
-                    <TableHead key={i} className="whitespace-nowrap text-xs">
+                    <TableHead key={i} className="text-xs whitespace-nowrap">
                       {columnLabel(i)}
                     </TableHead>
                   ))}
@@ -262,8 +260,7 @@ export function CsvImportMappingStep({
               onChange({
                 ...mapping,
                 amountMode: v as "signed" | "split",
-                amountColumn:
-                  v === "signed" ? mapping.amountColumn : undefined,
+                amountColumn: v === "signed" ? mapping.amountColumn : undefined,
                 debitColumn: v === "split" ? mapping.debitColumn : undefined,
                 creditColumn: v === "split" ? mapping.creditColumn : undefined,
               })

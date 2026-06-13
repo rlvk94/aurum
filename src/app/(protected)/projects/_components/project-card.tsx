@@ -72,7 +72,8 @@ export function ProjectCard({
       ? Math.min(100, Math.round(progress.limitFraction * 100))
       : null;
 
-  const remaining = limit !== null && limit !== undefined ? limit - project.net : null;
+  const remaining =
+    limit !== null && limit !== undefined ? limit - project.net : null;
   const overBy = remaining !== null && remaining < 0 ? Math.abs(remaining) : 0;
 
   const barColor =
@@ -84,7 +85,11 @@ export function ProjectCard({
           ? "bg-warning"
           : "bg-primary";
 
-  const periodLabel = formatPeriod(project.startDate, project.endDate, dateLocale);
+  const periodLabel = formatPeriod(
+    project.startDate,
+    project.endDate,
+    dateLocale,
+  );
 
   const topCats = (project.topCategoryIds ?? [])
     .map((id) => categories.find((c) => c.id === id))
@@ -96,18 +101,18 @@ export function ProjectCard({
   return (
     <Card
       className={cn(
-        "group relative overflow-hidden border-border bg-card shadow-card transition hover:shadow-elevated",
+        "group border-border bg-card shadow-card hover:shadow-elevated relative overflow-hidden transition",
         archived && "opacity-60",
       )}
     >
-      <div className="absolute right-3 top-3 z-30">
+      <div className="absolute top-3 right-3 z-30">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
               aria-label={t("card.moreOptions")}
-              className="h-7 w-7 rounded-full bg-card/40 text-foreground backdrop-blur hover:bg-card/70"
+              className="bg-card/40 text-foreground hover:bg-card/70 h-7 w-7 rounded-full backdrop-blur"
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
@@ -121,10 +126,7 @@ export function ProjectCard({
               <Archive />
               {archived ? t("actions.unarchive") : t("actions.archive")}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={onDelete}
-            >
+            <DropdownMenuItem className="text-destructive" onClick={onDelete}>
               <Trash2 />
               {t("actions.delete")}
             </DropdownMenuItem>
@@ -135,16 +137,16 @@ export function ProjectCard({
       <Link
         href={`/projects/${project.id}`}
         aria-label={t("card.openProject")}
-        className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="focus-visible:ring-ring block focus-visible:ring-2 focus-visible:outline-none"
       >
         <ProjectCover palette={palette} emoji={project.emoji} size="md">
           <div className="absolute inset-x-4 bottom-3 flex items-end justify-between gap-3">
-            <p className="min-w-0 flex-1 truncate font-display text-xl text-[var(--cover-glyph)]">
+            <p className="font-display min-w-0 flex-1 truncate text-xl text-[var(--cover-glyph)]">
               {project.name}
             </p>
             <Badge
               className={cn(
-                "shrink-0 rounded-full border-0 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider backdrop-blur",
+                "shrink-0 rounded-full border-0 px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase backdrop-blur",
                 STATUS_CLASSES[statusKey],
               )}
             >
@@ -154,7 +156,7 @@ export function ProjectCard({
         </ProjectCover>
 
         <div className="space-y-4 p-5">
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {periodLabel ?? t("status.noDates")}
             {project.transactionCount > 0 && (
               <>
@@ -168,21 +170,21 @@ export function ProjectCard({
 
           <div>
             <div className="flex items-baseline gap-1.5">
-              <span className="font-display text-2xl text-foreground">
+              <span className="font-display text-foreground text-2xl">
                 {formatAmount(project.net)}
               </span>
               {limit ? (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   {t("labels.ofLimit", { limit: formatAmount(limit) })}
                 </span>
               ) : (
-                <span className="text-sm text-muted-foreground">
+                <span className="text-muted-foreground text-sm">
                   {t("card.noLimit")}
                 </span>
               )}
             </div>
             {project.received > 0 && (
-              <p className="text-xs text-muted-foreground">
+              <p className="text-muted-foreground text-xs">
                 {tCommon("currency")}{" "}
                 <span className="text-income">
                   +{formatAmount(project.received)}
@@ -194,7 +196,7 @@ export function ProjectCard({
 
           {limitPct !== null && (
             <div>
-              <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+              <div className="text-muted-foreground mb-1 flex items-center justify-between text-xs">
                 <span>
                   {progress.status === "over"
                     ? t("labels.overBy", { amount: formatAmount(overBy) })
@@ -202,16 +204,16 @@ export function ProjectCard({
                       ? `${formatAmount(remaining)} ${t("labels.remaining").toLowerCase()}`
                       : ""}
                 </span>
-                <span className="font-medium text-foreground">{limitPct}%</span>
+                <span className="text-foreground font-medium">{limitPct}%</span>
               </div>
-              <div className="relative h-1.5 w-full overflow-hidden rounded-full bg-muted">
+              <div className="bg-muted relative h-1.5 w-full overflow-hidden rounded-full">
                 <div
                   className={cn("h-full rounded-full transition-all", barColor)}
                   style={{ width: `${Math.min(100, limitPct)}%` }}
                 />
                 {progress.elapsedFraction !== null && (
                   <span
-                    className="absolute top-1/2 h-3 w-px -translate-x-1/2 -translate-y-1/2 bg-foreground/40"
+                    className="bg-foreground/40 absolute top-1/2 h-3 w-px -translate-x-1/2 -translate-y-1/2"
                     style={{
                       left: `${Math.min(100, Math.round(progress.elapsedFraction * 100))}%`,
                     }}
@@ -219,7 +221,7 @@ export function ProjectCard({
                   />
                 )}
               </div>
-              <p className="mt-1 text-[11px] text-muted-foreground">
+              <p className="text-muted-foreground mt-1 text-[11px]">
                 {progress.status === "active" && progress.daysLeft !== null
                   ? t("labels.daysLeft", { count: progress.daysLeft })
                   : progress.status === "not_started" &&

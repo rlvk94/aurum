@@ -48,10 +48,10 @@ export function LandingContact() {
       <div className="mx-auto max-w-3xl px-6">
         <header className="max-w-2xl">
           <SectionMarker>{t("marker")}</SectionMarker>
-          <h2 className="mt-4 font-display text-4xl leading-tight text-foreground sm:text-5xl">
+          <h2 className="font-display text-foreground mt-4 text-4xl leading-tight sm:text-5xl">
             {t("heading")}
           </h2>
-          <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+          <p className="text-muted-foreground mt-4 text-base leading-relaxed">
             {t("lead")}
           </p>
         </header>
@@ -59,19 +59,15 @@ export function LandingContact() {
         <div className="almanac-rule mt-10" />
 
         {isSubmitted ? (
-          <div className="mt-10 rounded-lg border border-primary/30 bg-(--accent) p-8 text-center">
-            <div className="font-display text-2xl text-foreground">
+          <div className="border-primary/30 mt-10 rounded-lg border bg-(--accent) p-8 text-center">
+            <div className="font-display text-foreground text-2xl">
               {t("success")}
             </div>
           </div>
         ) : (
           <form onSubmit={onSubmit} className="mt-10 space-y-6" noValidate>
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-              <Field
-                label={t("fields.name")}
-                htmlFor="contact-name"
-                required
-              >
+              <Field label={t("fields.name")} htmlFor="contact-name" required>
                 <Input
                   id="contact-name"
                   name="name"
@@ -85,11 +81,7 @@ export function LandingContact() {
                   disabled={isSubmitting}
                 />
               </Field>
-              <Field
-                label={t("fields.email")}
-                htmlFor="contact-email"
-                required
-              >
+              <Field label={t("fields.email")} htmlFor="contact-email" required>
                 <Input
                   id="contact-email"
                   name="email"
@@ -121,8 +113,8 @@ export function LandingContact() {
                 rows={6}
                 disabled={isSubmitting}
                 className={cn(
-                  "flex w-full rounded-md border border-input bg-card px-3 py-2 text-base ring-offset-background",
-                  "placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "border-input bg-card ring-offset-background flex w-full rounded-md border px-3 py-2 text-base",
+                  "placeholder:text-muted-foreground focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
                   "disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
                   "resize-y leading-relaxed",
                 )}
@@ -130,7 +122,7 @@ export function LandingContact() {
             </Field>
 
             {errorKey && (
-              <p className="text-sm text-destructive" role="alert">
+              <p className="text-destructive text-sm" role="alert">
                 {t(errorKey)}
               </p>
             )}
@@ -160,9 +152,9 @@ function Field({
 }) {
   return (
     <label htmlFor={htmlFor} className="block">
-      <span className="almanac-smallcaps mb-2 block text-[10px] tracking-[0.22em] text-muted-foreground">
+      <span className="almanac-smallcaps text-muted-foreground mb-2 block text-[10px] tracking-[0.22em]">
         {label}
-        {required && <span className="ml-1 text-primary">·</span>}
+        {required && <span className="text-primary ml-1">·</span>}
       </span>
       {children}
     </label>

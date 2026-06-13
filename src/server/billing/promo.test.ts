@@ -54,9 +54,9 @@ describe("validatePromotionCode", () => {
     expect(validatePromotionCode(promo({ coupon: null }))).toEqual({
       valid: false,
     });
-    expect(
-      validatePromotionCode(promo({ coupon: { valid: false } })),
-    ).toEqual({ valid: false });
+    expect(validatePromotionCode(promo({ coupon: { valid: false } }))).toEqual({
+      valid: false,
+    });
   });
 
   it("returns invalid when the coupon is an unexpanded id string", () => {

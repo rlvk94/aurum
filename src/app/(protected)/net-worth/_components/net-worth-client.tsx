@@ -67,7 +67,7 @@ export function NetWorthClient() {
       <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {t("accountBalances")}
             </CardTitle>
           </CardHeader>
@@ -79,7 +79,7 @@ export function NetWorthClient() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {t("totalAssets")}
             </CardTitle>
           </CardHeader>
@@ -91,24 +91,24 @@ export function NetWorthClient() {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {t("totalDebts")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-display text-xl break-words text-debt sm:text-2xl">
+            <div className="font-display text-debt text-xl break-words sm:text-2xl">
               {debts ? formatAmount(debts.totalOutstanding) : "–"}
             </div>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardTitle className="text-muted-foreground text-sm font-medium">
               {t("netWorthValue")}
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="font-display text-xl break-words text-income sm:text-2xl">
+            <div className="font-display text-income text-xl break-words sm:text-2xl">
               {netWorth !== undefined ? formatAmount(netWorth) : "–"}
             </div>
           </CardContent>

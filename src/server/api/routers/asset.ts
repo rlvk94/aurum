@@ -16,10 +16,7 @@ const assetTypeSchema = z.enum([
   "other",
 ]);
 
-async function getActiveFamilyId(
-  db: typeof dbInstance,
-  userId: string,
-) {
+async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   const [dbUser] = await db
     .select({ activeFamilyId: user.activeFamilyId })
     .from(user)
@@ -67,7 +64,12 @@ export const assetRouter = createTRPCRouter({
     const asOf = new Date().toISOString().slice(0, 10);
     const byAsset = new Map<
       string,
-      Array<{ id: string; name: string; outstandingBalance: number; principal: number }>
+      Array<{
+        id: string;
+        name: string;
+        outstandingBalance: number;
+        principal: number;
+      }>
     >();
     for (const d of debts) {
       if (!d.assetId) continue;

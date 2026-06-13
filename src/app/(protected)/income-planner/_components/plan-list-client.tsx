@@ -81,10 +81,7 @@ export function PlanListClient() {
         <div className="space-y-4 sm:space-y-6">
           {active && (
             <section>
-              <SectionHeading
-                eyebrow={t("activePlan")}
-                count={null}
-              />
+              <SectionHeading eyebrow={t("activePlan")} count={null} />
               <div className="mt-4">
                 <PlanCardWithMenu
                   plan={active}
@@ -96,7 +93,9 @@ export function PlanListClient() {
                     updatePlan.mutate({ id: active.id, archived: true })
                   }
                   onDelete={() => {
-                    if (confirm(t("confirmDeletePlan", { name: active.name }))) {
+                    if (
+                      confirm(t("confirmDeletePlan", { name: active.name }))
+                    ) {
                       deletePlan.mutate({ id: active.id });
                     }
                   }}
@@ -107,10 +106,7 @@ export function PlanListClient() {
 
           {others.length > 0 && (
             <section>
-              <SectionHeading
-                eyebrow={t("otherPlans")}
-                count={others.length}
-              />
+              <SectionHeading eyebrow={t("otherPlans")} count={others.length} />
               <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {others.map((plan) => (
                   <PlanCardWithMenu
@@ -123,7 +119,9 @@ export function PlanListClient() {
                       updatePlan.mutate({ id: plan.id, archived: true })
                     }
                     onDelete={() => {
-                      if (confirm(t("confirmDeletePlan", { name: plan.name }))) {
+                      if (
+                        confirm(t("confirmDeletePlan", { name: plan.name }))
+                      ) {
                         deletePlan.mutate({ id: plan.id });
                       }
                     }}
@@ -152,7 +150,9 @@ export function PlanListClient() {
                       updatePlan.mutate({ id: plan.id, archived: false })
                     }
                     onDelete={() => {
-                      if (confirm(t("confirmDeletePlan", { name: plan.name }))) {
+                      if (
+                        confirm(t("confirmDeletePlan", { name: plan.name }))
+                      ) {
                         deletePlan.mutate({ id: plan.id });
                       }
                     }}
@@ -164,10 +164,7 @@ export function PlanListClient() {
         </div>
       )}
 
-      <CreatePlanDialog
-        open={createOpen}
-        onOpenChange={setCreateOpen}
-      />
+      <CreatePlanDialog open={createOpen} onOpenChange={setCreateOpen} />
       <CreatePlanDialog
         key={editingPlan?.id}
         open={Boolean(editingPlan)}
@@ -187,16 +184,16 @@ function SectionHeading({
 }) {
   return (
     <div className="flex items-baseline gap-3">
-      <span className="h-px flex-1 bg-border" />
-      <span className="font-sans text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+      <span className="bg-border h-px flex-1" />
+      <span className="text-muted-foreground font-sans text-[11px] tracking-[0.18em] uppercase">
         {eyebrow}
         {count !== null && (
-          <span className="ml-2 tabular-nums text-foreground/70">
+          <span className="text-foreground/70 ml-2 tabular-nums">
             {String(count).padStart(2, "0")}
           </span>
         )}
       </span>
-      <span className="h-px flex-1 bg-border" />
+      <span className="bg-border h-px flex-1" />
     </div>
   );
 }
@@ -226,13 +223,13 @@ function PlanCardWithMenu({
   return (
     <div className="relative">
       <PlanCard plan={plan} variant={variant} archived={archived} />
-      <div className="absolute right-3 top-3">
+      <div className="absolute top-3 right-3">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 rounded-full bg-background/60 backdrop-blur"
+              className="bg-background/60 h-8 w-8 rounded-full backdrop-blur"
               aria-label={tCommon("actions")}
             >
               <MoreHorizontal className="h-4 w-4" />
@@ -273,7 +270,7 @@ function EditorialEmptyState({ onCreate }: { onCreate: () => void }) {
   const t = useTranslations("incomePlanner");
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card px-8 py-16 text-center shadow-card sm:px-16 sm:py-24">
+    <div className="border-border bg-card shadow-card relative overflow-hidden rounded-2xl border px-8 py-16 text-center sm:px-16 sm:py-24">
       {/* Soft radial wash behind the content */}
       <div
         aria-hidden
@@ -284,13 +281,13 @@ function EditorialEmptyState({ onCreate }: { onCreate: () => void }) {
         }}
       />
       <div className="relative mx-auto max-w-xl">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <div className="bg-primary/10 text-primary mx-auto flex h-14 w-14 items-center justify-center rounded-full">
           <Calculator className="h-6 w-6" />
         </div>
-        <h2 className="mt-6 font-display text-3xl leading-tight text-foreground sm:text-4xl">
+        <h2 className="font-display text-foreground mt-6 text-3xl leading-tight sm:text-4xl">
           {t("emptyState")}
         </h2>
-        <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+        <p className="text-muted-foreground mt-3 text-sm sm:text-base">
           {t("subtitle")}
         </p>
         <Button className="mt-8" size="lg" onClick={onCreate}>
