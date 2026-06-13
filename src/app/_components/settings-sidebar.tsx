@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 
 import {
-  Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
@@ -28,18 +27,18 @@ import {
   SidebarRail,
 } from "~/app/_components/sidebar";
 import { UserMenu } from "~/app/_components/user-menu";
+import { useCloseMobileOnNavClick } from "~/app/_components/use-close-mobile-on-nav-click";
 import { api } from "~/trpc/react";
 
-export function SettingsSidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
+export function SettingsSidebarContent() {
   const t = useTranslations("settings.nav");
   const pathname = usePathname();
   const { data: family } = api.family.current.useQuery();
   const isOwner = family?.role === "owner";
+  const closeMobileOnNavClick = useCloseMobileOnNavClick();
 
   return (
-    <Sidebar variant="inset" {...props}>
+    <>
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -53,7 +52,7 @@ export function SettingsSidebar({
         </SidebarMenu>
       </SidebarHeader>
 
-      <SidebarContent>
+      <SidebarContent onClick={closeMobileOnNavClick}>
         <SidebarGroup>
           <SidebarGroupLabel>{t("account")}</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -163,6 +162,6 @@ export function SettingsSidebar({
       </SidebarFooter>
 
       <SidebarRail />
-    </Sidebar>
+    </>
   );
 }

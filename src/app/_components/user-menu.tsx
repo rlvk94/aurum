@@ -49,7 +49,10 @@ export function UserMenu() {
     <>
       <SidebarMenu>
         <SidebarMenuItem data-tour-id="settings">
-          <DropdownMenu>
+          {/* Non-modal: a modal dropdown locks body `pointer-events`; if this
+              menu unmounts while open (the sidebar swaps to the settings nav on
+              navigate), the lock is never cleaned up and freezes the page. */}
+          <DropdownMenu modal={false}>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
