@@ -37,8 +37,7 @@ export function parseWithMapping(
   mapping: ColumnMapping,
 ): ParseResult {
   const startIndex = mapping.hasHeader ? 1 : 0;
-  const headers =
-    mapping.hasHeader && table.length > 0 ? (table[0] ?? []) : [];
+  const headers = mapping.hasHeader && table.length > 0 ? (table[0] ?? []) : [];
 
   const mappedColumnIndices = new Set<number>();
   const addMapped = (idx: number | undefined) => {
@@ -249,7 +248,9 @@ export type MappingValidationError =
  * Returns a list of validation errors keyed for translation. Empty array
  * means the mapping can be used to parse the file.
  */
-export function validateMapping(mapping: ColumnMapping): MappingValidationError[] {
+export function validateMapping(
+  mapping: ColumnMapping,
+): MappingValidationError[] {
   const errors: MappingValidationError[] = [];
 
   if (mapping.amountMode === "signed") {
@@ -274,7 +275,8 @@ export function validateMapping(mapping: ColumnMapping): MappingValidationError[
   }
   if (mapping.amountMode === "split") {
     if (mapping.debitColumn !== undefined) hardMapped.push(mapping.debitColumn);
-    if (mapping.creditColumn !== undefined) hardMapped.push(mapping.creditColumn);
+    if (mapping.creditColumn !== undefined)
+      hardMapped.push(mapping.creditColumn);
   }
   const seen = new Set<number>();
   for (const c of hardMapped) {

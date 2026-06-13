@@ -32,7 +32,7 @@ export function AnnouncementCard({
     : null;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-border bg-card shadow-card">
+    <article className="border-border bg-card shadow-card overflow-hidden rounded-2xl border">
       <div
         data-project-palette={announcement.coverPalette}
         className={cn(
@@ -42,12 +42,12 @@ export function AnnouncementCard({
       >
         <span
           aria-hidden
-          className="project-cover-emoji absolute right-5 top-1/2 -translate-y-1/2 text-5xl leading-none"
+          className="project-cover-emoji absolute top-1/2 right-5 -translate-y-1/2 text-5xl leading-none"
         >
           {announcement.emoji}
         </span>
         {isNew && (
-          <Badge className="absolute left-5 top-5 rounded-full border-0 bg-foreground px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-background">
+          <Badge className="bg-foreground text-background absolute top-5 left-5 rounded-full border-0 px-2 py-0.5 text-[10px] font-medium tracking-wider uppercase">
             {t("whatsNew.newBadge")}
           </Badge>
         )}
@@ -55,8 +55,8 @@ export function AnnouncementCard({
 
       <div className="space-y-3 p-6">
         <header className="space-y-1">
-          <h3 className="font-display text-2xl text-foreground">{title}</h3>
-          <p className="text-xs text-muted-foreground">
+          <h3 className="font-display text-foreground text-2xl">{title}</h3>
+          <p className="text-muted-foreground text-xs">
             {t("whatsNew.publishedOn", {
               date: format(parseISO(announcement.publishedAt), "PPP", {
                 locale: dateLocale,
@@ -65,7 +65,7 @@ export function AnnouncementCard({
           </p>
         </header>
 
-        <p className="whitespace-pre-line text-sm leading-relaxed text-foreground/90">
+        <p className="text-foreground/90 text-sm leading-relaxed whitespace-pre-line">
           {body}
         </p>
 

@@ -65,7 +65,9 @@ export function SavingsDetailClient({
   const utils = api.useUtils();
 
   const { data: savings } = api.savings.get.useQuery({ id: savingsId });
-  const { data: account } = api.financialAccount.get.useQuery({ id: accountId });
+  const { data: account } = api.financialAccount.get.useQuery({
+    id: accountId,
+  });
   const { data: txData } = api.savings.listTransactions.useQuery({
     savingsId,
     limit: 50,
@@ -201,7 +203,7 @@ export function SavingsDetailClient({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 bg-background/20 text-[var(--cover-glyph)] hover:bg-background/30"
+                className="bg-background/20 hover:bg-background/30 h-9 w-9 text-[var(--cover-glyph)]"
                 aria-label={tCommon("more")}
               >
                 <MoreHorizontal className="h-5 w-5" />
@@ -254,7 +256,7 @@ export function SavingsDetailClient({
               {t("detail.of", { target: formatAmount(savings.targetAmount) })}
             </p>
           </div>
-          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-background/25">
+          <div className="bg-background/25 mt-3 h-2 w-full overflow-hidden rounded-full">
             <div
               className="h-full rounded-full bg-[var(--cover-glyph)] transition-all"
               style={{ width: `${progress * 100}%` }}
@@ -273,20 +275,20 @@ export function SavingsDetailClient({
           onClick={() => setMoveOpen("deposit")}
           disabled={savings.archived}
           className={cn(
-            "group flex items-center justify-between gap-3 rounded-xl border border-income/30 bg-income/10 p-4 text-left shadow-card transition",
+            "group border-income/30 bg-income/10 shadow-card flex items-center justify-between gap-3 rounded-xl border p-4 text-left transition",
             "hover:bg-income/15 hover:shadow-elevated",
             "disabled:cursor-not-allowed disabled:opacity-50",
           )}
         >
           <div>
-            <p className="font-display text-lg text-income">
+            <p className="font-display text-income text-lg">
               {t("detail.deposit")}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {t("detail.depositHint")}
             </p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-income/20 text-income transition group-hover:bg-income/30">
+          <div className="bg-income/20 text-income group-hover:bg-income/30 flex h-10 w-10 items-center justify-center rounded-full transition">
             <ArrowDownToLine className="h-5 w-5" />
           </div>
         </button>
@@ -295,20 +297,20 @@ export function SavingsDetailClient({
           onClick={() => setMoveOpen("withdraw")}
           disabled={savings.archived || savings.balance <= 0}
           className={cn(
-            "group flex items-center justify-between gap-3 rounded-xl border border-expense/30 bg-expense/10 p-4 text-left shadow-card transition",
+            "group border-expense/30 bg-expense/10 shadow-card flex items-center justify-between gap-3 rounded-xl border p-4 text-left transition",
             "hover:bg-expense/15 hover:shadow-elevated",
             "disabled:cursor-not-allowed disabled:opacity-50",
           )}
         >
           <div>
-            <p className="font-display text-lg text-expense">
+            <p className="font-display text-expense text-lg">
               {t("detail.withdraw")}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {t("detail.withdrawHint")}
             </p>
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-expense/20 text-expense transition group-hover:bg-expense/30">
+          <div className="bg-expense/20 text-expense group-hover:bg-expense/30 flex h-10 w-10 items-center justify-center rounded-full transition">
             <ArrowUpFromLine className="h-5 w-5" />
           </div>
         </button>
@@ -322,11 +324,11 @@ export function SavingsDetailClient({
         </CardHeader>
         <CardContent>
           {!txData || txData.items.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">
+            <p className="text-muted-foreground py-6 text-center text-sm">
               {t("detail.historyEmpty")}
             </p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="divide-border divide-y">
               {txData.items.map((row) => {
                 const positive = row.amount > 0;
                 return (
@@ -335,10 +337,8 @@ export function SavingsDetailClient({
                     className="flex items-center justify-between py-2 text-sm"
                   >
                     <div>
-                      <p className="font-medium">
-                        {t(`source.${row.source}`)}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="font-medium">{t(`source.${row.source}`)}</p>
+                      <p className="text-muted-foreground text-xs">
                         {row.date}
                         {row.note ? ` • ${row.note}` : ""}
                       </p>
@@ -419,14 +419,11 @@ export function SavingsDetailClient({
           <DialogHeader>
             <DialogTitle>{t("detail.confirmDeleteTitle")}</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {t("detail.confirmDeleteBody")}
           </p>
           <DialogFooter>
-            <Button
-              variant="ghost"
-              onClick={() => setConfirmDelete(false)}
-            >
+            <Button variant="ghost" onClick={() => setConfirmDelete(false)}>
               {tCommon("cancel")}
             </Button>
             <Button

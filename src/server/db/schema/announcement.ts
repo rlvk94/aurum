@@ -17,9 +17,7 @@ export const announcementDismissal = pgTable(
       .$defaultFn(() => new Date())
       .notNull(),
   },
-  (table) => [
-    primaryKey({ columns: [table.userId, table.announcementId] }),
-  ],
+  (table) => [primaryKey({ columns: [table.userId, table.announcementId] })],
 );
 
 export const announcementDismissalRelations = relations(

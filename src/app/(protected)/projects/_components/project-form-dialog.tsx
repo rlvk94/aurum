@@ -139,7 +139,8 @@ export function ProjectFormDialog({
       name: project?.name ?? defaults?.name ?? "",
       description: project?.description ?? "",
       emoji: project?.emoji ?? defaults?.emoji ?? "📌",
-      coverPalette: (project?.coverPalette as ProjectPalette | undefined) ??
+      coverPalette:
+        (project?.coverPalette as ProjectPalette | undefined) ??
         defaults?.coverPalette ??
         ("gold" satisfies ProjectPalette),
       spendingLimit: project?.spendingLimit
@@ -223,7 +224,7 @@ export function ProjectFormDialog({
                     emoji={emoji || "📌"}
                     size="lg"
                   >
-                    <div className="absolute inset-x-4 bottom-3 z-20 truncate font-display text-xl text-[var(--cover-glyph)]">
+                    <div className="font-display absolute inset-x-4 bottom-3 z-20 truncate text-xl text-[var(--cover-glyph)]">
                       {name?.trim() || t("form.preview")}
                     </div>
                   </ProjectCover>
@@ -277,7 +278,7 @@ export function ProjectFormDialog({
                     <div
                       role="listbox"
                       aria-label={t("form.emoji")}
-                      className="flex flex-1 flex-wrap items-center gap-1 rounded-md border border-input bg-background p-1.5"
+                      className="border-input bg-background flex flex-1 flex-wrap items-center gap-1 rounded-md border p-1.5"
                     >
                       {PROJECT_EMOJI_SUGGESTIONS.map((e) => (
                         <button
@@ -285,9 +286,9 @@ export function ProjectFormDialog({
                           key={e}
                           onClick={() => field.handleChange(e)}
                           className={cn(
-                            "h-8 w-8 rounded text-lg transition hover:bg-accent",
+                            "hover:bg-accent h-8 w-8 rounded text-lg transition",
                             field.state.value === e &&
-                              "bg-accent ring-1 ring-primary",
+                              "bg-accent ring-primary ring-1",
                           )}
                           aria-pressed={field.state.value === e}
                         >
@@ -319,7 +320,7 @@ export function ProjectFormDialog({
                           className={cn(
                             "h-9 w-12 rounded-md transition",
                             selected
-                              ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                              ? "ring-foreground ring-offset-background ring-2 ring-offset-2"
                               : "opacity-90 hover:opacity-100",
                           )}
                         />
@@ -406,7 +407,7 @@ export function ProjectFormDialog({
                         <button
                           type="button"
                           onClick={() => field.handleChange("")}
-                          className="text-left text-xs text-muted-foreground hover:text-foreground"
+                          className="text-muted-foreground hover:text-foreground text-left text-xs"
                         >
                           {tCommon("delete")}
                         </button>
@@ -463,7 +464,7 @@ export function ProjectFormDialog({
                         <button
                           type="button"
                           onClick={() => field.handleChange("")}
-                          className="text-left text-xs text-muted-foreground hover:text-foreground"
+                          className="text-muted-foreground hover:text-foreground text-left text-xs"
                         >
                           {tCommon("delete")}
                         </button>
@@ -476,7 +477,7 @@ export function ProjectFormDialog({
                 }}
               </form.Field>
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {t("form.datesOptional")}
             </p>
 
@@ -499,7 +500,7 @@ export function ProjectFormDialog({
           </FieldGroup>
 
           {mutation.error && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6">

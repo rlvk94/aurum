@@ -73,7 +73,13 @@ describe("distributeAmount", () => {
   });
 
   it("zero input across every recurrence returns zeros", () => {
-    for (const r of ["monthly", "quarterly", "semi_annual", "annual", "custom"] as const) {
+    for (const r of [
+      "monthly",
+      "quarterly",
+      "semi_annual",
+      "annual",
+      "custom",
+    ] as const) {
       expect(distributeAmount(0, r)).toEqual([
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
       ]);

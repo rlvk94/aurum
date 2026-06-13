@@ -6,12 +6,7 @@ import { randomBytes } from "crypto";
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { requireWithinLimit } from "~/server/billing/entitlements";
 import type { db as dbInstance } from "~/server/db";
-import {
-  family,
-  invitation,
-  user,
-  usersToFamilies,
-} from "~/server/db/schema";
+import { family, invitation, user, usersToFamilies } from "~/server/db/schema";
 import { getActiveFamilyMembership } from "~/server/api/routers/family";
 import { sendFamilyInviteEmail } from "~/server/email";
 
@@ -45,10 +40,7 @@ export const invitationRouter = createTRPCRouter({
       })
       .from(invitation)
       .where(
-        and(
-          eq(invitation.familyId, familyId),
-          gt(invitation.expiresAt, now),
-        ),
+        and(eq(invitation.familyId, familyId), gt(invitation.expiresAt, now)),
       );
   }),
 
@@ -68,10 +60,7 @@ export const invitationRouter = createTRPCRouter({
         .from(usersToFamilies)
         .innerJoin(user, eq(user.id, usersToFamilies.userId))
         .where(
-          and(
-            eq(usersToFamilies.familyId, familyId),
-            eq(user.email, email),
-          ),
+          and(eq(usersToFamilies.familyId, familyId), eq(user.email, email)),
         );
       if (existingMember) {
         throw new TRPCError({
@@ -110,10 +99,7 @@ export const invitationRouter = createTRPCRouter({
         .select({ count: sql<number>`count(*)::int` })
         .from(invitation)
         .where(
-          and(
-            eq(invitation.familyId, familyId),
-            gt(invitation.expiresAt, now),
-          ),
+          and(eq(invitation.familyId, familyId), gt(invitation.expiresAt, now)),
         );
       const projected =
         Number(memberCountRow?.count ?? 0) +
@@ -159,10 +145,7 @@ export const invitationRouter = createTRPCRouter({
       await ctx.db
         .delete(invitation)
         .where(
-          and(
-            eq(invitation.id, input.id),
-            eq(invitation.familyId, familyId),
-          ),
+          and(eq(invitation.id, input.id), eq(invitation.familyId, familyId)),
         );
     }),
 });

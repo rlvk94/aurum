@@ -141,7 +141,14 @@
     "actual": "Faktisk",
     "remaining": "Tilbage",
     "projects": "Projekter",
-    "projectsEmpty": "Ingen aktive projekter endnu."
+    "projectsEmpty": "Ingen aktive projekter endnu.",
+    "pushBanner": {
+      "title": "Få mest muligt ud af Aurum",
+      "description": "Aktivér push-beskeder på denne enhed, så du får vigtige beskeder med det samme.",
+      "enable": "Aktivér push",
+      "enabling": "Aktiverer …",
+      "dismiss": "Skjul på denne enhed"
+    }
   },
   "accounts": {
     "title": "Konti",
@@ -961,7 +968,8 @@
       "categories": "Kategorier",
       "preferences": "Præferencer",
       "appearance": "Udseende",
-      "billing": "Abonnement"
+      "billing": "Abonnement",
+      "notifications": "Notifikationer"
     },
     "profile": {
       "title": "Profil",
@@ -1032,6 +1040,34 @@
       "themeDark": "Mørkt",
       "themeSystem": "System",
       "themeSystemDescription": "Følg din enheds indstilling"
+    },
+    "notifications": {
+      "title": "Notifikationer",
+      "description": "Vælg hvilke beskeder du vil modtage og hvordan.",
+      "preferencesTitle": "Beskedtyper",
+      "preferencesDescription": "Slå hver type til eller fra pr. kanal.",
+      "typeColumn": "Type",
+      "emailColumn": "E-mail",
+      "pushColumn": "Push",
+      "types": {
+        "challenge_off_track": {
+          "label": "Udfordring ude af kurs",
+          "description": "Når en familieudfordring er på vej til at misse sit mål."
+        }
+      },
+      "deviceTitle": "Push på denne enhed",
+      "deviceDescription": "Aktivér push-beskeder i denne browser for at modtage dem her.",
+      "enableOnDevice": "Aktivér push her",
+      "disableOnDevice": "Deaktivér push her",
+      "enabling": "Aktiverer …",
+      "unsupported": "Denne browser understøtter ikke push-beskeder.",
+      "iosInstallHint": "På iPhone/iPad skal Aurum først føjes til hjemmeskærmen, før push kan aktiveres.",
+      "permissionDenied": "Beskeder er blokeret. Tillad dem i browserens indstillinger for at fortsætte.",
+      "devicesHeading": "Tilmeldte enheder",
+      "noDevices": "Ingen enheder tilmeldt endnu.",
+      "unknownDevice": "Ukendt enhed",
+      "addedOn": "Tilføjet {date}",
+      "remove": "Fjern"
     }
   },
   "emails": {
@@ -1087,6 +1123,14 @@
         "intro": "Vi har modtaget betalingen for {familyName}. Alle Pro-funktioner er aktive igen.",
         "body": "Tak fordi I bruger Aurum."
       }
+    },
+    "challengeOffTrack": {
+      "subject": "{challengeName}: ude af kurs",
+      "preview": "Din udfordring {challengeName} er ikke på rette spor",
+      "heading": "Udfordring ude af kurs",
+      "intro": "Din udfordring „{challengeName}” er i øjeblikket ikke på rette spor for denne periode.",
+      "body": "Tjek forbruget og justér, mens der stadig er tid til at nå målet.",
+      "cta": "Se udfordring"
     }
   },
   "tutorial": {
@@ -1541,5 +1585,13 @@
     "menu": "Menu",
     "addToHomescreen": "Hjemmeskærm",
     "continueInBrowser": "Fortsæt i browser"
+  },
+  "notifications": {
+    "push": {
+      "challengeOffTrack": {
+        "title": "{challengeName} er ude af kurs",
+        "body": "Du er ikke på rette spor for denne periode. Tryk for at se."
+      }
+    }
   }
 }

@@ -14,13 +14,15 @@ export function LandingFooter() {
   ];
 
   return (
-    <footer className="relative border-t border-primary/15 pt-16 pb-10">
+    <footer className="border-primary/15 relative border-t pt-16 pb-10">
       <div className="mx-auto max-w-6xl px-6">
         <div className="flex flex-col items-center gap-12 md:flex-row md:items-start md:justify-center md:gap-24">
           <div className="text-center md:max-w-sm md:text-left">
             <SectionMarker>§ Aurum</SectionMarker>
-            <div className="mt-3 font-display text-2xl text-foreground">Aurum</div>
-            <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+            <div className="font-display text-foreground mt-3 text-2xl">
+              Aurum
+            </div>
+            <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
               {t("tagline")}
             </p>
           </div>
@@ -32,7 +34,7 @@ export function LandingFooter() {
                 <li key={l.label}>
                   <Link
                     href={l.href}
-                    className="text-muted-foreground transition-colors hover:text-primary"
+                    className="text-muted-foreground hover:text-primary transition-colors"
                   >
                     {l.label}
                   </Link>
@@ -44,7 +46,7 @@ export function LandingFooter() {
 
         <div className="almanac-rule mt-12" />
 
-        <p className="almanac-smallcaps mt-6 text-center text-[10px] tracking-[0.28em] text-muted-foreground">
+        <p className="almanac-smallcaps text-muted-foreground mt-6 text-center text-[10px] tracking-[0.28em]">
           {t("colophon")}
         </p>
       </div>

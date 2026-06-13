@@ -59,7 +59,9 @@ function checkDateOrder(
 
 const createSchema = z
   .object(baseShape)
-  .superRefine((data, ctx) => checkDateOrder(data.startDate, data.endDate, ctx));
+  .superRefine((data, ctx) =>
+    checkDateOrder(data.startDate, data.endDate, ctx),
+  );
 
 const updateSchema = z
   .object({
@@ -75,7 +77,9 @@ const updateSchema = z
     startDate: true,
     endDate: true,
   })
-  .superRefine((data, ctx) => checkDateOrder(data.startDate, data.endDate, ctx));
+  .superRefine((data, ctx) =>
+    checkDateOrder(data.startDate, data.endDate, ctx),
+  );
 
 async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   const [dbUser] = await db

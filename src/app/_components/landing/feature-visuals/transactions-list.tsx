@@ -11,47 +11,87 @@ type Row = {
 };
 
 const ROWS: Row[] = [
-  { name: "REMA 1000 · Frederiksberg", date: "24. apr.", category: "Dagligvarer", categoryToken: "var(--expense)", amount: "−486 kr." },
-  { name: "Løn — april", date: "23. apr.", category: "Indkomst", categoryToken: "var(--income)", amount: "+21.793 kr.", income: true },
-  { name: "DSB Rejsekort", date: "22. apr.", category: "Transport", categoryToken: "var(--savings)", amount: "−240 kr." },
-  { name: "Netflix", date: "20. apr.", category: "Abonnementer", categoryToken: "var(--debt)", amount: "−119 kr.", suggested: true },
-  { name: "Bilka · Fields", date: "19. apr.", category: "Dagligvarer", categoryToken: "var(--expense)", amount: "−1.284 kr." },
-  { name: "Overførsel · Opsparing", date: "18. apr.", category: "Opsparing", categoryToken: "var(--savings)", amount: "−2.000 kr." },
+  {
+    name: "REMA 1000 · Frederiksberg",
+    date: "24. apr.",
+    category: "Dagligvarer",
+    categoryToken: "var(--expense)",
+    amount: "−486 kr.",
+  },
+  {
+    name: "Løn — april",
+    date: "23. apr.",
+    category: "Indkomst",
+    categoryToken: "var(--income)",
+    amount: "+21.793 kr.",
+    income: true,
+  },
+  {
+    name: "DSB Rejsekort",
+    date: "22. apr.",
+    category: "Transport",
+    categoryToken: "var(--savings)",
+    amount: "−240 kr.",
+  },
+  {
+    name: "Netflix",
+    date: "20. apr.",
+    category: "Abonnementer",
+    categoryToken: "var(--debt)",
+    amount: "−119 kr.",
+    suggested: true,
+  },
+  {
+    name: "Bilka · Fields",
+    date: "19. apr.",
+    category: "Dagligvarer",
+    categoryToken: "var(--expense)",
+    amount: "−1.284 kr.",
+  },
+  {
+    name: "Overførsel · Opsparing",
+    date: "18. apr.",
+    category: "Opsparing",
+    categoryToken: "var(--savings)",
+    amount: "−2.000 kr.",
+  },
 ];
 
 export function TransactionsList() {
   return (
-    <div className="relative w-full rounded-lg border border-border bg-card shadow-card">
+    <div className="border-border bg-card shadow-card relative w-full rounded-lg border">
       <div className="flex items-baseline justify-between p-5 pb-3">
         <SectionMarker>§ Transaktioner · April 2026</SectionMarker>
-        <span className="almanac-smallcaps text-[10px] tracking-[0.18em] text-muted-foreground">
+        <span className="almanac-smallcaps text-muted-foreground text-[10px] tracking-[0.18em]">
           06 poster
         </span>
       </div>
       <div className="almanac-rule" />
 
-      <ul className="divide-y divide-border">
+      <ul className="divide-border divide-y">
         {ROWS.map((r, i) => (
           <li
             key={i}
             className="grid grid-cols-[auto_1fr_auto] items-center gap-4 px-5 py-3 text-sm"
           >
-            <div className="almanac-numerals w-12 text-[11px] tracking-tight text-muted-foreground">
+            <div className="almanac-numerals text-muted-foreground w-12 text-[11px] tracking-tight">
               {r.date}
             </div>
             <div className="min-w-0">
-              <div className="truncate font-medium text-foreground">{r.name}</div>
+              <div className="text-foreground truncate font-medium">
+                {r.name}
+              </div>
               <div className="mt-0.5 flex items-center gap-2">
                 <span
                   aria-hidden
                   className="h-1.5 w-1.5 rounded-full"
                   style={{ backgroundColor: r.categoryToken }}
                 />
-                <span className="almanac-smallcaps text-[9px] tracking-[0.18em] text-muted-foreground">
+                <span className="almanac-smallcaps text-muted-foreground text-[9px] tracking-[0.18em]">
                   {r.category}
                 </span>
                 {r.suggested && (
-                  <span className="almanac-smallcaps rounded-sm border border-primary/40 bg-primary/5 px-1.5 py-0.5 text-[8px] tracking-[0.18em] text-primary">
+                  <span className="almanac-smallcaps border-primary/40 bg-primary/5 text-primary rounded-sm border px-1.5 py-0.5 text-[8px] tracking-[0.18em]">
                     Forslag
                   </span>
                 )}
@@ -70,10 +110,10 @@ export function TransactionsList() {
 
       <div className="almanac-rule" />
       <div className="flex items-center justify-between p-4 text-sm">
-        <span className="almanac-smallcaps text-[10px] tracking-[0.18em] text-muted-foreground">
+        <span className="almanac-smallcaps text-muted-foreground text-[10px] tracking-[0.18em]">
           Netto · April
         </span>
-        <span className="almanac-numerals font-display text-base text-income">
+        <span className="almanac-numerals font-display text-income text-base">
           +17.664 kr.
         </span>
       </div>

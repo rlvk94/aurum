@@ -5,6 +5,9 @@ export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    // Skip T3 env validation in tests (required URLs aren't set), and let
+    // server-only modules be imported (aliased below to a no-op).
+    env: { SKIP_ENV_VALIDATION: "true" },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html"],
@@ -18,6 +21,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "~": path.resolve(__dirname, "./src"),
+      "server-only": path.resolve(__dirname, "./src/test/empty.ts"),
     },
   },
 });

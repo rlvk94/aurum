@@ -6,14 +6,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { format, parseISO } from "date-fns";
 import { da, enUS } from "date-fns/locale";
-import {
-  Archive,
-  Pencil,
-  Plus,
-  Trash2,
-  ArrowRight,
-  Link2,
-} from "lucide-react";
+import { Archive, Pencil, Plus, Trash2, ArrowRight, Link2 } from "lucide-react";
 import posthog from "posthog-js";
 
 import { api } from "~/trpc/react";
@@ -85,7 +78,9 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
     },
   });
 
-  usePageMetadata(project ? { title: project.name, parentPath: "/projects" } : null);
+  usePageMetadata(
+    project ? { title: project.name, parentPath: "/projects" } : null,
+  );
 
   const categoryMap = useMemo(
     () => new Map(categories.map((c) => [c.id, c])),
@@ -123,7 +118,9 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
     project.startDate && project.endDate
       ? `${format(parseISO(project.startDate), "d. MMM yyyy", { locale: dateLocale })} – ${format(parseISO(project.endDate), "d. MMM yyyy", { locale: dateLocale })}`
       : project.startDate
-        ? format(parseISO(project.startDate), "d. MMM yyyy", { locale: dateLocale })
+        ? format(parseISO(project.startDate), "d. MMM yyyy", {
+            locale: dateLocale,
+          })
         : project.endDate
           ? `→ ${format(parseISO(project.endDate), "d. MMM yyyy", { locale: dateLocale })}`
           : t("status.noDates");
@@ -146,13 +143,15 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
   return (
     <div className="container mx-auto space-y-8">
       {/* Hero */}
-      <div className="overflow-hidden rounded-2xl border border-border shadow-elevated">
+      <div className="border-border shadow-elevated overflow-hidden rounded-2xl border">
         <ProjectCover palette={palette} emoji={project.emoji} size="hero">
-          <div className="absolute right-6 top-6 z-20">
+          <div className="absolute top-6 right-6 z-20">
             <Badge
               className={cn(
-                "rounded-full border-0 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-wider backdrop-blur",
-                STATUS_CLASSES[project.archivedAt ? "archived" : progress.status],
+                "rounded-full border-0 px-2.5 py-0.5 text-[10px] font-medium tracking-wider uppercase backdrop-blur",
+                STATUS_CLASSES[
+                  project.archivedAt ? "archived" : progress.status
+                ],
               )}
             >
               {project.archivedAt
@@ -162,7 +161,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
           </div>
           <div className="absolute inset-x-6 bottom-6 z-20 flex items-end justify-between gap-4">
             <div className="min-w-0">
-              <h1 className="truncate font-display text-4xl text-[var(--cover-glyph)] sm:text-5xl">
+              <h1 className="font-display truncate text-4xl text-[var(--cover-glyph)] sm:text-5xl">
                 {project.name}
               </h1>
               <p className="mt-1 text-sm text-[var(--cover-glyph)] opacity-80">
@@ -173,7 +172,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
-                  className="relative z-30 h-9 rounded-full bg-card/40 px-4 text-foreground backdrop-blur hover:bg-card/70"
+                  className="bg-card/40 text-foreground hover:bg-card/70 relative z-30 h-9 rounded-full px-4 backdrop-blur"
                 >
                   <Pencil className="h-4 w-4" />
                   <span>{tCommon("actions")}</span>
@@ -211,7 +210,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
       </div>
 
       {project.description && (
-        <p className="max-w-3xl text-muted-foreground">{project.description}</p>
+        <p className="text-muted-foreground max-w-3xl">{project.description}</p>
       )}
 
       {/* KPIs */}
@@ -250,7 +249,9 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
         ) : (
           <KpiCard
             label={t("card.noLimit")}
-            value={t("labels.transactions", { count: project.transactionCount })}
+            value={t("labels.transactions", {
+              count: project.transactionCount,
+            })}
             tone="default"
           />
         )}
@@ -258,17 +259,19 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
 
       {/* Burndown lane */}
       {limitPct !== null && (
-        <div className="rounded-2xl border border-border bg-card p-6 shadow-card">
+        <div className="border-border bg-card shadow-card rounded-2xl border p-6">
           <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm font-medium text-foreground">
+            <p className="text-foreground text-sm font-medium">
               {t("labels.burndownLegend")}
             </p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {progress.status === "active" && progress.daysLeft !== null
                 ? t("labels.daysLeft", { count: progress.daysLeft })
-                : progress.status === "not_started" && progress.daysToStart !== null
+                : progress.status === "not_started" &&
+                    progress.daysToStart !== null
                   ? t("labels.startsIn", { count: progress.daysToStart })
-                  : progress.status === "ended" && progress.daysSinceEnd !== null
+                  : progress.status === "ended" &&
+                      progress.daysSinceEnd !== null
                     ? t("labels.endedDaysAgo", { count: progress.daysSinceEnd })
                     : t(`status.${progress.status}`)}
             </p>
@@ -278,7 +281,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
           <div className="relative mb-1.5 h-4 text-[11px]">
             {elapsedPct !== null && (
               <div
-                className="absolute -translate-x-1/2 whitespace-nowrap font-medium text-foreground"
+                className="text-foreground absolute -translate-x-1/2 font-medium whitespace-nowrap"
                 style={{ left: `${elapsedPct}%` }}
               >
                 {format(parseISO(todayIso()), "d. MMM", { locale: dateLocale })}
@@ -287,7 +290,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
           </div>
 
           {/* Bar */}
-          <div className="relative h-2 overflow-hidden rounded-full bg-muted">
+          <div className="bg-muted relative h-2 overflow-hidden rounded-full">
             <div
               className={cn(
                 "h-full rounded-full transition-all",
@@ -303,7 +306,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
             />
             {elapsedPct !== null && (
               <span
-                className="absolute top-1/2 h-4 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded bg-foreground"
+                className="bg-foreground absolute top-1/2 h-4 w-0.5 -translate-x-1/2 -translate-y-1/2 rounded"
                 style={{ left: `${elapsedPct}%` }}
                 aria-hidden
               />
@@ -311,7 +314,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
           </div>
 
           {/* Date axis */}
-          <div className="mt-1.5 flex items-center justify-between text-[11px] text-muted-foreground">
+          <div className="text-muted-foreground mt-1.5 flex items-center justify-between text-[11px]">
             <span>
               {project.startDate
                 ? format(parseISO(project.startDate), "d. MMM yyyy", {
@@ -329,7 +332,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
           </div>
 
           {/* Footer summary */}
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-border pt-3 text-xs">
+          <div className="border-border mt-4 flex flex-wrap items-center justify-between gap-2 border-t pt-3 text-xs">
             <span className="text-muted-foreground">
               {limitPct}% {t("labels.spent").toLowerCase()}
             </span>
@@ -340,7 +343,9 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
                   progress.isOnTrack ? "text-income" : "text-warning",
                 )}
               >
-                {progress.isOnTrack ? t("labels.onTrack") : t("labels.offTrack")}
+                {progress.isOnTrack
+                  ? t("labels.onTrack")
+                  : t("labels.offTrack")}
               </span>
             )}
             {elapsedPct !== null && (
@@ -359,7 +364,8 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
           rows={project.byCategory.map((c) => ({
             id: c.categoryId ?? "uncategorized",
             label: c.categoryId
-              ? (categoryMap.get(c.categoryId)?.name ?? t("labels.uncategorized"))
+              ? (categoryMap.get(c.categoryId)?.name ??
+                t("labels.uncategorized"))
               : t("labels.uncategorized"),
             icon: c.categoryId ? categoryMap.get(c.categoryId)?.icon : null,
             spent: c.spent - c.received,
@@ -371,7 +377,8 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
           heading={t("labels.byAccount")}
           rows={project.byAccount.map((a) => ({
             id: a.accountId,
-            label: accountMap.get(a.accountId)?.name ?? t("labels.untaggedAccount"),
+            label:
+              accountMap.get(a.accountId)?.name ?? t("labels.untaggedAccount"),
             icon: null,
             spent: a.spent - a.received,
             count: a.count,
@@ -383,7 +390,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
       {/* Recent transactions */}
       <div className="space-y-3">
         <div className="flex items-end justify-between">
-          <h2 className="font-display text-xl text-foreground">
+          <h2 className="font-display text-foreground text-xl">
             {t("labels.recentTransactions")}
           </h2>
           {project.transactionCount > 0 && (
@@ -400,8 +407,8 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
         </div>
 
         {project.recentTransactions.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-card/50 p-8 text-center">
-            <p className="text-sm text-muted-foreground">
+          <div className="border-border bg-card/50 rounded-xl border border-dashed p-8 text-center">
+            <p className="text-muted-foreground text-sm">
               {t("labels.noTransactions")}
             </p>
             <Button asChild variant="outline" className="mt-4" size="sm">
@@ -412,7 +419,7 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
             </Button>
           </div>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-border bg-card shadow-card">
+          <div className="border-border bg-card shadow-card overflow-hidden rounded-xl border">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -427,11 +434,13 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
               </TableHeader>
               <TableBody>
                 {project.recentTransactions.map((tx) => {
-                  const cat = tx.categoryId ? categoryMap.get(tx.categoryId) : null;
+                  const cat = tx.categoryId
+                    ? categoryMap.get(tx.categoryId)
+                    : null;
                   const acc = accountMap.get(tx.accountId);
                   return (
                     <TableRow key={tx.id}>
-                      <TableCell className="whitespace-nowrap text-muted-foreground">
+                      <TableCell className="text-muted-foreground whitespace-nowrap">
                         {format(parseISO(tx.date), "d. MMM yyyy", {
                           locale: dateLocale,
                         })}
@@ -439,21 +448,21 @@ export function ProjectDetailClient({ projectId }: { projectId: string }) {
                       <TableCell>
                         <div className="flex items-center gap-1.5">
                           {tx.transferGroupId && (
-                            <Link2 className="h-3.5 w-3.5 text-muted-foreground" />
+                            <Link2 className="text-muted-foreground h-3.5 w-3.5" />
                           )}
-                          <span className="font-medium text-foreground">
+                          <span className="text-foreground font-medium">
                             {tx.description}
                           </span>
                         </div>
                       </TableCell>
                       <TableCell>
                         {cat ? (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
+                          <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
                             {cat.icon && <span>{cat.icon}</span>}
                             {cat.name}
                           </span>
                         ) : (
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-muted-foreground text-xs">
                             {t("labels.uncategorized")}
                           </span>
                         )}
@@ -499,13 +508,13 @@ function KpiCard({
   tone: "default" | "income" | "expense";
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4 shadow-card">
-      <p className="text-xs uppercase tracking-wider text-muted-foreground">
+    <div className="border-border bg-card shadow-card rounded-xl border p-4">
+      <p className="text-muted-foreground text-xs tracking-wider uppercase">
         {label}
       </p>
       <p
         className={cn(
-          "mt-2 font-display text-2xl",
+          "font-display mt-2 text-2xl",
           tone === "income" && "text-income",
           tone === "expense" && "text-expense",
         )}
@@ -522,23 +531,35 @@ function BreakdownCard({
   total,
 }: {
   heading: string;
-  rows: { id: string; label: string; icon?: string | null; spent: number; count: number }[];
+  rows: {
+    id: string;
+    label: string;
+    icon?: string | null;
+    spent: number;
+    count: number;
+  }[];
   total: number;
 }) {
   const max = Math.max(1, ...rows.map((r) => Math.abs(r.spent)));
-  const sorted = [...rows].sort((a, b) => Math.abs(b.spent) - Math.abs(a.spent));
+  const sorted = [...rows].sort(
+    (a, b) => Math.abs(b.spent) - Math.abs(a.spent),
+  );
   const t = useTranslations("projects");
 
   return (
-    <div className="rounded-xl border border-border bg-card p-5 shadow-card">
+    <div className="border-border bg-card shadow-card rounded-xl border p-5">
       <div className="mb-4 flex items-baseline justify-between">
-        <h3 className="font-display text-lg text-foreground">{heading}</h3>
-        <span className="text-xs text-muted-foreground">
-          {t("labels.transactions", { count: rows.reduce((acc, r) => acc + r.count, 0) })}
+        <h3 className="font-display text-foreground text-lg">{heading}</h3>
+        <span className="text-muted-foreground text-xs">
+          {t("labels.transactions", {
+            count: rows.reduce((acc, r) => acc + r.count, 0),
+          })}
         </span>
       </div>
       {sorted.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t("labels.noTransactions")}</p>
+        <p className="text-muted-foreground text-sm">
+          {t("labels.noTransactions")}
+        </p>
       ) : (
         <ul className="space-y-3">
           {sorted.map((r) => {
@@ -548,13 +569,13 @@ function BreakdownCard({
                 <div className="flex items-center justify-between gap-3 text-sm">
                   <span className="flex min-w-0 items-center gap-1.5">
                     {r.icon && <span>{r.icon}</span>}
-                    <span className="truncate text-foreground">{r.label}</span>
+                    <span className="text-foreground truncate">{r.label}</span>
                   </span>
-                  <span className="whitespace-nowrap font-medium text-foreground">
+                  <span className="text-foreground font-medium whitespace-nowrap">
                     {formatAmount(r.spent)}
                   </span>
                 </div>
-                <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+                <div className="bg-muted h-1.5 overflow-hidden rounded-full">
                   <div
                     className={cn(
                       "h-full rounded-full transition-all",
@@ -569,9 +590,11 @@ function BreakdownCard({
         </ul>
       )}
       {total !== 0 && (
-        <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-xs text-muted-foreground">
+        <div className="border-border text-muted-foreground mt-4 flex items-center justify-between border-t pt-3 text-xs">
           <span>{t("labels.net")}</span>
-          <span className="font-medium text-foreground">{formatAmount(total)}</span>
+          <span className="text-foreground font-medium">
+            {formatAmount(total)}
+          </span>
         </div>
       )}
     </div>

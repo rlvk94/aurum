@@ -70,11 +70,7 @@ async function loadBudgetInFamily(
   return row;
 }
 
-async function loadLineInFamily(
-  db: DbOrTx,
-  lineId: string,
-  familyId: string,
-) {
+async function loadLineInFamily(db: DbOrTx, lineId: string, familyId: string) {
   const [row] = await db
     .select({
       id: budgetLine.id,
@@ -90,7 +86,10 @@ async function loadLineInFamily(
     .innerJoin(budget, eq(budget.id, budgetLine.budgetId))
     .where(and(eq(budgetLine.id, lineId), eq(budget.familyId, familyId)));
   if (!row) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "Budget line not found" });
+    throw new TRPCError({
+      code: "NOT_FOUND",
+      message: "Budget line not found",
+    });
   }
   return row;
 }
@@ -140,7 +139,11 @@ async function fetchActualsByCategory(
 
   // Expand each line categoryId to itself + its child ids so a line on a
   // top-level parent aggregates spend across all its children.
-  const expansionMap = await expandCategoryIdsMap(db, familyId, lineCategoryIds);
+  const expansionMap = await expandCategoryIdsMap(
+    db,
+    familyId,
+    lineCategoryIds,
+  );
   if (expansionMap.size === 0) return new Map();
   const allTxCategoryIds = Array.from(
     new Set([...expansionMap.values()].flat()),
@@ -311,7 +314,8 @@ export const budgetRouter = createTRPCRouter({
       const actualsByBudget = await Promise.all(
         budgets.map(async (b) => {
           const entry = linesByBudget.get(b.id);
-          if (!entry) return { budgetId: b.id, map: new Map<string, number[]>() };
+          if (!entry)
+            return { budgetId: b.id, map: new Map<string, number[]>() };
           const accountIds = accountIdsByBudget.get(b.id) ?? [];
           const map = await fetchActualsByCategory(
             ctx.db,
@@ -377,9 +381,8 @@ export const budgetRouter = createTRPCRouter({
       const categoryIds = lines
         .map((l) => l.categoryId)
         .filter((c): c is string => Boolean(c));
-      const accountIds = (await loadAccountIdsByBudget(ctx.db, [b.id])).get(
-        b.id,
-      ) ?? [];
+      const accountIds =
+        (await loadAccountIdsByBudget(ctx.db, [b.id])).get(b.id) ?? [];
       const actuals = await fetchActualsByCategory(
         ctx.db,
         familyId,
@@ -572,7 +575,7 @@ export const budgetRouter = createTRPCRouter({
       const nextStartMonth =
         input.startMonth !== undefined
           ? input.startMonth
-          : existing.startMonth ?? defaultStartMonth(nextRecurrence);
+          : (existing.startMonth ?? defaultStartMonth(nextRecurrence));
 
       const patch: Partial<typeof budgetLine.$inferInsert> = {
         updatedAt: new Date(),
@@ -605,7 +608,10 @@ export const budgetRouter = createTRPCRouter({
         );
       }
 
-      await ctx.db.update(budgetLine).set(patch).where(eq(budgetLine.id, input.id));
+      await ctx.db
+        .update(budgetLine)
+        .set(patch)
+        .where(eq(budgetLine.id, input.id));
     }),
 
   updateCell: protectedProcedure

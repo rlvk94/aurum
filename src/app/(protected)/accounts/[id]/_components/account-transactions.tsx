@@ -92,10 +92,7 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
 
   const { data, isLoading } = api.transaction.list.useQuery({
     accountId,
-    type:
-      typeFilter === ALL
-        ? undefined
-        : (typeFilter as "expense" | "income"),
+    type: typeFilter === ALL ? undefined : (typeFilter as "expense" | "income"),
     search: debouncedSearch || undefined,
   });
   const transactions = data?.items;
@@ -172,76 +169,37 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
 
   return (
     <TooltipProvider delayDuration={200}>
-    <Card>
-      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <CardTitle className="text-base">
-          {tDetail("transactionsTitle")}
-        </CardTitle>
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative w-full sm:w-64">
-            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={t("searchPlaceholder")}
-              className="pl-9"
-            />
+      <Card>
+        <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle className="text-base">
+            {tDetail("transactionsTitle")}
+          </CardTitle>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="relative w-full sm:w-64">
+              <Search className="text-muted-foreground pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
+              <Input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={t("searchPlaceholder")}
+                className="pl-9"
+              />
+            </div>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-full sm:w-auto sm:min-w-[160px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={ALL}>{t("allTypes")}</SelectItem>
+                <SelectItem value="expense">{t("expense")}</SelectItem>
+                <SelectItem value="income">{t("income")}</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <Select value={typeFilter} onValueChange={setTypeFilter}>
-            <SelectTrigger className="w-full sm:w-auto sm:min-w-[160px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value={ALL}>{t("allTypes")}</SelectItem>
-              <SelectItem value="expense">{t("expense")}</SelectItem>
-              <SelectItem value="income">{t("income")}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </CardHeader>
-      <CardContent className="p-0">
-        {isLoading ? (
-          <div className="p-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{tCommon("date")}</TableHead>
-                  <TableHead>{t("descriptionLabel")}</TableHead>
-                  <TableHead>{tCommon("category")}</TableHead>
-                  <TableHead className="text-right">{t("amount")}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {Array.from({ length: 8 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <Skeleton className="h-4 w-16" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-4 w-48" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-24 rounded-full" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="ml-auto h-4 w-20" />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        ) : transactions?.length === 0 ? (
-          <div className="p-6">
-            <EmptyState
-              icon={ArrowLeftRight}
-              message={tDetail("noTransactions")}
-            />
-          </div>
-        ) : (
-          <>
-            <div className="hidden md:block">
+        </CardHeader>
+        <CardContent className="p-0">
+          {isLoading ? (
+            <div className="p-6">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -249,90 +207,241 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
                     <TableHead>{t("descriptionLabel")}</TableHead>
                     <TableHead>{tCommon("category")}</TableHead>
                     <TableHead className="text-right">{t("amount")}</TableHead>
-                    <TableHead className="w-[48px]"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions?.map((tx) => {
-                    const category = tx.categoryId
-                      ? categoryMap.get(tx.categoryId)
-                      : null;
-                    const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
-                    const sign = tx.type === "expense" ? -1 : 1;
-                    return (
-                      <TableRow
-                        key={tx.id}
-                        className={cn(
-                          tx.excludedFromCalculations && "opacity-60",
-                        )}
-                      >
-                        <TableCell className="whitespace-nowrap text-muted-foreground">
-                          {format(dateObj, "d. MMM yyyy", {
-                            locale: dateLocale,
-                          })}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1.5">
+                  {Array.from({ length: 8 }).map((_, i) => (
+                    <TableRow key={i}>
+                      <TableCell>
+                        <Skeleton className="h-4 w-16" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-4 w-48" />
+                      </TableCell>
+                      <TableCell>
+                        <Skeleton className="h-6 w-24 rounded-full" />
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Skeleton className="ml-auto h-4 w-20" />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : transactions?.length === 0 ? (
+            <div className="p-6">
+              <EmptyState
+                icon={ArrowLeftRight}
+                message={tDetail("noTransactions")}
+              />
+            </div>
+          ) : (
+            <>
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>{tCommon("date")}</TableHead>
+                      <TableHead>{t("descriptionLabel")}</TableHead>
+                      <TableHead>{tCommon("category")}</TableHead>
+                      <TableHead className="text-right">
+                        {t("amount")}
+                      </TableHead>
+                      <TableHead className="w-[48px]"></TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {transactions?.map((tx) => {
+                      const category = tx.categoryId
+                        ? categoryMap.get(tx.categoryId)
+                        : null;
+                      const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
+                      const sign = tx.type === "expense" ? -1 : 1;
+                      return (
+                        <TableRow
+                          key={tx.id}
+                          className={cn(
+                            tx.excludedFromCalculations && "opacity-60",
+                          )}
+                        >
+                          <TableCell className="text-muted-foreground whitespace-nowrap">
+                            {format(dateObj, "d. MMM yyyy", {
+                              locale: dateLocale,
+                            })}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              {tx.transferGroupId && (
+                                <Link2
+                                  className="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                                  aria-label={t("linkedTransaction")}
+                                />
+                              )}
+                              <div>
+                                <p className="text-foreground font-medium">
+                                  {tx.description}
+                                </p>
+                                {tx.note && (
+                                  <p className="text-muted-foreground text-xs">
+                                    {tx.note}
+                                  </p>
+                                )}
+                              </div>
+                              {tx.excludedFromCalculations && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="border-border text-muted-foreground inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase">
+                                      <EyeOff className="h-3 w-3" aria-hidden />
+                                      {t("excludedBadge")}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs">
+                                    {t("excludedTooltip")}
+                                  </TooltipContent>
+                                </Tooltip>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            {category ? (
+                              <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
+                                {category.icon && <span>{category.icon}</span>}
+                                {category.name}
+                              </span>
+                            ) : (
+                              <span className="text-muted-foreground text-xs">
+                                —
+                              </span>
+                            )}
+                          </TableCell>
+                          <TableCell
+                            className={cn(
+                              "text-right font-medium whitespace-nowrap",
+                              tx.type === "expense" && "text-expense",
+                              tx.type === "income" && "text-income",
+                            )}
+                          >
+                            {sign === -1 ? "-" : "+"}
+                            {formatAmount(tx.amount)}
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem
+                                  onClick={() => setEditing(tx)}
+                                >
+                                  <Pencil />
+                                  {tCommon("edit")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  className="text-destructive"
+                                  onClick={() => deleteTx.mutate({ id: tx.id })}
+                                >
+                                  <Trash2 />
+                                  {tCommon("delete")}
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              <ul className="divide-border divide-y md:hidden">
+                {transactions?.map((tx) => {
+                  const category = tx.categoryId
+                    ? categoryMap.get(tx.categoryId)
+                    : null;
+                  const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
+                  const sign = tx.type === "expense" ? -1 : 1;
+                  return (
+                    <li
+                      key={tx.id}
+                      className={cn(
+                        "px-4 py-3",
+                        tx.excludedFromCalculations && "opacity-60",
+                      )}
+                    >
+                      <div className="flex items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-muted-foreground flex items-center gap-1 text-xs">
                             {tx.transferGroupId && (
                               <Link2
-                                className="text-muted-foreground h-3.5 w-3.5 shrink-0"
+                                className="h-3 w-3 shrink-0"
                                 aria-label={t("linkedTransaction")}
                               />
                             )}
-                            <div>
-                              <p className="font-medium text-foreground">
-                                {tx.description}
-                              </p>
-                              {tx.note && (
-                                <p className="text-xs text-muted-foreground">
-                                  {tx.note}
-                                </p>
+                            <span className="whitespace-nowrap">
+                              {format(dateObj, "d. MMM yyyy", {
+                                locale: dateLocale,
+                              })}
+                            </span>
+                          </div>
+                          <p className="text-foreground mt-0.5 truncate text-sm font-medium">
+                            {tx.description}
+                          </p>
+                          {tx.note && (
+                            <p className="text-muted-foreground truncate text-xs">
+                              {tx.note}
+                            </p>
+                          )}
+                          {(category != null ||
+                            tx.excludedFromCalculations) && (
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                              {category && (
+                                <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
+                                  {category.icon && (
+                                    <span>{category.icon}</span>
+                                  )}
+                                  {category.name}
+                                </span>
+                              )}
+                              {tx.excludedFromCalculations && (
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="border-border text-muted-foreground inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium tracking-wide uppercase">
+                                      <EyeOff className="h-3 w-3" aria-hidden />
+                                      {t("excludedBadge")}
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent className="max-w-xs">
+                                    {t("excludedTooltip")}
+                                  </TooltipContent>
+                                </Tooltip>
                               )}
                             </div>
-                            {tx.excludedFromCalculations && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="border-border text-muted-foreground inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
-                                    <EyeOff className="h-3 w-3" aria-hidden />
-                                    {t("excludedBadge")}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs">
-                                  {t("excludedTooltip")}
-                                </TooltipContent>
-                              </Tooltip>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <span
+                            className={cn(
+                              "text-sm font-medium whitespace-nowrap",
+                              tx.type === "expense" && "text-expense",
+                              tx.type === "income" && "text-income",
                             )}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {category ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
-                              {category.icon && <span>{category.icon}</span>}
-                              {category.name}
-                            </span>
-                          ) : (
-                            <span className="text-xs text-muted-foreground">
-                              —
-                            </span>
-                          )}
-                        </TableCell>
-                        <TableCell
-                          className={cn(
-                            "whitespace-nowrap text-right font-medium",
-                            tx.type === "expense" && "text-expense",
-                            tx.type === "income" && "text-income",
-                          )}
-                        >
-                          {sign === -1 ? "-" : "+"}
-                          {formatAmount(tx.amount)}
-                        </TableCell>
-                        <TableCell>
+                          >
+                            {sign === -1 ? "-" : "+"}
+                            {formatAmount(tx.amount)}
+                          </span>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
+                                className="-mr-1 h-8 w-8"
                               >
                                 <MoreHorizontal className="h-4 w-4" />
                               </Button>
@@ -343,6 +452,24 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
                                 {tCommon("edit")}
                               </DropdownMenuItem>
                               <DropdownMenuItem
+                                onClick={() =>
+                                  toggleExclusion.mutate({
+                                    id: tx.id,
+                                    excludedFromCalculations:
+                                      !tx.excludedFromCalculations,
+                                  })
+                                }
+                              >
+                                {tx.excludedFromCalculations ? (
+                                  <Eye />
+                                ) : (
+                                  <EyeOff />
+                                )}
+                                {tx.excludedFromCalculations
+                                  ? t("includeAction")
+                                  : t("excludeAction")}
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
                                 className="text-destructive"
                                 onClick={() => deleteTx.mutate({ id: tx.id })}
                               >
@@ -351,147 +478,24 @@ export function AccountTransactions({ accountId }: { accountId: string }) {
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-
-            <ul className="divide-y divide-border md:hidden">
-              {transactions?.map((tx) => {
-                const category = tx.categoryId
-                  ? categoryMap.get(tx.categoryId)
-                  : null;
-                const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
-                const sign = tx.type === "expense" ? -1 : 1;
-                return (
-                  <li
-                    key={tx.id}
-                    className={cn(
-                      "px-4 py-3",
-                      tx.excludedFromCalculations && "opacity-60",
-                    )}
-                  >
-                    <div className="flex items-start gap-2">
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          {tx.transferGroupId && (
-                            <Link2
-                              className="h-3 w-3 shrink-0"
-                              aria-label={t("linkedTransaction")}
-                            />
-                          )}
-                          <span className="whitespace-nowrap">
-                            {format(dateObj, "d. MMM yyyy", {
-                              locale: dateLocale,
-                            })}
-                          </span>
                         </div>
-                        <p className="mt-0.5 truncate text-sm font-medium text-foreground">
-                          {tx.description}
-                        </p>
-                        {tx.note && (
-                          <p className="truncate text-xs text-muted-foreground">
-                            {tx.note}
-                          </p>
-                        )}
-                        {(category != null || tx.excludedFromCalculations) && (
-                          <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                            {category && (
-                              <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-xs text-accent-foreground">
-                                {category.icon && <span>{category.icon}</span>}
-                                {category.name}
-                              </span>
-                            )}
-                            {tx.excludedFromCalculations && (
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="border-border text-muted-foreground inline-flex items-center gap-1 rounded-full border px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide">
-                                    <EyeOff className="h-3 w-3" aria-hidden />
-                                    {t("excludedBadge")}
-                                  </span>
-                                </TooltipTrigger>
-                                <TooltipContent className="max-w-xs">
-                                  {t("excludedTooltip")}
-                                </TooltipContent>
-                              </Tooltip>
-                            )}
-                          </div>
-                        )}
                       </div>
-                      <div className="flex items-center gap-1">
-                        <span
-                          className={cn(
-                            "whitespace-nowrap text-sm font-medium",
-                            tx.type === "expense" && "text-expense",
-                            tx.type === "income" && "text-income",
-                          )}
-                        >
-                          {sign === -1 ? "-" : "+"}
-                          {formatAmount(tx.amount)}
-                        </span>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="-mr-1 h-8 w-8"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => setEditing(tx)}>
-                              <Pencil />
-                              {tCommon("edit")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() =>
-                                toggleExclusion.mutate({
-                                  id: tx.id,
-                                  excludedFromCalculations:
-                                    !tx.excludedFromCalculations,
-                                })
-                              }
-                            >
-                              {tx.excludedFromCalculations ? (
-                                <Eye />
-                              ) : (
-                                <EyeOff />
-                              )}
-                              {tx.excludedFromCalculations
-                                ? t("includeAction")
-                                : t("excludeAction")}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => deleteTx.mutate({ id: tx.id })}
-                            >
-                              <Trash2 />
-                              {tCommon("delete")}
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
-          </>
-        )}
-      </CardContent>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          )}
+        </CardContent>
 
-      <TransactionFormDialog
-        key={editing?.id}
-        open={Boolean(editing)}
-        onOpenChange={(open) => !open && setEditing(null)}
-        transaction={editing ?? undefined}
-        accounts={accounts}
-      />
-    </Card>
+        <TransactionFormDialog
+          key={editing?.id}
+          open={Boolean(editing)}
+          onOpenChange={(open) => !open && setEditing(null)}
+          transaction={editing ?? undefined}
+          accounts={accounts}
+        />
+      </Card>
     </TooltipProvider>
   );
 }

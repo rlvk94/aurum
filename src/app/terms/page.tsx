@@ -19,11 +19,11 @@ export default async function TermsPage() {
     terms.content[locale === "en" ? "en" : "da"] ?? terms.content.da;
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="bg-background text-foreground min-h-screen">
       <div className="mx-auto max-w-3xl px-6 py-12 sm:py-16">
         <Link
           href="/"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1.5 text-sm transition-colors"
         >
           <ArrowLeft className="size-4" />
           {t("backToHome")}

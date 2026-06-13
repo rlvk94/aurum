@@ -89,7 +89,7 @@ export function buildBudgetTree(
   };
 
   for (const line of lines) {
-    const cat = line.categoryId ? byId.get(line.categoryId) ?? null : null;
+    const cat = line.categoryId ? (byId.get(line.categoryId) ?? null) : null;
 
     if (!cat) {
       const top = ensureTop("__orphan", null, orphanLabel);

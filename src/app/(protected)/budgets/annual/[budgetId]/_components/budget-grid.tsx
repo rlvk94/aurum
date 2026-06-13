@@ -140,7 +140,7 @@ function SummaryCell({
           )}
           {overshootPct > 0 && (
             <div
-              className="absolute inset-y-0 right-0 bg-expense/80"
+              className="bg-expense/80 absolute inset-y-0 right-0"
               style={{ width: `${overshootPct}%` }}
             />
           )}
@@ -168,7 +168,7 @@ function SummaryCell({
         "flex flex-col gap-1 text-right",
         "-m-1 w-full cursor-pointer rounded-md p-1 transition-colors",
         "hover:bg-muted/60",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+        "focus-visible:ring-primary/40 focus-visible:ring-2 focus-visible:outline-none",
       )}
     >
       {inner}
@@ -216,7 +216,11 @@ function SummaryTooltip({
   const pctOfPlan =
     planned > 0 ? Math.round((actual / planned) * 100) : actual > 0 ? null : 0;
   const varianceLabel =
-    variance > 0 ? tT("overBy") : variance < 0 ? tT("remaining") : tT("onBudget");
+    variance > 0
+      ? tT("overBy")
+      : variance < 0
+        ? tT("remaining")
+        : tT("onBudget");
   const varianceColor =
     variance > 0
       ? "text-expense"
@@ -234,11 +238,11 @@ function SummaryTooltip({
 
   return (
     <div className="w-64 px-4 py-3 text-left">
-      <p className="almanac-smallcaps text-[10px] text-muted-foreground">
+      <p className="almanac-smallcaps text-muted-foreground text-[10px]">
         {title}
       </p>
       {subtitle && (
-        <p className="mt-0.5 truncate font-display text-base leading-tight text-foreground">
+        <p className="font-display text-foreground mt-0.5 truncate text-base leading-tight">
           {subtitle}
         </p>
       )}
@@ -260,13 +264,13 @@ function SummaryTooltip({
             )}
             {overshootPct > 0 && (
               <div
-                className="absolute inset-y-0 right-0 bg-expense/80"
+                className="bg-expense/80 absolute inset-y-0 right-0"
                 style={{ width: `${overshootPct}%` }}
               />
             )}
           </div>
           {pctOfPlan !== null && actual > 0 && (
-            <div className="flex items-center justify-between text-[10px] almanac-smallcaps">
+            <div className="almanac-smallcaps flex items-center justify-between text-[10px]">
               <span className="text-muted-foreground">{tT("pace")}</span>
               <span className={varianceColor}>
                 {tT("usedPct", { pct: String(pctOfPlan) })}
@@ -374,10 +378,7 @@ export function BudgetGrid({
       return next;
     });
 
-  const totalsTarget = useMemo(
-    () => collectAllCategoryIds(tree),
-    [tree],
-  );
+  const totalsTarget = useMemo(() => collectAllCategoryIds(tree), [tree]);
 
   const groupTarget = (
     group: CategoryGroup | null,
@@ -386,8 +387,7 @@ export function BudgetGrid({
     planned: number,
     actual: number,
   ): DrillDownTarget => {
-    const part =
-      group === null ? totalsTarget : collectGroupCategoryIds(group);
+    const part = group === null ? totalsTarget : collectGroupCategoryIds(group);
     return {
       key: `${group?.id ?? "__totals"}::${monthIndex ?? "year"}`,
       label,
@@ -404,21 +404,21 @@ export function BudgetGrid({
 
   if (budget.lines.length === 0) {
     return (
-      <div className="relative overflow-hidden rounded-[14px] border border-dashed border-border bg-card px-6 py-16 text-center">
+      <div className="border-border bg-card relative overflow-hidden rounded-[14px] border border-dashed px-6 py-16 text-center">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 opacity-60"
         >
-          <div className="absolute left-1/2 top-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/10 blur-3xl" />
+          <div className="bg-primary/10 absolute top-1/2 left-1/2 h-56 w-56 -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" />
         </div>
         <div className="relative mx-auto max-w-md">
-          <p className="almanac-smallcaps text-[10px] text-primary/80">
+          <p className="almanac-smallcaps text-primary/80 text-[10px]">
             {t("firstEntry")}
           </p>
-          <h3 className="mt-2 font-display text-2xl text-foreground">
+          <h3 className="font-display text-foreground mt-2 text-2xl">
             {t("linesEmptyHeadline")}
           </h3>
-          <p className="mt-3 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-3 text-sm">
             {t("linesEmptyDescription")}
           </p>
           <Button className="mt-6" onClick={onAddLine}>
@@ -446,156 +446,156 @@ export function BudgetGrid({
         makeTarget={groupTarget}
         onDrillDown={onDrillDown}
       />
-      <div className="relative hidden w-full min-w-0 max-w-full overflow-hidden rounded-[14px] border border-border bg-card shadow-card md:block">
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 z-30 h-px"
-        style={{
-          background:
-            "linear-gradient(to right, transparent 0%, hsl(38 60% 50% / 0.5) 50%, transparent 100%)",
-        }}
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-gradient-to-l from-card to-transparent"
-      />
+      <div className="border-border bg-card shadow-card relative hidden w-full max-w-full min-w-0 overflow-hidden rounded-[14px] border md:block">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 top-0 z-30 h-px"
+          style={{
+            background:
+              "linear-gradient(to right, transparent 0%, hsl(38 60% 50% / 0.5) 50%, transparent 100%)",
+          }}
+        />
+        <div
+          aria-hidden
+          className="from-card pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-gradient-to-l to-transparent"
+        />
 
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-max border-collapse text-sm">
-          <colgroup>
-            <col className="w-[14rem]" />
-            {months.map((m) => (
-              <col key={m} className="w-[92px]" />
-            ))}
-            <col className="w-[128px]" />
-            <col className="w-10" />
-          </colgroup>
-          <thead>
-            <tr>
-              <th
-                scope="col"
-                className="sticky left-0 z-20 bg-card px-4 py-3 text-left"
-              >
-                <span className="almanac-smallcaps text-[10px] text-muted-foreground">
-                  {t("categoryLineHeader")}
-                </span>
-              </th>
-              {months.map((m, i) => {
-                const isCurrent = currentMonthIndex === i;
-                return (
-                  <th
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-max border-collapse text-sm">
+            <colgroup>
+              <col className="w-[14rem]" />
+              {months.map((m) => (
+                <col key={m} className="w-[92px]" />
+              ))}
+              <col className="w-[128px]" />
+              <col className="w-10" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th
+                  scope="col"
+                  className="bg-card sticky left-0 z-20 px-4 py-3 text-left"
+                >
+                  <span className="almanac-smallcaps text-muted-foreground text-[10px]">
+                    {t("categoryLineHeader")}
+                  </span>
+                </th>
+                {months.map((m, i) => {
+                  const isCurrent = currentMonthIndex === i;
+                  return (
+                    <th
+                      key={m}
+                      scope="col"
+                      className={`px-2 py-3 text-left ${
+                        isCurrent ? "bg-primary/[0.04]" : ""
+                      }`}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span
+                          className={`almanac-smallcaps text-[10px] ${
+                            isCurrent ? "text-primary" : "text-muted-foreground"
+                          }`}
+                        >
+                          {m}
+                        </span>
+                        {isCurrent && (
+                          <span
+                            aria-hidden
+                            className="bg-primary h-1 w-1 rounded-full"
+                          />
+                        )}
+                      </div>
+                    </th>
+                  );
+                })}
+                <th scope="col" className="px-4 py-3 text-right">
+                  <span className="almanac-smallcaps text-muted-foreground text-[10px]">
+                    {t("yearTotal")}
+                  </span>
+                </th>
+                <th scope="col" className="px-1 py-3" aria-hidden />
+              </tr>
+            </thead>
+            <tbody>
+              {tree.map((group) => (
+                <GroupRows
+                  key={group.id}
+                  group={group}
+                  depth={0}
+                  expanded={expanded}
+                  onToggle={toggle}
+                  months={months}
+                  monthsLong={monthsLong}
+                  currentMonthIndex={currentMonthIndex}
+                  onEditLine={onEditLine}
+                  onDeleteLine={onDeleteLine}
+                  onUpdateCell={onUpdateCell}
+                  makeTarget={groupTarget}
+                  onDrillDown={onDrillDown}
+                />
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-primary/30 bg-muted/50 border-t-2">
+                <th
+                  scope="row"
+                  className="bg-muted sticky left-0 z-10 px-4 py-3 text-left"
+                >
+                  <span className="almanac-smallcaps text-muted-foreground text-[10px]">
+                    {t("totals")}
+                  </span>
+                </th>
+                {months.map((m, i) => (
+                  <td
                     key={m}
-                    scope="col"
-                    className={`px-2 py-3 text-left ${
-                      isCurrent ? "bg-primary/[0.04]" : ""
+                    className={`px-2 py-3 align-middle ${
+                      currentMonthIndex === i ? "bg-primary/[0.03]" : ""
                     }`}
                   >
-                    <div className="flex items-center gap-1">
-                      <span
-                        className={`almanac-smallcaps text-[10px] ${
-                          isCurrent ? "text-primary" : "text-muted-foreground"
-                        }`}
-                      >
-                        {m}
-                      </span>
-                      {isCurrent && (
-                        <span
-                          aria-hidden
-                          className="h-1 w-1 rounded-full bg-primary"
-                        />
-                      )}
-                    </div>
-                  </th>
-                );
-              })}
-              <th scope="col" className="px-4 py-3 text-right">
-                <span className="almanac-smallcaps text-[10px] text-muted-foreground">
-                  {t("yearTotal")}
-                </span>
-              </th>
-              <th scope="col" className="px-1 py-3" aria-hidden />
-            </tr>
-          </thead>
-          <tbody>
-            {tree.map((group) => (
-              <GroupRows
-                key={group.id}
-                group={group}
-                depth={0}
-                expanded={expanded}
-                onToggle={toggle}
-                months={months}
-                monthsLong={monthsLong}
-                currentMonthIndex={currentMonthIndex}
-                onEditLine={onEditLine}
-                onDeleteLine={onDeleteLine}
-                onUpdateCell={onUpdateCell}
-                makeTarget={groupTarget}
-                onDrillDown={onDrillDown}
-              />
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="border-t-2 border-primary/30 bg-muted/50">
-              <th
-                scope="row"
-                className="sticky left-0 z-10 bg-muted px-4 py-3 text-left"
-              >
-                <span className="almanac-smallcaps text-[10px] text-muted-foreground">
-                  {t("totals")}
-                </span>
-              </th>
-              {months.map((m, i) => (
-                <td
-                  key={m}
-                  className={`px-2 py-3 align-middle ${
-                    currentMonthIndex === i ? "bg-primary/[0.03]" : ""
-                  }`}
-                >
+                    <SummaryCell
+                      planned={totals.plannedByMonth[i] ?? 0}
+                      actual={totals.actualByMonth[i] ?? 0}
+                      tooltip={{ title: monthsLong[i]!, subtitle: t("totals") }}
+                      onClick={() =>
+                        onDrillDown(
+                          groupTarget(
+                            null,
+                            i,
+                            t("totals"),
+                            totals.plannedByMonth[i] ?? 0,
+                            totals.actualByMonth[i] ?? 0,
+                          ),
+                        )
+                      }
+                    />
+                  </td>
+                ))}
+                <td className="px-4 py-3 text-right align-middle">
                   <SummaryCell
-                    planned={totals.plannedByMonth[i] ?? 0}
-                    actual={totals.actualByMonth[i] ?? 0}
-                    tooltip={{ title: monthsLong[i]!, subtitle: t("totals") }}
+                    planned={totals.plannedYear}
+                    actual={totals.actualYear}
+                    size="lg"
+                    align="end"
+                    tooltip={{ title: t("yearTotal"), subtitle: t("totals") }}
                     onClick={() =>
                       onDrillDown(
                         groupTarget(
                           null,
-                          i,
+                          null,
                           t("totals"),
-                          totals.plannedByMonth[i] ?? 0,
-                          totals.actualByMonth[i] ?? 0,
+                          totals.plannedYear,
+                          totals.actualYear,
                         ),
                       )
                     }
                   />
                 </td>
-              ))}
-              <td className="px-4 py-3 align-middle text-right">
-                <SummaryCell
-                  planned={totals.plannedYear}
-                  actual={totals.actualYear}
-                  size="lg"
-                  align="end"
-                  tooltip={{ title: t("yearTotal"), subtitle: t("totals") }}
-                  onClick={() =>
-                    onDrillDown(
-                      groupTarget(
-                        null,
-                        null,
-                        t("totals"),
-                        totals.plannedYear,
-                        totals.actualYear,
-                      ),
-                    )
-                  }
-                />
-              </td>
-              <td />
-            </tr>
-          </tfoot>
-        </table>
+                <td />
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
-    </div>
     </>
   );
 }
@@ -643,10 +643,8 @@ function GroupRows({
     <>
       <tr
         className={`group/row border-t ${
-          depth === 0
-            ? "border-border"
-            : "border-border/50 bg-muted/[0.15]"
-        } transition-colors hover:bg-muted/40`}
+          depth === 0 ? "border-border" : "border-border/50 bg-muted/[0.15]"
+        } hover:bg-muted/40 transition-colors`}
       >
         <th
           scope="row"
@@ -665,7 +663,7 @@ function GroupRows({
             }`}
           >
             <span
-              className={`flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground transition-transform ${
+              className={`text-muted-foreground flex h-5 w-5 shrink-0 items-center justify-center transition-transform ${
                 isExpanded ? "rotate-90" : ""
               } ${depth === 1 ? "ml-5" : ""}`}
             >
@@ -674,7 +672,7 @@ function GroupRows({
             {group.icon ? (
               <span
                 aria-hidden
-                className={`flex shrink-0 items-center justify-center rounded-full bg-accent leading-none ${
+                className={`bg-accent flex shrink-0 items-center justify-center rounded-full leading-none ${
                   depth === 0 ? "h-8 w-8 text-base" : "h-6 w-6 text-sm"
                 }`}
               >
@@ -683,7 +681,7 @@ function GroupRows({
             ) : (
               <span
                 aria-hidden
-                className={`flex shrink-0 items-center justify-center rounded-full border border-dashed border-border text-[10px] uppercase text-muted-foreground ${
+                className={`border-border text-muted-foreground flex shrink-0 items-center justify-center rounded-full border border-dashed text-[10px] uppercase ${
                   depth === 0 ? "h-8 w-8" : "h-6 w-6"
                 }`}
               >
@@ -694,13 +692,13 @@ function GroupRows({
               <div
                 className={`truncate leading-tight ${
                   depth === 0
-                    ? "font-display text-[15px] text-foreground"
-                    : "font-medium text-sm text-foreground"
+                    ? "font-display text-foreground text-[15px]"
+                    : "text-foreground text-sm font-medium"
                 } ${group.archived ? "text-muted-foreground line-through" : ""}`}
               >
                 {group.label}
               </div>
-              <div className="mt-0.5 text-[10px] text-muted-foreground">
+              <div className="text-muted-foreground mt-0.5 text-[10px]">
                 {t("lineCount", {
                   count:
                     group.lines.length +
@@ -813,7 +811,7 @@ function LineRow({
 
   return (
     <tr
-      className="group/row border-t border-border/40 transition-colors hover:bg-muted/30"
+      className="group/row border-border/40 hover:bg-muted/30 border-t transition-colors"
       style={{
         animation: "almanac-rise 0.35s ease-out backwards",
         animationDelay: `${animDelay}ms`,
@@ -821,15 +819,15 @@ function LineRow({
     >
       <th
         scope="row"
-        className="sticky left-0 z-10 bg-card px-4 py-2 text-left align-middle group-hover/row:bg-muted"
+        className="bg-card group-hover/row:bg-muted sticky left-0 z-10 px-4 py-2 text-left align-middle"
       >
         <div className={`flex items-center gap-2 ${indent}`}>
           <div className="min-w-0">
-            <div className="truncate text-[13px] leading-tight text-foreground">
+            <div className="text-foreground truncate text-[13px] leading-tight">
               {line.name}
             </div>
             <div className="mt-0.5">
-              <span className="inline-flex items-center rounded-sm bg-muted/70 px-1.5 py-px text-[9px] uppercase tracking-wider text-muted-foreground">
+              <span className="bg-muted/70 text-muted-foreground inline-flex items-center rounded-sm px-1.5 py-px text-[9px] tracking-wider uppercase">
                 {t(`recurrences.${line.recurrence}`)}
               </span>
             </div>
@@ -851,8 +849,8 @@ function LineRow({
           />
         </td>
       ))}
-      <td className="px-4 py-2 align-middle text-right">
-        <span className="almanac-numerals text-sm text-muted-foreground">
+      <td className="px-4 py-2 text-right align-middle">
+        <span className="almanac-numerals text-muted-foreground text-sm">
           {formatMoney(rowTotal)}
         </span>
       </td>
@@ -938,7 +936,7 @@ function MobileBudget({
 
   return (
     <div className="space-y-3 md:hidden">
-      <div className="flex items-center justify-between rounded-[12px] border border-border bg-card px-2 py-2 shadow-card">
+      <div className="border-border bg-card shadow-card flex items-center justify-between rounded-[12px] border px-2 py-2">
         <Button
           variant="ghost"
           size="icon"
@@ -949,10 +947,10 @@ function MobileBudget({
           <ChevronLeft />
         </Button>
         <div className="flex flex-col items-center">
-          <span className="almanac-smallcaps text-[10px] text-muted-foreground">
+          <span className="almanac-smallcaps text-muted-foreground text-[10px]">
             {months[selectedMonth]}
           </span>
-          <span className="font-display text-lg leading-tight text-foreground">
+          <span className="font-display text-foreground text-lg leading-tight">
             {monthsLong[selectedMonth]}
           </span>
         </div>
@@ -967,10 +965,10 @@ function MobileBudget({
         </Button>
       </div>
 
-      <div className="rounded-[12px] border border-border bg-card px-4 py-3 shadow-card">
+      <div className="border-border bg-card shadow-card rounded-[12px] border px-4 py-3">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <p className="almanac-smallcaps text-[10px] text-muted-foreground">
+            <p className="almanac-smallcaps text-muted-foreground text-[10px]">
               {monthsLong[selectedMonth]} · {t("totals")}
             </p>
           </div>
@@ -994,7 +992,7 @@ function MobileBudget({
         </div>
         <div className="almanac-rule my-3" />
         <div className="flex items-center justify-between gap-3">
-          <p className="almanac-smallcaps text-[10px] text-muted-foreground">
+          <p className="almanac-smallcaps text-muted-foreground text-[10px]">
             {t("yearTotal")}
           </p>
           <SummaryCell
@@ -1083,8 +1081,8 @@ function MobileGroupCard({
     <div
       className={cn(
         depth === 0
-          ? "rounded-[12px] border border-border bg-card shadow-card"
-          : "rounded-[10px] border border-border/60 bg-muted/[0.25]",
+          ? "border-border bg-card shadow-card rounded-[12px] border"
+          : "border-border/60 bg-muted/[0.25] rounded-[10px] border",
       )}
     >
       <div className="flex items-stretch gap-2 px-3 py-3">
@@ -1099,7 +1097,7 @@ function MobileGroupCard({
         >
           <span
             className={cn(
-              "flex h-5 w-5 shrink-0 items-center justify-center text-muted-foreground transition-transform",
+              "text-muted-foreground flex h-5 w-5 shrink-0 items-center justify-center transition-transform",
               isExpanded && "rotate-90",
             )}
           >
@@ -1108,14 +1106,14 @@ function MobileGroupCard({
           {group.icon ? (
             <span
               aria-hidden
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-accent text-base leading-none"
+              className="bg-accent flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base leading-none"
             >
               {group.icon}
             </span>
           ) : (
             <span
               aria-hidden
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-dashed border-border text-[10px] uppercase text-muted-foreground"
+              className="border-border text-muted-foreground flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-dashed text-[10px] uppercase"
             >
               ·
             </span>
@@ -1125,14 +1123,14 @@ function MobileGroupCard({
               className={cn(
                 "truncate leading-tight",
                 depth === 0
-                  ? "font-display text-[15px] text-foreground"
-                  : "text-sm font-medium text-foreground",
+                  ? "font-display text-foreground text-[15px]"
+                  : "text-foreground text-sm font-medium",
                 group.archived && "text-muted-foreground line-through",
               )}
             >
               {group.label}
             </div>
-            <div className="mt-0.5 text-[10px] text-muted-foreground">
+            <div className="text-muted-foreground mt-0.5 text-[10px]">
               {t("lineCount", { count: lineCount })}
             </div>
           </div>
@@ -1152,7 +1150,7 @@ function MobileGroupCard({
       </div>
 
       {isExpanded && (
-        <div className="border-t border-border/60">
+        <div className="border-border/60 border-t">
           {group.lines.map((ln) => (
             <MobileLineRow
               key={ln.id}
@@ -1211,13 +1209,13 @@ function MobileLineRow({
   const planned = line.amounts[selectedMonth] ?? 0;
 
   return (
-    <div className="flex items-center gap-2 border-b border-border/40 px-3 py-2 last:border-b-0">
+    <div className="border-border/40 flex items-center gap-2 border-b px-3 py-2 last:border-b-0">
       <div className="min-w-0 flex-1">
-        <div className="truncate text-[13px] leading-tight text-foreground">
+        <div className="text-foreground truncate text-[13px] leading-tight">
           {line.name}
         </div>
         <div className="mt-0.5">
-          <span className="inline-flex items-center rounded-sm bg-muted/70 px-1.5 py-px text-[9px] uppercase tracking-wider text-muted-foreground">
+          <span className="bg-muted/70 text-muted-foreground inline-flex items-center rounded-sm px-1.5 py-px text-[9px] tracking-wider uppercase">
             {t(`recurrences.${line.recurrence}`)}
           </span>
         </div>

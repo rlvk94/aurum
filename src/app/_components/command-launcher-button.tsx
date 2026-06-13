@@ -27,8 +27,8 @@ export function CommandLauncherButton() {
       type="button"
       onClick={() => setOpen(true)}
       className={cn(
-        "inline-flex h-9 w-64 items-center gap-2 rounded-md border border-input bg-card px-3 text-sm text-muted-foreground shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-        "max-md:h-11 max-md:w-11 max-md:justify-center max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:text-foreground max-md:shadow-none",
+        "border-input bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex h-9 w-64 items-center gap-2 rounded-md border px-3 text-sm shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none",
+        "max-md:text-foreground max-md:h-11 max-md:w-11 max-md:justify-center max-md:border-0 max-md:bg-transparent max-md:px-0 max-md:shadow-none",
       )}
       aria-label={t("commandPalette.launcherAriaLabel")}
     >

@@ -32,7 +32,9 @@ export function NetWorthChart() {
     (p) => padTop + (1 - (p.v - min) / range) * (H - padTop - padBottom),
   );
 
-  const line = POINTS.map((_, i) => `${i === 0 ? "M" : "L"} ${xs[i]} ${ys[i]}`).join(" ");
+  const line = POINTS.map(
+    (_, i) => `${i === 0 ? "M" : "L"} ${xs[i]} ${ys[i]}`,
+  ).join(" ");
   const area = `${line} L ${xs[xs.length - 1]} ${H - padBottom} L ${xs[0]} ${H - padBottom} Z`;
 
   // Annotate the September peak transition
@@ -41,17 +43,19 @@ export function NetWorthChart() {
   const ay = ys[annotateIdx]!;
 
   return (
-    <div className="relative w-full rounded-lg border border-border bg-card p-6 shadow-card">
+    <div className="border-border bg-card shadow-card relative w-full rounded-lg border p-6">
       <div className="flex items-baseline justify-between">
         <div>
           <SectionMarker>§ Formue · 2026</SectionMarker>
-          <div className="mt-2 font-display text-xl text-foreground">Nettoformue</div>
+          <div className="font-display text-foreground mt-2 text-xl">
+            Nettoformue
+          </div>
         </div>
         <div className="text-right">
-          <div className="almanac-numerals font-display text-2xl text-foreground">
-            538.420 <span className="text-base text-muted-foreground">kr.</span>
+          <div className="almanac-numerals font-display text-foreground text-2xl">
+            538.420 <span className="text-muted-foreground text-base">kr.</span>
           </div>
-          <div className="almanac-smallcaps mt-0.5 text-[10px] tracking-[0.18em] text-income">
+          <div className="almanac-smallcaps text-income mt-0.5 text-[10px] tracking-[0.18em]">
             +30,6 % i år
           </div>
         </div>
@@ -91,7 +95,13 @@ export function NetWorthChart() {
           strokeDasharray="2 3"
         />
         <circle cx={ax} cy={ay} r="3" fill="var(--primary)" />
-        <circle cx={ax} cy={ay} r="6" fill="var(--primary)" fillOpacity="0.15" />
+        <circle
+          cx={ax}
+          cy={ay}
+          r="6"
+          fill="var(--primary)"
+          fillOpacity="0.15"
+        />
 
         <text
           x={ax}

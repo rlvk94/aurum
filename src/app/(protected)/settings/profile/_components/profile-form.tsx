@@ -29,7 +29,7 @@ function Avatar({ src, name }: { src: string | null; name: string }) {
 
   if (src) {
     return (
-      <div className="flex h-16 w-16 shrink-0 overflow-hidden rounded-full border border-border bg-muted">
+      <div className="border-border bg-muted flex h-16 w-16 shrink-0 overflow-hidden rounded-full border">
         {/* eslint-disable-next-line @next/next/no-img-element -- external avatar URL (e.g. Google), tiny 64px image; next/image remotePatterns config not warranted */}
         <img
           src={src}
@@ -41,7 +41,7 @@ function Avatar({ src, name }: { src: string | null; name: string }) {
     );
   }
   return (
-    <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-accent text-lg font-medium text-accent-foreground">
+    <div className="bg-accent text-accent-foreground flex h-16 w-16 shrink-0 items-center justify-center rounded-full text-lg font-medium">
       {initials || <UserRound className="size-6" />}
     </div>
   );
@@ -107,7 +107,7 @@ export function ProfileForm() {
                 <button
                   type="button"
                   onClick={() => setImageDraft("")}
-                  className="text-xs text-muted-foreground hover:text-foreground"
+                  className="text-muted-foreground hover:text-foreground text-xs"
                 >
                   {t("avatarClear")}
                 </button>
@@ -150,7 +150,7 @@ export function ProfileForm() {
             </Button>
           </div>
           {me?.pendingEmail && (
-            <div className="flex items-center justify-between gap-3 rounded-md border border-dashed border-warning/60 bg-warning/5 p-3 text-sm">
+            <div className="border-warning/60 bg-warning/5 flex items-center justify-between gap-3 rounded-md border border-dashed p-3 text-sm">
               <span className="text-muted-foreground">
                 {t("pendingEmailNotice", { email: me.pendingEmail })}
               </span>
@@ -178,7 +178,7 @@ export function ProfileForm() {
 
       <div className="flex items-center justify-end gap-3">
         {savedAt && !dirty && (
-          <span className="text-sm text-muted-foreground">
+          <span className="text-muted-foreground text-sm">
             {tSettings("saved")}
           </span>
         )}

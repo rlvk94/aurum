@@ -4,10 +4,10 @@ export default function OnboardingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative flex min-h-screen flex-col bg-background overflow-hidden">
+    <div className="bg-background relative flex min-h-screen flex-col overflow-hidden">
       {/* Subtle gold radial glow — top right */}
       <div
-        className="pointer-events-none absolute -right-32 -top-32 h-[500px] w-[500px] rounded-full opacity-[0.07]"
+        className="pointer-events-none absolute -top-32 -right-32 h-[500px] w-[500px] rounded-full opacity-[0.07]"
         style={{
           background:
             "radial-gradient(circle, hsl(38 60% 50%) 0%, transparent 70%)",

@@ -8,15 +8,17 @@ export function ChallengeDial() {
   const dash = (PERCENT / 100) * c;
 
   return (
-    <div className="relative w-full rounded-lg border border-border bg-card p-6 shadow-card">
+    <div className="border-border bg-card shadow-card relative w-full rounded-lg border p-6">
       <div className="flex items-baseline justify-between">
         <SectionMarker>§ Udfordring · 20.–26. apr. 2026</SectionMarker>
-        <span className="almanac-smallcaps text-[10px] tracking-[0.18em] text-warning">
+        <span className="almanac-smallcaps text-warning text-[10px] tracking-[0.18em]">
           1 dag tilbage
         </span>
       </div>
 
-      <div className="mt-3 font-display text-xl text-foreground">Take-away ≤ 500 kr.</div>
+      <div className="font-display text-foreground mt-3 text-xl">
+        Take-away ≤ 500 kr.
+      </div>
 
       <div className="mt-6 flex items-center gap-6">
         <div className="relative h-40 w-40 shrink-0">
@@ -41,11 +43,11 @@ export function ChallengeDial() {
             />
           </svg>
           <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <div className="almanac-numerals font-display text-3xl text-foreground">
+            <div className="almanac-numerals font-display text-foreground text-3xl">
               {PERCENT}
-              <span className="text-lg text-muted-foreground">%</span>
+              <span className="text-muted-foreground text-lg">%</span>
             </div>
-            <div className="almanac-smallcaps mt-1 text-[9px] tracking-[0.18em] text-muted-foreground">
+            <div className="almanac-smallcaps text-muted-foreground mt-1 text-[9px] tracking-[0.18em]">
               brugt
             </div>
           </div>
@@ -53,28 +55,28 @@ export function ChallengeDial() {
 
         <div className="flex-1 space-y-3 text-sm">
           <div>
-            <div className="almanac-smallcaps text-[9px] tracking-[0.18em] text-muted-foreground">
+            <div className="almanac-smallcaps text-muted-foreground text-[9px] tracking-[0.18em]">
               Brugt
             </div>
-            <div className="almanac-numerals font-display text-lg text-foreground">
+            <div className="almanac-numerals font-display text-foreground text-lg">
               310 kr.
             </div>
           </div>
           <div className="almanac-rule" />
           <div>
-            <div className="almanac-smallcaps text-[9px] tracking-[0.18em] text-muted-foreground">
+            <div className="almanac-smallcaps text-muted-foreground text-[9px] tracking-[0.18em]">
               Tilbage
             </div>
-            <div className="almanac-numerals font-display text-lg text-warning">
+            <div className="almanac-numerals font-display text-warning text-lg">
               190 kr.
             </div>
           </div>
           <div className="almanac-rule" />
           <div>
-            <div className="almanac-smallcaps text-[9px] tracking-[0.18em] text-muted-foreground">
+            <div className="almanac-smallcaps text-muted-foreground text-[9px] tracking-[0.18em]">
               Mål
             </div>
-            <div className="almanac-numerals font-display text-lg text-muted-foreground">
+            <div className="almanac-numerals font-display text-muted-foreground text-lg">
               500 kr.
             </div>
           </div>

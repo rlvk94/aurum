@@ -51,7 +51,7 @@ function SavingsRow({
   return (
     <Link
       href={`/accounts/${accountId}/savings/${savings.id}`}
-      className="block rounded-lg border border-border p-3 transition-shadow hover:shadow-card focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="border-border hover:shadow-card focus-visible:ring-ring block rounded-lg border p-3 transition-shadow focus:outline-none focus-visible:ring-2"
     >
       <div className="flex items-center gap-3">
         <div
@@ -71,17 +71,18 @@ function SavingsRow({
                 {t(`status.${status}`)}
               </Badge>
             )}
-            <span className="text-[10px] text-muted-foreground">
+            <span className="text-muted-foreground text-[10px]">
               {t(`mode.${savings.transferMode}Short`)}
             </span>
           </div>
-          <div className="mt-1 flex items-baseline justify-between gap-2 text-xs text-muted-foreground">
+          <div className="text-muted-foreground mt-1 flex items-baseline justify-between gap-2 text-xs">
             <span>
-              {formatAmount(savings.balance)} / {formatAmount(savings.targetAmount)}
+              {formatAmount(savings.balance)} /{" "}
+              {formatAmount(savings.targetAmount)}
             </span>
             <span>{Math.round(progress * 100)}%</span>
           </div>
-          <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+          <div className="bg-muted mt-1 h-1.5 w-full overflow-hidden rounded-full">
             <div
               className={cn(
                 "h-full rounded-full transition-all",
@@ -133,10 +134,8 @@ export function SavingsCard({
       <CardContent>
         {savings.length === 0 ? (
           <div className="flex flex-col items-center gap-2 py-6 text-center">
-            <Target className="h-8 w-8 text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">
-              {t("card.empty")}
-            </p>
+            <Target className="text-muted-foreground h-8 w-8" />
+            <p className="text-muted-foreground text-sm">{t("card.empty")}</p>
           </div>
         ) : (
           <>
@@ -146,9 +145,9 @@ export function SavingsCard({
               ))}
             </div>
             {totalReserved > 0 && (
-              <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm text-muted-foreground">
+              <div className="border-border text-muted-foreground mt-4 flex items-center justify-between border-t pt-3 text-sm">
                 <span>{t("card.totalReserved")}</span>
-                <span className="font-medium text-foreground">
+                <span className="text-foreground font-medium">
                   {formatAmount(totalReserved)}
                 </span>
               </div>

@@ -195,6 +195,7 @@ Server code lives outside `src/app/`:
 - `0022` — Discount codes at checkout (Stripe promotion codes)
 - `0023` — Terms & Conditions acceptance with versioned snapshots
 - `0024` — Split transactions (original kept + excluded, child parts via self-FK)
+- `0025` — Multi-channel notification system (channel/type registry, per-user prefs, self-hosted Web Push)
 
 ## Testing
 

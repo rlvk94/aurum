@@ -28,7 +28,7 @@ export function GraceBanner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "border-b border-warning/30 bg-warning/10 px-4 py-2 text-sm text-warning-foreground",
+        "border-warning/30 bg-warning/10 text-warning-foreground border-b px-4 py-2 text-sm",
         className,
       )}
       role="status"
@@ -36,9 +36,7 @@ export function GraceBanner({ className }: { className?: string }) {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-3">
         <div>
           <strong className="font-medium">{t("title")}</strong>{" "}
-          <span className="text-muted-foreground">
-            {t("body", { days })}
-          </span>
+          <span className="text-muted-foreground">{t("body", { days })}</span>
         </div>
         <Button asChild size="sm" variant="outline">
           <Link href="/settings/billing">{t("cta")}</Link>
@@ -59,7 +57,7 @@ export function PendingBillingBanner({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        "border-b border-primary/30 bg-primary/5 px-4 py-2 text-sm",
+        "border-primary/30 bg-primary/5 border-b px-4 py-2 text-sm",
         className,
       )}
       role="status"

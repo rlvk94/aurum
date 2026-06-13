@@ -65,18 +65,18 @@ function AccountCard({
   return (
     <Link
       href={`/accounts/${account.id}`}
-      className={`group relative flex items-start justify-between rounded-lg border border-border bg-card p-4 shadow-card transition-shadow hover:shadow-elevated focus:outline-none focus-visible:ring-2 focus-visible:ring-ring ${archived ? "opacity-60" : ""}`}
+      className={`group border-border bg-card shadow-card hover:shadow-elevated focus-visible:ring-ring relative flex items-start justify-between rounded-lg border p-4 transition-shadow focus:outline-none focus-visible:ring-2 ${archived ? "opacity-60" : ""}`}
     >
       <div className="flex gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
-          <Icon className="h-5 w-5 text-accent-foreground" />
+        <div className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+          <Icon className="text-accent-foreground h-5 w-5" />
         </div>
         <div>
           <div className="flex items-center gap-1.5">
-            <p className="font-medium text-foreground">{account.name}</p>
+            <p className="text-foreground font-medium">{account.name}</p>
             {account.visibility === "private" && (
               <span
-                className="flex items-center gap-0.5 rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground"
+                className="bg-muted text-muted-foreground flex items-center gap-0.5 rounded-md px-1.5 py-0.5 text-[10px] font-medium"
                 title={t("privateBadge")}
               >
                 <Lock className="h-2.5 w-2.5" />
@@ -84,10 +84,10 @@ function AccountCard({
               </span>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {t(`types.${accountTypeKeys[account.type]}`)}
           </p>
-          <p className="mt-1 font-display text-lg text-foreground">
+          <p className="font-display text-foreground mt-1 text-lg">
             {formatAmount(visualBalance)}
           </p>
         </div>
@@ -204,7 +204,7 @@ export default function AccountsPage() {
 
           {archivedAccounts.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+              <h2 className="text-muted-foreground mb-3 text-sm font-medium">
                 {t("archived")}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

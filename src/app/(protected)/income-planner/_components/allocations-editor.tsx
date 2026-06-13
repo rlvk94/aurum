@@ -2,7 +2,14 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { AlertCircle, Check, CheckCircle2, Copy, Plus, Trash2 } from "lucide-react";
+import {
+  AlertCircle,
+  Check,
+  CheckCircle2,
+  Copy,
+  Plus,
+  Trash2,
+} from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Button } from "~/app/_components/button";
@@ -118,8 +125,10 @@ export function AllocationsEditor({
         if (l.id !== vars.id) return l;
         const patch = { ...l };
         if (vars.target !== undefined) patch.target = vars.target;
-        if (vars.targetColor !== undefined) patch.targetColor = vars.targetColor;
-        if (vars.allocationType !== undefined) patch.allocationType = vars.allocationType;
+        if (vars.targetColor !== undefined)
+          patch.targetColor = vars.targetColor;
+        if (vars.allocationType !== undefined)
+          patch.allocationType = vars.allocationType;
         if (vars.value !== undefined) patch.value = vars.value;
         return patch;
       }),
@@ -152,13 +161,13 @@ export function AllocationsEditor({
   const showPerSource = incomes.length >= 2 && totalIncome > 0;
 
   return (
-    <section className="rounded-2xl border border-border bg-card p-4 shadow-card sm:p-6">
+    <section className="border-border bg-card shadow-card rounded-2xl border p-4 sm:p-6">
       <header className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
             {t("allocations")}
           </p>
-          <p className="mt-1 max-w-xs text-xs text-muted-foreground/80">
+          <p className="text-muted-foreground/80 mt-1 max-w-xs text-xs">
             {t("allocationsHint")}
           </p>
         </div>
@@ -176,11 +185,11 @@ export function AllocationsEditor({
       )}
 
       {lines.length === 0 ? (
-        <div className="mt-4 rounded-xl border border-dashed border-border px-6 py-8 text-center">
-          <p className="text-sm font-medium text-foreground">
+        <div className="border-border mt-4 rounded-xl border border-dashed px-6 py-8 text-center">
+          <p className="text-foreground text-sm font-medium">
             {t("noAllocationsYet")}
           </p>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="text-muted-foreground mt-1 text-xs">
             {t("noAllocationsHint")}
           </p>
           <Button className="mt-4" size="sm" onClick={handleAdd}>
@@ -197,9 +206,7 @@ export function AllocationsEditor({
               incomes={incomes}
               totalIncome={totalIncome}
               showPerSource={showPerSource}
-              onUpdate={(patch) =>
-                updateLine.mutate({ id: line.id, ...patch })
-              }
+              onUpdate={(patch) => updateLine.mutate({ id: line.id, ...patch })}
               onDelete={() => deleteLine.mutate({ id: line.id })}
             />
           ))}
@@ -236,15 +243,15 @@ function AllocationStatus({
 
   if (overAllocated) {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-expense/30 bg-expense/5 p-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-expense/10 text-expense">
+      <div className="border-expense/30 bg-expense/5 flex items-center gap-3 rounded-xl border p-4">
+        <div className="bg-expense/10 text-expense flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
           <AlertCircle className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-expense">
+          <p className="text-expense text-xs font-medium tracking-wide uppercase">
             {t("overAllocated")}
           </p>
-          <p className="mt-0.5 font-display text-xl tabular-nums text-foreground">
+          <p className="font-display text-foreground mt-0.5 text-xl tabular-nums">
             {formatMoney(overCents)}
           </p>
         </div>
@@ -254,15 +261,15 @@ function AllocationStatus({
 
   if (fullyAllocated && totalIncome > 0) {
     return (
-      <div className="flex items-center gap-3 rounded-xl border border-income/30 bg-income/5 p-4">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-income/10 text-income">
+      <div className="border-income/30 bg-income/5 flex items-center gap-3 rounded-xl border p-4">
+        <div className="bg-income/10 text-income flex h-10 w-10 shrink-0 items-center justify-center rounded-full">
           <CheckCircle2 className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-income">
+          <p className="text-income text-xs font-medium tracking-wide uppercase">
             {t("allocatedPercent", { percent: 100 })}
           </p>
-          <p className="mt-0.5 text-sm text-muted-foreground">
+          <p className="text-muted-foreground mt-0.5 text-sm">
             {t("fullyAllocatedHint")}
           </p>
         </div>
@@ -279,21 +286,21 @@ function AllocationStatus({
           : "border-border bg-muted/40",
       )}
     >
-      <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+      <div className="min-w-0 flex-1">
+        <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
           {t("unallocated")}
         </p>
-        <p className="mt-0.5 font-display text-2xl tabular-nums text-foreground">
+        <p className="font-display text-foreground mt-0.5 text-2xl tabular-nums">
           {formatMoney(unallocatedCents)}
         </p>
       </div>
       <div className="text-right">
-        <p className="text-xs text-muted-foreground">
+        <p className="text-muted-foreground text-xs">
           {formatPercentBps(allocatedBps)} {t("allocatedLower")}
         </p>
-        <div className="mt-1.5 h-1.5 w-28 overflow-hidden rounded-full bg-muted">
+        <div className="bg-muted mt-1.5 h-1.5 w-28 overflow-hidden rounded-full">
           <div
-            className="h-full rounded-full bg-primary transition-all"
+            className="bg-primary h-full rounded-full transition-all"
             style={{ width: `${allocatedBps / 100}%` }}
           />
         </div>
@@ -407,7 +414,7 @@ function AllocationRow({
   });
 
   return (
-    <div className="group relative rounded-xl border border-border bg-background p-3 transition-colors hover:border-foreground/20">
+    <div className="group border-border bg-background hover:border-foreground/20 relative rounded-xl border p-3 transition-colors">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         {/* Row 1 (mobile) / inline (desktop): color swatch picker + target input */}
         <div className="flex min-w-0 flex-1 items-center gap-2 sm:contents">
@@ -429,14 +436,14 @@ function AllocationRow({
               }
             }}
             placeholder={t("targetPlaceholder")}
-            className="h-9 min-w-0 flex-1 border-transparent bg-transparent px-2 font-medium shadow-none hover:bg-muted focus-visible:bg-background"
+            className="hover:bg-muted focus-visible:bg-background h-9 min-w-0 flex-1 border-transparent bg-transparent px-2 font-medium shadow-none"
           />
         </div>
 
         {/* Row 2 (mobile) / inline (desktop): type toggle + value + delete */}
         <div className="flex items-center gap-2 sm:contents">
           {/* Segmented type toggle */}
-          <div className="inline-flex h-9 shrink-0 items-center rounded-md border border-border bg-muted/60 p-0.5">
+          <div className="border-border bg-muted/60 inline-flex h-9 shrink-0 items-center rounded-md border p-0.5">
             <button
               type="button"
               onClick={() => setType("percentage")}
@@ -480,9 +487,9 @@ function AllocationRow({
               }}
               inputMode="decimal"
               placeholder="0"
-              className="h-9 w-20 shrink-0 border-transparent bg-muted px-2 text-right font-display tabular-nums shadow-none focus-visible:bg-background sm:w-24"
+              className="bg-muted font-display focus-visible:bg-background h-9 w-20 shrink-0 border-transparent px-2 text-right tabular-nums shadow-none sm:w-24"
             />
-            <span className="min-w-[4rem] text-right text-xs text-muted-foreground tabular-nums sm:min-w-[4.5rem]">
+            <span className="text-muted-foreground min-w-[4rem] text-right text-xs tabular-nums sm:min-w-[4.5rem]">
               {counterpart}
             </span>
           </div>
@@ -491,7 +498,7 @@ function AllocationRow({
             variant="ghost"
             size="icon"
             onClick={onDelete}
-            className="h-8 w-8 shrink-0 text-muted-foreground transition-opacity hover:text-destructive sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100 sm:group-focus-within:opacity-100"
+            className="text-muted-foreground hover:text-destructive h-8 w-8 shrink-0 transition-opacity sm:opacity-0 sm:group-focus-within:opacity-100 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
             aria-label={t("remove")}
           >
             <Trash2 className="h-4 w-4" />
@@ -502,20 +509,20 @@ function AllocationRow({
       {/* Per-source breakdown — shown when there are multiple income sources
           so the user can see (and copy) the exact amount drawn from each one. */}
       {showPerSource && perSource.length > 0 && (
-        <div className="mt-3 rounded-lg border border-border/60 bg-muted/30 p-2 sm:ml-5">
-          <p className="px-2 pb-1.5 pt-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-muted-foreground">
+        <div className="border-border/60 bg-muted/30 mt-3 rounded-lg border p-2 sm:ml-5">
+          <p className="text-muted-foreground px-2 pt-0.5 pb-1.5 text-[10px] font-medium tracking-[0.14em] uppercase">
             {t("perSourceTitle")}
           </p>
           <ul className="grid gap-1 sm:grid-cols-2">
             {perSource.map((ps) => (
               <li
                 key={ps.id}
-                className="flex items-center gap-2 rounded-md px-2 py-1.5 hover:bg-background"
+                className="hover:bg-background flex items-center gap-2 rounded-md px-2 py-1.5"
               >
-                <span className="min-w-0 flex-1 truncate text-xs font-medium text-foreground">
+                <span className="text-foreground min-w-0 flex-1 truncate text-xs font-medium">
                   {ps.name}
                 </span>
-                <span className="shrink-0 font-display text-sm tabular-nums text-foreground">
+                <span className="font-display text-foreground shrink-0 text-sm tabular-nums">
                   {formatMoney(ps.cents)}
                 </span>
                 <CopyAmountButton cents={ps.cents} />
@@ -553,7 +560,9 @@ function ColorSwatchPicker({
         onClick={() => setOpen((o) => !o)}
         onBlur={(e) => {
           // Close when focus leaves the swatch + popover.
-          if (!e.currentTarget.parentElement?.contains(e.relatedTarget as Node)) {
+          if (
+            !e.currentTarget.parentElement?.contains(e.relatedTarget as Node)
+          ) {
             setOpen(false);
           }
         }}
@@ -562,7 +571,7 @@ function ColorSwatchPicker({
       />
       {open && (
         <div
-          className="absolute left-0 top-full z-20 mt-2 flex gap-1 rounded-md border border-border bg-popover p-1.5 shadow-elevated"
+          className="border-border bg-popover shadow-elevated absolute top-full left-0 z-20 mt-2 flex gap-1 rounded-md border p-1.5"
           onMouseDown={(e) => e.preventDefault()}
         >
           {PROJECT_PALETTES.map((p) => {
@@ -581,7 +590,7 @@ function ColorSwatchPicker({
                 className={cn(
                   "h-6 w-6 rounded-full transition",
                   selected
-                    ? "ring-2 ring-foreground ring-offset-2 ring-offset-popover"
+                    ? "ring-foreground ring-offset-popover ring-2 ring-offset-2"
                     : "opacity-90 hover:opacity-100",
                 )}
               />
@@ -616,12 +625,16 @@ function CopyAmountButton({ cents }: { cents: number }) {
       type="button"
       onClick={handleCopy}
       className={cn(
-        "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-background hover:text-foreground",
+        "text-muted-foreground hover:bg-background hover:text-foreground inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition-colors",
         copied && "text-income hover:text-income",
       )}
       aria-label={copied ? t("copied") : t("copyAmount")}
     >
-      {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+      {copied ? (
+        <Check className="h-3.5 w-3.5" />
+      ) : (
+        <Copy className="h-3.5 w-3.5" />
+      )}
     </button>
   );
 }
@@ -632,7 +645,10 @@ function initialValueText(line: Line): string {
     const pct = line.value / 100;
     return Number.isInteger(pct)
       ? String(pct)
-      : pct.toFixed(2).replace(/\.?0+$/, "").replace(".", ",");
+      : pct
+          .toFixed(2)
+          .replace(/\.?0+$/, "")
+          .replace(".", ",");
   }
   const value = line.value / 100;
   return Number.isInteger(value)

@@ -73,18 +73,18 @@ function DebtCard({
   return (
     <Card className={archived ? "opacity-60" : ""}>
       <CardHeader className="flex flex-row items-start justify-between gap-3 pb-3">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
-            <CreditCard className="h-5 w-5 text-debt" />
+        <div className="flex min-w-0 items-start gap-3">
+          <div className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+            <CreditCard className="text-debt h-5 w-5" />
           </div>
           <div className="min-w-0">
             <Link
               href={`/debts/${debt.id}`}
-              className="truncate font-medium text-foreground hover:underline"
+              className="text-foreground truncate font-medium hover:underline"
             >
               {debt.name}
             </Link>
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="text-muted-foreground truncate text-xs">
               {debt.lender}
               {debt.assetName ? ` · ${debt.assetName}` : ""}
             </p>
@@ -111,10 +111,7 @@ function DebtCard({
                 <Archive />
                 {archived ? t("unarchive") : t("archive")}
               </DropdownMenuItem>
-              <DropdownMenuItem
-                className="text-destructive"
-                onClick={onDelete}
-              >
+              <DropdownMenuItem className="text-destructive" onClick={onDelete}>
                 <Trash2 />
                 {tCommon("delete")}
               </DropdownMenuItem>
@@ -124,20 +121,20 @@ function DebtCard({
       </CardHeader>
       <CardContent className="space-y-3">
         <div>
-          <p className="text-xs text-muted-foreground">{t("currentBalance")}</p>
-          <p className="font-display text-2xl text-foreground">
+          <p className="text-muted-foreground text-xs">{t("currentBalance")}</p>
+          <p className="font-display text-foreground text-2xl">
             {formatAmount(summary.outstandingBalance)}
           </p>
         </div>
 
         <div>
-          <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground mb-1 flex items-center justify-between text-xs">
             <span>{t("progress")}</span>
             <span>{progressPct}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
             <div
-              className="h-full rounded-full bg-primary transition-all"
+              className="bg-primary h-full rounded-full transition-all"
               style={{ width: `${progressPct}%` }}
             />
           </div>
@@ -148,13 +145,13 @@ function DebtCard({
             <p className="text-muted-foreground">
               {t(`paymentPerFrequency.${debt.paymentFrequency}`)}
             </p>
-            <p className="font-medium text-foreground">
+            <p className="text-foreground font-medium">
               {formatAmount(summary.periodicPayment)}
             </p>
           </div>
           <div>
             <p className="text-muted-foreground">{t("paymentsRemaining")}</p>
-            <p className="font-medium text-foreground">
+            <p className="text-foreground font-medium">
               {t("monthsRemaining", { count: monthsRemaining })}
             </p>
           </div>
@@ -224,27 +221,25 @@ export function DebtsClient() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-muted-foreground text-sm font-medium">
                 {t("totalDebt")}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="font-display text-2xl text-debt">
+              <p className="font-display text-debt text-2xl">
                 {summary ? formatAmount(summary.totalOutstanding) : "–"}
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+              <CardTitle className="text-muted-foreground text-sm font-medium">
                 {t("totalMonthlyEquivalent")}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <p className="font-display text-2xl">
-                {summary
-                  ? formatAmount(summary.totalMonthlyEquivalent)
-                  : "–"}
+                {summary ? formatAmount(summary.totalMonthlyEquivalent) : "–"}
               </p>
             </CardContent>
           </Card>
@@ -272,7 +267,7 @@ export function DebtsClient() {
           )}
           {archived.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+              <h2 className="text-muted-foreground mb-3 text-sm font-medium">
                 {t("archived")}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

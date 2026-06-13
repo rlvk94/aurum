@@ -99,7 +99,7 @@ export function BudgetCell({
         )}
         {overshootPct > 0 && (
           <div
-            className="absolute inset-y-0 right-0 bg-expense/80"
+            className="bg-expense/80 absolute inset-y-0 right-0"
             style={{ width: `${overshootPct}%` }}
           />
         )}
@@ -136,7 +136,7 @@ export function BudgetCell({
         <button
           type="button"
           aria-label={`${monthLabel}: ${t("cellEdit")}`}
-          className={`flex h-full w-full flex-col justify-center gap-0 rounded-[6px] px-2.5 py-2 text-left transition-colors hover:bg-primary/[0.04] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 focus-visible:ring-offset-1 focus-visible:ring-offset-background ${
+          className={`hover:bg-primary/[0.04] focus-visible:ring-primary/60 focus-visible:ring-offset-background flex h-full w-full flex-col justify-center gap-0 rounded-[6px] px-2.5 py-2 text-left transition-colors focus-visible:ring-2 focus-visible:ring-offset-1 focus-visible:outline-none ${
             isCurrent ? "bg-primary/[0.03]" : ""
           }`}
         >
@@ -146,22 +146,22 @@ export function BudgetCell({
       <PopoverContent className="w-64 p-4" align="center">
         <div className="space-y-4">
           <div>
-            <p className="almanac-smallcaps text-[10px] text-muted-foreground">
+            <p className="almanac-smallcaps text-muted-foreground text-[10px]">
               {monthLabel}
             </p>
-            <p className="mt-1 font-display text-2xl text-foreground almanac-numerals">
+            <p className="font-display text-foreground almanac-numerals mt-1 text-2xl">
               {planned > 0 ? formatMoney(planned) : "—"}
             </p>
             {actual > 0 && (
               <p
-                className={`mt-0.5 text-xs almanac-numerals ${varianceTextClass(
+                className={`almanac-numerals mt-0.5 text-xs ${varianceTextClass(
                   planned,
                   actual,
                 )}`}
               >
                 {t("cellActual")} · {formatMoney(actual)}
                 {variance !== 0 && (
-                  <span className="ml-1 text-muted-foreground">
+                  <span className="text-muted-foreground ml-1">
                     ({variancePrefix}
                     {formatMoney(Math.abs(variance))})
                   </span>
@@ -171,7 +171,7 @@ export function BudgetCell({
           </div>
           <div>
             <label
-              className="almanac-smallcaps text-[9px] text-muted-foreground"
+              className="almanac-smallcaps text-muted-foreground text-[9px]"
               htmlFor="cell-amount"
             >
               {t("cellPlanned")}
@@ -192,9 +192,9 @@ export function BudgetCell({
               }}
               placeholder="0"
               inputMode="numeric"
-              className="mt-1 almanac-numerals"
+              className="almanac-numerals mt-1"
             />
-            <p className="mt-1.5 text-[10px] text-muted-foreground">
+            <p className="text-muted-foreground mt-1.5 text-[10px]">
               ⏎ {tCommon("save")} · Esc {tCommon("cancel")}
             </p>
           </div>

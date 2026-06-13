@@ -86,7 +86,7 @@ function EmailChangeForm({
               autoFocus
             />
           </div>
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className="text-destructive text-sm">{error}</p>}
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>
               {tCommon("cancel")}
@@ -119,7 +119,7 @@ function EmailChangeForm({
             </InputOTP>
           </div>
           {error && (
-            <p className="text-center text-sm text-destructive">{error}</p>
+            <p className="text-destructive text-center text-sm">{error}</p>
           )}
           <DialogFooter>
             <Button type="button" variant="ghost" onClick={onClose}>

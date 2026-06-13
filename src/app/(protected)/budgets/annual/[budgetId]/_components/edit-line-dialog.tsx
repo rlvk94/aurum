@@ -98,7 +98,13 @@ export function EditLineDialog({
     return z.object({
       name: z.string().trim().min(1, required).max(100),
       categoryId: z.string().min(1, required),
-      recurrence: z.enum(["monthly", "quarterly", "semi_annual", "annual", "custom"]),
+      recurrence: z.enum([
+        "monthly",
+        "quarterly",
+        "semi_annual",
+        "annual",
+        "custom",
+      ]),
       startMonth: z.number().int().min(0).max(11),
       periodAmount: z.string().refine((v) => {
         if (v.trim() === "") return true;
@@ -315,7 +321,7 @@ export function EditLineDialog({
                       </form.Field>
                     )}
                     {recurrence === "custom" && (
-                      <p className="rounded-md border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+                      <p className="border-border bg-muted/40 text-muted-foreground rounded-md border border-dashed p-3 text-xs">
                         {t("lineCustomHelp")}
                       </p>
                     )}
@@ -329,7 +335,7 @@ export function EditLineDialog({
                 <Field>
                   <label
                     htmlFor={field.name}
-                    className="flex items-start gap-3 rounded-lg border border-border bg-card p-3"
+                    className="border-border bg-card flex items-start gap-3 rounded-lg border p-3"
                   >
                     <Checkbox
                       id={field.name}
@@ -352,7 +358,7 @@ export function EditLineDialog({
           </FieldGroup>
 
           {(update.error ?? remove.error) && (
-            <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+            <p className="text-destructive mt-4 text-sm">{tCommon("error")}</p>
           )}
 
           <DialogFooter className="mt-6 flex flex-row items-center justify-between gap-2 sm:justify-between">

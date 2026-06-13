@@ -24,7 +24,10 @@ export function PlanCard({
   const t = useTranslations("incomePlanner");
 
   const allocatedBps = Math.min(10_000, plan.allocatedPercentageBps);
-  const fixedShareBps = bpsFromCents(plan.allocatedFixedCents, plan.totalIncome);
+  const fixedShareBps = bpsFromCents(
+    plan.allocatedFixedCents,
+    plan.totalIncome,
+  );
   const allocatedTotalBps = Math.min(10_000, allocatedBps + fixedShareBps);
   const overAllocated = allocatedBps + fixedShareBps > 10_050;
 
@@ -34,8 +37,8 @@ export function PlanCard({
     <Link
       href={`/income-planner/${plan.id}`}
       className={cn(
-        "group relative block overflow-hidden rounded-2xl border border-border bg-card shadow-card transition-all",
-        "hover:shadow-elevated focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "group border-border bg-card shadow-card relative block overflow-hidden rounded-2xl border transition-all",
+        "hover:shadow-elevated focus-visible:ring-ring focus-visible:ring-2 focus-visible:outline-none",
         archived && "opacity-60",
         isHero && "px-6 py-7 sm:px-10 sm:py-10",
         !isHero && "p-5",
@@ -56,7 +59,7 @@ export function PlanCard({
         <div className="min-w-0">
           {plan.isActive && !archived && (
             <Badge
-              className="mb-3 gap-1 rounded-full border-0 bg-primary/10 px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-[0.14em] text-primary"
+              className="bg-primary/10 text-primary mb-3 gap-1 rounded-full border-0 px-2.5 py-0.5 text-[10px] font-medium tracking-[0.14em] uppercase"
               variant="secondary"
             >
               <Sparkles className="h-3 w-3" />
@@ -65,14 +68,19 @@ export function PlanCard({
           )}
           <h3
             className={cn(
-              "truncate font-display text-foreground",
+              "font-display text-foreground truncate",
               isHero ? "text-2xl sm:text-3xl" : "text-lg",
             )}
           >
             {plan.name}
           </h3>
           {plan.description && (
-            <p className={cn("mt-1 text-sm text-muted-foreground", !isHero && "line-clamp-2")}>
+            <p
+              className={cn(
+                "text-muted-foreground mt-1 text-sm",
+                !isHero && "line-clamp-2",
+              )}
+            >
               {plan.description}
             </p>
           )}
@@ -81,12 +89,12 @@ export function PlanCard({
 
       <div className={cn("relative mt-6", isHero && "sm:mt-10")}>
         <div className="flex items-baseline justify-between">
-          <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="text-muted-foreground text-[11px] tracking-[0.18em] uppercase">
             {t("monthlyIncome")}
           </span>
           <span
             className={cn(
-              "text-[11px] uppercase tracking-[0.14em]",
+              "text-[11px] tracking-[0.14em] uppercase",
               overAllocated
                 ? "text-expense"
                 : allocatedTotalBps === 10_000
@@ -101,7 +109,7 @@ export function PlanCard({
         </div>
         <p
           className={cn(
-            "mt-2 font-display tabular-nums text-foreground",
+            "font-display text-foreground mt-2 tabular-nums",
             isHero ? "text-5xl sm:text-6xl" : "text-3xl",
           )}
         >
@@ -109,7 +117,7 @@ export function PlanCard({
         </p>
 
         {/* Thin allocation-ratio bar */}
-        <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div className="bg-muted mt-4 h-1.5 w-full overflow-hidden rounded-full">
           <div
             className={cn(
               "h-full rounded-full transition-all",
@@ -123,7 +131,7 @@ export function PlanCard({
           />
         </div>
 
-        <div className="mt-4 flex items-center justify-between text-xs text-muted-foreground">
+        <div className="text-muted-foreground mt-4 flex items-center justify-between text-xs">
           <span className="tabular-nums">
             {plan.incomeCount} · {t("incomeSources").toLowerCase()}
           </span>

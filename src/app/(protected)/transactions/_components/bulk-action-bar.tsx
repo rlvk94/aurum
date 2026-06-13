@@ -36,17 +36,17 @@ export function BulkActionBar({
       className={cn(
         "fixed inset-x-3 z-30 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2",
         "bottom-[calc(env(safe-area-inset-bottom,0px)+0.75rem)]",
-        "rounded-full border border-border bg-card shadow-elevated",
+        "border-border bg-card shadow-elevated rounded-full border",
         "px-3 py-2 sm:px-4",
         "flex items-center gap-2",
       )}
       role="region"
       aria-label={t("title")}
     >
-      <span className="almanac-numerals text-sm font-medium text-foreground whitespace-nowrap pl-1 pr-2">
+      <span className="almanac-numerals text-foreground pr-2 pl-1 text-sm font-medium whitespace-nowrap">
         {t("bulkSelected", { count: selectedCount })}
       </span>
-      <div className="hidden h-5 w-px bg-border sm:block" />
+      <div className="bg-border hidden h-5 w-px sm:block" />
       <div className="flex flex-1 items-center gap-1 overflow-x-auto">
         <Button
           variant="ghost"

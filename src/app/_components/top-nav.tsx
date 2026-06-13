@@ -37,8 +37,7 @@ export function TopNav() {
   // detail page (React renders the new page before the old one unmounts).
   const metadataApplies =
     metadata?.title !== undefined &&
-    (!metadata.parentPath ||
-      pathname.startsWith(`${metadata.parentPath}/`));
+    (!metadata.parentPath || pathname.startsWith(`${metadata.parentPath}/`));
 
   if (metadataApplies && metadata) {
     // Dynamic leaf: page registered its own title.

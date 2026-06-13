@@ -137,6 +137,27 @@ These Terms are governed by Danish law, and any disputes are subject to the Dani
 
 If you have questions about these Terms, you can contact us via the contact form in the app.`;
 
+// ── 2026-06-13: web push notifications ──────────────────────────────────────
+// Derived from the immutable 2026-05-30 text (never edited in place): bumps the
+// "last updated" line and appends a push/notifications paragraph to §5 (Data
+// and privacy). See ADR-0025.
+const PUSH_PRIVACY_DA = `Hvis du aktiverer push-beskeder, gemmer vi en push-abonnementsnøgle og en beskrivelse af din enhed/browser (user-agent) for hver enhed, du tilmelder. Du kan til enhver tid slå push fra pr. enhed og vælge, hvilke typer beskeder du vil modtage pr. kanal (e-mail/push), under Indstillinger → Notifikationer. Selve leveringen af push-beskeder sker via din browserudbyders push-tjeneste (fx Apple, Google eller Mozilla), hvilket er en iboende del af web-push-standarden. Transaktionelle beskeder (fx login-koder) kan ikke fravælges.`;
+
+const PUSH_PRIVACY_EN = `If you enable push notifications, we store a push subscription key and a description of your device/browser (user agent) for each device you register. You can turn push off per device at any time and choose which types of messages you receive per channel (email/push) under Settings → Notifications. Delivery of push messages happens via your browser vendor's push service (e.g. Apple, Google or Mozilla), which is an inherent part of the Web Push standard. Transactional messages (e.g. sign-in codes) cannot be opted out of.`;
+
+const DA_2026_06_13 = DA_2026_05_30.replace(
+  "_Senest opdateret: 30. maj 2026_",
+  "_Senest opdateret: 13. juni 2026_",
+).replace(
+  "## 6. Acceptabel brug",
+  `${PUSH_PRIVACY_DA}\n\n## 6. Acceptabel brug`,
+);
+
+const EN_2026_06_13 = EN_2026_05_30.replace(
+  "_Last updated: 30 May 2026_",
+  "_Last updated: 13 June 2026_",
+).replace("## 6. Acceptable use", `${PUSH_PRIVACY_EN}\n\n## 6. Acceptable use`);
+
 // Ordered oldest → newest. Append new versions at the end.
 export const TERMS_VERSIONS: ReadonlyArray<TermsVersion> = [
   {
@@ -145,6 +166,14 @@ export const TERMS_VERSIONS: ReadonlyArray<TermsVersion> = [
     content: {
       da: DA_2026_05_30,
       en: EN_2026_05_30,
+    },
+  },
+  {
+    version: "2026-06-13",
+    effectiveDate: "2026-06-13",
+    content: {
+      da: DA_2026_06_13,
+      en: EN_2026_06_13,
     },
   },
 ];

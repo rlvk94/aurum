@@ -11,7 +11,7 @@ export function FolioNumeral({
     <span
       aria-hidden
       className={cn(
-        "font-display text-primary/30 leading-none select-none almanac-numerals",
+        "font-display text-primary/30 almanac-numerals leading-none select-none",
         className,
       )}
     >

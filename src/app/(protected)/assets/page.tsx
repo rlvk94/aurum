@@ -59,29 +59,32 @@ function AssetCard({
   const hasLoans = asset.linkedDebts.length > 0;
   const equityPct =
     asset.value > 0
-      ? Math.max(0, Math.min(100, Math.round((asset.equity / asset.value) * 100)))
+      ? Math.max(
+          0,
+          Math.min(100, Math.round((asset.equity / asset.value) * 100)),
+        )
       : 0;
   const underwater = asset.equity < 0;
 
   return (
     <div
-      className={`rounded-lg border border-border bg-card p-4 shadow-card ${archived ? "opacity-60" : ""}`}
+      className={`border-border bg-card shadow-card rounded-lg border p-4 ${archived ? "opacity-60" : ""}`}
     >
       <div className="flex items-start justify-between">
         <div className="flex gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent">
-            <Icon className="h-5 w-5 text-accent-foreground" />
+          <div className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
+            <Icon className="text-accent-foreground h-5 w-5" />
           </div>
           <div>
-            <p className="font-medium text-foreground">{asset.name}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-foreground font-medium">{asset.name}</p>
+            <p className="text-muted-foreground text-xs">
               {t(`types.${asset.type}`)}
             </p>
-            <p className="mt-1 font-display text-lg text-foreground">
+            <p className="font-display text-foreground mt-1 text-lg">
               {formatAmount(asset.value)}
             </p>
             {asset.note && (
-              <p className="mt-1 text-xs text-muted-foreground">{asset.note}</p>
+              <p className="text-muted-foreground mt-1 text-xs">{asset.note}</p>
             )}
           </div>
         </div>
@@ -100,10 +103,7 @@ function AssetCard({
               <Archive />
               {archived ? tAccounts("unarchive") : tAccounts("archive")}
             </DropdownMenuItem>
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={onDelete}
-            >
+            <DropdownMenuItem className="text-destructive" onClick={onDelete}>
               <Trash2 />
               {tCommon("delete")}
             </DropdownMenuItem>
@@ -111,7 +111,7 @@ function AssetCard({
         </DropdownMenu>
       </div>
       {hasLoans && (
-        <div className="mt-4 space-y-2 border-t border-border pt-3">
+        <div className="border-border mt-4 space-y-2 border-t pt-3">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">{t("equity")}</span>
             <span
@@ -120,13 +120,13 @@ function AssetCard({
               {formatAmount(asset.equity)} · {equityPct}%
             </span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
             <div
               className={`h-full transition-all ${underwater ? "bg-debt" : "bg-income"}`}
               style={{ width: `${equityPct}%` }}
             />
           </div>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-xs">
             {t("loanOutstanding", {
               count: asset.linkedDebts.length,
               amount: formatAmount(asset.debtOutstanding),
@@ -215,7 +215,7 @@ export default function AssetsPage() {
 
           {archivedAssets.length > 0 && (
             <div>
-              <h2 className="mb-3 text-sm font-medium text-muted-foreground">
+              <h2 className="text-muted-foreground mb-3 text-sm font-medium">
                 {tAccounts("archived")}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

@@ -205,7 +205,7 @@ export default function LoginPage() {
           {tTerms("loginNotice")}{" "}
           <Link
             href="/terms"
-            className="text-foreground underline underline-offset-2 hover:text-primary"
+            className="text-foreground hover:text-primary underline underline-offset-2"
           >
             {tTerms("viewLink")}
           </Link>

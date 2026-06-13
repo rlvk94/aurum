@@ -67,10 +67,7 @@ export function BudgetTransactionsSheet({
   const locale = useLocale();
   const dateLocale = locale === "da" ? da : enUS;
 
-  const monthsLong = useMemo(
-    () => parseMonthsLong(t("monthsLong")),
-    [t],
-  );
+  const monthsLong = useMemo(() => parseMonthsLong(t("monthsLong")), [t]);
 
   const { from, to } = useMemo(
     () =>
@@ -120,20 +117,20 @@ export function BudgetTransactionsSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent
         side="right"
-        className="flex w-full flex-col gap-0 overflow-hidden p-0 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] [&>button]:top-[calc(env(safe-area-inset-top,0px)+1rem)] sm:max-w-md"
+        className="flex w-full flex-col gap-0 overflow-hidden p-0 pt-[env(safe-area-inset-top,0px)] pb-[env(safe-area-inset-bottom,0px)] sm:max-w-md [&>button]:top-[calc(env(safe-area-inset-top,0px)+1rem)]"
       >
-        <SheetHeader className="border-b border-border px-5 py-4">
+        <SheetHeader className="border-border border-b px-5 py-4">
           <div className="flex items-center gap-3">
             {target?.icon && (
               <span
                 aria-hidden
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-lg leading-none"
+                className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-lg leading-none"
               >
                 {target.icon}
               </span>
             )}
             <div className="min-w-0 flex-1">
-              <SheetTitle className="font-display text-xl truncate">
+              <SheetTitle className="font-display truncate text-xl">
                 {target ? target.label : t("drillDownTitle")}
               </SheetTitle>
               <SheetDescription className="truncate text-sm">
@@ -147,7 +144,7 @@ export function BudgetTransactionsSheet({
 
         <div className="flex-1 overflow-y-auto">
           {!enabled && (
-            <p className="p-6 text-center text-sm text-muted-foreground">
+            <p className="text-muted-foreground p-6 text-center text-sm">
               {t("drillDownEmpty")}
             </p>
           )}
@@ -161,13 +158,13 @@ export function BudgetTransactionsSheet({
           )}
 
           {enabled && !query.isLoading && items.length === 0 && (
-            <p className="p-6 text-center text-sm text-muted-foreground">
+            <p className="text-muted-foreground p-6 text-center text-sm">
               {t("drillDownEmpty")}
             </p>
           )}
 
           {enabled && items.length > 0 && (
-            <ul className="divide-y divide-border">
+            <ul className="divide-border divide-y">
               {items.map((tx) => {
                 const dateObj = parse(tx.date, "yyyy-MM-dd", new Date());
                 const sign = tx.type === "expense" ? -1 : 1;
@@ -183,30 +180,28 @@ export function BudgetTransactionsSheet({
                       <div className="flex items-center gap-1.5">
                         {tx.transferGroupId && (
                           <Link2
-                            className="h-3.5 w-3.5 shrink-0 text-muted-foreground"
+                            className="text-muted-foreground h-3.5 w-3.5 shrink-0"
                             aria-hidden
                           />
                         )}
-                        <p className="truncate text-sm font-medium text-foreground">
+                        <p className="text-foreground truncate text-sm font-medium">
                           {tx.description}
                         </p>
                         {tx.excludedFromCalculations && (
-                          <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-border px-1.5 py-0.5 text-[9px] uppercase tracking-wide text-muted-foreground">
+                          <span className="border-border text-muted-foreground inline-flex shrink-0 items-center gap-1 rounded-full border px-1.5 py-0.5 text-[9px] tracking-wide uppercase">
                             <EyeOff className="h-2.5 w-2.5" aria-hidden />
                             {t("drillDownExcluded")}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-muted-foreground text-xs">
                         {format(dateObj, "d. MMM yyyy", { locale: dateLocale })}
                       </p>
                     </div>
                     <span
                       className={cn(
                         "almanac-numerals shrink-0 text-sm tabular-nums",
-                        tx.type === "expense"
-                          ? "text-expense"
-                          : "text-income",
+                        tx.type === "expense" ? "text-expense" : "text-income",
                       )}
                     >
                       {sign < 0 ? "−" : "+"}
@@ -247,14 +242,13 @@ function SummaryHeader({ target }: { target: DrillDownTarget }) {
       ? Math.min(40, ((actual - planned) / planned) * 100)
       : 0;
   const variance = actual - planned;
-  const pctOfPlan =
-    planned > 0 ? Math.round((actual / planned) * 100) : null;
+  const pctOfPlan = planned > 0 ? Math.round((actual / planned) * 100) : null;
   const varianceLabel =
     variance > 0 ? t("overBy") : variance < 0 ? t("remaining") : t("onBudget");
   const varianceColor = varianceTextClass(planned, actual);
 
   return (
-    <div className="border-b border-border px-5 py-4">
+    <div className="border-border border-b px-5 py-4">
       <dl className="grid grid-cols-3 gap-3">
         <Metric label={t("cellPlanned")} value={formatMoney(planned)} />
         <Metric
@@ -292,13 +286,13 @@ function SummaryHeader({ target }: { target: DrillDownTarget }) {
             )}
             {overshootPct > 0 && (
               <div
-                className="absolute inset-y-0 right-0 bg-expense/80"
+                className="bg-expense/80 absolute inset-y-0 right-0"
                 style={{ width: `${overshootPct}%` }}
               />
             )}
           </div>
           {pctOfPlan !== null && (
-            <div className="flex items-center justify-between almanac-smallcaps text-[10px]">
+            <div className="almanac-smallcaps flex items-center justify-between text-[10px]">
               <span className="text-muted-foreground">{t("pace")}</span>
               <span className={varianceColor}>
                 {t("usedPct", { pct: String(pctOfPlan) })}
@@ -322,12 +316,12 @@ function Metric({
 }) {
   return (
     <div className="min-w-0">
-      <dt className="almanac-smallcaps text-[10px] text-muted-foreground">
+      <dt className="almanac-smallcaps text-muted-foreground text-[10px]">
         {label}
       </dt>
       <dd
         className={cn(
-          "almanac-numerals mt-1 truncate font-display text-base leading-tight",
+          "almanac-numerals font-display mt-1 truncate text-base leading-tight",
           valueClass ?? "text-foreground",
         )}
       >

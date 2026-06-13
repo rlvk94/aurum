@@ -68,9 +68,7 @@ async function getAccessibleAccountIds(
 
   const privateSet = new Set(privateIds);
   return rows
-    .filter(
-      (r) => r.visibility === "shared" || privateSet.has(r.id),
-    )
+    .filter((r) => r.visibility === "shared" || privateSet.has(r.id))
     .map((r) => r.id);
 }
 
@@ -129,7 +127,12 @@ function validateModeFields(input: {
     }
   }
   if (input.transferMode === "rounding") {
-    if (!input.roundingStep || !ROUNDING_STEPS.includes(input.roundingStep as (typeof ROUNDING_STEPS)[number])) {
+    if (
+      !input.roundingStep ||
+      !ROUNDING_STEPS.includes(
+        input.roundingStep as (typeof ROUNDING_STEPS)[number],
+      )
+    ) {
       throw new TRPCError({
         code: "BAD_REQUEST",
         message: "Valid rounding step required for rounding mode",
@@ -242,12 +245,7 @@ export const savingsRouter = createTRPCRouter({
     .input(z.object({ id: z.string().uuid() }))
     .query(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
-      return getSavingsForUser(
-        ctx.db,
-        familyId,
-        ctx.session.user.id,
-        input.id,
-      );
+      return getSavingsForUser(ctx.db, familyId, ctx.session.user.id, input.id);
     }),
 
   /**
@@ -257,7 +255,9 @@ export const savingsRouter = createTRPCRouter({
    */
   reservedByAccount: protectedProcedure
     .input(
-      z.object({ accountIds: z.array(z.string().uuid()).optional() }).optional(),
+      z
+        .object({ accountIds: z.array(z.string().uuid()).optional() })
+        .optional(),
     )
     .query(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
@@ -402,9 +402,7 @@ export const savingsRouter = createTRPCRouter({
         patch.transferMode = input.transferMode;
         // Clear the field for the unused mode so we never have stale data.
         patch.monthlyAmount =
-          input.transferMode === "monthly_fixed"
-            ? (nextMonthly ?? null)
-            : null;
+          input.transferMode === "monthly_fixed" ? (nextMonthly ?? null) : null;
         patch.roundingStep =
           input.transferMode === "rounding" ? (nextRounding ?? null) : null;
       } else {
@@ -419,10 +417,7 @@ export const savingsRouter = createTRPCRouter({
         patch.pausedAt = input.paused ? new Date() : null;
       }
 
-      await ctx.db
-        .update(savings)
-        .set(patch)
-        .where(eq(savings.id, input.id));
+      await ctx.db.update(savings).set(patch).where(eq(savings.id, input.id));
     }),
 
   deposit: protectedProcedure

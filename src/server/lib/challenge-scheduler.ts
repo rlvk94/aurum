@@ -12,11 +12,10 @@ type SchedulerState = { started: boolean; timer: NodeJS.Timeout | null };
 const globalForScheduler = globalThis as unknown as {
   __aurumChallengeScheduler?: SchedulerState;
 };
-const state: SchedulerState =
-  globalForScheduler.__aurumChallengeScheduler ?? {
-    started: false,
-    timer: null,
-  };
+const state: SchedulerState = globalForScheduler.__aurumChallengeScheduler ?? {
+  started: false,
+  timer: null,
+};
 globalForScheduler.__aurumChallengeScheduler = state;
 
 async function runRotation(trigger: "startup" | "interval"): Promise<void> {

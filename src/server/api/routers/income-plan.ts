@@ -17,10 +17,7 @@ import {
 const allocationTypeSchema = z.enum(["percentage", "fixed"]);
 const targetColorSchema = z.enum(PROJECT_PALETTES);
 
-async function getActiveFamilyId(
-  db: typeof dbInstance,
-  userId: string,
-) {
+async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   const [dbUser] = await db
     .select({ activeFamilyId: user.activeFamilyId })
     .from(user)
@@ -35,9 +32,9 @@ async function getActiveFamilyId(
   return dbUser.activeFamilyId;
 }
 
-type DbOrTx = Parameters<
-  Parameters<typeof dbInstance.transaction>[0]
->[0] | typeof dbInstance;
+type DbOrTx =
+  | Parameters<Parameters<typeof dbInstance.transaction>[0]>[0]
+  | typeof dbInstance;
 
 async function assertPlanBelongsToFamily(
   db: DbOrTx,
@@ -112,7 +109,10 @@ export const incomePlanRouter = createTRPCRouter({
     ]);
 
     const totalsByPlan = new Map(
-      incomes.map((i) => [i.planId, { total: Number(i.total), count: Number(i.count) }]),
+      incomes.map((i) => [
+        i.planId,
+        { total: Number(i.total), count: Number(i.count) },
+      ]),
     );
 
     const linesByPlan = new Map<
@@ -170,12 +170,18 @@ export const incomePlanRouter = createTRPCRouter({
           .select()
           .from(incomePlanIncome)
           .where(eq(incomePlanIncome.planId, plan.id))
-          .orderBy(asc(incomePlanIncome.sortOrder), asc(incomePlanIncome.createdAt)),
+          .orderBy(
+            asc(incomePlanIncome.sortOrder),
+            asc(incomePlanIncome.createdAt),
+          ),
         ctx.db
           .select()
           .from(incomePlanLine)
           .where(eq(incomePlanLine.planId, plan.id))
-          .orderBy(asc(incomePlanLine.sortOrder), asc(incomePlanLine.createdAt)),
+          .orderBy(
+            asc(incomePlanLine.sortOrder),
+            asc(incomePlanLine.createdAt),
+          ),
       ]);
 
       return { ...plan, incomes, lines };
@@ -226,10 +232,7 @@ export const incomePlanRouter = createTRPCRouter({
           .select()
           .from(incomePlan)
           .where(
-            and(
-              eq(incomePlan.id, input.id),
-              eq(incomePlan.familyId, familyId),
-            ),
+            and(eq(incomePlan.id, input.id), eq(incomePlan.familyId, familyId)),
           );
         if (!source) {
           throw new TRPCError({ code: "NOT_FOUND", message: "Plan not found" });
@@ -326,10 +329,7 @@ export const incomePlanRouter = createTRPCRouter({
           .update(incomePlan)
           .set({ isActive: false, updatedAt: new Date() })
           .where(
-            and(
-              eq(incomePlan.familyId, familyId),
-              ne(incomePlan.id, input.id),
-            ),
+            and(eq(incomePlan.familyId, familyId), ne(incomePlan.id, input.id)),
           );
 
         await tx
@@ -400,10 +400,7 @@ export const incomePlanRouter = createTRPCRouter({
         .from(incomePlanIncome)
         .innerJoin(incomePlan, eq(incomePlan.id, incomePlanIncome.planId))
         .where(
-          and(
-            eq(incomePlanIncome.id, id),
-            eq(incomePlan.familyId, familyId),
-          ),
+          and(eq(incomePlanIncome.id, id), eq(incomePlan.familyId, familyId)),
         );
       if (!row) {
         throw new TRPCError({ code: "NOT_FOUND", message: "Income not found" });
@@ -499,10 +496,7 @@ export const incomePlanRouter = createTRPCRouter({
         .from(incomePlanLine)
         .innerJoin(incomePlan, eq(incomePlan.id, incomePlanLine.planId))
         .where(
-          and(
-            eq(incomePlanLine.id, id),
-            eq(incomePlan.familyId, familyId),
-          ),
+          and(eq(incomePlanLine.id, id), eq(incomePlan.familyId, familyId)),
         );
       if (!row) {
         throw new TRPCError({

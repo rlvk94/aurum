@@ -43,7 +43,10 @@ const RECURRENCES: Recurrence[] = [
   "custom",
 ];
 
-function defaultStartForUi(recurrence: Recurrence, currentMonth: number): number {
+function defaultStartForUi(
+  recurrence: Recurrence,
+  currentMonth: number,
+): number {
   switch (recurrence) {
     case "monthly":
     case "custom":
@@ -84,7 +87,13 @@ export function AddLineDialog({
     return z.object({
       name: z.string().trim().min(1, required).max(100),
       categoryId: z.string().min(1, required),
-      recurrence: z.enum(["monthly", "quarterly", "semi_annual", "annual", "custom"]),
+      recurrence: z.enum([
+        "monthly",
+        "quarterly",
+        "semi_annual",
+        "annual",
+        "custom",
+      ]),
       startMonth: z.number().int().min(0).max(11),
       periodAmount: z.string().refine((v) => {
         if (v.trim() === "") return true;
@@ -142,7 +151,9 @@ export function AddLineDialog({
         </DialogHeader>
 
         {availableCategories.length === 0 ? (
-          <p className="text-sm text-muted-foreground">{t("noCategoriesYet")}</p>
+          <p className="text-muted-foreground text-sm">
+            {t("noCategoriesYet")}
+          </p>
         ) : (
           <form
             onSubmit={(e) => {
@@ -301,7 +312,9 @@ export function AddLineDialog({
                                   {t(`lineAmountHelp.${recurrence}`)}
                                 </FieldDescription>
                                 {isInvalid && (
-                                  <FieldError errors={field.state.meta.errors} />
+                                  <FieldError
+                                    errors={field.state.meta.errors}
+                                  />
                                 )}
                               </Field>
                             );
@@ -309,7 +322,7 @@ export function AddLineDialog({
                         </form.Field>
                       )}
                       {recurrence === "custom" && (
-                        <p className="rounded-md border border-dashed border-border bg-muted/40 p-3 text-xs text-muted-foreground">
+                        <p className="border-border bg-muted/40 text-muted-foreground rounded-md border border-dashed p-3 text-xs">
                           {t("lineCustomHelp")}
                         </p>
                       )}
@@ -320,7 +333,9 @@ export function AddLineDialog({
             </FieldGroup>
 
             {create.error && (
-              <p className="mt-4 text-sm text-destructive">{tCommon("error")}</p>
+              <p className="text-destructive mt-4 text-sm">
+                {tCommon("error")}
+              </p>
             )}
 
             <DialogFooter className="mt-6">

@@ -13,10 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "~/app/_components/dropdown-menu";
 import { formatMoney } from "~/app/(protected)/income-planner/_lib/format";
-import {
-  variancePillClass,
-  varianceTextClass,
-} from "../_lib/budget-format";
+import { variancePillClass, varianceTextClass } from "../_lib/budget-format";
 
 type Budget = RouterOutputs["budget"]["list"][number];
 
@@ -44,7 +41,7 @@ export function BudgetCard({
 
   return (
     <article
-      className="group relative overflow-hidden rounded-[10px] border border-border bg-card opacity-0 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-elevated"
+      className="group border-border bg-card hover:border-primary/40 hover:shadow-elevated relative overflow-hidden rounded-[10px] border opacity-0 transition-[transform,box-shadow,border-color] duration-300 hover:-translate-y-0.5"
       style={{
         animation: "almanac-rise 0.55s ease-out forwards",
         animationDelay: `${60 + index * 60}ms`,
@@ -52,7 +49,7 @@ export function BudgetCard({
     >
       <Link
         href={`/budgets/annual/${budget.id}`}
-        className="absolute inset-0 z-[1] rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        className="focus-visible:ring-primary absolute inset-0 z-[1] rounded-[inherit] focus-visible:ring-2 focus-visible:outline-none"
         aria-label={budget.name}
       />
 
@@ -65,7 +62,7 @@ export function BudgetCard({
         }}
       />
 
-      <div className="absolute right-3 top-3 z-[2]">
+      <div className="absolute top-3 right-3 z-[2]">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -91,28 +88,28 @@ export function BudgetCard({
 
       <div className="space-y-4 p-5">
         <header className="space-y-1 pr-10">
-          <p className="almanac-smallcaps text-[10px] text-muted-foreground">
+          <p className="almanac-smallcaps text-muted-foreground text-[10px]">
             {isCurrentYear ? t("inProgress") : t("chapter")}
           </p>
-          <h3 className="font-display text-2xl leading-tight text-foreground">
+          <h3 className="font-display text-foreground text-2xl leading-tight">
             {budget.name}
           </h3>
-          <p className="almanac-numerals text-xs text-muted-foreground">
+          <p className="almanac-numerals text-muted-foreground text-xs">
             {t("lineCount", { count: budget.lineCount })}
           </p>
         </header>
 
         <div className="flex items-end justify-between gap-4">
           <div>
-            <p className="almanac-smallcaps text-[9px] text-muted-foreground">
+            <p className="almanac-smallcaps text-muted-foreground text-[9px]">
               {t("planned")}
             </p>
-            <p className="font-display text-[28px] leading-none text-foreground almanac-numerals">
+            <p className="font-display text-foreground almanac-numerals text-[28px] leading-none">
               {formatMoney(budget.totalPlanned)}
             </p>
           </div>
           <div className="text-right">
-            <p className="almanac-smallcaps text-[9px] text-muted-foreground">
+            <p className="almanac-smallcaps text-muted-foreground text-[9px]">
               {t("actual")}
             </p>
             <p
@@ -127,7 +124,7 @@ export function BudgetCard({
         </div>
 
         {budget.totalPlanned > 0 && (
-          <div className="relative h-1 overflow-hidden rounded-full bg-muted">
+          <div className="bg-muted relative h-1 overflow-hidden rounded-full">
             <div
               className={`h-full origin-left transition-transform duration-700 ease-out ${
                 budget.totalActual > budget.totalPlanned
@@ -137,18 +134,18 @@ export function BudgetCard({
               style={{ transform: `scaleX(${Math.max(0.02, pct / 100)})` }}
             />
             {budget.totalActual > budget.totalPlanned && (
-              <div className="absolute inset-y-0 right-0 w-px bg-foreground/20" />
+              <div className="bg-foreground/20 absolute inset-y-0 right-0 w-px" />
             )}
           </div>
         )}
 
-        <footer className="flex items-center justify-between border-t border-border/70 pt-3 text-[11px]">
+        <footer className="border-border/70 flex items-center justify-between border-t pt-3 text-[11px]">
           <span className="almanac-smallcaps text-muted-foreground">
             {t("variance")}
           </span>
           <div className="flex items-center gap-2">
             <span
-              className={`inline-flex items-center rounded-full px-2 py-0.5 almanac-numerals ${variancePillClass(
+              className={`almanac-numerals inline-flex items-center rounded-full px-2 py-0.5 ${variancePillClass(
                 budget.totalPlanned,
                 budget.totalActual,
               )}`}
@@ -156,7 +153,7 @@ export function BudgetCard({
               {variance >= 0 ? "+" : ""}
               {formatMoney(Math.abs(variance))}
             </span>
-            <ArrowUpRight className="h-3.5 w-3.5 text-muted-foreground transition-[transform,color] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
+            <ArrowUpRight className="text-muted-foreground group-hover:text-primary h-3.5 w-3.5 transition-[transform,color] group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </div>
         </footer>
       </div>

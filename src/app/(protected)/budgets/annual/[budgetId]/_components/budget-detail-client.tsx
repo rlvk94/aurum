@@ -9,10 +9,7 @@ import { Button } from "~/app/_components/button";
 import { Skeleton } from "~/app/_components/skeleton";
 import { usePageMetadata } from "~/app/_components/page-metadata";
 import { formatMoney } from "~/app/(protected)/income-planner/_lib/format";
-import {
-  expectedProgressFractions,
-  sumArray,
-} from "../../_lib/budget-format";
+import { expectedProgressFractions, sumArray } from "../../_lib/budget-format";
 import { buildBudgetTree, sumMonths } from "../../_lib/budget-tree";
 import { YearRibbon } from "../../_components/year-ribbon";
 import { BudgetGrid } from "./budget-grid";
@@ -34,9 +31,7 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
 
   // Surface the budget name as the leaf breadcrumb once it's loaded.
   usePageMetadata(
-    budget
-      ? { title: budget.name, parentPath: "/budgets/annual" }
-      : null,
+    budget ? { title: budget.name, parentPath: "/budgets/annual" } : null,
   );
 
   const [addOpen, setAddOpen] = useState(false);
@@ -48,8 +43,12 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
     void utils.budget.list.invalidate();
   };
 
-  const deleteLine = api.budget.deleteLine.useMutation({ onSuccess: invalidate });
-  const updateCell = api.budget.updateCell.useMutation({ onSuccess: invalidate });
+  const deleteLine = api.budget.deleteLine.useMutation({
+    onSuccess: invalidate,
+  });
+  const updateCell = api.budget.updateCell.useMutation({
+    onSuccess: invalidate,
+  });
 
   const { data: categories } = api.category.list.useQuery();
 
@@ -124,38 +123,35 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
   return (
     <div className="min-w-0 space-y-8">
       {/* HERO */}
-      <section className="almanac-grain relative overflow-hidden rounded-[18px] border border-border bg-card">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0"
-        >
-          <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-          <div className="absolute -right-24 bottom-0 h-56 w-56 rounded-full bg-accent blur-3xl opacity-60" />
+      <section className="almanac-grain border-border bg-card relative overflow-hidden rounded-[18px] border">
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <div className="bg-primary/10 absolute top-0 -left-24 h-72 w-72 rounded-full blur-3xl" />
+          <div className="bg-accent absolute -right-24 bottom-0 h-56 w-56 rounded-full opacity-60 blur-3xl" />
         </div>
 
-        <div className="relative px-6 pb-10 pt-8 md:px-10 md:pb-12 md:pt-10">
+        <div className="relative px-6 pt-8 pb-10 md:px-10 md:pt-10 md:pb-12">
           <div className="flex flex-wrap items-start justify-between gap-6">
             <div>
               <div className="flex items-center gap-3">
-                <span className="almanac-smallcaps text-[11px] text-primary">
+                <span className="almanac-smallcaps text-primary text-[11px]">
                   {t("chapter")}
                 </span>
-                <span className="h-px w-10 bg-primary/40" />
-                <span className="font-display text-lg text-foreground almanac-numerals">
+                <span className="bg-primary/40 h-px w-10" />
+                <span className="font-display text-foreground almanac-numerals text-lg">
                   {budget.year}
                 </span>
                 {isCurrentYear && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary almanac-smallcaps">
-                    <span className="h-1 w-1 animate-pulse rounded-full bg-primary" />
+                  <span className="bg-primary/10 text-primary almanac-smallcaps inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-medium">
+                    <span className="bg-primary h-1 w-1 animate-pulse rounded-full" />
                     {t("current")}
                   </span>
                 )}
               </div>
-              <h1 className="mt-3 font-display text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.02] text-foreground">
+              <h1 className="font-display text-foreground mt-3 text-[clamp(2.25rem,4.5vw,3.75rem)] leading-[1.02]">
                 {budget.name}
               </h1>
               {budget.description && (
-                <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+                <p className="text-muted-foreground mt-3 max-w-xl text-sm">
                   {budget.description}
                 </p>
               )}
@@ -184,8 +180,7 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
               label={t("spentToDate")}
               value={formatMoney(paceMetrics?.actualYear ?? 0)}
               accent={
-                (paceMetrics?.actualYear ?? 0) >
-                (paceMetrics?.plannedYear ?? 0)
+                (paceMetrics?.actualYear ?? 0) > (paceMetrics?.plannedYear ?? 0)
                   ? "expense"
                   : "income"
               }
@@ -225,10 +220,10 @@ export function BudgetDetailClient({ budgetId }: { budgetId: string }) {
           {paceMetrics && paceMetrics.plannedYear > 0 && (
             <div className="mt-10 space-y-3">
               <div className="flex items-baseline justify-between">
-                <span className="almanac-smallcaps text-[10px] text-muted-foreground">
+                <span className="almanac-smallcaps text-muted-foreground text-[10px]">
                   {t("twelveMonths")}
                 </span>
-                <span className="almanac-smallcaps text-[10px] text-muted-foreground">
+                <span className="almanac-smallcaps text-muted-foreground text-[10px]">
                   {t("usedPct", {
                     pct: Math.round(paceMetrics.pctUsed).toString(),
                   })}
@@ -295,18 +290,18 @@ function ScopeLine({ accountIds }: { accountIds: string[] }) {
 
   return (
     <p className="mt-4 flex flex-wrap items-center gap-2 text-xs">
-      <span className="almanac-smallcaps text-[10px] text-muted-foreground">
+      <span className="almanac-smallcaps text-muted-foreground text-[10px]">
         {t("scopedTo")}
       </span>
       {!names || names.length === 0 ? (
-        <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-muted-foreground">
+        <span className="bg-muted text-muted-foreground inline-flex items-center rounded-full px-2 py-0.5">
           {t("allAccounts")}
         </span>
       ) : (
         names.map((n) => (
           <span
             key={n}
-            className="inline-flex items-center rounded-full bg-accent px-2 py-0.5 text-accent-foreground"
+            className="bg-accent text-accent-foreground inline-flex items-center rounded-full px-2 py-0.5"
           >
             {n}
           </span>
@@ -335,17 +330,17 @@ function HeroMetric({
         : "text-foreground";
   return (
     <div>
-      <dt className="almanac-smallcaps text-[10px] text-muted-foreground">
+      <dt className="almanac-smallcaps text-muted-foreground text-[10px]">
         {label}
       </dt>
       <dd
-        className={`mt-1.5 font-display text-[26px] leading-none almanac-numerals ${color}`}
+        className={`font-display almanac-numerals mt-1.5 text-[26px] leading-none ${color}`}
       >
         {value}
       </dd>
       {supplemental && (
         <p
-          className={`mt-1 text-[11px] almanac-numerals ${
+          className={`almanac-numerals mt-1 text-[11px] ${
             accent === "expense"
               ? "text-expense"
               : accent === "income"

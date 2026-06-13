@@ -141,7 +141,14 @@
     "actual": "Actual",
     "remaining": "Remaining",
     "projects": "Projects",
-    "projectsEmpty": "No active projects yet."
+    "projectsEmpty": "No active projects yet.",
+    "pushBanner": {
+      "title": "Get the most out of Aurum",
+      "description": "Enable push notifications on this device to get important updates the moment they happen.",
+      "enable": "Enable push",
+      "enabling": "Enabling …",
+      "dismiss": "Dismiss on this device"
+    }
   },
   "accounts": {
     "title": "Accounts",
@@ -961,7 +968,8 @@
       "categories": "Categories",
       "preferences": "Preferences",
       "appearance": "Appearance",
-      "billing": "Subscription"
+      "billing": "Subscription",
+      "notifications": "Notifications"
     },
     "profile": {
       "title": "Profile",
@@ -1032,6 +1040,34 @@
       "themeDark": "Dark",
       "themeSystem": "System",
       "themeSystemDescription": "Match your device setting"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "Choose which messages you receive and how.",
+      "preferencesTitle": "Notification types",
+      "preferencesDescription": "Turn each type on or off per channel.",
+      "typeColumn": "Type",
+      "emailColumn": "Email",
+      "pushColumn": "Push",
+      "types": {
+        "challenge_off_track": {
+          "label": "Challenge off track",
+          "description": "When a family challenge is trending to miss its target."
+        }
+      },
+      "deviceTitle": "Push on this device",
+      "deviceDescription": "Enable push notifications in this browser to receive them here.",
+      "enableOnDevice": "Enable push here",
+      "disableOnDevice": "Disable push here",
+      "enabling": "Enabling …",
+      "unsupported": "This browser does not support push notifications.",
+      "iosInstallHint": "On iPhone/iPad, add Aurum to your home screen first before enabling push.",
+      "permissionDenied": "Notifications are blocked. Allow them in your browser settings to continue.",
+      "devicesHeading": "Registered devices",
+      "noDevices": "No devices registered yet.",
+      "unknownDevice": "Unknown device",
+      "addedOn": "Added {date}",
+      "remove": "Remove"
     }
   },
   "emails": {
@@ -1087,6 +1123,14 @@
         "intro": "We've received the payment for {familyName}. All Pro features are active again.",
         "body": "Thanks for using Aurum."
       }
+    },
+    "challengeOffTrack": {
+      "subject": "{challengeName}: off track",
+      "preview": "Your challenge {challengeName} is falling behind",
+      "heading": "Challenge off track",
+      "intro": "Your challenge “{challengeName}” is currently off track for this period.",
+      "body": "Check your spending and adjust while there's still time to hit the target.",
+      "cta": "View challenge"
     }
   },
   "tutorial": {
@@ -1541,5 +1585,13 @@
     "menu": "Menu",
     "addToHomescreen": "Home Screen",
     "continueInBrowser": "Continue in browser"
+  },
+  "notifications": {
+    "push": {
+      "challengeOffTrack": {
+        "title": "{challengeName} is off track",
+        "body": "You're not on pace for this period. Tap to view."
+      }
+    }
   }
 }

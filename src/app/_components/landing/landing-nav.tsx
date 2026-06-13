@@ -45,14 +45,14 @@ export function LandingNav({ isAuthed }: { isAuthed: boolean }) {
       className={cn(
         "sticky top-0 z-40 w-full transition-colors",
         scrolled
-          ? "bg-background/85 backdrop-blur-md border-b border-primary/15"
+          ? "bg-background/85 border-primary/15 border-b backdrop-blur-md"
           : "bg-transparent",
       )}
     >
       <nav className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link
           href="/"
-          className="font-display text-xl tracking-tight text-foreground"
+          className="font-display text-foreground text-xl tracking-tight"
         >
           Aurum
         </Link>
@@ -73,7 +73,7 @@ export function LandingNav({ isAuthed }: { isAuthed: boolean }) {
                 <span
                   aria-hidden
                   className={cn(
-                    "absolute -bottom-1.5 left-0 h-px bg-primary transition-all duration-300",
+                    "bg-primary absolute -bottom-1.5 left-0 h-px transition-all duration-300",
                     active === id ? "w-full" : "w-0",
                   )}
                 />
@@ -89,7 +89,12 @@ export function LandingNav({ isAuthed }: { isAuthed: boolean }) {
             </Button>
           ) : (
             <>
-              <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
+              <Button
+                asChild
+                variant="ghost"
+                size="sm"
+                className="hidden sm:inline-flex"
+              >
                 <Link href="/login">{t("login")}</Link>
               </Button>
               <Button asChild size="sm" className="rounded-md">

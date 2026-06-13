@@ -111,8 +111,7 @@ export function ChallengeDetailClient({ id }: { id: string }) {
   const Icon = typeIcon[challenge.type];
   const archived = Boolean(challenge.archivedAt);
   const pastInstances = challenge.instances.filter(
-    (i) =>
-      i.status !== "active" && i.id !== challenge.currentInstance?.id,
+    (i) => i.status !== "active" && i.id !== challenge.currentInstance?.id,
   );
 
   const handleDelete = () => {
@@ -154,11 +153,11 @@ export function ChallengeDetailClient({ id }: { id: string }) {
     <div className="mx-auto w-full max-w-6xl space-y-6">
       <div className="flex flex-row items-start justify-between gap-3 sm:gap-4">
         <div className="flex min-w-0 flex-1 items-start gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent sm:h-12 sm:w-12">
-            <Icon className="h-5 w-5 text-primary sm:h-6 sm:w-6" />
+          <div className="bg-accent flex h-10 w-10 shrink-0 items-center justify-center rounded-lg sm:h-12 sm:w-12">
+            <Icon className="text-primary h-5 w-5 sm:h-6 sm:w-6" />
           </div>
           <div className="min-w-0">
-            <h1 className="truncate font-display text-2xl text-foreground sm:text-3xl">
+            <h1 className="font-display text-foreground truncate text-2xl sm:text-3xl">
               {challenge.name}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -175,7 +174,7 @@ export function ChallengeDetailClient({ id }: { id: string }) {
               )}
             </div>
             {challenge.description && (
-              <p className="mt-3 max-w-xl text-sm text-muted-foreground">
+              <p className="text-muted-foreground mt-3 max-w-xl text-sm">
                 {challenge.description}
               </p>
             )}
@@ -298,11 +297,11 @@ function CurrentPeriodCard({
     <Card className="overflow-hidden">
       <CardHeader className="flex flex-row items-start justify-between gap-3 pb-3">
         <div className="min-w-0">
-          <p className="text-xs uppercase tracking-wide text-muted-foreground">
+          <p className="text-muted-foreground text-xs tracking-wide uppercase">
             {t("challengeCurrentPeriod")}
           </p>
-          <p className="mt-1 flex items-center gap-1.5 text-sm text-foreground">
-            <CalendarRange className="h-4 w-4 text-muted-foreground" />
+          <p className="text-foreground mt-1 flex items-center gap-1.5 text-sm">
+            <CalendarRange className="text-muted-foreground h-4 w-4" />
             {periodLabel}
           </p>
         </div>
@@ -315,21 +314,21 @@ function CurrentPeriodCard({
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <p className="text-xs text-muted-foreground">{amountLabel}</p>
-          <p className="font-display text-3xl text-foreground">
+          <p className="text-muted-foreground text-xs">{amountLabel}</p>
+          <p className="font-display text-foreground text-3xl">
             {formatAmount(progress)}
-            <span className="ml-1.5 text-base text-muted-foreground">
+            <span className="text-muted-foreground ml-1.5 text-base">
               / {formatAmount(targetAmount)}
             </span>
           </p>
         </div>
 
         <div>
-          <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+          <div className="text-muted-foreground mb-1 flex items-center justify-between text-xs">
             <span>{t("challengeProgress")}</span>
             <span>{displayPct}%</span>
           </div>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+          <div className="bg-muted h-2 w-full overflow-hidden rounded-full">
             <div
               className={`h-full rounded-full transition-all ${progressColor}`}
               style={{ width: `${displayPct}%` }}
@@ -339,19 +338,19 @@ function CurrentPeriodCard({
 
         <div className="grid grid-cols-2 gap-4 pt-1 text-sm">
           <div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {isOver
                 ? t("challengeOverBy", { amount: formatAmount(-remaining) })
                 : t("challengeRemaining")}
             </p>
             {!isOver && (
-              <p className="mt-0.5 font-medium text-foreground">
+              <p className="text-foreground mt-0.5 font-medium">
                 {formatAmount(Math.max(0, remaining))}
               </p>
             )}
           </div>
           <div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               {notStarted
                 ? daysToStart === 0
                   ? t("challengeStartsToday")
@@ -370,7 +369,7 @@ function CurrentPeriodCard({
           </div>
         </div>
 
-        <div className="border-t border-border pt-3">
+        <div className="border-border border-t pt-3">
           <PeriodTransactions
             instance={currentInstance}
             challenge={challenge}
@@ -383,4 +382,3 @@ function CurrentPeriodCard({
     </Card>
   );
 }
-

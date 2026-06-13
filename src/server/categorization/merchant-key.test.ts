@@ -4,7 +4,9 @@ import { deriveMerchantKey } from "./merchant-key";
 
 describe("deriveMerchantKey", () => {
   it("reduces a noisy card line to the brand token", () => {
-    expect(deriveMerchantKey("DK KORT NETTO HØRSHOLM 1234 28.05")).toBe("netto");
+    expect(deriveMerchantKey("DK KORT NETTO HØRSHOLM 1234 28.05")).toBe(
+      "netto",
+    );
     // First token (>3 chars) is the stable brand key; the "1000" isn't appended.
     expect(deriveMerchantKey("Visa/Dankort REMA 1000 LYNGBY")).toBe("rema");
   });

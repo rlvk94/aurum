@@ -61,7 +61,10 @@ describe("parseWithMapping (signed)", () => {
       ["2024-01-15", "Coffee", "-50.00", "1", "REF123", "Food"],
     ];
     const { rows } = parseWithMapping(table, baseSigned);
-    expect(rows[0]?.metadata).toEqual({ Reference: "REF123", Category: "Food" });
+    expect(rows[0]?.metadata).toEqual({
+      Reference: "REF123",
+      Category: "Food",
+    });
   });
 
   it("uses balance in externalId when mapped", () => {

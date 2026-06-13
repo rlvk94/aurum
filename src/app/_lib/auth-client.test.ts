@@ -11,11 +11,19 @@ import { describe, it, expect, vi } from "vitest";
 vi.mock("better-auth/react", () => ({
   createAuthClient: vi.fn(() => ({
     emailOtp: {
-      sendVerificationOtp: vi.fn().mockResolvedValue({ data: { success: true } }),
-      verifyEmail: vi.fn().mockResolvedValue({ data: { session: { id: "session-1" } } }),
+      sendVerificationOtp: vi
+        .fn()
+        .mockResolvedValue({ data: { success: true } }),
+      verifyEmail: vi
+        .fn()
+        .mockResolvedValue({ data: { session: { id: "session-1" } } }),
     },
     signIn: {
-      emailOtp: vi.fn().mockResolvedValue({ data: { user: { id: "user-1", email: "test@example.com" } } }),
+      emailOtp: vi
+        .fn()
+        .mockResolvedValue({
+          data: { user: { id: "user-1", email: "test@example.com" } },
+        }),
     },
     signOut: vi.fn().mockResolvedValue({}),
     useSession: vi.fn().mockReturnValue({

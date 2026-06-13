@@ -1,5 +1,18 @@
 import { z } from "zod";
-import { and, desc, eq, gte, ilike, inArray, isNotNull, isNull, lte, ne, or, sql } from "drizzle-orm";
+import {
+  and,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  isNotNull,
+  isNull,
+  lte,
+  ne,
+  or,
+  sql,
+} from "drizzle-orm";
 import { TRPCError } from "@trpc/server";
 
 import {
@@ -53,10 +66,7 @@ function sanitizeMetadata(
 
 const transactionTypeSchema = z.enum(["expense", "income"]);
 
-async function getActiveFamilyId(
-  db: typeof dbInstance,
-  userId: string,
-) {
+async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   const [dbUser] = await db
     .select({ activeFamilyId: user.activeFamilyId })
     .from(user)
@@ -210,7 +220,9 @@ async function assertPartCategoriesLeaf(
   }
 }
 
-type DbOrTx = Parameters<Parameters<typeof dbInstance.transaction>[0]>[0] | typeof dbInstance;
+type DbOrTx =
+  | Parameters<Parameters<typeof dbInstance.transaction>[0]>[0]
+  | typeof dbInstance;
 
 /**
  * Apply rounding-mode savings auto-transfers for an expense. Runs after
@@ -476,9 +488,7 @@ export const transactionRouter = createTRPCRouter({
       ) {
         const ids = input?.categoryIds ?? [];
         const expanded =
-          ids.length > 0
-            ? await expandCategoryIds(ctx.db, familyId, ids)
-            : [];
+          ids.length > 0 ? await expandCategoryIds(ctx.db, familyId, ids) : [];
         const branches = [];
         if (expanded.length > 0) {
           branches.push(inArray(transaction.categoryId, expanded));
@@ -567,12 +577,9 @@ export const transactionRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
-      await assertAccountAccess(
-        ctx.db,
-        familyId,
-        ctx.session.user.id,
-        [input.accountId],
-      );
+      await assertAccountAccess(ctx.db, familyId, ctx.session.user.id, [
+        input.accountId,
+      ]);
 
       if (input.categoryId) {
         await assertCategoryIsLeaf(ctx.db, familyId, input.categoryId);
@@ -684,13 +691,12 @@ export const transactionRouter = createTRPCRouter({
             ? { ...(metadata ?? {}), rawDescription }
             : metadata;
         // Auto-categorize from learned/seeded merchant rules; null otherwise.
-        const categoryId =
-          t.transferGroupId
-            ? null
-            : ruleCategoryFor(
-                learnedIndex,
-                deriveMerchantKey(description, storedMetadata),
-              );
+        const categoryId = t.transferGroupId
+          ? null
+          : ruleCategoryFor(
+              learnedIndex,
+              deriveMerchantKey(description, storedMetadata),
+            );
         return {
           familyId,
           accountId: t.accountId,
@@ -835,20 +841,15 @@ export const transactionRouter = createTRPCRouter({
           splitParentId: transaction.splitParentId,
         })
         .from(transaction)
-        .where(
-          and(eq(transaction.id, id), eq(transaction.familyId, familyId)),
-        );
+        .where(and(eq(transaction.id, id), eq(transaction.familyId, familyId)));
 
       if (!existing) {
         throw new TRPCError({ code: "NOT_FOUND" });
       }
 
-      await assertAccountAccess(
-        ctx.db,
-        familyId,
-        ctx.session.user.id,
-        [existing.accountId],
-      );
+      await assertAccountAccess(ctx.db, familyId, ctx.session.user.id, [
+        existing.accountId,
+      ]);
 
       // A split part's amount/type is owned by the split (it must keep summing
       // to the bank original). Editing it here would desync the parts from the
@@ -873,19 +874,13 @@ export const transactionRouter = createTRPCRouter({
       await ctx.db
         .update(transaction)
         .set({ ...data, updatedAt: new Date() })
-        .where(
-          and(eq(transaction.id, id), eq(transaction.familyId, familyId)),
-        );
+        .where(and(eq(transaction.id, id), eq(transaction.familyId, familyId)));
 
       const oldDelta = signedDelta(existing.type, existing.amount);
       const newType = data.type ?? existing.type;
       const newAmount = data.amount ?? existing.amount;
       const newDelta = signedDelta(newType, newAmount);
-      await applyBalanceDelta(
-        ctx.db,
-        existing.accountId,
-        newDelta - oldDelta,
-      );
+      await applyBalanceDelta(ctx.db, existing.accountId, newDelta - oldDelta);
 
       // Rounding tied to the prior state must be discarded before
       // re-applying for the new state — otherwise a type or amount
@@ -972,7 +967,10 @@ export const transactionRouter = createTRPCRouter({
         );
       if (!source) return { matched: 0, updated: 0 };
 
-      const merchantKey = deriveMerchantKey(source.description, source.metadata);
+      const merchantKey = deriveMerchantKey(
+        source.description,
+        source.metadata,
+      );
       if (!merchantKey) return { matched: 0, updated: 0 };
 
       // Candidate set: uncategorized rows in accessible accounts. The merchant
@@ -1286,7 +1284,10 @@ export const transactionRouter = createTRPCRouter({
       const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
 
       const [row] = await ctx.db
-        .select({ id: transaction.id, splitParentId: transaction.splitParentId })
+        .select({
+          id: transaction.id,
+          splitParentId: transaction.splitParentId,
+        })
         .from(transaction)
         .where(
           and(
@@ -1360,12 +1361,9 @@ export const transactionRouter = createTRPCRouter({
         );
 
       if (!existing) return;
-      await assertAccountAccess(
-        ctx.db,
-        familyId,
-        ctx.session.user.id,
-        [existing.accountId],
-      );
+      await assertAccountAccess(ctx.db, familyId, ctx.session.user.id, [
+        existing.accountId,
+      ]);
 
       // A part never moved the account balance (the original owns it) and
       // never triggered rounding, so deleting one must NOT roll back balance.

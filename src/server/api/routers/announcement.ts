@@ -3,10 +3,7 @@ import { and, eq, inArray } from "drizzle-orm";
 
 import { createTRPCRouter, protectedProcedure } from "~/server/api/trpc";
 import { announcementDismissal } from "~/server/db/schema";
-import {
-  ANNOUNCEMENTS,
-  getVisibleAnnouncements,
-} from "~/server/announcements";
+import { ANNOUNCEMENTS, getVisibleAnnouncements } from "~/server/announcements";
 
 export const announcementRouter = createTRPCRouter({
   list: protectedProcedure.query(async ({ ctx }) => {

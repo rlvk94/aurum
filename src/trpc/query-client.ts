@@ -15,10 +15,18 @@ import { openUpgradeModal } from "~/app/_components/billing/upgrade-modal-bus";
  */
 function handleMutationError(error: unknown) {
   if (typeof error !== "object" || error === null) return;
-  const e = error as { message?: unknown; data?: { cause?: { feature?: string } | null } };
-  if (e.message === "plan_upgrade_required" || e.message === "plan_limit_reached") {
+  const e = error as {
+    message?: unknown;
+    data?: { cause?: { feature?: string } | null };
+  };
+  if (
+    e.message === "plan_upgrade_required" ||
+    e.message === "plan_limit_reached"
+  ) {
     const feature =
-      typeof e.data?.cause?.feature === "string" ? e.data.cause.feature : undefined;
+      typeof e.data?.cause?.feature === "string"
+        ? e.data.cause.feature
+        : undefined;
     openUpgradeModal(feature);
   }
 }

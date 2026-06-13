@@ -45,7 +45,9 @@ export const ANNOUNCEMENTS: ReadonlyArray<Announcement> = [
   },
 ];
 
-export function getVisibleAnnouncements(now: Date = new Date()): Announcement[] {
+export function getVisibleAnnouncements(
+  now: Date = new Date(),
+): Announcement[] {
   const today = now.toISOString().slice(0, 10);
   return ANNOUNCEMENTS.filter((a) => a.publishedAt <= today)
     .slice()

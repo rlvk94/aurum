@@ -74,11 +74,15 @@ export type PlanBulletKey =
   | (typeof PLAN_DISPLAY_BULLETS)["family"][number];
 
 export type BooleanFeatureKey = {
-  [K in FeatureKey]: (typeof PLAN_FEATURES)["family"][K] extends boolean ? K : never;
+  [K in FeatureKey]: (typeof PLAN_FEATURES)["family"][K] extends boolean
+    ? K
+    : never;
 }[FeatureKey];
 
 export type NumericLimitKey = {
-  [K in FeatureKey]: (typeof PLAN_FEATURES)["family"][K] extends number ? K : never;
+  [K in FeatureKey]: (typeof PLAN_FEATURES)["family"][K] extends number
+    ? K
+    : never;
 }[FeatureKey];
 
 export function planHas(plan: PlanKey, feature: BooleanFeatureKey): boolean {

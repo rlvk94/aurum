@@ -96,9 +96,7 @@ export function CategoryBreakdownCard({ accountId }: { accountId: string }) {
     <Card>
       <CardHeader className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <CardTitle className="text-base">
-            {t("categoryBreakdown")}
-          </CardTitle>
+          <CardTitle className="text-base">{t("categoryBreakdown")}</CardTitle>
           <CardDescription>{label}</CardDescription>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -145,7 +143,7 @@ export function CategoryBreakdownCard({ accountId }: { accountId: string }) {
         ) : totalCents > 0 ? (
           <CategorySplit entries={entries} totalCents={totalCents} />
         ) : (
-          <p className="py-8 text-center text-sm text-muted-foreground">
+          <p className="text-muted-foreground py-8 text-center text-sm">
             {t("noExpenses")}
           </p>
         )}

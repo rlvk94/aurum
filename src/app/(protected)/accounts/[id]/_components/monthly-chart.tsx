@@ -41,7 +41,7 @@ export function MonthlyChart({
             >
               <div className="flex h-full w-full items-end justify-center gap-0.5">
                 <div
-                  className="w-1/2 rounded-sm bg-income transition-all"
+                  className="bg-income w-1/2 rounded-sm transition-all"
                   style={{
                     height: `${incomeH}px`,
                     minHeight: m.incomeCents > 0 ? 2 : 0,
@@ -49,7 +49,7 @@ export function MonthlyChart({
                   aria-label={`${t("totalIncome")} ${formatAmount(m.incomeCents)}`}
                 />
                 <div
-                  className="w-1/2 rounded-sm bg-expense transition-all"
+                  className="bg-expense w-1/2 rounded-sm transition-all"
                   style={{
                     height: `${expenseH}px`,
                     minHeight: m.expenseCents > 0 ? 2 : 0,
@@ -58,13 +58,15 @@ export function MonthlyChart({
                 />
               </div>
               {hasData && (
-                <div className="pointer-events-none absolute bottom-full mb-2 hidden whitespace-nowrap rounded-md border border-border bg-popover px-2 py-1 text-xs shadow-elevated group-hover:block">
+                <div className="border-border bg-popover shadow-elevated pointer-events-none absolute bottom-full mb-2 hidden rounded-md border px-2 py-1 text-xs whitespace-nowrap group-hover:block">
                   <p className="font-medium">
-                    {format(parse(`${m.month}-01`, "yyyy-MM-dd", new Date()), "MMMM yyyy", { locale: dateLocale })}
+                    {format(
+                      parse(`${m.month}-01`, "yyyy-MM-dd", new Date()),
+                      "MMMM yyyy",
+                      { locale: dateLocale },
+                    )}
                   </p>
-                  <p className="text-income">
-                    + {formatAmount(m.incomeCents)}
-                  </p>
+                  <p className="text-income">+ {formatAmount(m.incomeCents)}</p>
                   <p className="text-expense">
                     − {formatAmount(m.expenseCents)}
                   </p>
@@ -80,7 +82,7 @@ export function MonthlyChart({
           return (
             <div
               key={m.month}
-              className="flex-1 text-center text-xs text-muted-foreground"
+              className="text-muted-foreground flex-1 text-center text-xs"
             >
               <span className="sm:hidden">
                 {format(d, "MMMMM", { locale: dateLocale })}
@@ -92,13 +94,13 @@ export function MonthlyChart({
           );
         })}
       </div>
-      <div className="flex items-center justify-center gap-4 pt-2 text-xs text-muted-foreground">
+      <div className="text-muted-foreground flex items-center justify-center gap-4 pt-2 text-xs">
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-sm bg-income" />
+          <span className="bg-income h-2 w-2 rounded-sm" />
           {t("totalIncome")}
         </span>
         <span className="inline-flex items-center gap-1.5">
-          <span className="h-2 w-2 rounded-sm bg-expense" />
+          <span className="bg-expense h-2 w-2 rounded-sm" />
           {t("totalExpense")}
         </span>
       </div>

@@ -21,8 +21,7 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   const isPublic =
-    pathname === "/" ||
-    publicPaths.some((path) => pathname.startsWith(path));
+    pathname === "/" || publicPaths.some((path) => pathname.startsWith(path));
   const hasSession = Boolean(getSessionCookie(request));
 
   // Authenticated users visiting login → redirect to dashboard

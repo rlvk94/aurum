@@ -26,8 +26,7 @@ describe("announcements bundle", () => {
   it("latestAnnouncementId returns the highest id by lex order", () => {
     const id = latestAnnouncementId(new Date("2099-01-01T00:00:00Z"));
     expect(id).toBe(
-      ANNOUNCEMENTS.slice()
-        .sort((a, b) => (a.id < b.id ? 1 : -1))[0]!.id,
+      ANNOUNCEMENTS.slice().sort((a, b) => (a.id < b.id ? 1 : -1))[0]!.id,
     );
   });
 

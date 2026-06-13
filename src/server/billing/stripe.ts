@@ -36,7 +36,9 @@ export function priceIdFor(cadence: BillingCadence): string {
   return id;
 }
 
-export function cadenceFromPriceId(priceId: string | null): BillingCadence | null {
+export function cadenceFromPriceId(
+  priceId: string | null,
+): BillingCadence | null {
   if (!priceId) return null;
   if (priceId === env.STRIPE_PRICE_FAMILY_ANNUAL) return "annual";
   if (priceId === env.STRIPE_PRICE_FAMILY_MONTHLY) return "monthly";

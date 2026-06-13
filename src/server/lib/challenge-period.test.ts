@@ -5,7 +5,13 @@ describe("computePeriodWindow", () => {
   describe("one_off", () => {
     it("returns the fixed start and end dates", () => {
       expect(
-        computePeriodWindow("one_off", "2026-04-01", "2026-04-30", null, "2026-04-15"),
+        computePeriodWindow(
+          "one_off",
+          "2026-04-01",
+          "2026-04-30",
+          null,
+          "2026-04-15",
+        ),
       ).toEqual({ from: "2026-04-01", to: "2026-04-30" });
     });
   });

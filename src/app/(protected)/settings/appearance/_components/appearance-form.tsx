@@ -37,9 +37,7 @@ function setCookie(name: string, value: string, maxAge: number) {
 }
 
 function applyTheme(theme: Theme) {
-  const prefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)",
-  ).matches;
+  const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
   const isDark = theme === "dark" || (theme === "system" && prefersDark);
   document.documentElement.classList.toggle("dark", isDark);
 }
@@ -94,12 +92,12 @@ export function AppearanceForm() {
                 )}
               >
                 <span className="text-2xl">{lang.flag}</span>
-                <span className="flex-1 text-base font-medium text-foreground">
+                <span className="text-foreground flex-1 text-base font-medium">
                   {lang.label}
                 </span>
                 {isSelected && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
-                    <Check className="h-3 w-3 text-primary-foreground" />
+                  <span className="bg-primary flex h-5 w-5 items-center justify-center rounded-full">
+                    <Check className="text-primary-foreground h-3 w-3" />
                   </span>
                 )}
               </button>
@@ -135,20 +133,20 @@ export function AppearanceForm() {
                     : "border-border bg-background hover:border-primary/30 hover:bg-accent/50",
                 )}
               >
-                <Icon className="size-5 text-foreground" />
+                <Icon className="text-foreground size-5" />
                 <div className="flex-1">
-                  <div className="text-base font-medium text-foreground">
+                  <div className="text-foreground text-base font-medium">
                     {t(labelKey)}
                   </div>
                   {option.code === "system" && (
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-muted-foreground text-xs">
                       {t("themeSystemDescription")}
                     </div>
                   )}
                 </div>
                 {isSelected && (
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary">
-                    <Check className="h-3 w-3 text-primary-foreground" />
+                  <span className="bg-primary flex h-5 w-5 items-center justify-center rounded-full">
+                    <Check className="text-primary-foreground h-3 w-3" />
                   </span>
                 )}
               </button>

@@ -193,9 +193,12 @@ function SplitFlow({
     }));
     const originalId = target.splitParentId ?? target.id;
     const onSuccess = () => {
-      posthog.capture(isExisting ? "transaction_split_edited" : "transaction_split", {
-        parts: parts.length,
-      });
+      posthog.capture(
+        isExisting ? "transaction_split_edited" : "transaction_split",
+        {
+          parts: parts.length,
+        },
+      );
       invalidateAll(utils);
       onClose();
     };
@@ -222,7 +225,7 @@ function SplitFlow({
 
   if (isExisting && splitLoading) {
     return (
-      <div className="p-6 text-center text-sm text-muted-foreground">
+      <div className="text-muted-foreground p-6 text-center text-sm">
         {tCommon("loading")}
       </div>
     );
@@ -231,8 +234,8 @@ function SplitFlow({
   return (
     <div className="flex flex-col gap-4 px-4 pb-4 sm:px-0">
       {isExisting && splitData && (
-        <div className="rounded-lg border border-border bg-muted/40 px-3 py-2 text-xs text-muted-foreground">
-          <span className="font-medium text-foreground">
+        <div className="border-border bg-muted/40 text-muted-foreground rounded-lg border px-3 py-2 text-xs">
+          <span className="text-foreground font-medium">
             {t("originalTransaction")}:
           </span>{" "}
           {splitData.original.description} · {formatAmount(originalAmount)}
@@ -249,7 +252,7 @@ function SplitFlow({
         {effectiveRows.map((row, i) => (
           <div
             key={i}
-            className="flex flex-col gap-2 rounded-lg border border-border p-3"
+            className="border-border flex flex-col gap-2 rounded-lg border p-3"
           >
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium">
@@ -343,7 +346,7 @@ function SplitFlow({
         </span>
       </div>
       {remaining !== 0 && (
-        <p className="-mt-2 text-xs text-muted-foreground">
+        <p className="text-muted-foreground -mt-2 text-xs">
           {t("mustSumToTotal")}
         </p>
       )}
@@ -362,7 +365,11 @@ function SplitFlow({
         ) : (
           <span />
         )}
-        <Button type="button" onClick={handleSave} disabled={!canSave || pending}>
+        <Button
+          type="button"
+          onClick={handleSave}
+          disabled={!canSave || pending}
+        >
           {pending ? tCommon("loading") : tCommon("save")}
         </Button>
       </div>
@@ -397,7 +404,7 @@ export function TransactionInspectDialog({
   const content = (
     <div className="flex flex-col gap-4 px-4 pb-4 sm:px-0">
       {isLoading || !data ? (
-        <div className="p-4 text-center text-sm text-muted-foreground">
+        <div className="text-muted-foreground p-4 text-center text-sm">
           {tCommon("loading")}
         </div>
       ) : (
@@ -423,14 +430,12 @@ export function TransactionInspectDialog({
             )}
           </dl>
           <div className="border-t pt-3">
-            <p className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wide uppercase">
               {t("splitInto", { count: data.parts.length })}
             </p>
             <ul className="space-y-1.5">
               {data.parts.map((p) => {
-                const cat = p.categoryId
-                  ? categoryMap.get(p.categoryId)
-                  : null;
+                const cat = p.categoryId ? categoryMap.get(p.categoryId) : null;
                 return (
                   <li
                     key={p.id}

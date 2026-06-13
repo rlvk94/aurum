@@ -159,9 +159,7 @@ export function AccountFormDialog({
         visibility: value.visibility,
         accessUserIds: isPrivate ? value.accessUserIds : [],
       };
-      const balanceCents = Math.round(
-        parseFloat(value.balance || "0") * 100,
-      );
+      const balanceCents = Math.round(parseFloat(value.balance || "0") * 100);
       if (isEdit) {
         updateAccount.mutate({
           id: account.id,
@@ -319,9 +317,7 @@ export function AccountFormDialog({
                     onChange={(e) => field.handleChange(e.target.value)}
                   />
                   {isEdit && (
-                    <FieldDescription>
-                      {t("balanceEditHelp")}
-                    </FieldDescription>
+                    <FieldDescription>{t("balanceEditHelp")}</FieldDescription>
                   )}
                 </Field>
               )}

@@ -9,42 +9,42 @@ import { cn } from "~/app/_lib/utils";
 // what we snapshot on acceptance, so rendering is purely presentational.
 const components: Components = {
   h1: ({ children }) => (
-    <h1 className="font-display text-2xl tracking-tight text-foreground sm:text-3xl">
+    <h1 className="font-display text-foreground text-2xl tracking-tight sm:text-3xl">
       {children}
     </h1>
   ),
   h2: ({ children }) => (
-    <h2 className="mt-8 font-display text-lg tracking-tight text-foreground sm:text-xl">
+    <h2 className="font-display text-foreground mt-8 text-lg tracking-tight sm:text-xl">
       {children}
     </h2>
   ),
   h3: ({ children }) => (
-    <h3 className="mt-6 text-base font-semibold text-foreground">{children}</h3>
+    <h3 className="text-foreground mt-6 text-base font-semibold">{children}</h3>
   ),
   p: ({ children }) => (
-    <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+    <p className="text-muted-foreground mt-3 text-sm leading-relaxed">
       {children}
     </p>
   ),
   ul: ({ children }) => (
-    <ul className="mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed text-muted-foreground">
+    <ul className="text-muted-foreground mt-3 list-disc space-y-1 pl-5 text-sm leading-relaxed">
       {children}
     </ul>
   ),
   ol: ({ children }) => (
-    <ol className="mt-3 list-decimal space-y-1 pl-5 text-sm leading-relaxed text-muted-foreground">
+    <ol className="text-muted-foreground mt-3 list-decimal space-y-1 pl-5 text-sm leading-relaxed">
       {children}
     </ol>
   ),
   li: ({ children }) => <li>{children}</li>,
   strong: ({ children }) => (
-    <strong className="font-semibold text-foreground">{children}</strong>
+    <strong className="text-foreground font-semibold">{children}</strong>
   ),
   em: ({ children }) => <em className="italic">{children}</em>,
   a: ({ href, children }) => (
     <a
       href={href}
-      className="text-primary underline underline-offset-2 hover:text-primary/80"
+      className="text-primary hover:text-primary/80 underline underline-offset-2"
     >
       {children}
     </a>

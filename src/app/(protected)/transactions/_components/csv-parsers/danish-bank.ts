@@ -46,8 +46,7 @@ export const danishBankParser: CsvParser = {
         amount < 0 ? "outgoing" : "incoming";
 
       // Counter account is the "other side" of the transaction.
-      const counterAccount =
-        direction === "outgoing" ? toAccount : fromAccount;
+      const counterAccount = direction === "outgoing" ? toAccount : fromAccount;
 
       const payer = (fields[7] ?? "").trim();
       const suppText = (fields[8] ?? "").trim();

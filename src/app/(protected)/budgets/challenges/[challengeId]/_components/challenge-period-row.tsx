@@ -8,10 +8,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 
 import { api, type RouterOutputs } from "~/trpc/react";
 import { Skeleton } from "~/app/_components/skeleton";
-import {
-  formatAmount,
-  formatPeriodRange,
-} from "../../_lib/challenge-progress";
+import { formatAmount, formatPeriodRange } from "../../_lib/challenge-progress";
 
 type ChallengeDetail = RouterOutputs["challenge"]["get"];
 type ChallengeInstance = ChallengeDetail["instances"][number];
@@ -38,40 +35,42 @@ export function ChallengePeriodRow({
 
   const isSpendLess = challenge.type === "spend_less";
   // Goal met: spend_less wants finalAmount <= target; accrual types want finalAmount >= target.
-  const met = isSpendLess
-    ? finalAmount <= target
-    : finalAmount >= target;
+  const met = isSpendLess ? finalAmount <= target : finalAmount >= target;
   const ratio = target > 0 ? Math.max(0, finalAmount) / target : 0;
   const displayPct = Math.min(100, Math.round(ratio * 100));
   const barColor = met ? "bg-income" : "bg-expense";
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card">
+    <div className="border-border bg-card overflow-hidden rounded-lg border">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full flex-col gap-2 px-4 py-3 text-left transition-colors hover:bg-muted/40"
+        className="hover:bg-muted/40 flex w-full flex-col gap-2 px-4 py-3 text-left transition-colors"
         aria-expanded={open}
       >
         <div className="flex w-full items-center justify-between gap-3">
-          <span className="min-w-0 truncate text-sm font-medium text-foreground">
-            {formatPeriodRange(instance.periodStart, instance.periodEnd, locale)}
+          <span className="text-foreground min-w-0 truncate text-sm font-medium">
+            {formatPeriodRange(
+              instance.periodStart,
+              instance.periodEnd,
+              locale,
+            )}
           </span>
           <div className="flex shrink-0 items-center gap-3">
-            <span className="text-sm text-muted-foreground tabular-nums">
+            <span className="text-muted-foreground text-sm tabular-nums">
               {formatAmount(finalAmount)}
-              <span className="ml-1 text-xs text-muted-foreground/70">
+              <span className="text-muted-foreground/70 ml-1 text-xs">
                 / {formatAmount(target)}
               </span>
             </span>
             {open ? (
-              <ChevronUp className="h-4 w-4 text-muted-foreground" />
+              <ChevronUp className="text-muted-foreground h-4 w-4" />
             ) : (
-              <ChevronDown className="h-4 w-4 text-muted-foreground" />
+              <ChevronDown className="text-muted-foreground h-4 w-4" />
             )}
           </div>
         </div>
-        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+        <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
           <div
             className={`h-full rounded-full transition-all ${barColor}`}
             style={{ width: `${displayPct}%` }}
@@ -80,7 +79,7 @@ export function ChallengePeriodRow({
       </button>
 
       {open && (
-        <div className="border-t border-border px-4 py-3">
+        <div className="border-border border-t px-4 py-3">
           <PeriodTransactions
             instance={instance}
             challenge={challenge}
@@ -113,7 +112,7 @@ export function PeriodTransactions({
 
   if (challenge.type === "net_worth_goal") {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {t("challengeNoTransactionsForType")}
       </p>
     );
@@ -167,7 +166,7 @@ export function PeriodTransactions({
   const items = query.data?.items ?? [];
   if (items.length === 0) {
     return (
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         {t("challengeNoTransactionsInPeriod")}
       </p>
     );
@@ -176,7 +175,7 @@ export function PeriodTransactions({
   const categoryById = new Map(categories.map((c) => [c.id, c]));
 
   return (
-    <ul className="divide-y divide-border">
+    <ul className="divide-border divide-y">
       {items.map((tx) => {
         const dateLabel = format(parseISO(tx.date), "d. MMM yyyy", {
           locale: dateLocale,
@@ -195,23 +194,23 @@ export function PeriodTransactions({
             className="flex min-w-0 items-center gap-3 py-2 text-sm"
           >
             <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="truncate text-foreground">{tx.description}</span>
-              <span className="text-xs text-muted-foreground">{dateLabel}</span>
+              <span className="text-foreground truncate">{tx.description}</span>
+              <span className="text-muted-foreground text-xs">{dateLabel}</span>
             </div>
             <button
               type="button"
               onClick={() =>
                 onAssignCategory({ id: tx.id, categoryId: tx.categoryId })
               }
-              className="inline-flex shrink-0 items-center gap-1 rounded-full text-xs transition hover:ring-2 hover:ring-primary/40 sm:text-[11px]"
+              className="hover:ring-primary/40 inline-flex shrink-0 items-center gap-1 rounded-full text-xs transition hover:ring-2 sm:text-[11px]"
             >
               {cat ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-accent-foreground">
+                <span className="bg-accent text-accent-foreground inline-flex items-center gap-1 rounded-full px-2 py-0.5">
                   {cat.icon && <span className="leading-none">{cat.icon}</span>}
                   <span>{cat.name}</span>
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full border border-dashed border-muted-foreground/40 px-2 py-0.5 text-muted-foreground">
+                <span className="border-muted-foreground/40 text-muted-foreground inline-flex items-center gap-1 rounded-full border border-dashed px-2 py-0.5">
                   + {tTx("uncategorizedFilter")}
                 </span>
               )}

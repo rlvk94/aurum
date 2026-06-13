@@ -35,9 +35,12 @@ describe("splitRows", () => {
 
 describe("decodeFile", () => {
   it("round-trips UTF-8 with diacritics", async () => {
-    const blob = new Blob([new TextEncoder().encode("dato;tekst\n2024-01-01;Smørrebrød")], {
-      type: "text/csv",
-    });
+    const blob = new Blob(
+      [new TextEncoder().encode("dato;tekst\n2024-01-01;Smørrebrød")],
+      {
+        type: "text/csv",
+      },
+    );
     const file = new File([blob], "x.csv");
     const text = await decodeFile(file, "utf-8");
     expect(text).toContain("Smørrebrød");

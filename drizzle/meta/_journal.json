@@ -169,6 +169,13 @@
       "when": 1780724463022,
       "tag": "0023_common_bloodstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1781329086389,
+      "tag": "0024_natural_blonde_phantom",
+      "breakpoints": true
     }
   ]
 }

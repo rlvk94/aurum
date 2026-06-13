@@ -60,10 +60,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/dashboard"}
-                >
+                <SidebarMenuButton asChild isActive={pathname === "/dashboard"}>
                   <Link href="/dashboard">
                     <LayoutDashboard />
                     <span>{t("dashboard")}</span>
@@ -94,10 +91,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
 
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname === "/accounts"}
-                >
+                <SidebarMenuButton asChild isActive={pathname === "/accounts"}>
                   <Link href="/accounts">
                     <Wallet />
                     <span>{t("accounts")}</span>
@@ -122,7 +116,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               >
                 <SidebarMenuItem data-tour-id="budgets">
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuButton isActive={pathname.startsWith("/budgets")}>
+                    <SidebarMenuButton
+                      isActive={pathname.startsWith("/budgets")}
+                    >
                       <PieChart />
                       <span>{t("budgets")}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />

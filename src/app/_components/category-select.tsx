@@ -105,7 +105,11 @@ export function CategorySelect(props: CategorySelectProps) {
   };
 
   const isUncategorizedSelected = isSelected(UNCATEGORIZED_SENTINEL);
-  const selectedCount = isMulti ? props.value.length : props.value !== null ? 1 : 0;
+  const selectedCount = isMulti
+    ? props.value.length
+    : props.value !== null
+      ? 1
+      : 0;
 
   function toggleId(categoryId: string) {
     if (isMulti) {
@@ -143,7 +147,7 @@ export function CategorySelect(props: CategorySelectProps) {
   if (isMulti) {
     if (selectedCount === 0) {
       triggerNode = (
-        <span className="truncate text-muted-foreground">
+        <span className="text-muted-foreground truncate">
           {placeholder ?? t("allCategoriesOption")}
         </span>
       );
@@ -198,7 +202,7 @@ export function CategorySelect(props: CategorySelectProps) {
       );
     } else {
       triggerNode = (
-        <span className="truncate text-muted-foreground">
+        <span className="text-muted-foreground truncate">
           {props.value === null && sentinelLabel
             ? sentinelLabel
             : (placeholder ?? t("searchPlaceholder"))}
@@ -220,7 +224,7 @@ export function CategorySelect(props: CategorySelectProps) {
           aria-expanded={open}
           aria-haspopup="listbox"
           className={cn(
-            "flex h-10 w-full items-center justify-between gap-2 rounded-md border border-input bg-card px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+            "border-input bg-card ring-offset-background focus:ring-ring flex h-10 w-full items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm focus:ring-2 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50",
             className,
           )}
         >
@@ -302,7 +306,7 @@ export function CategorySelect(props: CategorySelectProps) {
             {groups.map(({ parent, children }) => (
               <CommandGroup key={parent.id}>
                 {mode === "leaf-only" ? (
-                  <div className="relative flex select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium">
+                  <div className="relative flex items-center gap-2 rounded-sm px-2 py-1.5 text-sm font-medium select-none">
                     {parent.icon && (
                       <span className="text-base leading-none">
                         {parent.icon}

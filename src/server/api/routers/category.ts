@@ -56,10 +56,7 @@ export async function loadLearnedRules(
     );
 }
 
-async function getActiveFamilyId(
-  db: typeof dbInstance,
-  userId: string,
-) {
+async function getActiveFamilyId(db: typeof dbInstance, userId: string) {
   const [dbUser] = await db
     .select({ activeFamilyId: user.activeFamilyId })
     .from(user)
@@ -155,9 +152,7 @@ export const categoryRouter = createTRPCRouter({
           parentId: category.parentId,
         })
         .from(category)
-        .where(
-          and(eq(category.id, input.id), eq(category.familyId, familyId)),
-        );
+        .where(and(eq(category.id, input.id), eq(category.familyId, familyId)));
 
       if (!existing) {
         throw new TRPCError({ code: "NOT_FOUND" });

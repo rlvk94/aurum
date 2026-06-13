@@ -72,7 +72,8 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
 
   const billingCurrent = api.billing.current.useQuery(undefined, {
     enabled: open,
-    refetchInterval: step === "activating" ? ACTIVATION_POLL_INTERVAL_MS : false,
+    refetchInterval:
+      step === "activating" ? ACTIVATION_POLL_INTERVAL_MS : false,
   });
 
   // Status flipped to active by webhook → close dialog and let parent re-render.
@@ -200,13 +201,13 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
             <div className="space-y-1.5">
               <label
                 htmlFor="promo-code"
-                className="text-sm font-medium text-foreground"
+                className="text-foreground text-sm font-medium"
               >
                 {t("promoLabel")}
               </label>
               {appliedPromo ? (
-                <div className="flex items-center justify-between rounded-lg border border-income/40 bg-income/5 px-3 py-2">
-                  <p className="text-sm text-foreground">
+                <div className="border-income/40 bg-income/5 flex items-center justify-between rounded-lg border px-3 py-2">
+                  <p className="text-foreground text-sm">
                     {t("promoApplied", {
                       code: appliedPromo.code,
                       discount: appliedPromo.label,
@@ -215,7 +216,7 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
                   <button
                     type="button"
                     onClick={removePromo}
-                    className="text-xs text-muted-foreground underline-offset-2 hover:underline"
+                    className="text-muted-foreground text-xs underline-offset-2 hover:underline"
                   >
                     {t("promoRemove")}
                   </button>
@@ -253,14 +254,14 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
                 </div>
               )}
               {promoError && (
-                <p className="text-sm text-destructive" role="alert">
+                <p className="text-destructive text-sm" role="alert">
                   {promoError}
                 </p>
               )}
             </div>
 
             {createSubscription.error && (
-              <p className="text-sm text-destructive" role="alert">
+              <p className="text-destructive text-sm" role="alert">
                 {createSubscription.error.message}
               </p>
             )}
@@ -311,7 +312,7 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
             />
 
             {activationError && (
-              <p className="text-sm text-destructive" role="alert">
+              <p className="text-destructive text-sm" role="alert">
                 {activationError}
               </p>
             )}
@@ -338,7 +339,7 @@ export function CadenceDialog({ open, onOpenChange }: Props) {
             </DialogHeader>
 
             <div className="flex items-center justify-center py-8">
-              <Loader2 className="size-8 animate-spin text-primary" />
+              <Loader2 className="text-primary size-8 animate-spin" />
             </div>
           </>
         )}
@@ -376,15 +377,15 @@ function CadenceOption({
       )}
     >
       {recommended && (
-        <span className="almanac-smallcaps absolute right-3 top-3 rounded-sm border border-primary/30 bg-primary/10 px-1.5 py-0.5 text-[8px] tracking-[0.22em] text-primary">
+        <span className="almanac-smallcaps border-primary/30 bg-primary/10 text-primary absolute top-3 right-3 rounded-sm border px-1.5 py-0.5 text-[8px] tracking-[0.22em]">
           {t("recommended")}
         </span>
       )}
-      <div className="text-sm font-medium text-foreground">{heading}</div>
-      <div className="font-display text-2xl text-foreground">{price}</div>
-      <div className="text-xs text-muted-foreground">{subtext}</div>
+      <div className="text-foreground text-sm font-medium">{heading}</div>
+      <div className="font-display text-foreground text-2xl">{price}</div>
+      <div className="text-muted-foreground text-xs">{subtext}</div>
       {selected && (
-        <span className="mt-2 inline-flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
+        <span className="bg-primary text-primary-foreground mt-2 inline-flex h-5 w-5 items-center justify-center rounded-full">
           <Check className="size-3" />
         </span>
       )}
