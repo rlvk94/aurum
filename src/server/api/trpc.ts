@@ -49,12 +49,21 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 const t = initTRPC.context<typeof createTRPCContext>().create({
   transformer: superjson,
   errorFormatter({ shape, error }) {
+    const cause: unknown = error.cause;
     return {
       ...shape,
       data: {
         ...shape.data,
-        zodError:
-          error.cause instanceof ZodError ? error.cause.flatten() : null,
+        zodError: cause instanceof ZodError ? cause.flatten() : null,
+        // Plain-object causes (e.g. `{ feature }` from requireFeature or
+        // `{ failures }` from bulk validation) are safe to expose; Error
+        // instances (stack traces) are not.
+        cause:
+          cause !== null &&
+          typeof cause === "object" &&
+          !(cause instanceof Error)
+            ? (cause as Record<string, unknown>)
+            : null,
       },
     };
   },

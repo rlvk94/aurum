@@ -6,6 +6,7 @@ export * from "./budget";
 export * from "./categorization-rule";
 export * from "./category";
 export * from "./challenge";
+export * from "./consumption";
 export * from "./debt";
 export * from "./family";
 export * from "./favorite";

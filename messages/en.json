@@ -51,6 +51,7 @@
     "assets": "Assets",
     "tools": "Tools",
     "incomePlanner": "Income Planner",
+    "consumption": "Consumption",
     "importData": "Import Data"
   },
   "favorites": {
@@ -148,7 +149,16 @@
       "enable": "Enable push",
       "enabling": "Enabling …",
       "dismiss": "Dismiss on this device"
-    }
+    },
+    "consumption": "Consumption",
+    "consumptionEmpty": "No meters yet. Create a meter to track your consumption.",
+    "consumptionCreateMeter": "Create meter",
+    "consumptionReadMeters": "Read meters",
+    "consumptionReadOn": "Read {date}",
+    "consumptionNoReadings": "No readings",
+    "consumptionOverdue": "Reading due",
+    "consumptionLastMonth": "Last full month",
+    "consumptionNextReminder": "Next reminder {date}"
   },
   "accounts": {
     "title": "Accounts",
@@ -876,6 +886,11 @@
         "title": "Savings goals are here",
         "body": "Track multiple savings goals on the same account. Reserve money toward a holiday, a new bike or a buffer — and only see the available amount in your account overview. Pick manual transfers, a fixed monthly amount, or automatic round-up on every expense. Open any account to create your first goal.",
         "cta": "Go to accounts"
+      },
+      "2026-09-consumption": {
+        "title": "New: Consumption tracker",
+        "body": "Record your electricity, water, gas and heat meter readings in Aurum and see consumption month by month — compared with the same month last year. Set a reminder so you never miss your reading day. Find Consumption under Tools in the sidebar.",
+        "cta": "Open Consumption"
       }
     }
   },
@@ -942,6 +957,127 @@
     "perSourceTitle": "By income source",
     "copyAmount": "Copy amount",
     "copied": "Copied"
+  },
+  "consumption": {
+    "title": "Consumption",
+    "subtitle": "Read your meters and follow consumption month by month.",
+    "readMeters": "Read meters",
+    "newMeter": "New meter",
+    "createFirstMeter": "Create your first meter",
+    "emptyState": "No meters yet. Create a meter for electricity, water, gas or heat and record its first reading.",
+    "archived": "Archived",
+    "archive": "Archive",
+    "unarchive": "Unarchive",
+    "deleteMeter": "Delete meter",
+    "deleteMeterConfirm": "Delete the meter \"{name}\" and all its readings? This cannot be undone.",
+    "deleteReadingConfirm": "Delete this reading?",
+    "kinds": {
+      "electricity": "Electricity",
+      "water": "Water",
+      "gas": "Gas",
+      "heat": "Heat",
+      "other": "Other"
+    },
+    "overdue": "Reading due",
+    "latestReading": "Latest reading",
+    "noReadingsYet": "No readings yet",
+    "lastInterval": "Last period",
+    "perDay": "Per day",
+    "dayAbbr": "day",
+    "days": "{count, plural, one {# day} other {# days}}",
+    "lastCompleteMonth": "Last full month",
+    "vsLastYear": "Vs. last year",
+    "thisYear": "This year",
+    "completeMonths": "{count, plural, one {# full month} other {# full months}}",
+    "resetBadge": "New meter",
+    "form": {
+      "createTitle": "New meter",
+      "editTitle": "Edit meter",
+      "description": "Name the meter and choose its type and unit.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Electricity, basement",
+      "kind": "Type",
+      "unit": "Unit",
+      "unitCustom": "Other unit…",
+      "customUnitPlaceholder": "e.g. litres",
+      "decimals": "Decimals",
+      "decimalsExample": "Shown as {example}",
+      "unitChangeHint": "Changing unit or decimals does not convert existing readings."
+    },
+    "readDialog": {
+      "title": "Read meters",
+      "description": "Enter the current display on each meter. Empty fields are skipped.",
+      "date": "Reading date",
+      "valuePlaceholder": "e.g. 12345.6",
+      "previous": "Previous: {value} · {date}",
+      "noPrevious": "No previous reading — this becomes the starting point.",
+      "overwrites": "A reading already exists on {date}. It will be overwritten.",
+      "resetLabel": "New meter (reset)",
+      "resetHint": "The meter was replaced or reset. Consumption for this period cannot be calculated.",
+      "resetNoDelta": "Consumption for this period is unknown",
+      "noMeters": "There are no active meters to read.",
+      "submit": "Save readings"
+    },
+    "validation": {
+      "atLeastOne": "Enter at least one reading.",
+      "belowPrevious": "Must be at least {previous}. Turn on \"New meter\" if the meter was replaced.",
+      "dateInFuture": "The date cannot be in the future.",
+      "newerReadingExists": "A newer reading exists ({date}). Edit older readings on the meter page.",
+      "readingExistsForDate": "A reading already exists on this date.",
+      "deleteBreaksSequence": "This reading cannot be deleted because the next reading would then be lower than the previous one. Mark the next reading as \"New meter\" first.",
+      "belowPreviousGeneric": "The reading cannot be lower than the previous one. Mark it as \"New meter\" if the meter was replaced."
+    },
+    "reminders": {
+      "title": "Reminders",
+      "description": "Get notified when it's time to read the meters. Applies to the whole family.",
+      "enabledLabel": "Remind me to read",
+      "enabledHint": "Meters are marked \"Reading due\" once the deadline passes.",
+      "cadence": "Frequency",
+      "monthly": "Monthly",
+      "weekly": "Weekly",
+      "dayOfMonth": "Day of month",
+      "dayNumber": "Day {day}",
+      "lastDayOfMonth": "Last day of the month",
+      "weekday": "Weekday",
+      "channelsLink": "Choose email/push under Notifications →"
+    },
+    "detail": {
+      "yoyTitle": "Month by month",
+      "yoyDescription": "{year} compared with {previousYear}",
+      "previousYear": "Previous year",
+      "nextYear": "Next year",
+      "gridTitle": "Year overview",
+      "gridDescription": "Consumption per month. Partially covered months are muted.",
+      "readingsTitle": "Readings",
+      "editMeter": "Edit meter"
+    },
+    "chart": {
+      "partialSuffix": "(partial: {covered} of {days} days)",
+      "partialLegend": "Partial month",
+      "noData": "No data",
+      "empty": "No consumption data for these years yet. Read the meter at least twice."
+    },
+    "grid": {
+      "year": "Year",
+      "total": "Total",
+      "partialTooltip": "Partial month: {covered} of {days} days covered",
+      "completeMonths": "{count} full months",
+      "empty": "No months with consumption yet."
+    },
+    "readings": {
+      "empty": "No readings yet. Press \"Read meters\" to record the first one.",
+      "columns": {
+        "value": "Reading",
+        "delta": "Usage",
+        "days": "Days",
+        "perDay": "Per day"
+      },
+      "editTitle": "Edit reading",
+      "editDescription": "Change the date, value or note for this reading.",
+      "value": "Reading value",
+      "note": "Note",
+      "notePlaceholder": "e.g. read by the utility"
+    }
   },
   "import": {
     "title": "Import Data",
@@ -1054,6 +1190,10 @@
         "challenge_off_track": {
           "label": "Challenge off track",
           "description": "When a family challenge is trending to miss its target."
+        },
+        "consumption_reading_reminder": {
+          "label": "Meter reading reminder",
+          "description": "When it's time to read the family's utility meters (electricity, water, gas, heat)."
         }
       },
       "deviceTitle": "Push on this device",
@@ -1132,6 +1272,14 @@
       "intro": "Your challenge “{challengeName}” is currently off track for this period.",
       "body": "Check your spending and adjust while there's still time to hit the target.",
       "cta": "View challenge"
+    },
+    "consumptionReadingReminder": {
+      "subject": "Time to read the meters",
+      "preview": "Remember to read {count, plural, one {the meter} other {# meters}} today",
+      "heading": "Time to read the meters",
+      "intro": "It's reading day. {count, plural, one {This meter} other {These meters}} still {count, plural, one {needs} other {need}} a reading today:",
+      "body": "Note the number on each meter and enter it in Aurum to follow your consumption month by month.",
+      "cta": "Read meters"
     }
   },
   "tutorial": {
@@ -1592,6 +1740,10 @@
       "challengeOffTrack": {
         "title": "{challengeName} is off track",
         "body": "You're not on pace for this period. Tap to view."
+      },
+      "consumptionReadingReminder": {
+        "title": "Time to read the meters",
+        "body": "{meterNames}. Tap to enter."
       }
     }
   }

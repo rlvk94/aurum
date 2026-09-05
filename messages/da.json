@@ -51,6 +51,7 @@
     "assets": "Aktiver",
     "tools": "Værktøjer",
     "incomePlanner": "Indkomstplanlægger",
+    "consumption": "Forbrug",
     "importData": "Importér data"
   },
   "favorites": {
@@ -148,7 +149,16 @@
       "enable": "Aktivér push",
       "enabling": "Aktiverer …",
       "dismiss": "Skjul på denne enhed"
-    }
+    },
+    "consumption": "Forbrug",
+    "consumptionEmpty": "Ingen målere endnu. Opret en måler for at følge dit forbrug.",
+    "consumptionCreateMeter": "Opret måler",
+    "consumptionReadMeters": "Aflæs målere",
+    "consumptionReadOn": "Aflæst {date}",
+    "consumptionNoReadings": "Ingen aflæsninger",
+    "consumptionOverdue": "Aflæsning mangler",
+    "consumptionLastMonth": "Sidste hele måned",
+    "consumptionNextReminder": "Næste påmindelse {date}"
   },
   "accounts": {
     "title": "Konti",
@@ -876,6 +886,11 @@
         "title": "Opsparingsmål er her",
         "body": "Hold styr på flere opsparingsmål på samme konto. Reservér penge til ferie, en ny cykel eller en buffer — og se kun det resterende beløb i din kontooversigt. Vælg mellem manuel overførsel, fast månedligt beløb eller automatisk afrunding på alle udgifter. Åbn en konto for at oprette din første opsparing.",
         "cta": "Gå til konti"
+      },
+      "2026-09-consumption": {
+        "title": "Ny: Forbrugstracker",
+        "body": "Aflæs jeres el-, vand-, gas- og varmemålere i Aurum og se forbruget måned for måned – sammenlignet med samme måned året før. Sæt en påmindelse, så I husker at aflæse på jeres faste dag. Find Forbrug under Værktøjer i sidemenuen.",
+        "cta": "Åbn Forbrug"
       }
     }
   },
@@ -942,6 +957,127 @@
     "perSourceTitle": "Pr. indkomstkilde",
     "copyAmount": "Kopiér beløb",
     "copied": "Kopieret"
+  },
+  "consumption": {
+    "title": "Forbrug",
+    "subtitle": "Aflæs jeres målere og følg forbruget måned for måned.",
+    "readMeters": "Aflæs målere",
+    "newMeter": "Ny måler",
+    "createFirstMeter": "Opret din første måler",
+    "emptyState": "Ingen målere endnu. Opret en måler for el, vand, gas eller varme, og aflæs den første gang.",
+    "archived": "Arkiverede",
+    "archive": "Arkivér",
+    "unarchive": "Genaktivér",
+    "deleteMeter": "Slet måler",
+    "deleteMeterConfirm": "Slet måleren \"{name}\" og alle dens aflæsninger? Dette kan ikke fortrydes.",
+    "deleteReadingConfirm": "Slet denne aflæsning?",
+    "kinds": {
+      "electricity": "El",
+      "water": "Vand",
+      "gas": "Gas",
+      "heat": "Varme",
+      "other": "Andet"
+    },
+    "overdue": "Aflæsning mangler",
+    "latestReading": "Seneste aflæsning",
+    "noReadingsYet": "Ingen aflæsninger endnu",
+    "lastInterval": "Seneste periode",
+    "perDay": "Pr. dag",
+    "dayAbbr": "dag",
+    "days": "{count, plural, one {# dag} other {# dage}}",
+    "lastCompleteMonth": "Sidste hele måned",
+    "vsLastYear": "Vs. sidste år",
+    "thisYear": "I år",
+    "completeMonths": "{count, plural, one {# hel måned} other {# hele måneder}}",
+    "resetBadge": "Ny måler",
+    "form": {
+      "createTitle": "Ny måler",
+      "editTitle": "Rediger måler",
+      "description": "Giv måleren et navn, og vælg type og enhed.",
+      "name": "Navn",
+      "namePlaceholder": "F.eks. Elmåler, kælder",
+      "kind": "Type",
+      "unit": "Enhed",
+      "unitCustom": "Anden enhed…",
+      "customUnitPlaceholder": "F.eks. liter",
+      "decimals": "Decimaler",
+      "decimalsExample": "Vises som {example}",
+      "unitChangeHint": "Ændring af enhed eller decimaler omregner ikke eksisterende aflæsninger."
+    },
+    "readDialog": {
+      "title": "Aflæs målere",
+      "description": "Indtast den aktuelle visning på hver måler. Tomme felter springes over.",
+      "date": "Aflæsningsdato",
+      "valuePlaceholder": "F.eks. 12.345,6",
+      "previous": "Forrige: {value} · {date}",
+      "noPrevious": "Ingen tidligere aflæsning – dette bliver startpunktet.",
+      "overwrites": "Der findes allerede en aflæsning den {date}. Den bliver overskrevet.",
+      "resetLabel": "Ny måler (nulstillet)",
+      "resetHint": "Måleren er udskiftet eller nulstillet. Forbruget for perioden kan ikke beregnes.",
+      "resetNoDelta": "Forbrug for perioden er ukendt",
+      "noMeters": "Der er ingen aktive målere at aflæse.",
+      "submit": "Gem aflæsninger"
+    },
+    "validation": {
+      "atLeastOne": "Indtast mindst én aflæsning.",
+      "belowPrevious": "Skal være mindst {previous}. Slå \"Ny måler\" til, hvis måleren er udskiftet.",
+      "dateInFuture": "Datoen kan ikke ligge i fremtiden.",
+      "newerReadingExists": "Der findes en nyere aflæsning ({date}). Ret ældre aflæsninger på målerens side.",
+      "readingExistsForDate": "Der findes allerede en aflæsning på denne dato.",
+      "deleteBreaksSequence": "Aflæsningen kan ikke slettes, fordi den næste aflæsning så bliver lavere end den forrige. Markér den næste aflæsning som \"Ny måler\" først.",
+      "belowPreviousGeneric": "Aflæsningen må ikke være lavere end den forrige. Markér den som \"Ny måler\", hvis måleren er udskiftet."
+    },
+    "reminders": {
+      "title": "Påmindelser",
+      "description": "Få besked, når det er tid til at aflæse målerne. Gælder hele familien.",
+      "enabledLabel": "Påmind om aflæsning",
+      "enabledHint": "Målere markeres som \"Aflæsning mangler\", når fristen er overskredet.",
+      "cadence": "Hyppighed",
+      "monthly": "Månedligt",
+      "weekly": "Ugentligt",
+      "dayOfMonth": "Dag i måneden",
+      "dayNumber": "Den {day}.",
+      "lastDayOfMonth": "Sidste dag i måneden",
+      "weekday": "Ugedag",
+      "channelsLink": "Vælg e-mail/push under Notifikationer →"
+    },
+    "detail": {
+      "yoyTitle": "Måned for måned",
+      "yoyDescription": "{year} sammenlignet med {previousYear}",
+      "previousYear": "Forrige år",
+      "nextYear": "Næste år",
+      "gridTitle": "Årsoverblik",
+      "gridDescription": "Forbrug pr. måned. Delvist dækkede måneder er nedtonet.",
+      "readingsTitle": "Aflæsninger",
+      "editMeter": "Rediger måler"
+    },
+    "chart": {
+      "partialSuffix": "(delvis: {covered} af {days} dage)",
+      "partialLegend": "Delvis måned",
+      "noData": "Ingen data",
+      "empty": "Ingen forbrugsdata for disse år endnu. Aflæs måleren mindst to gange."
+    },
+    "grid": {
+      "year": "År",
+      "total": "I alt",
+      "partialTooltip": "Delvis måned: {covered} af {days} dage dækket",
+      "completeMonths": "{count} hele mdr.",
+      "empty": "Ingen måneder med forbrug endnu."
+    },
+    "readings": {
+      "empty": "Ingen aflæsninger endnu. Tryk \"Aflæs målere\" for at registrere den første.",
+      "columns": {
+        "value": "Aflæsning",
+        "delta": "Forbrug",
+        "days": "Dage",
+        "perDay": "Pr. dag"
+      },
+      "editTitle": "Rediger aflæsning",
+      "editDescription": "Ret dato, værdi eller note for denne aflæsning.",
+      "value": "Aflæst værdi",
+      "note": "Note",
+      "notePlaceholder": "F.eks. aflæst af elselskabet"
+    }
   },
   "import": {
     "title": "Importér data",
@@ -1054,6 +1190,10 @@
         "challenge_off_track": {
           "label": "Udfordring ude af kurs",
           "description": "Når en familieudfordring er på vej til at misse sit mål."
+        },
+        "consumption_reading_reminder": {
+          "label": "Påmindelse om måleraflæsning",
+          "description": "Når det er tid til at aflæse familiens forbrugsmålere (el, vand, gas, varme)."
         }
       },
       "deviceTitle": "Push på denne enhed",
@@ -1132,6 +1272,14 @@
       "intro": "Din udfordring „{challengeName}” er i øjeblikket ikke på rette spor for denne periode.",
       "body": "Tjek forbruget og justér, mens der stadig er tid til at nå målet.",
       "cta": "Se udfordring"
+    },
+    "consumptionReadingReminder": {
+      "subject": "Tid til at aflæse målerne",
+      "preview": "Husk at aflæse {count, plural, one {måleren} other {# målere}} i dag",
+      "heading": "Tid til at aflæse målerne",
+      "intro": "Det er aflæsningsdag. {count, plural, one {Denne måler} other {Disse målere}} mangler en aflæsning i dag:",
+      "body": "Notér tallet på hver måler, og indtast det i Aurum – så kan I følge forbruget måned for måned.",
+      "cta": "Aflæs målere"
     }
   },
   "tutorial": {
@@ -1592,6 +1740,10 @@
       "challengeOffTrack": {
         "title": "{challengeName} er ude af kurs",
         "body": "Du er ikke på rette spor for denne periode. Tryk for at se."
+      },
+      "consumptionReadingReminder": {
+        "title": "Tid til at aflæse målerne",
+        "body": "{meterNames}. Tryk for at indtaste."
       }
     }
   }

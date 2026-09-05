@@ -53,11 +53,13 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 ## Business Rules
 
 ### Family scoping
+
 - Every financial record belongs to a family
 - A user must be a member of a family to access its data
 - Queries, routes, pages, and mutations must always be scoped to the active family
 
 ### Transactions
+
 - Expense reduces an account balance
 - Income increases an account balance
 - Transfer moves money between two accounts in the same family
@@ -66,17 +68,20 @@ All financial data is **family-scoped**. A user can belong to one or more famili
 - Transactions can be manually created or imported via CSV
 
 ### Budgets
+
 - A budget covers a **full year**, with planned amounts distributed across 12 months
 - Budget lines have a **recurrence** (monthly, quarterly, semi_annual, annual, custom) that determines per-month distribution
 - Budget vs actual is shown for the current month (planned vs categorized expense transactions)
 - Transfer transactions are excluded from budget actuals
 
 ### Challenges
+
 - Time-boxed spending goals with flexible duration (1 week, 2 weeks, 1 month, or custom)
 - Independent of the annual budget — a motivational overlay, not a planning tool
 - Track progress: spent vs target, remaining amount, days left
 
 ### Authentication
+
 - Email OTP only — no password authentication
 - 6-digit code, ~10 min expiry, resend with cooldown
 
@@ -206,6 +211,9 @@ Server code lives outside `src/app/`:
 - `0020` — Stripe Price IDs configured via environment variables
 - `0022` — Discount codes at checkout (Stripe promotion codes)
 - `0023` — Terms & Conditions acceptance with versioned snapshots
+- `0024` — Split transactions (original kept + excluded, child parts via self-FK)
+- `0025` — Multi-channel notification system (channel/type registry, per-user prefs, self-hosted Web Push)
+- `0026` — Consumption tracker (cumulative meter readings, pro-rata month normalisation, reminder via notification sweep)
 
 ## Testing
 

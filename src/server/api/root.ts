@@ -4,6 +4,7 @@ import { billingRouter } from "~/server/api/routers/billing";
 import { budgetRouter } from "~/server/api/routers/budget";
 import { categoryRouter } from "~/server/api/routers/category";
 import { challengeRouter } from "~/server/api/routers/challenge";
+import { consumptionRouter } from "~/server/api/routers/consumption";
 import { contactRouter } from "~/server/api/routers/contact";
 import { debtRouter } from "~/server/api/routers/debt";
 import { familyRouter } from "~/server/api/routers/family";
@@ -30,6 +31,7 @@ export const appRouter = createTRPCRouter({
   budget: budgetRouter,
   category: categoryRouter,
   challenge: challengeRouter,
+  consumption: consumptionRouter,
   contact: contactRouter,
   debt: debtRouter,
   family: familyRouter,

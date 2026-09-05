@@ -48,4 +48,19 @@ describe("terms bundle", () => {
       "may change these terms at any time",
     );
   });
+
+  it("2026-09-05 covers utility meter readings in §2 in both locales", () => {
+    const v = getTermsByVersion("2026-09-05");
+    expect(v).toBeDefined();
+    expect(v!.content.da).toContain("forbrugsmålere");
+    expect(v!.content.en).toContain("utility meters");
+    // The clause lands inside §2, before §3.
+    const en = v!.content.en;
+    expect(en.indexOf("utility meters")).toBeLessThan(
+      en.indexOf("## 3. No financial advice"),
+    );
+    // Still derived from the prior versions.
+    expect(en.toLowerCase()).toContain("push notifications");
+    expect(en.toLowerCase()).toContain("may change these terms at any time");
+  });
 });

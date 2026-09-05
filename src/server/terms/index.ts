@@ -158,6 +158,30 @@ const EN_2026_06_13 = EN_2026_05_30.replace(
   "_Last updated: 13 June 2026_",
 ).replace("## 6. Acceptable use", `${PUSH_PRIVACY_EN}\n\n## 6. Acceptable use`);
 
+// ── 2026-09-05: consumption tracker (meter readings) ────────────────────────
+// Derived from the immutable 2026-06-13 text: bumps the "last updated" line and
+// adds a sentence to §2 (About the Service) covering manually recorded utility
+// meter readings. See ADR-0026.
+const CONSUMPTION_DA = `Tjenesten giver dig også mulighed for at registrere aflæsninger af jeres forbrugsmålere (fx el, vand, gas og varme) for at følge forbruget over tid. Aflæsninger gemmes som de tal og datoer, du selv indtaster, og er synlige for din familie.`;
+
+const CONSUMPTION_EN = `The Service also lets you record readings from your household utility meters (e.g. electricity, water, gas and heat) to follow consumption over time. Readings are stored as the numbers and dates you enter yourself and are visible to your family.`;
+
+const DA_2026_09_05 = DA_2026_06_13.replace(
+  "_Senest opdateret: 13. juni 2026_",
+  "_Senest opdateret: 5. september 2026_",
+).replace(
+  "## 3. Ingen finansiel rådgivning",
+  `${CONSUMPTION_DA}\n\n## 3. Ingen finansiel rådgivning`,
+);
+
+const EN_2026_09_05 = EN_2026_06_13.replace(
+  "_Last updated: 13 June 2026_",
+  "_Last updated: 5 September 2026_",
+).replace(
+  "## 3. No financial advice",
+  `${CONSUMPTION_EN}\n\n## 3. No financial advice`,
+);
+
 // Ordered oldest → newest. Append new versions at the end.
 export const TERMS_VERSIONS: ReadonlyArray<TermsVersion> = [
   {
@@ -174,6 +198,14 @@ export const TERMS_VERSIONS: ReadonlyArray<TermsVersion> = [
     content: {
       da: DA_2026_06_13,
       en: EN_2026_06_13,
+    },
+  },
+  {
+    version: "2026-09-05",
+    effectiveDate: "2026-09-05",
+    content: {
+      da: DA_2026_09_05,
+      en: EN_2026_09_05,
     },
   },
 ];
