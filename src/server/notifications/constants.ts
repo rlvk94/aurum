@@ -8,7 +8,10 @@
 export const CHANNELS = ["email", "push"] as const;
 export type ChannelId = (typeof CHANNELS)[number];
 
-export const NOTIFICATION_TYPES = ["challenge_off_track"] as const;
+export const NOTIFICATION_TYPES = [
+  "challenge_off_track",
+  "consumption_reading_reminder",
+] as const;
 export type NotificationType = (typeof NOTIFICATION_TYPES)[number];
 
 export function isChannelId(value: string): value is ChannelId {

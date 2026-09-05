@@ -15,6 +15,7 @@ export default async function DashboardPage() {
     api.transaction.weeklyExpense.prefetch(),
     api.transaction.list.prefetch({ limit: 5 }),
     api.budget.list.prefetch({ year: currentYear }),
+    api.consumption.summary.prefetch(),
     ...(hasFamilyFeatures
       ? [
           api.asset.summary.prefetch(),

@@ -4,6 +4,7 @@ import {
   Calculator,
   CreditCard,
   FolderHeart,
+  Gauge,
   Home,
   Landmark,
   LayoutDashboard,
@@ -109,6 +110,13 @@ export const ROUTES: RouteEntry[] = [
     titleKey: "nav.incomePlanner",
     icon: Calculator,
     shortcut: "G I",
+    parent: "/dashboard",
+  },
+  {
+    path: "/consumption",
+    titleKey: "nav.consumption",
+    icon: Gauge,
+    shortcut: "G U",
     parent: "/dashboard",
   },
   {

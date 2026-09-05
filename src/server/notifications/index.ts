@@ -22,3 +22,4 @@ export {
 export { resolveFamilyMembers } from "./recipients/family";
 export { loadNotifiedUserIds, recordNotified, clearEpisode } from "./dedupe";
 export type { ChallengeOffTrackPayload } from "./definitions/challenge-off-track";
+export type { ConsumptionReadingReminderPayload } from "./definitions/consumption-reading-reminder";

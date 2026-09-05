@@ -4,15 +4,16 @@ import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
-  Wallet,
   ArrowLeftRight,
-  PieChart,
-  CreditCard,
   Calculator,
   ChevronRight,
-  Landmark,
+  CreditCard,
   FolderHeart,
+  Gauge,
+  Landmark,
+  LayoutDashboard,
+  PieChart,
+  Wallet,
 } from "lucide-react";
 
 import {
@@ -193,6 +194,17 @@ export function AppSidebarContent() {
                   <Link href="/income-planner">
                     <Calculator />
                     <span>{t("incomePlanner")}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname.startsWith("/consumption")}
+                >
+                  <Link href="/consumption">
+                    <Gauge />
+                    <span>{t("consumption")}</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

@@ -34,6 +34,7 @@ import { cn } from "~/app/_lib/utils";
 import type { BooleanFeatureKey } from "~/server/billing/plans";
 import { deriveProgress } from "~/app/(protected)/projects/_lib/format";
 import { PushBanner } from "./push-banner";
+import { ConsumptionCard } from "./consumption-card";
 
 type Challenge = RouterOutputs["challenge"]["list"][number];
 type Budget = RouterOutputs["budget"]["list"][number];
@@ -558,6 +559,7 @@ export function DashboardClient() {
         ) : (
           <FeatureTeaserCard feature="projects" />
         )}
+        <ConsumptionCard />
 
         <Card data-tour-id="recent-transactions">
           <CardHeader className="flex flex-row items-start justify-between gap-3">

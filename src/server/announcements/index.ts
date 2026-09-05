@@ -43,6 +43,16 @@ export const ANNOUNCEMENTS: ReadonlyArray<Announcement> = [
     coverPalette: "sage",
     publishedAt: "2026-05-23",
   },
+  {
+    id: "2026-09-consumption",
+    titleKey: "whatsNew.entries.2026-09-consumption.title",
+    bodyKey: "whatsNew.entries.2026-09-consumption.body",
+    ctaLabelKey: "whatsNew.entries.2026-09-consumption.cta",
+    ctaHref: "/consumption",
+    emoji: "⚡",
+    coverPalette: "sky",
+    publishedAt: "2026-09-05",
+  },
 ];
 
 export function getVisibleAnnouncements(

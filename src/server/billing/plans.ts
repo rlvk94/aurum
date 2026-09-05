@@ -18,6 +18,7 @@ export const PLAN_FEATURES = {
     incomePlanner: true,
     autoCategorisationRules: true,
     projects: false,
+    consumption: true,
   },
   family: {
     maxAccounts: Number.POSITIVE_INFINITY,
@@ -30,6 +31,7 @@ export const PLAN_FEATURES = {
     incomePlanner: true,
     autoCategorisationRules: true,
     projects: true,
+    consumption: true,
   },
 } as const;
 
