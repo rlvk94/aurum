@@ -289,15 +289,26 @@ export const budgetRouter = createTRPCRouter({
 
       const linesByBudget = new Map<
         string,
-        { categoryIds: Set<string>; planned: number; count: number }
+        {
+          categoryIds: Set<string>;
+          planned: number;
+          plannedByMonth: number[];
+          count: number;
+        }
       >();
       for (const l of lines) {
         const entry = linesByBudget.get(l.budgetId) ?? {
           categoryIds: new Set<string>(),
           planned: 0,
+          plannedByMonth: [...EMPTY_AMOUNTS],
           count: 0,
         };
-        entry.planned += sumAmounts(normaliseAmounts(l.amounts));
+        const amounts = normaliseAmounts(l.amounts);
+        entry.planned += sumAmounts(amounts);
+        for (let i = 0; i < 12; i++) {
+          entry.plannedByMonth[i] =
+            (entry.plannedByMonth[i] ?? 0) + (amounts[i] ?? 0);
+        }
         entry.count += 1;
         if (l.categoryId) entry.categoryIds.add(l.categoryId);
         linesByBudget.set(l.budgetId, entry);
@@ -334,18 +345,23 @@ export const budgetRouter = createTRPCRouter({
       return budgets.map((b) => {
         const entry = linesByBudget.get(b.id);
         const actuals = actualsByBudgetMap.get(b.id);
-        let totalActual = 0;
+        const actualByMonth = [...EMPTY_AMOUNTS];
         if (entry && actuals) {
           for (const cid of entry.categoryIds) {
             const arr = actuals.get(cid);
-            if (arr) totalActual += sumAmounts(arr);
+            if (!arr) continue;
+            for (let i = 0; i < 12; i++) {
+              actualByMonth[i] = (actualByMonth[i] ?? 0) + (arr[i] ?? 0);
+            }
           }
         }
         return {
           ...b,
           lineCount: entry?.count ?? 0,
           totalPlanned: entry?.planned ?? 0,
-          totalActual,
+          totalActual: sumAmounts(actualByMonth),
+          plannedByMonth: entry?.plannedByMonth ?? [...EMPTY_AMOUNTS],
+          actualByMonth,
           accountIds: accountIdsByBudget.get(b.id) ?? [],
         };
       });
@@ -453,6 +469,75 @@ export const budgetRouter = createTRPCRouter({
         if (input.accountIds && input.accountIds.length > 0) {
           await replaceBudgetAccounts(tx, created.id, input.accountIds);
         }
+        return created;
+      });
+    }),
+
+  // Clone a budget into a (typically later) year: same scoped accounts and
+  // every line with its category, recurrence, anchor month and planned
+  // amounts. Actuals are never copied — they derive from transactions in the
+  // target year.
+  duplicate: protectedProcedure
+    .input(
+      z.object({
+        id: z.string().uuid(),
+        year: yearSchema,
+        name: z.string().trim().min(1).max(100),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const familyId = await getActiveFamilyId(ctx.db, ctx.session.user.id);
+
+      return await ctx.db.transaction(async (tx) => {
+        const source = await loadBudgetInFamily(tx, input.id, familyId);
+
+        const [created] = await tx
+          .insert(budget)
+          .values({
+            familyId,
+            year: input.year,
+            name: input.name,
+            description: source.description,
+          })
+          .returning();
+        if (!created) {
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "Failed to create budget copy",
+          });
+        }
+
+        const accountIds =
+          (await loadAccountIdsByBudget(tx, [source.id])).get(source.id) ?? [];
+        if (accountIds.length > 0) {
+          await replaceBudgetAccounts(tx, created.id, accountIds);
+        }
+
+        const sourceLines = await tx
+          .select({
+            categoryId: budgetLine.categoryId,
+            name: budgetLine.name,
+            recurrence: budgetLine.recurrence,
+            startMonth: budgetLine.startMonth,
+            amounts: budgetLine.amounts,
+          })
+          .from(budgetLine)
+          .where(eq(budgetLine.budgetId, source.id))
+          .orderBy(asc(budgetLine.sortOrder), asc(budgetLine.createdAt));
+        if (sourceLines.length > 0) {
+          await tx.insert(budgetLine).values(
+            sourceLines.map((l, i) => ({
+              budgetId: created.id,
+              categoryId: l.categoryId,
+              name: l.name,
+              recurrence: l.recurrence,
+              startMonth: l.startMonth,
+              amounts: normaliseAmounts(l.amounts),
+              sortOrder: i,
+            })),
+          );
+        }
+
         return created;
       });
     }),

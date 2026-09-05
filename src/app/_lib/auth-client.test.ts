@@ -19,11 +19,9 @@ vi.mock("better-auth/react", () => ({
         .mockResolvedValue({ data: { session: { id: "session-1" } } }),
     },
     signIn: {
-      emailOtp: vi
-        .fn()
-        .mockResolvedValue({
-          data: { user: { id: "user-1", email: "test@example.com" } },
-        }),
+      emailOtp: vi.fn().mockResolvedValue({
+        data: { user: { id: "user-1", email: "test@example.com" } },
+      }),
     },
     signOut: vi.fn().mockResolvedValue({}),
     useSession: vi.fn().mockReturnValue({

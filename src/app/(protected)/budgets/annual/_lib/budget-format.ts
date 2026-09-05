@@ -140,3 +140,59 @@ export function expectedProgressFractions(year: number, now: Date): number[] {
 export function sumArray(arr: number[]): number {
   return arr.reduce((acc, v) => acc + v, 0);
 }
+
+// ── Year-to-date status ──────────────────────────────────────────────────────
+
+export type YearToDateStatus =
+  | { kind: "not_started" }
+  | { kind: "no_plan" }
+  | {
+      kind: "on_budget" | "under" | "over";
+      phase: "in_progress" | "ended";
+      amount: number;
+      plannedToDate: number;
+    };
+
+// Compare spend so far against the *pro-rated* plan for the elapsed part of
+// the year, rather than the full-year plan. Mid-year, "planned − actual" is
+// meaningless (most of the plan hasn't come due yet); this answers "am I
+// ahead of or behind where the plan says I should be right now?".
+export function yearToDateStatus(
+  plannedByMonth: number[],
+  actualToDate: number,
+  year: number,
+  now: Date,
+): YearToDateStatus {
+  const thisYear = now.getFullYear();
+  if (thisYear < year) return { kind: "not_started" };
+
+  const plannedYear = sumArray(plannedByMonth);
+  if (plannedYear === 0 && actualToDate === 0) return { kind: "no_plan" };
+
+  const fractions = expectedProgressFractions(year, now);
+  let plannedToDate = 0;
+  for (let i = 0; i < 12; i++) {
+    plannedToDate += (plannedByMonth[i] ?? 0) * (fractions[i] ?? 0);
+  }
+  plannedToDate = Math.round(plannedToDate);
+
+  const phase = thisYear > year ? "ended" : "in_progress";
+  const diff = plannedToDate - actualToDate;
+  if (diff === 0) return { kind: "on_budget", phase, amount: 0, plannedToDate };
+  if (diff > 0) return { kind: "under", phase, amount: diff, plannedToDate };
+  return { kind: "over", phase, amount: -diff, plannedToDate };
+}
+
+// Suggest a name for a budget copied into another year: swap the source year
+// if it appears in the name ("Husholdning 2026" → "Husholdning 2027"),
+// otherwise append the target year.
+export function defaultCopyName(
+  name: string,
+  sourceYear: number,
+  targetYear: number,
+): string {
+  const trimmed = name.trim();
+  const from = String(sourceYear);
+  if (trimmed.includes(from)) return trimmed.replace(from, String(targetYear));
+  return `${trimmed} ${targetYear}`;
+}
